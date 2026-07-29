@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { AnimatePresence, motion } from "framer-motion";
+import { ControlBar } from "@/components/controls/ControlBar";
 import { useBoringMode } from "@/contexts/BoringModeContext";
 import { useSound } from "@/contexts/SoundContext";
 import { useHydrated } from "@/lib/use-hydrated";
@@ -86,7 +87,7 @@ export function SiteMenu({
       <button
         type="button"
         aria-expanded={open}
-        className="type-mono cursor-pointer border border-line px-3 py-1.5 transition-colors hover:bg-foreground hover:text-background"
+        className="btn-tactile type-mono cursor-pointer rounded-md border border-line px-3 py-1.5 transition-colors hover:bg-foreground hover:text-background"
         onClick={() => toggle(true)}
       >
         {dict.nav.menu}
@@ -128,7 +129,7 @@ export function SiteMenu({
               <div className="flex items-center justify-end">
                 <button
                   type="button"
-                  className="type-mono cursor-pointer border border-line px-3 py-1.5 transition-colors hover:bg-foreground hover:text-background"
+                  className="btn-tactile type-mono cursor-pointer rounded-md border border-line px-3 py-1.5 transition-colors hover:bg-foreground hover:text-background"
                   onClick={() => toggle(false)}
                 >
                   {dict.nav.close}
@@ -166,6 +167,13 @@ export function SiteMenu({
                   </div>
                 ))}
               </motion.nav>
+
+              {/* No mobile a mesa de controle mora aqui: a barra do topo fica
+                  só com menu, assinatura e lua. No desktop ela já vive na
+                  barra, então some para não duplicar. */}
+              <div className="pb-6 lg:hidden">
+                <ControlBar locale={locale} dict={dict} />
+              </div>
             </div>
           </motion.div>
         )}

@@ -3,7 +3,7 @@
 import { useBoringMode } from "@/contexts/BoringModeContext";
 import { BoringView } from "@/components/boring/BoringView";
 import { Hero } from "@/components/sections/Hero";
-import { Marquee } from "@/components/ui/Marquee";
+import { TicketStrip } from "@/components/ui/TicketStrip";
 import { CasePanels } from "@/components/sections/CasePanels";
 import { Playground } from "@/components/sections/Playground";
 import { About } from "@/components/sections/About";
@@ -30,7 +30,7 @@ export function HomeView({
   return (
     <>
       <Hero dict={dict} />
-      <Marquee items={dict.hero.marquee} className="type-mono py-3" />
+      <TicketStrip items={dict.hero.marquee} />
       <CasePanels locale={locale} dict={dict} />
       <Playground locale={locale} dict={dict} />
       <About locale={locale} dict={dict} />

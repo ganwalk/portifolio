@@ -17,14 +17,22 @@ export const es: Dictionary = {
   controls: {
     boringOn: "Modo aburrido",
     boringOff: "Modo creativo",
-    boringHint: "Sin animaciones, sin texturas. Solo la información.",
+    boringHint: "Para quien prefiere las cosas directas al grano ;)",
     theme: "Cambiar tema",
     sound: "Sonido de la interfaz",
     language: "Idioma",
   },
   hero: {
-    scrollHint: "Baja",
-    availability: "Desde Brasil · Disponible para proyectos",
+    titleTop: "Ingeniero",
+    titleAccent: "creativo",
+    titleBottom: "de diseño",
+    facts: [
+      "UX/UI · Webapps · Design Systems",
+      "Del banking a la música, y todo lo demás",
+    ],
+    availability:
+      "Desde Brasil · Disponible para proyectos en todo el mundo 🌍",
+    cta: "Mira mi trabajo",
     marquee: [
       "UX/UI",
       "Prototipos de alta fidelidad",

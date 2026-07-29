@@ -17,14 +17,21 @@ export const en: Dictionary = {
   controls: {
     boringOn: "Boring mode",
     boringOff: "Creative mode",
-    boringHint: "No animations, no textures. Just the information.",
+    boringHint: "For those who like it straight to the point ;)",
     theme: "Toggle theme",
     sound: "Interface sound",
     language: "Language",
   },
   hero: {
-    scrollHint: "Scroll",
-    availability: "Based in Brazil · Available for projects",
+    titleTop: "Creative",
+    titleAccent: "design",
+    titleBottom: "engineer",
+    facts: [
+      "UX/UI · Webapps · Design Systems",
+      "From banking to music, and everything between",
+    ],
+    availability: "Based in Brazil · Available for projects worldwide 🌍",
+    cta: "See my work",
     marquee: [
       "UX/UI",
       "High fidelity prototypes",

@@ -26,6 +26,13 @@ texto, ou seja, slugs de URL (`guia-da-musica-2026`), nomes de arquivo, chaves d
 localStorage, classes CSS e propriedades de código. O que a pessoa lê na tela é que
 precisa estar limpo.
 
+## Emoji: um só, e é este 🌍
+
+O site inteiro tem exatamente um emoji autorizado: o globo na frase de
+disponibilidade ("Disponível para projetos no mundo todo 🌍"). Nenhum outro
+emoji entra em texto visível, commit, PR ou doc. Símbolos tipográficos
+(☾, ☀, ♪, ·) não contam como emoji e seguem liberados nos controles.
+
 ## Tom
 
 Conversa de gente, não release corporativo. Primeira pessoa, frase curta, verbo

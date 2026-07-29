@@ -1,3 +1,5 @@
+import { Fragment } from "react";
+import { Reveal } from "@/components/ui/Reveal";
 import { profile } from "@/data/profile";
 import { localeNames, type Locale } from "@/i18n/config";
 import type { Dictionary } from "@/i18n/dictionaries";
@@ -11,30 +13,34 @@ export function About({ locale, dict }: { locale: Locale; dict: Dictionary }) {
 
   return (
     <section id="about" className="border-t border-line px-4 py-20 sm:px-8">
-      <h2 className="type-mono mb-12 text-accent">{dict.about.title}</h2>
+      <Reveal>
+        <h2 className="type-mono mb-12 text-accent">{dict.about.title}</h2>
+      </Reveal>
 
       <div className="grid grid-cols-1 gap-12 lg:grid-cols-2">
-        <div className="space-y-6 text-lg leading-relaxed">
+        <Reveal className="space-y-6 text-lg leading-relaxed">
           {dict.about.bio.map((paragraph) => (
             <p key={paragraph.slice(0, 24)}>{paragraph}</p>
           ))}
-        </div>
+        </Reveal>
 
-        <div className="space-y-10">
+        <Reveal delay={0.15} className="space-y-10">
           <div>
             <h3 className="type-mono mb-4 text-muted">
               {dict.about.skillsTitle}
             </h3>
+            {/* Cada habilidade em inline-block: sem isso, "skill•skill" vira
+                um token inquebrável e estoura a largura no mobile. */}
             <p className="leading-loose">
               {allSkills.map((skill, i) => (
-                <span key={skill}>
-                  {skill}
+                <Fragment key={skill}>
+                  <span className="inline-block">{skill}</span>
                   {i < allSkills.length - 1 && (
-                    <span aria-hidden className="mx-2 text-accent">
+                    <span aria-hidden className="mx-2 inline-block text-accent">
                       •
                     </span>
                   )}
-                </span>
+                </Fragment>
               ))}
             </p>
           </div>
@@ -52,7 +58,7 @@ export function About({ locale, dict }: { locale: Locale; dict: Dictionary }) {
               ))}
             </ul>
           </div>
-        </div>
+        </Reveal>
       </div>
     </section>
   );
