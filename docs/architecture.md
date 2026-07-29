@@ -128,6 +128,30 @@ Atalho para o conteúdo, foco visível, `aria-pressed` nos interruptores,
 `prefers-reduced-motion` respeitado, contraste alto nos dois temas e o letreiro
 contínuo lido como texto por leitores de tela, não como animação.
 
+## Mídia e movimento
+
+A home é dirigida pela mídia, não pelo texto:
+
+- **Hero**: só o nome, em display gigante, com saída em parallax no scroll.
+- **Cases**: painéis de tela quase inteira (`CasePanels`), com vídeo ou foto de
+  fundo em parallax, título display e uma métrica. O texto longo mora na página
+  do case.
+- **Lua de fases** (`MoonPhase`): ícone ao lado da assinatura no cabeçalho que
+  percorre as fases da lua conforme o scroll, três lunações por página.
+- **Menu overlay** (`SiteMenu`): navegação de tela cheia com tipografia gigante
+  e preview de imagem no hover de cada link. Renderiza num portal para o body,
+  porque o `backdrop-blur` do cabeçalho criaria um containing block e prenderia
+  o overlay dentro da barra.
+
+Toda mídia passa pelo componente `MediaView`, que decide entre `<video>` (mudo,
+em loop, com poster e camada de fallback) e `<img>`. As URLs vivem nos dados
+(`cases.ts`, `experiments.ts`), como placeholders do Pexels e Picsum escolhidos
+por afinidade de tema; cada bloco tem um comentário com a sugestão de mídia
+real. Trocar placeholder por mídia final é editar só o bloco `cover`/`media`.
+
+No Modo Boring nada disso existe: sem lua, sem menu, sem vídeo, só a página
+utilitária.
+
 ## Deploy
 
 GitHub Actions publica no GitHub Pages a cada push na branch principal. O build
@@ -142,4 +166,4 @@ Com domínio próprio ou na Vercel, basta não definir essa variável.
 3. Escrever o corpo dos quatro cases.
 4. Completar `src/data/profile.ts`: LinkedIn, cidade, ano de entrada na AUVP.
 5. Ligar Microsoft Clarity e Google Analytics quando os IDs existirem.
-6. Colagens que vazam do grid no hero, quando os recortes chegarem.
+6. Recortes de colagem em volta do nome no hero, quando chegarem.

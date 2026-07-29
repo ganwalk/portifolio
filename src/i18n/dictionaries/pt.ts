@@ -12,6 +12,8 @@ export const pt = {
     work: "Projetos",
     about: "Sobre",
     contact: "Contato",
+    menu: "Menu",
+    close: "Fechar",
     skipToContent: "Pular para o conteúdo",
   },
   controls: {
@@ -23,10 +25,7 @@ export const pt = {
     language: "Idioma",
   },
   hero: {
-    role: "Design Engineer",
-    headline: ["Do banking", "à música,", "e tudo no meio."],
-    tagline:
-      "Experiências interativas que se adaptam às necessidades reais de quem usa, fundamentadas em métricas, SEO e performance.",
+    scrollHint: "Desça",
     availability: "Baseado no Brasil · Disponível para projetos",
     marquee: [
       "UX/UI",

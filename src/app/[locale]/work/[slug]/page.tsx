@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { MediaView } from "@/components/ui/MediaView";
 import { cases, getCase } from "@/data/cases";
 import { locales, isLocale } from "@/i18n/config";
 import { getDictionary } from "@/i18n/dictionaries";
@@ -77,9 +78,14 @@ export default async function CasePage({
         </p>
       </header>
 
-      {/* Corpo do case: placeholders de mídia até os recortes serem fornecidos. */}
+      {/* Corpo do case: a capa já é real; os apoios ficam de placeholder até
+          os recortes serem fornecidos. */}
       <div className="mt-12 space-y-6">
-        <div className="texture-noise aspect-video w-full bg-surface" />
+        <MediaView
+          media={caseStudy.cover}
+          locale={locale}
+          className="aspect-video w-full object-cover"
+        />
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
           <div className="texture-noise aspect-4/3 bg-surface" />
           <div className="texture-noise aspect-4/3 bg-surface" />

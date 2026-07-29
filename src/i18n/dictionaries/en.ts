@@ -10,6 +10,8 @@ export const en: Dictionary = {
     work: "Work",
     about: "About",
     contact: "Contact",
+    menu: "Menu",
+    close: "Close",
     skipToContent: "Skip to content",
   },
   controls: {
@@ -21,10 +23,7 @@ export const en: Dictionary = {
     language: "Language",
   },
   hero: {
-    role: "Design Engineer",
-    headline: ["From banking", "to music,", "and everything between."],
-    tagline:
-      "Interactive experiences that adapt to real user needs, grounded in metrics, SEO and loading performance.",
+    scrollHint: "Scroll",
     availability: "Based in Brazil · Available for projects",
     marquee: [
       "UX/UI",

@@ -1,10 +1,11 @@
+import { MediaView } from "@/components/ui/MediaView";
 import { experiments } from "@/data/experiments";
 import type { Locale } from "@/i18n/config";
 import type { Dictionary } from "@/i18n/dictionaries";
 
-// Bloco compacto "Fora do expediente", híbrido enxuto: as habilidades
-// secundárias vivem como prova no próprio site (som, colagem, animação),
-// e aqui ganham 3 a 4 vitrines selecionadas. Placeholders até as mídias chegarem.
+// Bloco "Fora do expediente": vitrines visuais das habilidades paralelas
+// (colagem, animação, produção musical). A mídia carrega a seção; o texto é
+// só a legenda de galeria.
 
 export function Playground({
   locale,
@@ -14,15 +15,20 @@ export function Playground({
   dict: Dictionary;
 }) {
   return (
-    <section className="border-t border-line px-4 py-20 sm:px-8">
+    <section id="playground" className="border-t border-line px-4 py-20 sm:px-8">
       <h2 className="type-mono mb-2 text-accent">{dict.playground.title}</h2>
       <p className="mb-12 max-w-lg text-muted">{dict.playground.subtitle}</p>
 
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
         {experiments.map((experiment) => (
-          <figure key={experiment.id} className="border border-line">
-            {/* Placeholder de mídia, proporção reservada para colagem/vídeo/áudio */}
-            <div className="texture-noise aspect-square bg-surface" />
+          <figure key={experiment.id} className="group border border-line">
+            <div className="aspect-square overflow-hidden bg-surface">
+              <MediaView
+                media={experiment.media}
+                locale={locale}
+                className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+              />
+            </div>
             <figcaption className="border-t border-line p-4">
               <span className="block font-medium">
                 {experiment.title[locale]}

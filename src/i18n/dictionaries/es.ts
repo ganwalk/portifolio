@@ -10,6 +10,8 @@ export const es: Dictionary = {
     work: "Proyectos",
     about: "Sobre mí",
     contact: "Contacto",
+    menu: "Menú",
+    close: "Cerrar",
     skipToContent: "Saltar al contenido",
   },
   controls: {
@@ -21,10 +23,7 @@ export const es: Dictionary = {
     language: "Idioma",
   },
   hero: {
-    role: "Design Engineer",
-    headline: ["Del banking", "a la música,", "y todo lo demás."],
-    tagline:
-      "Experiencias interactivas que se adaptan a las necesidades reales de quien las usa, fundamentadas en métricas, SEO y performance de carga.",
+    scrollHint: "Baja",
     availability: "Desde Brasil · Disponible para proyectos",
     marquee: [
       "UX/UI",

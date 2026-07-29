@@ -20,6 +20,7 @@ npm run build   # gera o site estático em out/
 | ---------------------------- | --------------------------------------------- |
 | Textos do site               | `src/i18n/dictionaries/pt.ts` (e en, es)       |
 | Cases e métricas             | `src/data/cases.ts`                            |
+| Vídeos e fotos placeholder   | `src/data/cases.ts` e `src/data/experiments.ts` |
 | Contato, habilidades, cargo  | `src/data/profile.ts`                          |
 | Cores, fontes, texturas      | `src/app/globals.css`                          |
 
