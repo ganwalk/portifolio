@@ -37,7 +37,12 @@ jobs:
       - name: Impedir que o Pages processe o build com Jekyll
         run: touch out/.nojekyll
 
+      # enablement liga o Pages pela API caso ainda esteja desligado. Sem isso, o
+      # job de publicação falha antes de rodar qualquer passo, porque o environment
+      # github-pages nem chega a existir.
       - uses: actions/configure-pages@v5
+        with:
+          enablement: true
 
       - uses: actions/upload-pages-artifact@v3
         with:

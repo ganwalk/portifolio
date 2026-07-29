@@ -31,5 +31,9 @@ Arquitetura e decisões técnicas em `docs/architecture.md`.
 
 ## Publicação
 
-Push na `main` publica sozinho no GitHub Pages, via GitHub Actions. Para o Pages
-funcionar, é preciso habilitar em Settings, Pages, Source igual a GitHub Actions.
+Push na `main` publica sozinho no GitHub Pages, via GitHub Actions.
+
+O workflow tenta habilitar o Pages sozinho na primeira execução. Se o job de
+publicação falhar em poucos segundos, sem executar nenhum passo, é sinal de que o
+Pages continua desligado: habilite em Settings, Pages, Source igual a GitHub
+Actions, e rode o workflow de novo.
