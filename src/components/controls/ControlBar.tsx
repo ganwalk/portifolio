@@ -33,7 +33,7 @@ export function ControlBar({ locale, dict }: ControlBarProps) {
   };
 
   const buttonClass =
-    "type-mono cursor-pointer border border-line px-3 py-1.5 hover:bg-foreground hover:text-background transition-colors";
+    "btn-tactile type-mono cursor-pointer rounded-md border border-line px-3 py-1.5 hover:bg-foreground hover:text-background transition-colors";
 
   return (
     <div className="no-print flex flex-wrap items-center gap-2">

@@ -19,14 +19,24 @@ export const pt = {
   controls: {
     boringOn: "Modo sem graça",
     boringOff: "Modo criativo",
-    boringHint: "Sem animações, sem texturas. Só a informação.",
+    boringHint: "Pra você que gosta das coisas direto ao ponto ;)",
     theme: "Alternar tema",
     sound: "Som da interface",
     language: "Idioma",
   },
   hero: {
-    scrollHint: "Desça",
-    availability: "Baseado no Brasil · Disponível para projetos",
+    // Manchete em três partes: sans, serif itálica em acento, sans de novo.
+    titleTop: "Engenheiro",
+    titleAccent: "criativo",
+    titleBottom: "de design",
+    facts: [
+      "UX/UI · Webapps · Design Systems",
+      "Do banking à música, e tudo no meio",
+    ],
+    // O único emoji autorizado do site inteiro é este globo.
+    availability:
+      "Baseado no Brasil · Disponível para projetos no mundo todo 🌍",
+    cta: "Veja meu trabalho",
     marquee: [
       "UX/UI",
       "Protótipos de alta fidelidade",

@@ -132,16 +132,28 @@ contínuo lido como texto por leitores de tela, não como animação.
 
 A home é dirigida pela mídia, não pelo texto:
 
-- **Hero**: só o nome, em display gigante, com saída em parallax no scroll.
-- **Cases**: painéis de tela quase inteira (`CasePanels`), com vídeo ou foto de
-  fundo em parallax, título display e uma métrica. O texto longo mora na página
-  do case.
-- **Lua de fases** (`MoonPhase`): ícone ao lado da assinatura no cabeçalho que
-  percorre as fases da lua conforme o scroll, três lunações por página.
+- **Hero com lente** (`Hero`): manchete em sans display com uma palavra serif
+  itálica de acento, e um círculo de vidro que segue o mouse revelando uma
+  cópia do conteúdo com aberração cromática, mais um brilho radial no fundo.
+  Perto do CTA "Veja meu trabalho" o raio da lente encolhe até quase sumir.
+  Em telas de toque a lente fica com raio zero e nada roda.
+- **Tarja de ingresso** (`TicketStrip`): letreiro editorial entre a hero e os
+  projetos, alternando tipo vazado e serif itálica, com costura tracejada.
+- **Cases como baralho** (`CasePanels`): cada painel gruda no topo (sticky) e
+  o seguinte desliza por cima com canto arredondado e sombra de papel; o
+  painel coberto encolhe e escurece. A mídia segue em parallax dentro de cada
+  carta. O texto longo mora na página do case.
+- **Lua de fases** (`MoonPhase`): no canto direito do cabeçalho, percorre as
+  fases da lua conforme o scroll, três lunações por página.
 - **Menu overlay** (`SiteMenu`): navegação de tela cheia com tipografia gigante
   e preview de imagem no hover de cada link. Renderiza num portal para o body,
   porque o `backdrop-blur` do cabeçalho criaria um containing block e prenderia
-  o overlay dentro da barra.
+  o overlay dentro da barra. No mobile a mesa de controle mora aqui.
+- **Skeuomorfismo**: teclas com relevo físico (`.btn-tactile`), cartões com
+  peso de papel (`.card-tactile`) e o vidro da lente. Tudo morre no Modo
+  Boring e na impressão.
+- **Cabeçalho**: grid de três colunas (menu, assinatura centralizada, lua),
+  que encorpa ao rolar. `Reveal` dá a entrada padrão das seções de apoio.
 
 Toda mídia passa pelo componente `MediaView`, que decide entre `<video>` (mudo,
 em loop, com poster e camada de fallback) e `<img>`. As URLs vivem nos dados
