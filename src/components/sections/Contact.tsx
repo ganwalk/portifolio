@@ -9,7 +9,8 @@ export function Contact({ dict }: { dict: Dictionary }) {
       <h2 className="type-serif-display mb-4 text-5xl sm:text-7xl">
         {dict.contact.title}
       </h2>
-      <p className="mb-10 text-muted">{dict.contact.subtitle}</p>
+      <p className="mb-3 text-muted">{dict.contact.subtitle}</p>
+      <p className="type-mono mb-10 text-muted">{dict.hero.availability}</p>
 
       <a
         href={`mailto:${profile.email}`}

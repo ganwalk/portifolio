@@ -1,7 +1,9 @@
 import type { Experiment } from "./types";
 
 // Bloco compacto "Fora do expediente" na home, 3 a 4 experimentos selecionados.
-// Placeholders até as mídias reais (colagens, animações, áudio) serem fornecidas.
+// Mídias placeholder (Pexels e Picsum) até as reais chegarem: colagens
+// digitalizadas, gravações de tela dos estudos de movimento e trechos de
+// produção no DAW. A troca é substituir o bloco media de cada item.
 
 export const experiments: Experiment[] = [
   {
@@ -16,6 +18,17 @@ export const experiments: Experiment[] = [
       en: "Illustration & collage",
       es: "Ilustración & collage",
     },
+    // Sugestão de mídia real: uma colagem finalizada em alta, ou um carrossel
+    // de recortes escaneados.
+    media: {
+      kind: "image",
+      src: "https://picsum.photos/seed/colagem-armando/1200/1200",
+      alt: {
+        pt: "Fotografia placeholder para a série de colagens",
+        en: "Placeholder photograph for the collage series",
+        es: "Fotografía placeholder para la serie de collages",
+      },
+    },
   },
   {
     id: "animacao-01",
@@ -29,6 +42,17 @@ export const experiments: Experiment[] = [
       en: "Animation",
       es: "Animación",
     },
+    // Sugestão de mídia real: loop curto de um estudo de animação (2 a 6s),
+    // exportado em mp4 mudo.
+    media: {
+      kind: "image",
+      src: "https://picsum.photos/seed/movimento-armando/1200/1200",
+      alt: {
+        pt: "Fotografia placeholder para os estudos de movimento",
+        en: "Placeholder photograph for the motion studies",
+        es: "Fotografía placeholder para los estudios de movimiento",
+      },
+    },
   },
   {
     id: "som-01",
@@ -41,6 +65,19 @@ export const experiments: Experiment[] = [
       pt: "Áudio",
       en: "Audio",
       es: "Audio",
+    },
+    // Sugestão de mídia real: vídeo do arranjo no DAW rodando, ou player de
+    // áudio com uma faixa autoral.
+    media: {
+      kind: "video",
+      src: "https://videos.pexels.com/video-files/3116506/3116506-hd_1920_1080_25fps.mp4",
+      poster:
+        "https://images.pexels.com/photos/164938/pexels-photo-164938.jpeg?auto=compress&cs=tinysrgb&w=800",
+      alt: {
+        pt: "Vinil tocando em uma vitrola, placeholder da produção musical",
+        en: "Vinyl playing on a turntable, music production placeholder",
+        es: "Vinilo sonando en un tocadiscos, placeholder de producción musical",
+      },
     },
   },
 ];

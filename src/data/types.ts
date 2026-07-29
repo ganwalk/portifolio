@@ -5,6 +5,21 @@ export type Localized<T = string> = Record<Locale, T>;
 
 export type CaseArea = "banking" | "music";
 
+export type MediaKind = "image" | "video";
+
+/**
+ * Mídia de capa ou de vitrine. Enquanto as mídias reais não chegam, os src
+ * apontam para placeholders do Pexels e do Picsum, escolhidos por afinidade
+ * de tema. A troca é só substituir a URL, nenhum componente muda.
+ */
+export interface Media {
+  kind: MediaKind;
+  src: string;
+  /** Quadro de capa exibido enquanto o vídeo carrega. Só para kind "video". */
+  poster?: string;
+  alt: Localized;
+}
+
 export interface CaseMetric {
   /** Valor exibido em número gigante na capa. "+XX%" enquanto o número real não é calibrado. */
   value: string;
@@ -21,6 +36,8 @@ export interface CaseStudy {
   statement: Localized;
   tags: Localized<readonly string[]>;
   metrics: CaseMetric[];
+  /** Mídia de fundo do painel full bleed na home e da capa do case. */
+  cover: Media;
   /** Case ainda sem página completa publicada. */
   comingSoon: boolean;
   year: string;
@@ -30,4 +47,5 @@ export interface Experiment {
   id: string;
   title: Localized;
   medium: Localized;
+  media: Media;
 }

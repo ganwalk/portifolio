@@ -3,6 +3,9 @@ import type { CaseStudy } from "./types";
 // Lineup de lançamento: 2 cases de Banking + 2 de Música.
 // Métricas com value "+XX%" são placeholders explícitos até calibração com números reais.
 // Telas dos cases de Banking serão recriadas/anonimizadas até autorização formal de uso.
+//
+// Capas: vídeos e fotos do Pexels como placeholder, escolhidos pelo clima de cada
+// case. Para trocar pela mídia real, basta substituir src (e poster) no bloco cover.
 
 export const cases: CaseStudy[] = [
   {
@@ -44,6 +47,19 @@ export const cases: CaseStudy[] = [
         illustrative: true,
       },
     ],
+    // Sugestão de mídia real: screencast navegando pela intranet, ou motion
+    // reveal dos componentes do Design System em grid.
+    cover: {
+      kind: "video",
+      src: "https://videos.pexels.com/video-files/3129671/3129671-hd_1920_1080_30fps.mp4",
+      poster:
+        "https://images.pexels.com/videos/3129671/free-video-3129671.jpg?auto=compress&w=1280",
+      alt: {
+        pt: "Projeção digital de linhas geométricas abstratas",
+        en: "Digital projection of abstract geometric lines",
+        es: "Proyección digital de líneas geométricas abstractas",
+      },
+    },
     comingSoon: true,
   },
   {
@@ -85,6 +101,19 @@ export const cases: CaseStudy[] = [
         illustrative: true,
       },
     ],
+    // Sugestão de mídia real: timelapse dos sites do ecossistema em telas
+    // diferentes, ou zoom out de um dashboard do Clarity/GA com dados reais.
+    cover: {
+      kind: "video",
+      src: "https://videos.pexels.com/video-files/3141210/3141210-hd_1920_1080_25fps.mp4",
+      poster:
+        "https://images.pexels.com/videos/3141210/free-video-3141210.jpg?auto=compress&w=1280",
+      alt: {
+        pt: "Cálculo digital em simetria geométrica",
+        en: "Digital calculation in geometric symmetry",
+        es: "Cálculo digital en simetría geométrica",
+      },
+    },
     comingSoon: true,
   },
   {
@@ -117,6 +146,19 @@ export const cases: CaseStudy[] = [
         illustrative: false,
       },
     ],
+    // Sugestão de mídia real: montagem curta alternando as três experiências
+    // (Ganwalk, Dezert Horse, Pink Opala) com o áudio de cada artista.
+    cover: {
+      kind: "video",
+      src: "https://videos.pexels.com/video-files/3941289/3941289-hd_1920_1080_30fps.mp4",
+      poster:
+        "https://images.pexels.com/photos/1105666/pexels-photo-1105666.jpeg?auto=compress&cs=tinysrgb&w=1280",
+      alt: {
+        pt: "Multidão em um show, luzes de palco ao fundo",
+        en: "Crowd at a concert, stage lights in the background",
+        es: "Multitud en un concierto, luces de escenario al fondo",
+      },
+    },
     comingSoon: true,
   },
   {
@@ -149,6 +191,19 @@ export const cases: CaseStudy[] = [
         illustrative: true,
       },
     ],
+    // Sugestão de mídia real: scroll gravado do próprio Guia, mostrando as
+    // interações editoriais, ou animação da capa da edição 2026.
+    cover: {
+      kind: "video",
+      src: "https://videos.pexels.com/video-files/4380097/4380097-hd_1920_1080_30fps.mp4",
+      poster:
+        "https://images.pexels.com/photos/164938/pexels-photo-164938.jpeg?auto=compress&cs=tinysrgb&w=1280",
+      alt: {
+        pt: "Disco de vinil girando em uma vitrola",
+        en: "Vinyl record spinning on a turntable",
+        es: "Disco de vinilo girando en un tocadiscos",
+      },
+    },
     comingSoon: true,
   },
 ];
