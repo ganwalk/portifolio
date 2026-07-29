@@ -1,0 +1,205 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ==========================================================================
+   TOKENS DE DESIGN
+   Base neutra em "papel e tinta", acento turquesa usado com parcimônia.
+   Tema light: papel envelhecido. Tema dark: impresso financeiro/fósforo.
+   ========================================================================== */
+
+:root {
+  /* Light, "papel vintage" */
+  --background: #f2eee4;
+  --surface: #eae5d8;
+  --foreground: #16130d;
+  --muted: #6e6858;
+  --line: rgba(22, 19, 13, 0.16);
+  --accent: #0e9384;
+
+  --font-sans: "Archivo Variable", system-ui, sans-serif;
+  --font-serif: "Fraunces Variable", Georgia, serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+}
+
+.dark {
+  /* Dark, "extrato bancário à noite" */
+  --background: #0d0f0e;
+  --surface: #151816;
+  --foreground: #eae6da;
+  --muted: #8f8b7c;
+  --line: rgba(234, 230, 218, 0.16);
+  --accent: #35d9c4;
+}
+
+/* Modo Boring: alto contraste absoluto, sem textura, sem cor de acento.
+   O atributo é aplicado no <html> pelo BoringModeContext. */
+html[data-boring="true"] {
+  --background: #ffffff;
+  --surface: #ffffff;
+  --foreground: #000000;
+  --muted: #333333;
+  --line: #000000;
+  --accent: #000000;
+}
+
+html[data-boring="true"].dark {
+  --background: #000000;
+  --surface: #000000;
+  --foreground: #ffffff;
+  --muted: #cccccc;
+  --line: #ffffff;
+  --accent: #ffffff;
+}
+
+/* No Modo Boring, nenhuma animação ou transição sobrevive, nem de CSS de terceiros. */
+html[data-boring="true"] *,
+html[data-boring="true"] *::before,
+html[data-boring="true"] *::after {
+  animation: none !important;
+  transition: none !important;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-accent: var(--accent);
+  --font-sans: var(--font-sans);
+  --font-serif: var(--font-serif);
+  --font-mono: var(--font-mono);
+}
+
+/* ==========================================================================
+   BASE
+   ========================================================================== */
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  background: var(--accent);
+  color: var(--background);
+}
+
+/* Display "ingresso antigo": Archivo condensada e pesada, via eixos da fonte variável. */
+.type-display {
+  font-family: var(--font-sans);
+  font-stretch: 68%;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: -0.01em;
+  line-height: 0.92;
+}
+
+/* Serif "impresso financeiro": Fraunces com ótica de corpo grande, para métricas e manchetes. */
+.type-serif-display {
+  font-family: var(--font-serif);
+  font-variation-settings: "opsz" 144, "SOFT" 0, "WONK" 1;
+  font-weight: 560;
+  line-height: 0.95;
+  letter-spacing: -0.02em;
+}
+
+/* Mono "extrato": detalhes, legendas técnicas, separadores por bullet. */
+.type-mono {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* Textura de ruído analógico, desligada no Modo Boring e na impressão.
+   (SVG inline: gratuito, sem asset externo; substituível por textura real depois.) */
+.texture-noise {
+  position: relative;
+}
+
+.texture-noise::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.05;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+html[data-boring="true"] .texture-noise::after {
+  display: none;
+}
+
+/* Respeito ao sistema: se a pessoa pediu menos movimento, o site obedece
+   mesmo fora do Modo Boring. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+/* ==========================================================================
+   IMPRESSÃO, o Modo Boring é o currículo
+   ========================================================================== */
+
+@media print {
+  :root,
+  .dark {
+    --background: #ffffff;
+    --surface: #ffffff;
+    --foreground: #000000;
+    --muted: #333333;
+    --line: #000000;
+    --accent: #000000;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+
+  .texture-noise::after {
+    display: none;
+  }
+
+  body {
+    font-size: 11pt;
+  }
+
+  a {
+    color: #000000;
+    text-decoration: none;
+  }
+
+  /* Só links dentro de texto ganham sublinhado. Cartões e blocos clicáveis
+     sublinhados por inteiro viram poluição no papel. */
+  p a,
+  li a,
+  td a,
+  h1 a,
+  h2 a {
+    text-decoration: underline;
+  }
+
+  /* Links visíveis no papel: URL entre parênteses após o texto do link. */
+  main a[href^="http"]::after {
+    content: " (" attr(href) ")";
+    font-size: 8pt;
+    word-break: break-all;
+  }
+}
