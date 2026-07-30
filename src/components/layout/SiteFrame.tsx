@@ -110,6 +110,17 @@ export function SiteFrame({
         </div>
       </header>
 
+      {/* No mobile, em Modo Criativo, o cabeçalho não é um lugar confiável
+          para o Boring morar: na home ele começa escondido até a segunda
+          dobra, e em qualquer página é só texto dentro do menu hamburguer,
+          fácil de nunca notar. Esta cópia flutuante, presa a um canto, fica
+          sempre à mão sem depender de rolagem nem de abrir o menu. Some no
+          Modo Boring porque lá o cabeçalho já é sempre visível e já mostra o
+          próprio botão (veja o cluster da esquerda ali em cima). */}
+      {!isBoringMode && (
+        <BoringToggle dict={dict} showTooltip floating />
+      )}
+
       <main id="main" className="flex-1">
         {children}
       </main>
