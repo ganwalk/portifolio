@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { AnimatePresence, motion } from "framer-motion";
+import { BoringToggle } from "@/components/controls/BoringToggle";
 import { ControlBar } from "@/components/controls/ControlBar";
 import { useBoringMode } from "@/contexts/BoringModeContext";
 import { useSound } from "@/contexts/SoundContext";
@@ -168,10 +169,12 @@ export function SiteMenu({
                 ))}
               </motion.nav>
 
-              {/* No mobile a mesa de controle mora aqui: a barra do topo fica
-                  só com menu, assinatura e lua. No desktop ela já vive na
-                  barra, então some para não duplicar. */}
-              <div className="pb-6 lg:hidden">
+              {/* No mobile a mesa de controle inteira mora aqui, Boring
+                  incluso: a barra do topo fica só com menu, assinatura e lua.
+                  No desktop os dois já vivem na barra, um de cada lado, então
+                  somem daqui para não duplicar. */}
+              <div className="flex flex-wrap items-center gap-4 pb-6 lg:hidden">
+                <BoringToggle dict={dict} />
                 <ControlBar locale={locale} dict={dict} />
               </div>
             </div>

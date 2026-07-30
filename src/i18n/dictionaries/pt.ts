@@ -38,10 +38,12 @@ export const pt = {
       "sistemas",
       "músicas",
       "sonhos",
+      "embalagens",
+      "sites",
     ],
     facts: [
       "UX/UI · Webapps · Design Systems",
-      "Do banking à música, e tudo no meio",
+      "Do institucional ao lúdico, e tudo entre as duas coisas!",
     ],
     // O único emoji autorizado do site inteiro é este globo.
     availability:

@@ -4,6 +4,12 @@ import type { Dictionary } from "@/i18n/dictionaries";
 
 export function Contact({ dict }: { dict: Dictionary }) {
   const links = Object.entries(profile.links).filter(([, url]) => url);
+  // break-all quebrava em qualquer caractere, sem dó: "gmail.com" virava
+  // "GMA" numa linha e "IL.COM" na outra. Com o @ como único ponto de quebra
+  // sugerido (wbr) e break-words como rede de segurança, o navegador só
+  // quebra ali, e cada metade ("armandocustodio0@" e "gmail.com") cabe
+  // inteira numa linha em qualquer largura de tela razoável.
+  const [emailUser, emailDomain] = profile.email.split("@");
 
   return (
     <section id="contact" className="gutter section-y border-t border-line">
@@ -18,9 +24,10 @@ export function Contact({ dict }: { dict: Dictionary }) {
       <Reveal delay={0.1}>
         <a
           href={`mailto:${profile.email}`}
-          className="type-display inline-block break-all text-2xl underline underline-offset-8 sm:text-4xl"
+          className="type-display inline-block break-words text-2xl underline underline-offset-8 sm:text-4xl"
         >
-          {profile.email}
+          {emailUser}@<wbr />
+          {emailDomain}
         </a>
       </Reveal>
 

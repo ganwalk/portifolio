@@ -33,10 +33,12 @@ export const en: Dictionary = {
       "systems",
       "music",
       "dreams",
+      "packaging",
+      "websites",
     ],
     facts: [
       "UX/UI · Webapps · Design Systems",
-      "From banking to music, and everything between",
+      "From corporate to playful, and everything in between!",
     ],
     availability: "Based in Brazil · Available for projects worldwide 🌍",
     cta: "See my work",
