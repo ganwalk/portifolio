@@ -11,15 +11,16 @@ export function Contact({ dict }: { dict: Dictionary }) {
   const links = Object.entries(profile.links).filter(([, url]) => url);
 
   return (
-    <section
-      id="contact"
-      className="relative border-t border-line sm:flex sm:min-h-svh"
-    >
-      {/* No desktop a imagem ocupa a lateral inteira: altura total da seção
-          (min-h-svh, "a dobra") e vai até a borda direita da tela, sem o
-          padding do gutter, que por isso não está no <section> e sim só na
-          coluna de texto. No mobile ela ganha uma altura própria (svh
-          também, mas fração menor) e continua de ponta a ponta na
+    <section id="contact" className="relative border-t border-line sm:flex">
+      {/* No desktop a imagem ocupa a lateral inteira: vai até a borda
+          direita da tela (sem o padding do gutter, que por isso não está no
+          <section> e sim só na coluna de texto) e estica (align-items:
+          stretch, o padrão do flex) até a altura natural da coluna de
+          texto, que é quem manda no tamanho da seção. Chegou a usar
+          min-h-svh (a seção inteira do tamanho da tela), mas isso deixava a
+          dobra grande demais; sem esse mínimo, a seção só cresce até onde o
+          conteúdo pede. No mobile ela ganha uma altura própria mais contida
+          (aspect-ratio, não fração da tela) e continua de ponta a ponta na
           horizontal, sem virar um quadrado pequeno preso no meio da seção. */}
       <div className="gutter section-y sm:flex sm:w-1/2 sm:flex-shrink-0 sm:flex-col sm:justify-center sm:py-0">
         <Reveal>
@@ -69,7 +70,7 @@ export function Contact({ dict }: { dict: Dictionary }) {
         )}
       </div>
 
-      <Reveal delay={0.15} className="h-[70svh] sm:h-auto sm:flex-1">
+      <Reveal delay={0.15} className="aspect-[4/3] sm:h-auto sm:flex-1">
         <InteractiveGridImage
           src={CONTACT_IMAGE}
           alt={dict.contact.imageAlt}
