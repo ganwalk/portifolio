@@ -213,6 +213,28 @@ html[data-boring="true"] .portrait-frames {
   text-decoration-color: var(--background) !important;
 }
 
+/* Cursor personalizado: a mesma mão apontando do resto do site, em três
+   poses (repouso, hover, clique). As URLs vêm por variável, no <html>, pelo
+   mesmo motivo do retrato: o basePath do GitHub Pages não chega a url()
+   dentro do CSS. Cai pro Modo Boring com o cursor do sistema, mesmo
+   critério de "informação, não vitrine" do retrato e da imagem interativa
+   do contato. */
+html:not([data-boring="true"]) {
+  cursor: var(--cursor-repouso);
+}
+
+html:not([data-boring="true"]) a,
+html:not([data-boring="true"]) button,
+html:not([data-boring="true"]) [role="button"] {
+  cursor: var(--cursor-hover);
+}
+
+html:not([data-boring="true"]) a:active,
+html:not([data-boring="true"]) button:active,
+html:not([data-boring="true"]) [role="button"]:active {
+  cursor: var(--cursor-clique);
+}
+
 /* Textura de ruído analógico, desligada no Modo Boring e na impressão.
    (SVG inline: gratuito, sem asset externo; substituível por textura real depois.) */
 .texture-noise {
