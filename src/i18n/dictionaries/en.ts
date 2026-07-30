@@ -15,8 +15,8 @@ export const en: Dictionary = {
     skipToContent: "Skip to content",
   },
   controls: {
-    boringOn: "Boring mode",
-    boringOff: "Creative mode",
+    boringOn: "Get straight to the point!",
+    boringOff: "Surprise me",
     boringHint: "For those who like it straight to the point ;)",
     boringTooltip: "i HATE animations!",
     theme: "Toggle theme",

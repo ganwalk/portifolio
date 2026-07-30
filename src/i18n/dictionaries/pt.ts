@@ -17,8 +17,8 @@ export const pt = {
     skipToContent: "Pular para o conteúdo",
   },
   controls: {
-    boringOn: "Modo sem graça",
-    boringOff: "Modo criativo",
+    boringOn: "Vá direto ao ponto!",
+    boringOff: "Me surpreenda",
     boringHint: "Pra você que gosta das coisas direto ao ponto ;)",
     boringTooltip: "eu ODEIO animações!",
     theme: "Alternar tema",
