@@ -61,8 +61,12 @@ function HeroContent({
   // mesma conta de altura. No desktop ele volta a ser absoluto, à direita,
   // porque lá sobra espaço ao lado da manchete e não precisa disputar altura
   // com mais nada.
+  // pt-16 no mobile: a segunda linha do cabeçalho (o botão do Modo Boring)
+  // fica sempre visível, até antes de rolar (veja SiteFrame), então a hero
+  // precisa reservar espaço pra ela por baixo, senão "ARMANDO CUSTODIO"
+  // nasce atrás da tarja.
   return (
-    <div className="gutter relative flex flex-1 flex-col items-center justify-between pb-14 pt-10 sm:items-stretch sm:pt-32">
+    <div className="gutter relative flex flex-1 flex-col items-center justify-between pb-14 pt-16 sm:items-stretch sm:pt-32">
       <div className="order-1 text-center sm:text-left">
         <h1 className="type-display text-[17vw] leading-[0.84] sm:text-[12vw]">
           {words.map((word, index) => (

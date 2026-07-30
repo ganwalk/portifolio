@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useBoringMode } from "@/contexts/BoringModeContext";
 import { useSound } from "@/contexts/SoundContext";
 import { useHydrated } from "@/lib/use-hydrated";
@@ -20,31 +20,37 @@ import type { Dictionary } from "@/i18n/dictionaries";
 interface BoringToggleProps {
   dict: Dictionary;
   /**
-   * Só a cópia do cabeçalho desktop deve oferecer o tooltip: a de dentro do
-   * menu mobile fica muda, porque abrir o menu já é a pessoa procurando os
-   * controles, não precisa de mais um empurrão.
+   * Só a cópia do cabeçalho desktop deve oferecer o tooltip: a linha do
+   * mobile nunca mostra, em momento algum, a caixa reduzida pré rolagem já
+   * é aperto suficiente pra não sobrar espaço pra bolha.
    */
   showTooltip?: boolean;
+  /**
+   * Vira true quando é hora de fechar a tooltip sozinha, além do fechamento
+   * por clique. No desktop é "passou da primeira dobra" (vindo de
+   * SiteFrame): a tooltip fica fixa até a pessoa rolar a hero pra longe, em
+   * vez de sumir num tempo fixo que pode não bater com o ritmo de leitura.
+   */
+  dismissTooltip?: boolean;
 }
 
-export function BoringToggle({ dict, showTooltip = false }: BoringToggleProps) {
+export function BoringToggle({
+  dict,
+  showTooltip = false,
+  dismissTooltip = false,
+}: BoringToggleProps) {
   const { isBoringMode, toggleBoringMode } = useBoringMode();
   const { play } = useSound();
   const mounted = useHydrated();
 
   const [tooltipDismissed, setTooltipDismissed] = useState(false);
 
-  // No desktop o cabeçalho está sempre visível, então o tooltip nasce logo
-  // que a página assenta, e some sozinho depois de alguns segundos, ou assim
-  // que a pessoa entra no Boring (a sugestão já foi seguida).
-  useEffect(() => {
-    if (!showTooltip || tooltipDismissed) return;
-    const timer = setTimeout(() => setTooltipDismissed(true), 4500);
-    return () => clearTimeout(timer);
-  }, [showTooltip, tooltipDismissed]);
-
   const tooltipVisible =
-    showTooltip && !tooltipDismissed && !isBoringMode && mounted;
+    showTooltip &&
+    !tooltipDismissed &&
+    !dismissTooltip &&
+    !isBoringMode &&
+    mounted;
 
   return (
     <div className="relative">
