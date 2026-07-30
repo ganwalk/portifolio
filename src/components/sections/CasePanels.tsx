@@ -55,10 +55,13 @@ function Panel({
   return (
     <div ref={ref} className="sticky top-0 h-[100svh]">
       {/* Fundo preto opaco: sem ele, mídia ainda carregando deixaria o véu
-          translúcido vazar o painel pinado atrás. */}
+          translúcido vazar o painel pinado atrás. mx + rounded dão o respiro
+          lateral e o arredondamento leve nos cantos; overflow-hidden já
+          clipava a mídia, então os cantos arredondados cortam ela também,
+          de graça. */}
       <motion.div
         style={{ scale }}
-        className="h-full overflow-hidden bg-black shadow-[0_-1px_0_rgba(255,255,255,0.18)]"
+        className="mx-3 h-full overflow-hidden rounded-2xl bg-black shadow-[0_-1px_0_rgba(255,255,255,0.18)] sm:mx-6 lg:mx-8"
       >
         <Link
           href={`/${locale}/work/${caseStudy.slug}/`}
