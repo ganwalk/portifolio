@@ -99,10 +99,17 @@ function HeroContent({
           pra tela de desktop grande. Na faixa de notebook (lg até antes do
           2xl, a maioria das telas de 13" a 16" cai aqui) ele fica pequeno
           demais para o espaço disponível, então encolhe; monitores grandes
-          (2xl) voltam ao tamanho original. */}
+          (2xl) voltam ao tamanho original.
+
+          O top também muda por faixa: `top` é uma porcentagem da altura do
+          contêiner inteiro, não da altura do próprio retrato, então uma
+          imagem mais baixa (a versão notebook) ancorada no mesmo topo acaba
+          com o centro mais alto do que a versão grande, e sai do alinhamento
+          vertical com "Armando Custodio". O valor de cada faixa foi calibrado
+          medindo o centro do h1 contra o centro do retrato naquela largura. */}
       <SelfPortrait
         label={dict.hero.portraitAlt}
-        className="pointer-events-none relative order-2 w-[52vw] max-w-64 sm:absolute sm:right-[5vw] sm:top-[6%] sm:order-none sm:w-[36vw] sm:max-w-[520px] lg:w-[26vw] lg:max-w-[300px] 2xl:w-[36vw] 2xl:max-w-[520px]"
+        className="pointer-events-none relative order-2 w-[52vw] max-w-64 sm:absolute sm:right-[5vw] sm:top-[6%] sm:order-none sm:w-[36vw] sm:max-w-[520px] lg:top-[12%] lg:w-[26vw] lg:max-w-[300px] 2xl:top-[6%] 2xl:w-[36vw] 2xl:max-w-[520px]"
       />
 
       <div className="order-3 flex flex-col items-center gap-8 sm:items-start sm:gap-10 sm:mt-16">
