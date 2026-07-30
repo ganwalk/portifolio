@@ -4,21 +4,21 @@
 
 /* ==========================================================================
    TOKENS DE DESIGN
-   Base neutra em "papel e tinta", acento turquesa usado com parcimônia.
-   Tema light: papel envelhecido. Tema dark: impresso financeiro/fósforo.
+   Preto e branco, e nada mais: a única cor do site vem das imagens e dos
+   vídeos. A hierarquia se sustenta em tamanho, peso e no cinza intermediário.
    ========================================================================== */
 
 :root {
-  /* Light, "papel vintage" */
-  --background: #f2eee4;
-  --surface: #eae5d8;
-  --foreground: #16130d;
-  --muted: #6e6858;
-  --line: rgba(22, 19, 13, 0.16);
-  /* Turquesa puxado para o verde (matiz 162, era 174). A luminosidade é
-     calibrada para o acento carregar rótulos pequenos sem perder contraste:
-     3.57:1 sobre o papel, acima do 3.28:1 do tom anterior. */
-  --accent: #0b8e67;
+  /* Light: papel branco, tinta preta. */
+  --background: #ffffff;
+  --surface: #f4f4f4;
+  --foreground: #0b0b0b;
+  --muted: #6d6d6d;
+  --line: rgba(11, 11, 11, 0.16);
+  /* O site é preto e branco: a única cor vem das imagens e dos vídeos.
+     O token de acento continua existindo, apontado para a tinta, para haver
+     um lugar só caso um dia faça sentido reintroduzir cor. */
+  --accent: var(--foreground);
 
   --font-sans: "Archivo Variable", system-ui, sans-serif;
   --font-serif: "Fraunces Variable", Georgia, serif;
@@ -26,14 +26,13 @@
 }
 
 .dark {
-  /* Dark, "extrato bancário à noite" */
-  --background: #0d0f0e;
-  --surface: #151816;
-  --foreground: #eae6da;
-  --muted: #8f8b7c;
-  --line: rgba(234, 230, 218, 0.16);
-  /* Mesmo matiz 162 do tema claro, na versão clara para fundo escuro. */
-  --accent: #3edaab;
+  /* Dark: o mesmo par invertido, tinta branca sobre preto. */
+  --background: #0a0a0a;
+  --surface: #161616;
+  --foreground: #f4f4f4;
+  --muted: #9b9b9b;
+  --line: rgba(244, 244, 244, 0.18);
+  --accent: var(--foreground);
 }
 
 /* Modo Boring: alto contraste absoluto, sem textura, sem cor de acento.
@@ -126,20 +125,20 @@ body {
   text-transform: uppercase;
 }
 
-/* Tinta da lente: cópia do conteúdo com aberração cromática, revelada por uma
-   máscara radial de borda suave (aplicada pelo componente, que segue o mouse).
-   O desfoque é forte de propósito: a lente é uma mancha de luz, não um recorte. */
-.lens-ink {
-  filter: blur(7px) saturate(1.8);
+/* Lente: dentro do círculo que segue o mouse, a página inverte. Tinta virando
+   papel e papel virando tinta, sem nenhuma cor entrar na conta. A borda difusa
+   vem da máscara radial que o componente aplica, e o desfoque leve dá o
+   comportamento de vidro. */
+.lens-invert {
+  background: var(--foreground);
+  filter: blur(1.2px);
 }
 
-.lens-ink,
-.lens-ink * {
-  color: color-mix(in srgb, var(--foreground) 55%, transparent) !important;
-  text-shadow:
-    -12px 0 18px rgba(255, 60, 96, 0.8),
-    12px 0 18px rgba(52, 178, 255, 0.8),
-    0 0 10px rgba(255, 210, 70, 0.55);
+.lens-invert,
+.lens-invert * {
+  color: var(--background) !important;
+  border-color: var(--background) !important;
+  text-decoration-color: var(--background) !important;
 }
 
 /* Textura de ruído analógico, desligada no Modo Boring e na impressão.

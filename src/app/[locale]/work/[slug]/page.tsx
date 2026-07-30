@@ -46,7 +46,10 @@ export default async function CasePage({
 
   return (
     <article className="px-4 py-16 sm:px-8">
-      <Link href={`/${locale}/`} className="type-mono text-accent">
+      <Link
+        href={`/${locale}/`}
+        className="type-mono text-muted transition-colors hover:text-foreground"
+      >
         ← {dict.nav.work}
       </Link>
 
