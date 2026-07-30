@@ -146,14 +146,21 @@ function HeroContent({
           </a>
         </motion.div>
 
+        {/* Medido via Playwright, largura de coluna vs. quantas linhas cada
+            frase ocupa: "UX/UI · Webapps..." e "Baseado no Brasil..." só
+            cabem numa linha só a partir de ~1150px de largura de coluna
+            (viewport ≳1150px com 2 colunas), e facts[1], a mais longa das
+            três, só cabe a partir de ~1750px (3 colunas). Nenhum dos dois
+            valores cai perto de um breakpoint nomeado do Tailwind, daí os
+            arbitrários xl (1280, com folga acima de 1150) e min-[1800px].
+            Até xl fica empilhado (1 coluna): 2 ou 3 colunas mais cedo
+            quebraria linha nas frases mais longas. */}
         <motion.div
           {...reveal(3)}
-          className="grid grid-cols-1 gap-x-12 gap-y-4 text-center sm:grid-cols-3 sm:text-left"
+          className="grid grid-cols-1 gap-x-12 gap-y-4 text-center sm:text-left xl:grid-cols-2 min-[1800px]:grid-cols-3"
         >
           <p className="type-mono text-muted">{dict.hero.facts[0]}</p>
-          {/* Some no mobile: a tela já está cheia de linha, e essa frase é a
-              menos essencial das três (assinatura de tom, não informação). */}
-          <p className="type-mono hidden text-muted sm:block">
+          <p className="type-mono hidden text-muted min-[1800px]:block">
             {dict.hero.facts[1]}
           </p>
           <p className="type-mono text-muted">{dict.hero.availability}</p>
