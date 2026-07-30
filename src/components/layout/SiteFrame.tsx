@@ -113,7 +113,11 @@ export function SiteFrame({
           <div className="flex items-center gap-4 justify-self-start">
             <SiteMenu locale={locale} dict={dict} />
             <div className="hidden lg:flex">
-              <BoringToggle dict={dict} showTooltip />
+              <BoringToggle
+                dict={dict}
+                showTooltip
+                dismissTooltip={pastFirstFold}
+              />
             </div>
           </div>
 
@@ -134,11 +138,11 @@ export function SiteFrame({
 
         {/* Segunda linha: só o Modo Boring, sempre presente no mobile (em
             qualquer página, em qualquer modo), sumindo no desktop porque lá
-            já cabe na primeira linha. Sem tooltip enquanto a primeira linha
-            está recolhida: a bolha brigaria com o pouco espaço da barra
-            reduzida. */}
+            já cabe na primeira linha. Nunca mostra tooltip: é uma tarja
+            estreita, sem espaço sobrando pra bolha, e é o único controle
+            visível na tela reduzida pré rolagem, já autoexplicativo. */}
         <div className="flex justify-center border-t border-line px-6 py-2 lg:hidden">
-          <BoringToggle dict={dict} showTooltip={headerVisible} />
+          <BoringToggle dict={dict} />
         </div>
       </header>
 
