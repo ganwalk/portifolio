@@ -70,6 +70,7 @@ export const en: Dictionary = {
     subtitle: "Open to projects, collaborations and good ideas.",
     emailLabel: "Email",
     copied: "Copied!",
+    imageAlt: "Interactive grid image that reacts to mouse movement",
   },
   boring: {
     experienceTitle: "Experience",

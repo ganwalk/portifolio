@@ -71,6 +71,7 @@ export const es: Dictionary = {
     subtitle: "Abierto a proyectos, colaboraciones y buenas ideas.",
     emailLabel: "Correo",
     copied: "¡Copiado!",
+    imageAlt: "Imagen interactiva, en cuadrícula, que reacciona al movimiento del mouse",
   },
   boring: {
     experienceTitle: "Experiencia",

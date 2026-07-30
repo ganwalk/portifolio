@@ -77,6 +77,7 @@ export const pt = {
     subtitle: "Aberto a projetos, colaborações e boas ideias.",
     emailLabel: "Email",
     copied: "Copiado!",
+    imageAlt: "Imagem interativa, em grade, que reage ao movimento do mouse",
   },
   boring: {
     experienceTitle: "Experiência",
