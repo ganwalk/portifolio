@@ -55,14 +55,14 @@ function HeroContent({
     <div className="gutter relative flex flex-1 flex-col justify-between pb-14 pt-24 sm:pt-32">
       {/* Retrato ao lado do nome. Posicionado em absoluto para não competir
           com o dimensionamento em vw da manchete: no desktop fica à direita,
-          na altura do nome; no mobile desce para o vazio entre o subtítulo e
-          o rodapé da hero. */}
+          na altura do nome; no mobile desce centralizado para o vazio entre
+          o subtítulo e o rodapé da hero. */}
       <SelfPortrait
         label={dict.hero.portraitAlt}
-        className="pointer-events-none absolute right-0 top-[38%] w-[58vw] sm:top-[4%] sm:w-[42vw] sm:max-w-[620px]"
+        className="pointer-events-none absolute left-1/2 top-[38%] w-[58vw] -translate-x-1/2 sm:left-auto sm:right-0 sm:top-[4%] sm:w-[42vw] sm:max-w-[620px] sm:translate-x-0"
       />
 
-      <div>
+      <div className="text-center sm:text-left">
         <h1 className="type-display text-[17vw] leading-[0.84] sm:text-[12vw]">
           {words.map((word, index) => (
             <span key={word} className="block overflow-hidden">
