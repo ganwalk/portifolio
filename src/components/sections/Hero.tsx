@@ -115,13 +115,15 @@ function HeroContent({
           contêiner inteiro, não da altura do próprio retrato, então uma
           imagem mais baixa (a versão notebook) ancorada no mesmo topo acaba
           com o centro mais alto do que a versão grande, e sai do alinhamento
-          vertical com "Armando Custodio". O valor de cada faixa foi calibrado
-          medindo o centro do h1 contra o centro do retrato naquela largura,
-          com um empurrão extra pra baixo por cima disso (ajuste estético, não
-          matemático). */}
+          vertical com "Armando Custodio". Em telas grandes (2xl) o mesmo
+          6% herdado da faixa de tablet deixava o topo do retrato quase
+          colado no cabeçalho (54px, contra os 128px de respiro do h1 antes
+          da faixa `pt-32`), mesmo com o centro da imagem já mais ou menos
+          alinhado, porque a imagem é alta e sobra pouco embaixo. 14% deixa
+          o topo do retrato perto do topo do h1, com respiro parecido. */}
       <SelfPortrait
         label={dict.hero.portraitAlt}
-        className="pointer-events-none relative order-2 w-[52vw] max-w-64 sm:absolute sm:right-[5vw] sm:top-[6%] sm:order-none sm:w-[36vw] sm:max-w-[520px] lg:top-[17%] lg:w-[26vw] lg:max-w-[300px] 2xl:top-[6%] 2xl:w-[36vw] 2xl:max-w-[520px]"
+        className="pointer-events-none relative order-2 w-[52vw] max-w-64 sm:absolute sm:right-[5vw] sm:top-[6%] sm:order-none sm:w-[36vw] sm:max-w-[520px] lg:top-[17%] lg:w-[26vw] lg:max-w-[300px] 2xl:top-[14%] 2xl:w-[36vw] 2xl:max-w-[520px]"
       />
 
       <div className="order-3 flex flex-col items-center gap-8 sm:items-start sm:gap-10 sm:mt-16">
