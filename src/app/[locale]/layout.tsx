@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import type { ReactNode } from "react";
 // Archivo com o eixo de largura (wdth), que é o que dá o ar de cartaz condensado.
 import "@fontsource-variable/archivo/wdth.css";
-import "@fontsource-variable/fraunces";
+import "@fontsource-variable/bricolage-grotesque";
 import "@fontsource/ibm-plex-mono/400.css";
 import "../globals.css";
 import { Providers } from "@/components/providers/Providers";

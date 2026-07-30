@@ -107,14 +107,23 @@ para quem estiver sem JavaScript. Cada idioma gera HTML próprio com o atributo
 
 ## Tipografia
 
-| Papel                    | Fonte           | Onde aparece                                  |
-| ------------------------ | --------------- | --------------------------------------------- |
-| Display de cartaz        | Archivo (wdth)  | nome na hero, títulos de case                 |
-| Serif de impresso        | Fraunces        | subtítulo da hero, métricas gigantes          |
-| Mono de extrato          | IBM Plex Mono   | legendas técnicas, tags, controles            |
+| Papel                    | Fonte              | Onde aparece                                  |
+| ------------------------ | ------------------ | ---------------------------------------------- |
+| Corpo de texto           | Archivo (wdth)     | parágrafos, listas, texto corrido              |
+| Manchete                 | Bricolage Grotesque | nome na hero, título e métrica dos cases, convite do contato, menu overlay |
+| Mono de extrato          | IBM Plex Mono      | legendas técnicas, tags, controles             |
 
-O eixo de largura da Archivo é o que dá o ar de ingresso antigo, por isso a
-importação é do arquivo `wdth.css` e a classe usa `font-stretch`, não o eixo padrão.
+`--font-headline` é a variável que carrega a Bricolage Grotesque, referenciada
+direto dentro de `.type-display` e `.type-serif-display` (os nomes das classes
+ficaram do desenho anterior, quando eram Archivo condensada e Fraunces
+respectivamente; hoje as duas apontam para a mesma fonte de manchete, cada
+uma com peso e entrelinha próprios). `--font-sans`, usada pelo `body` e por
+`--font-headline` como fallback, continua em Archivo: só o corpo de texto e
+nada de manchete usa essa variável diretamente.
+
+Bricolage Grotesque não tem eixo de largura nem itálico de verdade: onde o
+subtítulo da hero pede itálico, o navegador sintetiza (oblíqua), efeito aceito
+de propósito em fontes grotescas, ao contrário de uma serifa.
 
 ## Cores
 
@@ -152,14 +161,21 @@ A home é dirigida pela mídia, não pelo texto:
 A direção é minimalista: nenhuma moldura, nenhum relevo, nenhuma sombra
 decorativa. O que dá vida é movimento e tipografia, não ornamento.
 
-- **Hero com lente** (`Hero`): o nome em display gigante, uma palavra por linha
-  e alinhado à esquerda, com o subtítulo em serif itálica logo abaixo. A lente
-  que segue o mouse é uma inversão: dentro dela tinta e papel trocam de lugar,
-  sem nenhuma cor entrar na conta. A revelação usa máscara radial de borda
-  suave, não recorte duro, então o círculo é difuso nas beiradas. Perto do CTA
-  "Veja meu trabalho" o raio encolhe. Em telas de toque a lente fica com raio
-  zero e nada roda. A hero desconta a altura da barra (`100svh` menos
+- **Hero com lente** (`Hero`): o nome em display gigante, uma palavra por linha.
+  A lente que segue o mouse é uma inversão: dentro dela tinta e papel trocam de
+  lugar, sem nenhuma cor entrar na conta. A revelação usa máscara radial de
+  borda suave, não recorte duro, então o círculo é difuso nas beiradas. Perto
+  do CTA "Veja meu trabalho" o raio encolhe. Em telas de toque a lente fica com
+  raio zero e nada roda. A hero desconta a altura da barra (`100svh` menos
   `3.5rem`) porque o cabeçalho é sticky e ocupa espaço no fluxo.
+
+  No desktop o retrato é posicionado em absoluto, à direita, alinhado ao topo
+  do nome, e o resto (nome, subtítulo, CTA, fatos) fica alinhado à esquerda. No
+  mobile o retrato deixa de ser absoluto e passa a ser um terceiro item do
+  flex (via `order`), entre o bloco de título e o de CTA: o `justify-between`
+  do contêiner reparte o espaço entre os três, então o retrato nunca sobrepõe
+  o botão nem o subtítulo, porque participa da mesma conta de altura, e tudo
+  (título, subtítulo, retrato, CTA, fatos) fica centralizado.
 - **Retrato animado** (`SelfPortrait`): flipbook ao lado do nome. A volta tem
   quatro ciclos: os quadros 1 a 12 sempre iguais e o último mudando entre 13,
   14, 15 e 16, as quatro expressões, que seguram mais tempo no ar (700ms contra
@@ -225,7 +241,39 @@ decorativa. O que dá vida é movimento e tipografia, não ornamento.
   No mobile é grid de três colunas, com a assinatura centralizada; no desktop
   vira flex e a assinatura vai para a frente da fila (`lg:order-first`), com a
   lua empurrada para a direita. Os controles são só texto, sem moldura nem
-  fundo. `Reveal` dá a entrada padrão das seções de apoio.
+  fundo, com uma exceção: o Modo Boring tem caixa própria (contorno mesmo em
+  repouso), porque é a porta de saída do site inteiro para quem não quer ver
+  nem uma animação, merece se destacar dos demais.
+
+  Na home em Modo Criativo, o cabeçalho começa escondido (`SiteFrame`, variável
+  `headerVisible`): a hero ocupa a primeira dobra sozinha, sem chrome por cima,
+  e a barra desliza para dentro assim que o scroll passa de 90% da altura da
+  tela. Em qualquer outra página, ou já em Modo Boring, o cabeçalho é sempre
+  visível desde o primeiro pixel (`isHomeHero`, calculado via `usePathname`):
+  Boring não tem hero para esconder atrás, e o botão de volta ao Criativo
+  precisa estar sempre à mão, sem depender de a pessoa rolar a página até
+  achá-lo.
+
+  Assim que o cabeçalho aparece, um tooltip aponta para o botão do Modo Boring
+  com a frase da pessoa que odeia animação, e some sozinho depois de alguns
+  segundos ou ao clicar (`ControlBar`, prop `tooltipArmed`). O texto do
+  tooltip não usa `.type-mono`: aquela classe força `text-transform: uppercase`,
+  que apagaria o contraste entre "eu" minúsculo e "ODEIO" maiúsculo, a graça
+  da frase.
+
+  `Reveal` dá a entrada padrão das seções de apoio.
+
+- **Transição de modo** (`ModeTransitionOverlay`): uma cortina cobre a tela e
+  revela o novo modo por baixo ao alternar Criativo/Boring, em vez do corte
+  seco de uma troca instantânea. Não pode depender de CSS `transition` nem do
+  `MotionConfig` do Framer Motion: a regra global em `globals.css` que zera
+  todo movimento quando `data-boring="true"` mata literalmente qualquer
+  transition do documento inteiro no instante em que o atributo muda,
+  incluindo indo *para* o Boring, porque é uma regra de CSS (alcança qualquer
+  elemento do DOM, não importa onde ele mora na árvore React). Por isso a
+  cortina anima escrevendo `opacity` a cada quadro via `requestAnimationFrame`,
+  na mão: nenhuma regra de CSS intercepta uma mutação de estilo feita assim.
+  Quem pediu menos movimento no sistema não vê a cortina, só a troca direta.
 
 Toda mídia passa pelo componente `MediaView`, que decide entre `<video>` (mudo,
 em loop, com poster e camada de fallback) e `<img>`. As URLs vivem nos dados
