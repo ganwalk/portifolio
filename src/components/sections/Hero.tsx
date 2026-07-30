@@ -86,11 +86,17 @@ function HeroContent({
             </span>
           ))}
         </h1>
+        {/* No mobile a palavra da roleta desce pra linha de baixo: dividir
+            "Designer de" e a palavra em duas linhas deixa cada uma centrar
+            pela própria largura (flex-col + items-center), em vez de
+            depender do texto inteiro caber numa linha só pra centralizar
+            direito. No desktop (sm:block) volta a ser texto corrido numa
+            linha, como sempre foi. */}
         <motion.p
           {...reveal(1)}
-          className="type-serif-display mt-7 text-[6.5vw] italic text-muted sm:mt-9 sm:text-[3.6vw]"
+          className="type-serif-display mt-7 flex flex-col items-center text-[6.5vw] italic text-muted sm:mt-9 sm:block sm:text-[3.6vw]"
         >
-          {dict.hero.subtitlePrefix}{" "}
+          <span>{dict.hero.subtitlePrefix}</span>{" "}
           <SubtitleRoulette words={dict.hero.subtitleWords} />
         </motion.p>
       </div>
@@ -137,7 +143,11 @@ function HeroContent({
           className="grid grid-cols-1 gap-x-12 gap-y-4 text-center sm:grid-cols-3 sm:text-left"
         >
           <p className="type-mono text-muted">{dict.hero.facts[0]}</p>
-          <p className="type-mono text-muted">{dict.hero.facts[1]}</p>
+          {/* Some no mobile: a tela já está cheia de linha, e essa frase é a
+              menos essencial das três (assinatura de tom, não informação). */}
+          <p className="type-mono hidden text-muted sm:block">
+            {dict.hero.facts[1]}
+          </p>
           <p className="type-mono text-muted">{dict.hero.availability}</p>
         </motion.div>
       </div>
