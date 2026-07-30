@@ -6,13 +6,13 @@ export function Contact({ dict }: { dict: Dictionary }) {
   const links = Object.entries(profile.links).filter(([, url]) => url);
 
   return (
-    <section id="contact" className="border-t border-line px-4 py-20 sm:px-8">
+    <section id="contact" className="gutter section-y border-t border-line">
       <Reveal>
-        <h2 className="type-serif-display mb-4 text-5xl sm:text-7xl">
+        <h2 className="type-serif-display mb-6 text-5xl sm:text-7xl">
           {dict.contact.title}
         </h2>
-        <p className="mb-3 text-muted">{dict.contact.subtitle}</p>
-        <p className="type-mono mb-10 text-muted">{dict.hero.availability}</p>
+        <p className="mb-4 text-muted">{dict.contact.subtitle}</p>
+        <p className="type-mono mb-16 text-muted">{dict.hero.availability}</p>
       </Reveal>
 
       <Reveal delay={0.1}>
@@ -25,7 +25,7 @@ export function Contact({ dict }: { dict: Dictionary }) {
       </Reveal>
 
       {links.length > 0 && (
-        <p className="type-mono mt-10">
+        <p className="type-mono mt-16">
           {links.map(([name, url], i) => (
             <span key={name}>
               <a

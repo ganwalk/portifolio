@@ -23,7 +23,7 @@ export const es: Dictionary = {
     language: "Idioma",
   },
   hero: {
-    subtitle: "Ingeniero creativo de diseño",
+    subtitle: "Diseñador de productos",
     facts: [
       "UX/UI · Webapps · Design Systems",
       "Del banking a la música, y todo lo demás",
@@ -31,6 +31,7 @@ export const es: Dictionary = {
     availability:
       "Desde Brasil · Disponible para proyectos en todo el mundo 🌍",
     cta: "Mira mi trabajo",
+    portraitAlt: "Retrato animado de Armando Custodio, en trazo blanco y negro",
   },
   cases: {
     title: "Proyectos destacados",

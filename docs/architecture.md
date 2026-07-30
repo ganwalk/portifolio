@@ -127,6 +127,18 @@ para haver um lugar só caso um dia faça sentido reintroduzir cor. Por isso
 nenhum componente carrega cor no código: quem precisa de ênfase usa `--muted`,
 sublinhado ou opacidade.
 
+## Respiro
+
+A margem lateral e o ritmo vertical vivem em duas classes, `.gutter` e
+`.section-y`, em vez de padding solto repetido em cada arquivo. Cabeçalho,
+hero, cartas de case, seções, rodapé e páginas de case usam as mesmas, então
+mudar o respiro do site inteiro é mexer em um lugar. O gutter cresce em três
+degraus (1.5rem, 3rem, 5rem) e o ritmo vertical em outros três (7rem, 9rem,
+11rem).
+
+O Modo Boring não usa nenhuma das duas: currículo é documento, tem densidade
+própria e margem de leitura, não de vitrine.
+
 ## Acessibilidade
 
 Atalho para o conteúdo, foco visível, `aria-pressed` nos interruptores,
@@ -148,28 +160,41 @@ decorativa. O que dá vida é movimento e tipografia, não ornamento.
   "Veja meu trabalho" o raio encolhe. Em telas de toque a lente fica com raio
   zero e nada roda. A hero desconta a altura da barra (`100svh` menos
   `3.5rem`) porque o cabeçalho é sticky e ocupa espaço no fluxo.
-- **Cases como baralho** (`CasePanels`): cada painel gruda abaixo da barra e o
-  seguinte desliza por cima; o painel coberto encolhe e escurece. Cada
-  invólucro é mais alto que a carta (`175svh` contra uma tela), e essa sobra é
-  o tempo em que a carta fica parada e inteira à vista: sem ela, a próxima
-  entraria no mesmo instante em que a atual fixa. O quanto uma carta já foi
-  coberta sai do progresso da borda inferior do próprio invólucro indo do pé
-  ao topo da tela, que é justamente a passagem da carta de cima, então nenhum
-  painel precisa de referência aos irmãos.
+- **Retrato animado** (`SelfPortrait`): flipbook ao lado do nome. A volta tem
+  quatro ciclos: os quadros 1 a 12 sempre iguais e o último mudando entre 13,
+  14, 15 e 16, as quatro expressões, que seguram mais tempo no ar (700ms contra
+  85ms) senão a expressão passa batido.
 
-  Para o scroll não virar repetição, cada carta usa um arranjo e um movimento
-  próprios, escolhidos pela posição na fila, e a quinta recomeça o ciclo:
+  Os quadros vivem numa folha de sprite 4x4 em `public/frames`, gerada por
+  `scripts/build-frames.mjs` a partir de `frames eu/`. Uma folha em vez de
+  dezesseis arquivos dá uma requisição só, elimina flicker na primeira volta e,
+  porque a URL é a mesma, o bitmap decodificado é compartilhado entre a cópia
+  normal e a cópia invertida que aparece dentro da lente. A animação troca de
+  quadro mexendo apenas em `background-position`, sem tocar no DOM.
 
-  | Arranjo   | Composição                                  | Movimento          |
-  | --------- | ------------------------------------------- | ------------------ |
-  | `cheia`   | mídia de borda a borda, título no pé        | parallax vertical  |
-  | `meio`    | texto no papel de um lado, mídia do outro   | título entra pelo lado |
-  | `moldura` | mídia emoldurada, título atravessando ela   | parallax nos dois eixos |
-  | `zoom`    | título e métrica centralizados sobre a mídia | zoom de saída     |
+  O relógio mora em `src/lib/portrait-frames.ts`, fora do React: a hero
+  renderiza o retrato duas vezes, e dois temporizadores independentes sairiam de
+  sincronia, deixando a lente mostrar um quadro diferente do que está atrás
+  dela. Com um relógio só as duas andam juntas.
 
-  No arranjo `moldura` o título usa `mix-blend-difference`, então ele se
-  inverte sozinho ao cruzar a borda da imagem: legível no papel e sobre a
-  mídia, sem depender da cor do que está atrás.
+  Peso: os PNGs originais somam 16,6 MB. As folhas somam 461 KB no desktop e
+  178 KB no mobile, escolhidas na mão porque o meio tom do desenho é caro de
+  comprimir e a qualidade só derruba o arquivo até certo ponto. `--accent`
+  apontado para a tinta não ajuda aqui: o desenho é cinza dentro de uma
+  silhueta de alfa binário, não uma máscara de uma cor.
+
+- **Cases como baralho** (`CasePanels`): todas as cartas usam a mesma
+  composição, mídia de borda a borda com índice e métrica no topo e título no
+  pé, porque a repetição aqui é ritmo, não monotonia: o que muda de uma carta
+  para a outra é a mídia. Cada painel tem exatamente uma tela de altura e gruda
+  no topo, então a carta seguinte começa a subir no mesmo instante em que a
+  atual fixa, e a sobreposição vira um movimento contínuo, sem pausas. A carta
+  coberta encolhe e escurece, e um fio de luz no topo de cada uma marca a
+  passagem. A mídia corre em parallax dentro da carta.
+
+  O conteúdo da carta tem folga generosa no topo (`pt-24`): a carta fixa em
+  `top-0` para a mídia sangrar até a borda da tela, e sem essa folga a linha de
+  índice e ano ficaria escondida atrás da barra sticky.
 - **Lua de fases** (`MoonPhase`): no canto direito do cabeçalho, percorre as
   fases da lua conforme o scroll, três lunações por página.
 - **Menu overlay** (`SiteMenu`): navegação de tela cheia com tipografia gigante

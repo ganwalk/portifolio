@@ -125,6 +125,73 @@ body {
   text-transform: uppercase;
 }
 
+/* ==========================================================================
+   RESPIRO
+   Margem lateral e ritmo vertical em um lugar só: mudar aqui move cabeçalho,
+   hero, seções e rodapé juntos, em vez de caçar padding solto em cada arquivo.
+   O Modo Boring tem densidade própria, de documento, e não usa estas classes.
+   ========================================================================== */
+
+.gutter {
+  padding-inline: 1.5rem;
+}
+
+.section-y {
+  padding-block: 7rem;
+}
+
+@media (min-width: 640px) {
+  .gutter {
+    padding-inline: 3rem;
+  }
+
+  .section-y {
+    padding-block: 9rem;
+  }
+}
+
+@media (min-width: 1280px) {
+  .gutter {
+    padding-inline: 5rem;
+  }
+
+  .section-y {
+    padding-block: 11rem;
+  }
+}
+
+/* Retrato animado da hero: folha de sprite 4x4, um quadro por vez, trocado por
+   background-position. A proporção é a do tile gerado por
+   scripts/build-frames.mjs, e as URLs vêm por variável porque o basePath do
+   GitHub Pages não chega a url() dentro do CSS. */
+.portrait-frames {
+  aspect-ratio: 8 / 9;
+  background-image: var(--portrait-sm);
+  background-repeat: no-repeat;
+  background-size: 400% 400%;
+  background-position: 0% 0%;
+}
+
+@media (min-width: 640px) {
+  .portrait-frames {
+    background-image: var(--portrait-lg);
+  }
+}
+
+/* Dentro da lente o retrato inverte junto com o resto da página. */
+.lens-invert .portrait-frames {
+  filter: invert(1);
+}
+
+/* No Modo Boring o React tira o retrato do DOM, mas o HTML estático já vinha
+   com ele, e a folha era baixada antes da hidratação. Como o script de boot
+   marca o atributo antes da primeira pintura, cortar aqui evita meio mega de
+   download que ia direto para o lixo. */
+html[data-boring="true"] .portrait-frames {
+  display: none;
+  background-image: none;
+}
+
 /* Lente: dentro do círculo que segue o mouse, a página inverte. Tinta virando
    papel e papel virando tinta, sem nenhuma cor entrar na conta. A borda difusa
    vem da máscara radial que o componente aplica, e o desfoque leve dá o

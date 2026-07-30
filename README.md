@@ -21,8 +21,20 @@ npm run build   # gera o site estático em out/
 | Textos do site               | `src/i18n/dictionaries/pt.ts` (e en, es)       |
 | Cases e métricas             | `src/data/cases.ts`                            |
 | Vídeos e fotos placeholder   | `src/data/cases.ts` e `src/data/experiments.ts` |
+| Frames do retrato da hero    | `frames eu/`, depois `node scripts/build-frames.mjs` |
 | Contato, habilidades, cargo  | `src/data/profile.ts`                          |
 | Cores, fontes, texturas      | `src/app/globals.css`                          |
+
+O retrato animado da hero é gerado a partir dos PNGs em `frames eu/`. Para
+regerar as folhas de sprite depois de mexer nos quadros:
+
+```bash
+npm install --no-save sharp
+node scripts/build-frames.mjs
+```
+
+O sharp fica fora do `package.json` de propósito: é ferramenta de bancada, o
+site não depende dele para rodar nem para publicar.
 
 ## Antes de escrever qualquer texto
 

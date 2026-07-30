@@ -23,13 +23,14 @@ export const en: Dictionary = {
     language: "Language",
   },
   hero: {
-    subtitle: "Creative design engineer",
+    subtitle: "Product designer",
     facts: [
       "UX/UI · Webapps · Design Systems",
       "From banking to music, and everything between",
     ],
     availability: "Based in Brazil · Available for projects worldwide 🌍",
     cta: "See my work",
+    portraitAlt: "Animated portrait of Armando Custodio, in black and white line art",
   },
   cases: {
     title: "Featured work",

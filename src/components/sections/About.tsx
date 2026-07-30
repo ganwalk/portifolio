@@ -12,19 +12,19 @@ export function About({ locale, dict }: { locale: Locale; dict: Dictionary }) {
   ];
 
   return (
-    <section id="about" className="border-t border-line px-4 py-20 sm:px-8">
+    <section id="about" className="gutter section-y border-t border-line">
       <Reveal>
-        <h2 className="type-mono mb-12">{dict.about.title}</h2>
+        <h2 className="type-mono mb-16">{dict.about.title}</h2>
       </Reveal>
 
-      <div className="grid grid-cols-1 gap-12 lg:grid-cols-2">
-        <Reveal className="space-y-6 text-lg leading-relaxed">
+      <div className="grid grid-cols-1 gap-16 lg:grid-cols-2 lg:gap-24">
+        <Reveal className="space-y-7 text-lg leading-relaxed">
           {dict.about.bio.map((paragraph) => (
             <p key={paragraph.slice(0, 24)}>{paragraph}</p>
           ))}
         </Reveal>
 
-        <Reveal delay={0.15} className="space-y-10">
+        <Reveal delay={0.15} className="space-y-14">
           <div>
             <h3 className="type-mono mb-4 text-muted">
               {dict.about.skillsTitle}

@@ -7,11 +7,13 @@ import {
   useMotionValue,
   useSpring,
 } from "framer-motion";
+import { SelfPortrait } from "@/components/ui/SelfPortrait";
 import { profile } from "@/data/profile";
 import type { Dictionary } from "@/i18n/dictionaries";
 
 // Hero em preto e branco: o nome em display gigante, uma palavra por linha,
-// alinhado à esquerda, e o subtítulo em serif itálica logo abaixo.
+// alinhado à esquerda, o subtítulo em serif itálica logo abaixo e o retrato
+// animado em flipbook ao lado.
 //
 // A lente é uma inversão: dentro do círculo que segue o mouse, tinta e papel
 // trocam de lugar. A revelação usa máscara radial de borda suave, não recorte
@@ -50,7 +52,16 @@ function HeroContent({
   // flex-1, e não h-full: altura percentual não resolve contra um pai que só
   // ganha altura por flex-grow, e o justify-between viraria letra morta.
   return (
-    <div className="flex flex-1 flex-col justify-between px-4 pb-8 pt-16 sm:px-8 sm:pt-24">
+    <div className="gutter relative flex flex-1 flex-col justify-between pb-14 pt-24 sm:pt-32">
+      {/* Retrato ao lado do nome. Posicionado em absoluto para não competir
+          com o dimensionamento em vw da manchete: no desktop fica à direita,
+          na altura do nome; no mobile desce para o vazio entre o subtítulo e
+          o rodapé da hero. */}
+      <SelfPortrait
+        label={dict.hero.portraitAlt}
+        className="pointer-events-none absolute right-0 top-[45%] w-[52vw] sm:top-[9%] sm:w-[31vw] sm:max-w-[430px]"
+      />
+
       <div>
         <h1 className="type-display text-[17vw] leading-[0.84] sm:text-[12vw]">
           {words.map((word, index) => (
@@ -76,13 +87,13 @@ function HeroContent({
         </h1>
         <motion.p
           {...reveal(1)}
-          className="type-serif-display mt-5 text-[6.5vw] italic text-muted sm:text-[3.6vw]"
+          className="type-serif-display mt-7 text-[6.5vw] italic text-muted sm:mt-9 sm:text-[3.6vw]"
         >
           {dict.hero.subtitle}
         </motion.p>
       </div>
 
-      <div className="mt-12 flex flex-col gap-8">
+      <div className="mt-16 flex flex-col gap-10">
         <motion.div {...reveal(2)}>
           <a
             ref={ctaRef}
@@ -104,7 +115,7 @@ function HeroContent({
 
         <motion.div
           {...reveal(3)}
-          className="grid grid-cols-1 gap-x-8 gap-y-3 sm:grid-cols-3"
+          className="grid grid-cols-1 gap-x-12 gap-y-4 sm:grid-cols-3"
         >
           <p className="type-mono text-muted">{dict.hero.facts[0]}</p>
           <p className="type-mono text-muted">{dict.hero.facts[1]}</p>
