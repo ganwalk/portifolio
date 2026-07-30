@@ -26,10 +26,12 @@ const SRC = here("../frames eu");
 const OUT = here("../public/frames");
 const COLS = 4;
 const ROWS = 4;
-// Larguras calibradas na mão: o desenho é meio tom, então uma leve suavização
-// passa despercebida, mas o padrão de pontos é caro de comprimir. q50 foi o
-// ponto onde o arquivo cai sem artefato visível no tamanho real de exibição.
-const TILE_WIDTHS = { lg: 448, sm: 288 };
+// Larguras calibradas na mão para o tamanho de exibição na hero (lg exibe até
+// ~620px, sm até a largura do retrato no mobile). O desenho é meio tom, então
+// uma leve suavização passa despercebida, mas o padrão de pontos é caro de
+// comprimir: quality abaixo foi achado testando cada combinação até o ponto
+// onde o arquivo cai sem artefato visível no tamanho real de exibição.
+const TILE_WIDTHS = { lg: 640, sm: 340 };
 
 const files = Array.from({ length: 16 }, (_, i) => `${SRC}/${i + 1} copiar.png`);
 
@@ -116,7 +118,7 @@ for (const [label, tileW] of Object.entries(TILE_WIDTHS)) {
 
   const webp = await sheet
     .composite(composite)
-    .webp({ quality: 50, alphaQuality: 80, effort: 6 })
+    .webp({ quality: 28, alphaQuality: 75, effort: 6 })
     .toBuffer();
 
   const path = `${OUT}/eu-${label}.webp`;

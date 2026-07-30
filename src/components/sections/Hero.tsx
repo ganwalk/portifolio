@@ -59,7 +59,7 @@ function HeroContent({
           o rodapé da hero. */}
       <SelfPortrait
         label={dict.hero.portraitAlt}
-        className="pointer-events-none absolute right-0 top-[45%] w-[52vw] sm:top-[9%] sm:w-[31vw] sm:max-w-[430px]"
+        className="pointer-events-none absolute right-0 top-[38%] w-[58vw] sm:top-[4%] sm:w-[42vw] sm:max-w-[620px]"
       />
 
       <div>
