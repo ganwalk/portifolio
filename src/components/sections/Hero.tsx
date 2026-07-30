@@ -162,67 +162,50 @@ function HeroContent({
           </a>
         </motion.div>
 
-        {/* As três informações formam um rodapé só, na mesma altura, mas a
-            de disponibilidade não entra no grid de duas colunas junto com
-            as outras: no notebook ela mora do lado direito, na mesma
-            distância da borda da tela que "UX/UI..." tem do lado esquerdo,
-            e no desktop grande ela centraliza com o retrato, numa posição
-            que o próprio grid (estreito, encolhido pro tamanho do
-            conteúdo) nem alcançaria.
+        {/* As três informações formam um rodapé só, na mesma altura. No
+            notebook (sm até antes de 2xl) só "UX/UI..." e a disponibilidade
+            aparecem: o wrapper é flex-row com justify-between, os dois
+            medidos pela mesma borda (o próprio wrapper), então a distância
+            até cada lateral bate por construção. Precisa de sm:w-full: o
+            pai (order-3) é flex items-start, não stretch, então sem
+            largura explícita o wrapper encolhe pro tamanho do próprio
+            conteúdo.
 
-            No notebook (sm até antes de 2xl) o truque é simples: o wrapper
-            vira flex-row com justify-between, o grid fica na ponta
-            esquerda e a legenda na direita, os dois medidos pela mesma
-            borda (o próprio wrapper), então a distância bate com a de
-            "UX/UI..." por construção, sem precisar calcular nada. Precisa
-            de sm:w-full: o pai (order-3) é flex items-start, não stretch,
-            então sem largura explícita o wrapper encolhe pro tamanho do
-            próprio conteúdo, e a borda direita dele para de significar
-            "borda da área de conteúdo" (mesma armadilha de antes, na
-            legenda ancorada em 2xl).
+            No desktop grande (2xl) as três aparecem juntas, numa grade de
+            três colunas iguais: "UX/UI..." alinhada à esquerda na primeira
+            coluna, "Do institucional..." centralizada na coluna do meio
+            (equidistante das outras duas por construção, já que cada
+            coluna tem a mesma largura) e a disponibilidade alinhada à
+            direita na última, cuja borda direita coincide com a borda do
+            próprio gutter, a mesma referência que o resto do conteúdo usa.
+            Uma tentativa anterior ancorava a disponibilidade em posição
+            absoluta, centralizada sob o retrato, e ela acabava
+            sobrepondo "Do institucional...", que cresce pra encher a
+            grade antiga de duas colunas.
 
-            No desktop grande (2xl) o wrapper volta a ser um bloco comum
-            (2xl:block desliga o flex-row) e a legenda sai do fluxo dele:
-            em vez de aninhar outro "position: relative" (testado e
-            descartado: o container de posicionamento de um elemento
-            absolute é a padding box do ancestral mais próximo, então
-            "right: 5vw" mede a partir da borda daquele container, e um
-            container aninhado mais estreito dá uma resposta diferente do
-            container do retrato mesmo os dois usando vw), ela ancora direto
-            na raiz do HeroContent (o mesmo "relative" que o retrato usa),
-            com right/width idênticos aos dele. bottom-14, não bottom-0: a
-            raiz tem pb-14 de padding, e a base de um absolute mede da
-            padding box, não da borda interna do padding, então bottom-0
-            sobraria 56px abaixo de onde o rodapé de verdade termina.
-
-            No mobile (abaixo de sm) o wrapper nem é flex, então os dois
-            filhos empilham na ordem do DOM, sem posicionamento especial. */}
-        <div className="sm:flex sm:w-full sm:items-start sm:justify-between 2xl:block">
-          <motion.div
-            {...reveal(3)}
-            className="grid grid-cols-1 gap-x-12 gap-y-4 text-center sm:text-left 2xl:grid-cols-2"
-          >
-            <p
-              className="type-mono text-muted"
-              style={{ fontSize: "clamp(0.625rem, 0.55vw, 0.75rem)" }}
-            >
-              {dict.hero.facts[0]}
-            </p>
-            <p
-              className="type-mono hidden text-muted 2xl:block"
-              style={{ fontSize: "clamp(0.625rem, 0.55vw, 0.75rem)" }}
-            >
-              {dict.hero.facts[1]}
-            </p>
-          </motion.div>
-
-          {/* motion.p com o mesmo reveal(3) do grid vizinho: virou irmã
-              dele numa edição anterior e perdeu a entrada animada nessa
-              troca, já que só o motion.div do grid carregava a
-              animação. */}
+            No mobile (abaixo de sm) o wrapper nem é flex nem grid, então
+            os filhos empilham na ordem do DOM: "UX/UI...", depois a
+            disponibilidade ("Do institucional..." continua escondida). */}
+        <div className="sm:flex sm:w-full sm:items-start sm:justify-between sm:gap-8 2xl:grid 2xl:grid-cols-3 2xl:items-start 2xl:gap-x-12">
           <motion.p
             {...reveal(3)}
-            className="type-mono mt-8 text-center text-muted sm:mt-0 sm:text-right 2xl:absolute 2xl:bottom-14 2xl:right-[5vw] 2xl:w-[36vw] 2xl:max-w-[520px] 2xl:text-center"
+            className="type-mono text-center text-muted sm:text-left"
+            style={{ fontSize: "clamp(0.625rem, 0.55vw, 0.75rem)" }}
+          >
+            {dict.hero.facts[0]}
+          </motion.p>
+
+          <motion.p
+            {...reveal(3)}
+            className="type-mono hidden text-muted 2xl:block 2xl:text-center"
+            style={{ fontSize: "clamp(0.625rem, 0.55vw, 0.75rem)" }}
+          >
+            {dict.hero.facts[1]}
+          </motion.p>
+
+          <motion.p
+            {...reveal(3)}
+            className="type-mono mt-8 text-center text-muted sm:mt-0 sm:text-right"
             style={{ fontSize: "clamp(0.625rem, 0.55vw, 0.75rem)" }}
           >
             {availabilityBefore} <br className="sm:hidden" />
