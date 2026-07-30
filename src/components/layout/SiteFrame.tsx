@@ -102,9 +102,14 @@ export function SiteFrame({
             translate não retira o espaço reservado no fluxo, e aqui a linha
             é filha normal do flex-col (não teria como flutuar por cima da
             segunda linha sem empurrá-la). No desktop, ou fora dessa
-            combinação específica de mobile+home+criativo, sempre expandida. */}
+            combinação específica de mobile+home+criativo, sempre expandida:
+            lg:pointer-events-auto e lg:overflow-visible desfazem, só aí, o
+            pointer-events-none e o overflow-hidden que a versão recolhida
+            usa no mobile, senão o cabeçalho inteiro ficava inclicável e a
+            tooltip cortada no desktop mesmo com max-height/opacity já
+            revertidos por lg:max-h-none/lg:opacity-100. */}
         <div
-          className={`grid grid-cols-[1fr_auto_1fr] items-center gap-2 overflow-hidden px-6 transition-all duration-300 sm:px-12 lg:flex lg:max-h-none lg:gap-8 lg:opacity-100 xl:px-20 ${
+          className={`grid grid-cols-[1fr_auto_1fr] items-center gap-2 overflow-hidden px-6 transition-all duration-300 sm:px-12 lg:flex lg:max-h-none lg:gap-8 lg:overflow-visible lg:opacity-100 lg:pointer-events-auto xl:px-20 ${
             headerVisible
               ? "max-h-20 py-3 opacity-100"
               : "pointer-events-none max-h-0 py-0 opacity-0"
