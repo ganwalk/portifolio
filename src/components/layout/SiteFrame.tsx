@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState, type ReactNode } from "react";
+import { BoringToggle } from "@/components/controls/BoringToggle";
 import { ControlBar } from "@/components/controls/ControlBar";
 import { SiteMenu } from "@/components/nav/SiteMenu";
 import { MoonPhase } from "@/components/ui/MoonPhase";
@@ -14,19 +15,31 @@ import type { Dictionary } from "@/i18n/dictionaries";
 // Moldura comum a todas as páginas.
 //
 // O cabeçalho muda de arranjo com a largura, mantendo uma só ordem de DOM
-// (menu, assinatura, lua): no mobile é grid de três colunas, com a assinatura
-// centralizada e a lua do outro lado; no desktop virá flex e a assinatura vai
-// para a frente da fila (order-first), com a lua empurrada para a direita.
-// A mesa de controle mora na barra no desktop e dentro do menu no mobile.
-// Ao rolar, a barra encorpa (fundo mais sólido) para não sumir sobre as
-// mídias. Some por completo na impressão.
+// (menu+Boring, assinatura, tema/som/idioma+lua): no mobile é grid de três
+// colunas, com a assinatura centralizada; no desktop vira flex e a assinatura
+// vai para a frente da fila (order-first), com o segundo cluster empurrado
+// para a direita. No mobile a mesa de controle inteira mora dentro do menu;
+// no desktop ela se divide nos dois clusters da própria barra. Ao rolar, a
+// barra encorpa (fundo mais sólido) para não sumir sobre as mídias. Some por
+// completo na impressão.
 //
-// Na home em Modo Criativo, o cabeçalho começa escondido: a hero ocupa a
-// primeira dobra sozinha, sem chrome nenhum por cima, e a barra desliza para
-// dentro assim que o scroll passa da altura da tela. Em qualquer outra
-// página, ou já em Modo Boring (onde não existe hero para esconder atrás, e
-// o botão de voltar ao criativo precisa estar sempre à mão), o cabeçalho
-// segue visível desde o primeiro pixel, como sempre foi.
+// No mobile, na home em Modo Criativo, o cabeçalho começa escondido: a hero
+// ocupa a primeira dobra sozinha, sem chrome nenhum por cima, e a barra
+// desliza para dentro assim que o scroll passa da altura da tela. No desktop
+// o cabeçalho é sempre visível, em qualquer página e desde o primeiro pixel:
+// lá o espaço sobra, esconder a barra só tira acesso sem ganhar nada em troca.
+// Em Modo Boring, ou fora da home, o cabeçalho também é sempre visível, em
+// qualquer largura: sem hero para esconder atrás, e o botão de voltar ao
+// criativo precisa estar sempre à mão.
+//
+// Na home em Modo Criativo o cabeçalho é `fixed`, não `sticky`: um elemento
+// sticky reserva a própria altura no fluxo do documento mesmo escondido via
+// opacity/transform (são propriedades visuais, não afetam layout), o que
+// deixava uma tarja vazia no topo do mobile antes da hero aparecer. Fixed
+// nunca reserva espaço, então a hero pode ocupar a tela inteira (100svh) e o
+// cabeçalho simplesmente flutua por cima quando decide aparecer. Fora da
+// home (ou em Boring), continua sticky: essas páginas não têm hero e sempre
+// dependeram do cabeçalho empurrando o conteúdo para baixo.
 
 export function SiteFrame({
   children,
@@ -67,7 +80,7 @@ export function SiteFrame({
       </a>
 
       <header
-        className={`no-print sticky top-0 z-40 grid grid-cols-[1fr_auto_1fr] items-center gap-2 border-b border-line px-6 backdrop-blur transition-all duration-300 sm:px-12 lg:flex lg:gap-8 xl:px-20 ${
+        className={`no-print ${isHomeHero ? "fixed" : "sticky"} top-0 z-40 grid w-full grid-cols-[1fr_auto_1fr] items-center gap-2 border-b border-line px-6 backdrop-blur transition-all duration-300 sm:px-12 lg:flex lg:translate-y-0 lg:gap-8 lg:opacity-100 lg:pointer-events-auto xl:px-20 ${
           scrolled ? "bg-background/95 py-2" : "bg-background/85 py-3"
         } ${
           headerVisible
@@ -78,12 +91,7 @@ export function SiteFrame({
         <div className="flex items-center gap-4 justify-self-start">
           <SiteMenu locale={locale} dict={dict} />
           <div className={isBoringMode ? "flex" : "hidden lg:flex"}>
-            <ControlBar
-              locale={locale}
-              dict={dict}
-              showTooltip
-              tooltipArmed={headerVisible}
-            />
+            <BoringToggle dict={dict} showTooltip />
           </div>
         </div>
 
@@ -94,7 +102,10 @@ export function SiteFrame({
           {profile.name}
         </Link>
 
-        <div className="justify-self-end lg:ml-auto">
+        <div className="flex items-center gap-4 justify-self-end lg:ml-auto">
+          <div className="hidden lg:flex">
+            <ControlBar locale={locale} dict={dict} />
+          </div>
           <MoonPhase className="h-5 w-5" />
         </div>
       </header>

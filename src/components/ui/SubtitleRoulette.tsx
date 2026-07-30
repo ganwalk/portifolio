@@ -14,9 +14,16 @@ import { subscribeRouletteTick } from "@/lib/portrait-frames";
 // juntas.
 //
 // O texto entra e sai deslizando na vertical com um leve desfoque, feito para
-// lembrar as fitas de uma roleta física, não um crossfade comum. A palavra
-// mais longa da lista fica invisível por baixo, empilhada no mesmo espaço via
-// grid, só para reservar a largura e a rotação nunca empurrar o texto ao lado.
+// lembrar as fitas de uma roleta física, não um crossfade comum.
+//
+// A largura reservada não vem de "achar a palavra mais longa por número de
+// caracteres": letras têm larguras diferentes (um "m" não é um "i"), então
+// contar caracteres erra a largura real sempre que a fonte não é monoespaçada,
+// e a palavra visível acaba maior que a caixa reservada e é cortada pelo
+// overflow-hidden. Em vez de adivinhar, TODAS as palavras da lista entram
+// como texto invisível empilhado na mesma célula do grid, e é o próprio
+// motor de layout do navegador, que já sabe a largura real de cada uma
+// nesta fonte, quem decide a largura da coluna.
 
 export function SubtitleRoulette({ words }: { words: readonly string[] }) {
   const [tick, setTick] = useState(0);
@@ -24,17 +31,26 @@ export function SubtitleRoulette({ words }: { words: readonly string[] }) {
   useEffect(() => subscribeRouletteTick(setTick), []);
 
   const word = words[tick % words.length];
-  const longest = words.reduce((a, b) => (b.length > a.length ? b : a));
 
+  // text-center: sem isso, uma palavra curta como "sites" fica alinhada à
+  // esquerda dentro da caixa (reservada para a palavra mais longa da lista)
+  // e sobra um vão grande à direita, parecendo desalinhada. Centrado, toda
+  // palavra ocupa o meio da caixa e o efeito lê como intencional.
   return (
-    <span className="relative inline-grid overflow-hidden align-bottom">
-      <span aria-hidden className="invisible col-start-1 row-start-1">
-        {longest}
-      </span>
+    <span className="relative inline-grid overflow-hidden text-center align-bottom">
+      {words.map((w) => (
+        <span
+          key={w}
+          aria-hidden
+          className="invisible col-start-1 row-start-1 whitespace-nowrap"
+        >
+          {w}
+        </span>
+      ))}
       <AnimatePresence initial={false}>
         <motion.span
           key={word}
-          className="col-start-1 row-start-1"
+          className="col-start-1 row-start-1 whitespace-nowrap"
           initial={{ y: "70%", opacity: 0, filter: "blur(6px)" }}
           animate={{ y: "0%", opacity: 1, filter: "blur(0px)" }}
           exit={{ y: "-70%", opacity: 0, filter: "blur(6px)" }}

@@ -169,14 +169,15 @@ export function Hero({ dict }: { dict: Dictionary }) {
     }
   };
 
-  // A barra do topo é sticky, logo ocupa espaço no fluxo: descontar a altura
-  // dela é o que faz hero mais cabeçalho darem exatamente uma tela.
+  // Na home o cabeçalho é fixed (veja SiteFrame), não reserva espaço no
+  // fluxo, então a hero ocupa a tela inteira e a barra flutua por cima
+  // quando decide aparecer.
   return (
     <section
       ref={sectionRef}
       onMouseMove={onMouseMove}
       onMouseLeave={() => radius.set(0)}
-      className="texture-noise relative flex min-h-[calc(100svh-3.5rem)] flex-col overflow-hidden"
+      className="texture-noise relative flex min-h-[100svh] flex-col overflow-hidden"
       aria-label={profile.name}
     >
       <div className="relative flex flex-1">
