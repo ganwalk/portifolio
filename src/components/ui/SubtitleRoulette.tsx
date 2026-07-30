@@ -32,12 +32,12 @@ export function SubtitleRoulette({ words }: { words: readonly string[] }) {
 
   const word = words[tick % words.length];
 
-  // text-center: sem isso, uma palavra curta como "sites" fica alinhada à
-  // esquerda dentro da caixa (reservada para a palavra mais longa da lista)
-  // e sobra um vão grande à direita, parecendo desalinhada. Centrado, toda
-  // palavra ocupa o meio da caixa e o efeito lê como intencional.
+  // Alinhado à esquerda (padrão): a palavra sempre começa colada no prefixo
+  // "Designer de", então o vão de uma palavra curta como "sites" sobra à
+  // direita, fora da linha de leitura, em vez de abrir um buraco entre o
+  // prefixo e a palavra como aconteceria centralizado.
   return (
-    <span className="relative inline-grid overflow-hidden text-center align-bottom">
+    <span className="relative inline-grid overflow-hidden text-left align-bottom">
       {words.map((w) => (
         <span
           key={w}
