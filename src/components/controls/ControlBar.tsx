@@ -89,7 +89,7 @@ export function ControlBar({ locale, dict }: ControlBarProps) {
             aria-current={l === locale ? "true" : undefined}
             className={`type-mono px-1 py-1.5 ${
               l === locale
-                ? "text-accent underline underline-offset-4"
+                ? "text-foreground underline underline-offset-4"
                 : "text-muted hover:text-foreground"
             }`}
             title={localeNames[l]}

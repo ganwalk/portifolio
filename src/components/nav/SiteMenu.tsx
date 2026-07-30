@@ -87,7 +87,7 @@ export function SiteMenu({
       <button
         type="button"
         aria-expanded={open}
-        className="type-mono cursor-pointer text-foreground transition-colors hover:text-accent"
+        className="type-mono cursor-pointer text-foreground transition-opacity hover:opacity-60"
         onClick={() => toggle(true)}
       >
         {dict.nav.menu}
@@ -129,7 +129,7 @@ export function SiteMenu({
               <div className="flex items-center justify-end">
                 <button
                   type="button"
-                  className="type-mono cursor-pointer text-foreground transition-colors hover:text-accent"
+                  className="type-mono cursor-pointer text-foreground transition-opacity hover:opacity-60"
                   onClick={() => toggle(false)}
                 >
                   {dict.nav.close}
@@ -159,7 +159,7 @@ export function SiteMenu({
                         <span className="type-mono text-muted">
                           0{index + 1}
                         </span>
-                        <span className="type-display text-[13vw] leading-none transition-colors group-hover:text-accent sm:text-[7vw]">
+                        <span className="type-display text-[13vw] leading-none transition-opacity group-hover:opacity-55 sm:text-[7vw]">
                           {item.label}
                         </span>
                       </Link>

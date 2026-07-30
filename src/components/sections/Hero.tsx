@@ -10,27 +10,30 @@ import {
 import { profile } from "@/data/profile";
 import type { Dictionary } from "@/i18n/dictionaries";
 
-// Hero minimalista: o nome em display gigante, o subtítulo em serif itálica,
-// e uma mancha de luz que segue o mouse revelando uma cópia do conteúdo com
-// aberração cromática. A revelação usa máscara radial de borda suave, não
-// recorte duro, então a lente é difusa nas beiradas.
-// Perto do CTA a mancha encolhe, cedendo o palco ao clique.
-// Em telas de toque nada disso roda: sem mousemove, o raio fica em zero.
+// Hero em preto e branco: o nome em display gigante, uma palavra por linha,
+// alinhado à esquerda, e o subtítulo em serif itálica logo abaixo.
+//
+// A lente é uma inversão: dentro do círculo que segue o mouse, tinta e papel
+// trocam de lugar. A revelação usa máscara radial de borda suave, não recorte
+// duro, então o círculo é difuso nas beiradas. Perto do CTA o raio encolhe,
+// cedendo o palco ao clique. Em telas de toque nada disso roda: sem mousemove,
+// o raio fica em zero.
 
 const LENS_MAX = 210;
 const LENS_MIN = 40;
 
 function HeroContent({
   dict,
-  chromatic,
+  mirrored,
   ctaRef,
 }: {
   dict: Dictionary;
-  chromatic?: boolean;
+  /** Cópia dentro da lente: entra pronta, sem repetir a animação de entrada. */
+  mirrored?: boolean;
   ctaRef?: React.RefObject<HTMLAnchorElement | null>;
 }) {
   const reveal = (index: number): object =>
-    chromatic
+    mirrored
       ? {}
       : {
           initial: { y: 40, opacity: 0 },
@@ -38,24 +41,42 @@ function HeroContent({
           transition: {
             duration: 0.9,
             ease: [0.16, 1, 0.3, 1],
-            delay: 0.15 + index * 0.12,
+            delay: 0.35 + index * 0.12,
           },
         };
 
-    // flex-1, e não h-full: altura percentual não resolve contra um pai que
-    // só ganha altura por flex-grow, e o justify-between viraria letra morta.
+  const words = profile.name.split(" ");
+
+  // flex-1, e não h-full: altura percentual não resolve contra um pai que só
+  // ganha altura por flex-grow, e o justify-between viraria letra morta.
   return (
     <div className="flex flex-1 flex-col justify-between px-4 pb-8 pt-16 sm:px-8 sm:pt-24">
       <div>
-        <motion.h1
-          {...reveal(0)}
-          className="type-display text-[15vw] leading-[0.86] sm:text-[11vw]"
-        >
-          {profile.name}
-        </motion.h1>
+        <h1 className="type-display text-[17vw] leading-[0.84] sm:text-[12vw]">
+          {words.map((word, index) => (
+            <span key={word} className="block overflow-hidden">
+              <motion.span
+                className="block"
+                initial={mirrored ? undefined : { y: "108%" }}
+                animate={mirrored ? undefined : { y: 0 }}
+                transition={
+                  mirrored
+                    ? undefined
+                    : {
+                        duration: 0.95,
+                        ease: [0.16, 1, 0.3, 1],
+                        delay: 0.1 + index * 0.13,
+                      }
+                }
+              >
+                {word}
+              </motion.span>
+            </span>
+          ))}
+        </h1>
         <motion.p
           {...reveal(1)}
-          className="type-serif-display mt-4 pl-[1vw] text-[7vw] italic text-accent sm:text-[4vw]"
+          className="type-serif-display mt-5 text-[6.5vw] italic text-muted sm:text-[3.6vw]"
         >
           {dict.hero.subtitle}
         </motion.p>
@@ -66,8 +87,8 @@ function HeroContent({
           <a
             ref={ctaRef}
             href="#work"
-            tabIndex={chromatic ? -1 : undefined}
-            className="type-mono group inline-flex items-center gap-3 text-foreground"
+            tabIndex={mirrored ? -1 : undefined}
+            className="type-mono group inline-flex items-center gap-3"
           >
             <span className="underline decoration-1 underline-offset-8">
               {dict.hero.cta}
@@ -107,8 +128,7 @@ export function Hero({ dict }: { dict: Dictionary }) {
   const r = useSpring(radius, { stiffness: 180, damping: 24 });
 
   // Máscara de borda suave: opaca no centro, dissolvendo até o raio cheio.
-  const mask = useMotionTemplate`radial-gradient(circle ${r}px at ${x}px ${y}px, black 0%, rgba(0,0,0,0.85) 42%, rgba(0,0,0,0.35) 68%, transparent 100%)`;
-  const glow = useMotionTemplate`radial-gradient(620px circle at ${x}px ${y}px, color-mix(in srgb, var(--accent) 14%, transparent), transparent 72%)`;
+  const mask = useMotionTemplate`radial-gradient(circle ${r}px at ${x}px ${y}px, black 0%, rgba(0,0,0,0.9) 46%, rgba(0,0,0,0.4) 72%, transparent 100%)`;
 
   const onMouseMove = (event: React.MouseEvent) => {
     const section = sectionRef.current;
@@ -117,7 +137,7 @@ export function Hero({ dict }: { dict: Dictionary }) {
     mouseX.set(event.clientX - rect.left);
     mouseY.set(event.clientY - rect.top);
 
-    // Perto do CTA a mancha encolhe: o raio é função da distância ao botão.
+    // Perto do CTA a lente encolhe: o raio é função da distância ao botão.
     const cta = ctaRef.current?.getBoundingClientRect();
     if (cta) {
       const distance = Math.hypot(
@@ -141,23 +161,16 @@ export function Hero({ dict }: { dict: Dictionary }) {
       className="texture-noise relative flex min-h-[calc(100svh-3.5rem)] flex-col overflow-hidden"
       aria-label={profile.name}
     >
-      {/* Brilho de fundo que acompanha o cursor */}
-      <motion.div
-        aria-hidden
-        className="pointer-events-none absolute inset-0"
-        style={{ background: glow }}
-      />
-
       <div className="relative flex flex-1">
         <HeroContent dict={dict} ctaRef={ctaRef} />
 
-        {/* Cópia cromática, revelada pela mancha de luz */}
+        {/* Cópia invertida, revelada pela lente */}
         <motion.div
           aria-hidden
-          className="lens-ink pointer-events-none absolute inset-0 flex"
+          className="lens-invert pointer-events-none absolute inset-0 flex"
           style={{ maskImage: mask, WebkitMaskImage: mask }}
         >
-          <HeroContent dict={dict} chromatic />
+          <HeroContent dict={dict} mirrored />
         </motion.div>
       </div>
     </section>

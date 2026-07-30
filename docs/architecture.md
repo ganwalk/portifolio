@@ -118,10 +118,14 @@ importação é do arquivo `wdth.css` e a classe usa `font-stretch`, não o eixo
 
 ## Cores
 
-Base neutra de papel e tinta, com um verde turquesa (matiz 162) como único acento,
-usado com parcimônia: links, marcadores, estado ativo, subtítulo da hero. A
-luminosidade dos dois temas é calibrada para o acento poder carregar rótulos
-pequenos. No Modo Boring o acento é abolido, resta preto e branco.
+Preto e branco, e nada mais: a única cor do site vem das imagens e dos vídeos
+dos projetos. A hierarquia se sustenta em tamanho, peso e no cinza intermediário
+(`--muted`), não em cor.
+
+O token `--accent` continua existindo, apontado para a tinta (`--foreground`),
+para haver um lugar só caso um dia faça sentido reintroduzir cor. Por isso
+nenhum componente carrega cor no código: quem precisa de ênfase usa `--muted`,
+sublinhado ou opacidade.
 
 ## Acessibilidade
 
@@ -136,18 +140,36 @@ A home é dirigida pela mídia, não pelo texto:
 A direção é minimalista: nenhuma moldura, nenhum relevo, nenhuma sombra
 decorativa. O que dá vida é movimento e tipografia, não ornamento.
 
-- **Hero com lente** (`Hero`): o nome em display gigante, o subtítulo em serif
-  itálica de acento, e uma mancha de luz que segue o mouse revelando uma cópia
-  do conteúdo com aberração cromática, mais um brilho radial no fundo. A
-  revelação usa máscara radial de borda suave, não recorte duro, então a lente
-  é difusa nas beiradas. Perto do CTA "Veja meu trabalho" o raio encolhe.
-  Em telas de toque a lente fica com raio zero e nada roda.
-  A hero desconta a altura da barra (`100svh` menos `3.5rem`) porque o
-  cabeçalho é sticky e ocupa espaço no fluxo.
-- **Cases como baralho** (`CasePanels`): cada painel gruda no topo (sticky) e
-  o seguinte desliza por cima; o painel coberto encolhe e escurece, e um fio
-  de luz no topo marca a sobreposição. A mídia segue em parallax dentro de
-  cada carta. O texto longo mora na página do case.
+- **Hero com lente** (`Hero`): o nome em display gigante, uma palavra por linha
+  e alinhado à esquerda, com o subtítulo em serif itálica logo abaixo. A lente
+  que segue o mouse é uma inversão: dentro dela tinta e papel trocam de lugar,
+  sem nenhuma cor entrar na conta. A revelação usa máscara radial de borda
+  suave, não recorte duro, então o círculo é difuso nas beiradas. Perto do CTA
+  "Veja meu trabalho" o raio encolhe. Em telas de toque a lente fica com raio
+  zero e nada roda. A hero desconta a altura da barra (`100svh` menos
+  `3.5rem`) porque o cabeçalho é sticky e ocupa espaço no fluxo.
+- **Cases como baralho** (`CasePanels`): cada painel gruda abaixo da barra e o
+  seguinte desliza por cima; o painel coberto encolhe e escurece. Cada
+  invólucro é mais alto que a carta (`175svh` contra uma tela), e essa sobra é
+  o tempo em que a carta fica parada e inteira à vista: sem ela, a próxima
+  entraria no mesmo instante em que a atual fixa. O quanto uma carta já foi
+  coberta sai do progresso da borda inferior do próprio invólucro indo do pé
+  ao topo da tela, que é justamente a passagem da carta de cima, então nenhum
+  painel precisa de referência aos irmãos.
+
+  Para o scroll não virar repetição, cada carta usa um arranjo e um movimento
+  próprios, escolhidos pela posição na fila, e a quinta recomeça o ciclo:
+
+  | Arranjo   | Composição                                  | Movimento          |
+  | --------- | ------------------------------------------- | ------------------ |
+  | `cheia`   | mídia de borda a borda, título no pé        | parallax vertical  |
+  | `meio`    | texto no papel de um lado, mídia do outro   | título entra pelo lado |
+  | `moldura` | mídia emoldurada, título atravessando ela   | parallax nos dois eixos |
+  | `zoom`    | título e métrica centralizados sobre a mídia | zoom de saída     |
+
+  No arranjo `moldura` o título usa `mix-blend-difference`, então ele se
+  inverte sozinho ao cruzar a borda da imagem: legível no papel e sobre a
+  mídia, sem depender da cor do que está atrás.
 - **Lua de fases** (`MoonPhase`): no canto direito do cabeçalho, percorre as
   fases da lua conforme o scroll, três lunações por página.
 - **Menu overlay** (`SiteMenu`): navegação de tela cheia com tipografia gigante

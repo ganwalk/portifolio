@@ -18,7 +18,7 @@ export function Contact({ dict }: { dict: Dictionary }) {
       <Reveal delay={0.1}>
         <a
           href={`mailto:${profile.email}`}
-          className="type-display inline-block break-all text-2xl text-accent underline underline-offset-8 sm:text-4xl"
+          className="type-display inline-block break-all text-2xl underline underline-offset-8 sm:text-4xl"
         >
           {profile.email}
         </a>
@@ -32,12 +32,12 @@ export function Contact({ dict }: { dict: Dictionary }) {
                 href={url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="hover:text-accent"
+                className="text-muted transition-colors hover:text-foreground"
               >
                 {name}
               </a>
               {i < links.length - 1 && (
-                <span aria-hidden className="mx-3 text-accent">
+                <span aria-hidden className="mx-3 text-muted">
                   •
                 </span>
               )}

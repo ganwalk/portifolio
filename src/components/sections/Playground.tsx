@@ -18,7 +18,7 @@ export function Playground({
   return (
     <section id="playground" className="border-t border-line px-4 py-20 sm:px-8">
       <Reveal>
-        <h2 className="type-mono mb-2 text-accent">{dict.playground.title}</h2>
+        <h2 className="type-mono mb-2">{dict.playground.title}</h2>
         <p className="mb-12 max-w-lg text-muted">{dict.playground.subtitle}</p>
       </Reveal>
 

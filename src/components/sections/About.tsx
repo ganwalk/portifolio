@@ -14,7 +14,7 @@ export function About({ locale, dict }: { locale: Locale; dict: Dictionary }) {
   return (
     <section id="about" className="border-t border-line px-4 py-20 sm:px-8">
       <Reveal>
-        <h2 className="type-mono mb-12 text-accent">{dict.about.title}</h2>
+        <h2 className="type-mono mb-12">{dict.about.title}</h2>
       </Reveal>
 
       <div className="grid grid-cols-1 gap-12 lg:grid-cols-2">
@@ -36,7 +36,7 @@ export function About({ locale, dict }: { locale: Locale; dict: Dictionary }) {
                 <Fragment key={skill}>
                   <span className="inline-block">{skill}</span>
                   {i < allSkills.length - 1 && (
-                    <span aria-hidden className="mx-2 inline-block text-accent">
+                    <span aria-hidden className="mx-2 inline-block text-muted">
                       •
                     </span>
                   )}
