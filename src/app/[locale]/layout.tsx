@@ -7,6 +7,7 @@ import "@fontsource/ibm-plex-mono/400.css";
 import "../globals.css";
 import { Providers } from "@/components/providers/Providers";
 import { BoringBootScript } from "@/components/providers/BoringBootScript";
+import { ScrollRestorationScript } from "@/components/providers/ScrollRestorationScript";
 import { SiteFrame } from "@/components/layout/SiteFrame";
 import { locales, htmlLang, isLocale, type Locale } from "@/i18n/config";
 import { getDictionary } from "@/i18n/dictionaries";
@@ -48,6 +49,7 @@ export default async function LocaleLayout({
     <html lang={htmlLang[locale]} suppressHydrationWarning>
       <body>
         <BoringBootScript />
+        <ScrollRestorationScript />
         <Providers>
           <SiteFrame locale={locale} dict={dict}>
             {children}
