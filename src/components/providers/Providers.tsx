@@ -4,6 +4,7 @@ import { ThemeProvider } from "next-themes";
 import { MotionConfig } from "framer-motion";
 import type { ReactNode } from "react";
 import { BoringModeProvider, useBoringMode } from "@/contexts/BoringModeContext";
+import { ModeTransitionOverlay } from "@/components/providers/ModeTransitionOverlay";
 import { SoundProvider } from "@/contexts/SoundContext";
 
 // Ordem importa: BoringMode envolve tudo, pois som e animação dependem dele.
@@ -23,6 +24,7 @@ export function Providers({ children }: { children: ReactNode }) {
   return (
     <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
       <BoringModeProvider>
+        <ModeTransitionOverlay />
         <MotionGate>
           <SoundProvider>{children}</SoundProvider>
         </MotionGate>

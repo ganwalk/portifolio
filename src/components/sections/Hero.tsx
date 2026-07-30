@@ -53,18 +53,17 @@ function HeroContent({
 
   // flex-1, e não h-full: altura percentual não resolve contra um pai que só
   // ganha altura por flex-grow, e o justify-between viraria letra morta.
+  //
+  // No mobile o retrato deixa de ser posicionado em absoluto e passa a ser um
+  // terceiro item do flex (via order), entre o bloco de título e o de CTA: o
+  // justify-between do contêiner então reparte o espaço entre os três, e o
+  // retrato nunca mais sobrepõe o botão nem o subtítulo, porque participa da
+  // mesma conta de altura. No desktop ele volta a ser absoluto, à direita,
+  // porque lá sobra espaço ao lado da manchete e não precisa disputar altura
+  // com mais nada.
   return (
-    <div className="gutter relative flex flex-1 flex-col justify-between pb-14 pt-24 sm:pt-32">
-      {/* Retrato ao lado do nome. Posicionado em absoluto para não competir
-          com o dimensionamento em vw da manchete: no desktop fica à direita,
-          na altura do nome; no mobile desce centralizado para o vazio entre
-          o subtítulo e o rodapé da hero. */}
-      <SelfPortrait
-        label={dict.hero.portraitAlt}
-        className="pointer-events-none absolute left-1/2 top-[38%] w-[58vw] -translate-x-1/2 sm:left-auto sm:right-0 sm:top-[4%] sm:w-[42vw] sm:max-w-[620px] sm:translate-x-0"
-      />
-
-      <div className="text-center sm:text-left">
+    <div className="gutter relative flex flex-1 flex-col items-center justify-between pb-14 pt-10 sm:items-stretch sm:pt-32">
+      <div className="order-1 text-center sm:text-left">
         <h1 className="type-display text-[17vw] leading-[0.84] sm:text-[12vw]">
           {words.map((word, index) => (
             <span key={word} className="block overflow-hidden">
@@ -96,7 +95,12 @@ function HeroContent({
         </motion.p>
       </div>
 
-      <div className="mt-16 flex flex-col gap-10">
+      <SelfPortrait
+        label={dict.hero.portraitAlt}
+        className="pointer-events-none relative order-2 w-[52vw] max-w-64 sm:absolute sm:right-[5vw] sm:top-[6%] sm:order-none sm:w-[36vw] sm:max-w-[520px]"
+      />
+
+      <div className="order-3 flex flex-col items-center gap-8 sm:items-start sm:gap-10 sm:mt-16">
         <motion.div {...reveal(2)}>
           <a
             ref={ctaRef}
@@ -118,7 +122,7 @@ function HeroContent({
 
         <motion.div
           {...reveal(3)}
-          className="grid grid-cols-1 gap-x-12 gap-y-4 sm:grid-cols-3"
+          className="grid grid-cols-1 gap-x-12 gap-y-4 text-center sm:grid-cols-3 sm:text-left"
         >
           <p className="type-mono text-muted">{dict.hero.facts[0]}</p>
           <p className="type-mono text-muted">{dict.hero.facts[1]}</p>

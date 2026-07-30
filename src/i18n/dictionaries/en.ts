@@ -18,6 +18,7 @@ export const en: Dictionary = {
     boringOn: "Boring mode",
     boringOff: "Creative mode",
     boringHint: "For those who like it straight to the point ;)",
+    boringTooltip: "i HATE animations!",
     theme: "Toggle theme",
     sound: "Interface sound",
     language: "Language",

@@ -21,8 +21,11 @@
   --accent: var(--foreground);
 
   --font-sans: "Archivo Variable", system-ui, sans-serif;
-  --font-serif: "Fraunces Variable", Georgia, serif;
   --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+  /* Reservada para os poucos momentos de "manchete de verdade": o nome na
+     hero, título e métrica dos cases, o convite do contato. Todo o resto do
+     display (menu, cartaz) continua em Archivo. */
+  --font-headline: "Bricolage Grotesque Variable", var(--font-sans);
 }
 
 .dark {
@@ -71,8 +74,8 @@ html[data-boring="true"] *::after {
   --color-line: var(--line);
   --color-accent: var(--accent);
   --font-sans: var(--font-sans);
-  --font-serif: var(--font-serif);
   --font-mono: var(--font-mono);
+  --font-headline: var(--font-headline);
 }
 
 /* ==========================================================================
@@ -98,21 +101,23 @@ body {
   color: var(--background);
 }
 
-/* Display "ingresso antigo": Archivo condensada e pesada, via eixos da fonte variável. */
+/* Display "cartaz": Bricolage Grotesque no lugar de Archivo condensada.
+   Sem font-stretch aqui: Bricolage não tem eixo de largura, então a
+   propriedade não faz mais nada, e um valor sem efeito é só ruído no CSS. */
 .type-display {
-  font-family: var(--font-sans);
-  font-stretch: 68%;
+  font-family: var(--font-headline);
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: -0.01em;
   line-height: 0.92;
 }
 
-/* Serif "impresso financeiro": Fraunces com ótica de corpo grande, para métricas e manchetes. */
+/* Serif "impresso financeiro" não é mais serifa: Bricolage Grotesque também
+   aqui, no lugar de Fraunces, para métricas e manchetes de corpo grande. O
+   nome da classe ficou, mas o par Archivo/Fraunces virou só Bricolage. */
 .type-serif-display {
-  font-family: var(--font-serif);
-  font-variation-settings: "opsz" 144, "SOFT" 0, "WONK" 1;
-  font-weight: 560;
+  font-family: var(--font-headline);
+  font-weight: 700;
   line-height: 0.95;
   letter-spacing: -0.02em;
 }

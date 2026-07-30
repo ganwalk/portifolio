@@ -20,6 +20,7 @@ export const pt = {
     boringOn: "Modo sem graça",
     boringOff: "Modo criativo",
     boringHint: "Pra você que gosta das coisas direto ao ponto ;)",
+    boringTooltip: "eu ODEIO animações!",
     theme: "Alternar tema",
     sound: "Som da interface",
     language: "Idioma",
