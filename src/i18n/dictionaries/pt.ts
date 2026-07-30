@@ -25,8 +25,19 @@ export const pt = {
     language: "Idioma",
   },
   hero: {
-    // O título é o nome (vem de profile.name). Aqui vive só o subtítulo.
-    subtitle: "Designer de produtos",
+    // O título é o nome (vem de profile.name). Aqui vive o subtítulo: um
+    // prefixo fixo mais uma roleta de palavras (a primeira é o estado de
+    // descanso, a lista gira e volta pra ela).
+    subtitlePrefix: "Designer de",
+    subtitleWords: [
+      "produtos",
+      "experiências",
+      "aplicativos",
+      "interfaces",
+      "sistemas",
+      "músicas",
+      "sonhos",
+    ],
     facts: [
       "UX/UI · Webapps · Design Systems",
       "Do banking à música, e tudo no meio",

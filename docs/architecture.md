@@ -177,11 +177,31 @@ decorativa. O que dá vida é movimento e tipografia, não ornamento.
   sincronia, deixando a lente mostrar um quadro diferente do que está atrás
   dela. Com um relógio só as duas andam juntas.
 
-  Peso: os PNGs originais somam 16,6 MB. As folhas somam 461 KB no desktop e
-  178 KB no mobile, escolhidas na mão porque o meio tom do desenho é caro de
+  Peso: os PNGs originais somam 16,6 MB. As folhas somam 744 KB no desktop e
+  169 KB no mobile, escolhidas na mão porque o meio tom do desenho é caro de
   comprimir e a qualidade só derruba o arquivo até certo ponto. `--accent`
   apontado para a tinta não ajuda aqui: o desenho é cinza dentro de uma
   silhueta de alfa binário, não uma máscara de uma cor.
+
+- **Roleta do subtítulo** (`SubtitleRoulette`): a última palavra do subtítulo
+  ("produtos") gira por uma lista que alude à atuação (experiências,
+  aplicativos, interfaces, sistemas, músicas, sonhos) e descansa de novo na
+  primeira ao voltar ao início. A troca é disparada pelo mesmo relógio do
+  retrato: `subscribeRouletteTick`, em `portrait-frames.ts`, soma um a cada vez
+  que o relógio entra num quadro final (13 a 16), no mesmo instante em que a
+  expressão muda. Rosto e palavra giram juntos porque saem do mesmo pulso, sem
+  precisar de um segundo temporizador nem de código de coordenação entre os
+  dois componentes.
+
+  A ordem da frase muda por idioma ("Designer de produtos" em PT, "Designer of
+  products" em EN), por isso o dicionário guarda `subtitlePrefix` e
+  `subtitleWords` separados, e cada idioma tem sua própria lista, coerente com
+  a posição da palavra na frase.
+
+  A troca de palavra desliza na vertical com desfoque, para lembrar as fitas
+  de uma roleta física, não um crossfade comum. Uma cópia invisível da palavra
+  mais longa da lista fica empilhada por baixo via grid, só para reservar a
+  largura: sem ela, a rotação empurraria o texto ao lado a cada troca.
 
 - **Cases como baralho** (`CasePanels`): todas as cartas usam a mesma
   composição, mídia de borda a borda com índice e métrica no topo e título no

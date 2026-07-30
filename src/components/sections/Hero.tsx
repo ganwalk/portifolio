@@ -8,12 +8,14 @@ import {
   useSpring,
 } from "framer-motion";
 import { SelfPortrait } from "@/components/ui/SelfPortrait";
+import { SubtitleRoulette } from "@/components/ui/SubtitleRoulette";
 import { profile } from "@/data/profile";
 import type { Dictionary } from "@/i18n/dictionaries";
 
 // Hero em preto e branco: o nome em display gigante, uma palavra por linha,
-// alinhado à esquerda, o subtítulo em serif itálica logo abaixo e o retrato
-// animado em flipbook ao lado.
+// alinhado à esquerda, o subtítulo em serif itálica logo abaixo (com a última
+// palavra girando numa roleta sincronizada ao retrato) e o retrato animado em
+// flipbook ao lado.
 //
 // A lente é uma inversão: dentro do círculo que segue o mouse, tinta e papel
 // trocam de lugar. A revelação usa máscara radial de borda suave, não recorte
@@ -89,7 +91,8 @@ function HeroContent({
           {...reveal(1)}
           className="type-serif-display mt-7 text-[6.5vw] italic text-muted sm:mt-9 sm:text-[3.6vw]"
         >
-          {dict.hero.subtitle}
+          {dict.hero.subtitlePrefix}{" "}
+          <SubtitleRoulette words={dict.hero.subtitleWords} />
         </motion.p>
       </div>
 
