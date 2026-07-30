@@ -7,6 +7,14 @@ import { useBoringMode } from "@/contexts/BoringModeContext";
 // Modo Boring, e revela o novo modo por baixo, em vez do corte seco de uma
 // troca instantânea de página inteira.
 //
+// A troca também sempre leva a página de volta ao topo: os dois modos têm
+// alturas e seções completamente diferentes, então continuar no mesmo
+// scrollY de um pra outro quase sempre cai em lugar nenhum, no meio de uma
+// seção sem relação com a anterior. Com a cortina ativa, o salto acontece
+// no instante em que a tela está totalmente coberta (não se vê); sem
+// cortina (prefers-reduced-motion), acontece na hora, sem animação de
+// rolagem, coerente com o pedido de menos movimento.
+//
 // Não é mais um fade plano de opacidade (lia como um simples pisca preto/
 // branco): agora é um conjunto de réguas verticais, alternando a dobradiça
 // entre topo e base, que fecham em leque da esquerda para a direita até
@@ -61,14 +69,22 @@ export function ModeTransitionOverlay() {
     if (prevRef.current === isBoringMode) return;
     prevRef.current = isBoringMode;
 
+    const scrollToTop = () => window.scrollTo({ top: 0, behavior: "instant" });
+
     const container = containerRef.current;
     const stripes = stripeRefs.current;
-    if (!container || stripes.some((s) => !s)) return;
+    if (!container || stripes.some((s) => !s)) {
+      scrollToTop();
+      return;
+    }
 
     const reduced =
       typeof window !== "undefined" &&
       window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (reduced) return;
+    if (reduced) {
+      scrollToTop();
+      return;
+    }
 
     if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
 
@@ -77,9 +93,17 @@ export function ModeTransitionOverlay() {
     // conserva o estreitamento de null feito acima, mesmo sendo const.
     const overlayEl = container;
     overlayEl.style.pointerEvents = "auto";
+    let scrolled = false;
 
     function frame(now: number) {
       const elapsed = now - start;
+
+      // A tela já está totalmente coberta assim que o cover termina: é o
+      // único instante em que um salto de scroll não se vê.
+      if (!scrolled && elapsed >= COVER_MS) {
+        scrollToTop();
+        scrolled = true;
+      }
 
       stripes.forEach((el, i) => {
         if (!el) return;

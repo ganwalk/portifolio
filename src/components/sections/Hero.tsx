@@ -146,20 +146,28 @@ function HeroContent({
           </a>
         </motion.div>
 
-        {/* Três colunas iguais em uma linha só é o layout "de verdade", mas
-            facts[1] ("Do institucional...") é a mais longa das três, e não
-            cabe numa coluna de terço a 12px (o tamanho padrão do
-            .type-mono) antes de telas bem largas. Em vez de esperar uma
-            largura enorme (a rota anterior, só a partir de ~1750px), o
-            texto encolhe um pouco (via style, .type-mono não é layered e
-            venceria uma utilitária comum do Tailwind) especificamente nessa
-            faixa, o suficiente pra caber num terço a partir do 2xl (telas
-            de desktop de verdade, não notebook). Abaixo de 2xl (notebook e
-            menor) facts[1] some e o grid nem tenta three colunas, fica
-            empilhado. */}
+        {/* As três informações formam um rodapé só, na mesma altura, mas a
+            de disponibilidade não entra no grid de duas colunas junto com
+            as outras: ela precisa ficar centralizada com o retrato, numa
+            posição que o grid (estreito, encolhido pro tamanho do próprio
+            conteúdo) nem alcança. Em vez de aninhar outro "position:
+            relative" (testado e descartado: o container de posicionamento
+            de um elemento absolute é a padding box do ancestral mais
+            próximo, então "right: 5vw" mede a partir da borda daquele
+            container, e um container aninhado mais estreito dá uma resposta
+            diferente do container do retrato mesmo os dois usando vw), a
+            legenda vira irmã do grid, ancorada direto na raiz do
+            HeroContent (o mesmo "relative" que o retrato usa), com
+            right/width idênticos aos dele. Para a altura, bottom-0 (não
+            top em %): o rodapé fica colado na borda de baixo da raiz
+            (justify-between, só dois filhos em fluxo no desktop), e o grid
+            de fatos é o último elemento dali, então a base da legenda cai
+            perto o bastante da base das outras duas frases. No mobile ela
+            só empilha depois das outras duas, sem posicionamento
+            especial. */}
         <motion.div
           {...reveal(3)}
-          className="grid grid-cols-1 gap-x-12 gap-y-4 text-center sm:text-left 2xl:grid-cols-3"
+          className="grid grid-cols-1 gap-x-12 gap-y-4 text-center sm:text-left 2xl:grid-cols-2"
         >
           <p
             className="type-mono text-muted"
@@ -173,13 +181,29 @@ function HeroContent({
           >
             {dict.hero.facts[1]}
           </p>
-          <p
-            className="type-mono text-muted"
-            style={{ fontSize: "clamp(0.625rem, 0.55vw, 0.75rem)" }}
-          >
-            {dict.hero.availability}
-          </p>
         </motion.div>
+
+        {/* bottom-14, não bottom-0: o container de posicionamento (a raiz)
+            tem pb-14 de padding, e a base de um elemento absolute mede a
+            partir da padding box (fora do padding, não da borda interna
+            dele), então bottom-0 sobraria 56px abaixo de onde o conteúdo de
+            verdade (o rodapé, dentro do padding) termina. bottom-14
+            cancela exatamente esse padding e alinha a base desta legenda
+            com a base das outras duas frases do rodapé.
+
+            O alinhamento com o retrato só liga a partir de 2xl, não de sm:
+            entre sm e xl o retrato usa a largura da faixa de notebook
+            (300px, calibrada pro tamanho da imagem, não do texto), estreita
+            demais pra essa frase caber numa linha só, e quebrar violaria a
+            própria exigência de "mesma altura" (mais uma linha muda a
+            altura da caixa). Abaixo de 2xl ela só empilha depois das outras
+            duas, como um quarto item comum do rodapé. */}
+        <p
+          className="type-mono text-center text-muted 2xl:absolute 2xl:bottom-14 2xl:right-[5vw] 2xl:w-[36vw] 2xl:max-w-[520px]"
+          style={{ fontSize: "clamp(0.625rem, 0.55vw, 0.75rem)" }}
+        >
+          {dict.hero.availability}
+        </p>
       </div>
     </div>
   );
