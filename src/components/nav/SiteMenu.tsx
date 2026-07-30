@@ -125,7 +125,7 @@ export function SiteMenu({
               </AnimatePresence>
             </div>
 
-            <div className="flex h-full flex-col px-4 py-3 sm:px-8">
+            <div className="gutter flex h-full flex-col py-3">
               <div className="flex items-center justify-end">
                 <button
                   type="button"

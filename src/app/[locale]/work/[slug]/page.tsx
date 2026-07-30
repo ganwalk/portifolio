@@ -45,7 +45,7 @@ export default async function CasePage({
   if (!caseStudy) notFound();
 
   return (
-    <article className="px-4 py-16 sm:px-8">
+    <article className="gutter py-20 sm:py-28">
       <Link
         href={`/${locale}/`}
         className="type-mono text-muted transition-colors hover:text-foreground"
@@ -53,7 +53,7 @@ export default async function CasePage({
         ← {dict.nav.work}
       </Link>
 
-      <header className="texture-noise mt-10 border-b border-line pb-12">
+      <header className="texture-noise mt-14 border-b border-line pb-16">
         <p className="type-mono mb-6 text-muted">
           {caseStudy.title[locale]} · {caseStudy.year}
         </p>
@@ -62,7 +62,7 @@ export default async function CasePage({
           {caseStudy.statement[locale]}
         </h1>
 
-        <div className="mt-12 flex flex-wrap gap-x-16 gap-y-8">
+        <div className="mt-16 flex flex-wrap gap-x-20 gap-y-10">
           {caseStudy.metrics.map((metric) => (
             <div key={metric.label[locale]}>
               <span className="type-serif-display block text-7xl sm:text-8xl">
@@ -76,14 +76,14 @@ export default async function CasePage({
           ))}
         </div>
 
-        <p className="type-mono mt-10 text-muted">
+        <p className="type-mono mt-12 text-muted">
           {caseStudy.tags[locale].join(" • ")}
         </p>
       </header>
 
       {/* Corpo do case: a capa já é real; os apoios ficam de placeholder até
           os recortes serem fornecidos. */}
-      <div className="mt-12 space-y-6">
+      <div className="mt-16 space-y-8">
         <MediaView
           media={caseStudy.cover}
           locale={locale}

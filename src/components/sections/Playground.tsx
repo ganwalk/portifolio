@@ -16,13 +16,13 @@ export function Playground({
   dict: Dictionary;
 }) {
   return (
-    <section id="playground" className="border-t border-line px-4 py-20 sm:px-8">
+    <section id="playground" className="gutter section-y border-t border-line">
       <Reveal>
         <h2 className="type-mono mb-2">{dict.playground.title}</h2>
-        <p className="mb-12 max-w-lg text-muted">{dict.playground.subtitle}</p>
+        <p className="mb-16 max-w-lg text-muted">{dict.playground.subtitle}</p>
       </Reveal>
 
-      <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
+      <div className="grid grid-cols-1 gap-8 sm:grid-cols-3 lg:gap-12">
         {experiments.map((experiment, index) => (
           <Reveal key={experiment.id} delay={index * 0.1}>
             <figure className="group border border-line bg-background">

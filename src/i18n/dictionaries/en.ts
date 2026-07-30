@@ -23,7 +23,7 @@ export const en: Dictionary = {
     language: "Language",
   },
   hero: {
-    subtitle: "Creative design engineer",
+    subtitle: "Product designer",
     facts: [
       "UX/UI · Webapps · Design Systems",
       "From banking to music, and everything between",

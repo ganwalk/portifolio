@@ -49,7 +49,7 @@ export function SiteFrame({
       </a>
 
       <header
-        className={`no-print sticky top-0 z-40 grid grid-cols-[1fr_auto_1fr] items-center gap-2 border-b border-line px-4 backdrop-blur transition-all duration-300 sm:px-8 lg:flex lg:gap-6 ${
+        className={`no-print sticky top-0 z-40 grid grid-cols-[1fr_auto_1fr] items-center gap-2 border-b border-line px-6 backdrop-blur transition-all duration-300 sm:px-12 lg:flex lg:gap-8 xl:px-20 ${
           scrolled ? "bg-background/95 py-2" : "bg-background/85 py-3"
         }`}
       >
@@ -76,7 +76,7 @@ export function SiteFrame({
         {children}
       </main>
 
-      <footer className="no-print flex flex-wrap items-center justify-between gap-4 border-t border-line px-4 py-8 sm:px-8">
+      <footer className="no-print flex flex-wrap items-center justify-between gap-4 border-t border-line px-6 py-14 sm:px-12 xl:px-20">
         <p className="type-mono text-muted">{dict.footer.rights}</p>
         <p className="type-mono text-muted">
           {new Date().getFullYear()} · {profile.name}

@@ -50,7 +50,7 @@ function HeroContent({
   // flex-1, e não h-full: altura percentual não resolve contra um pai que só
   // ganha altura por flex-grow, e o justify-between viraria letra morta.
   return (
-    <div className="flex flex-1 flex-col justify-between px-4 pb-8 pt-16 sm:px-8 sm:pt-24">
+    <div className="gutter flex flex-1 flex-col justify-between pb-14 pt-24 sm:pt-32">
       <div>
         <h1 className="type-display text-[17vw] leading-[0.84] sm:text-[12vw]">
           {words.map((word, index) => (
@@ -76,13 +76,13 @@ function HeroContent({
         </h1>
         <motion.p
           {...reveal(1)}
-          className="type-serif-display mt-5 text-[6.5vw] italic text-muted sm:text-[3.6vw]"
+          className="type-serif-display mt-7 text-[6.5vw] italic text-muted sm:mt-9 sm:text-[3.6vw]"
         >
           {dict.hero.subtitle}
         </motion.p>
       </div>
 
-      <div className="mt-12 flex flex-col gap-8">
+      <div className="mt-16 flex flex-col gap-10">
         <motion.div {...reveal(2)}>
           <a
             ref={ctaRef}
@@ -104,7 +104,7 @@ function HeroContent({
 
         <motion.div
           {...reveal(3)}
-          className="grid grid-cols-1 gap-x-8 gap-y-3 sm:grid-cols-3"
+          className="grid grid-cols-1 gap-x-12 gap-y-4 sm:grid-cols-3"
         >
           <p className="type-mono text-muted">{dict.hero.facts[0]}</p>
           <p className="type-mono text-muted">{dict.hero.facts[1]}</p>

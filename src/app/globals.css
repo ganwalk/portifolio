@@ -125,6 +125,41 @@ body {
   text-transform: uppercase;
 }
 
+/* ==========================================================================
+   RESPIRO
+   Margem lateral e ritmo vertical em um lugar só: mudar aqui move cabeçalho,
+   hero, seções e rodapé juntos, em vez de caçar padding solto em cada arquivo.
+   O Modo Boring tem densidade própria, de documento, e não usa estas classes.
+   ========================================================================== */
+
+.gutter {
+  padding-inline: 1.5rem;
+}
+
+.section-y {
+  padding-block: 7rem;
+}
+
+@media (min-width: 640px) {
+  .gutter {
+    padding-inline: 3rem;
+  }
+
+  .section-y {
+    padding-block: 9rem;
+  }
+}
+
+@media (min-width: 1280px) {
+  .gutter {
+    padding-inline: 5rem;
+  }
+
+  .section-y {
+    padding-block: 11rem;
+  }
+}
+
 /* Lente: dentro do círculo que segue o mouse, a página inverte. Tinta virando
    papel e papel virando tinta, sem nenhuma cor entrar na conta. A borda difusa
    vem da máscara radial que o componente aplica, e o desfoque leve dá o

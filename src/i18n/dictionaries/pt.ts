@@ -26,7 +26,7 @@ export const pt = {
   },
   hero: {
     // O título é o nome (vem de profile.name). Aqui vive só o subtítulo.
-    subtitle: "Engenheiro criativo de design",
+    subtitle: "Designer de produtos",
     facts: [
       "UX/UI · Webapps · Design Systems",
       "Do banking à música, e tudo no meio",
