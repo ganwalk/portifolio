@@ -51,6 +51,22 @@ function HeroContent({
 
   const words = profile.name.split(" ");
 
+  // No mobile a frase quebra entre "no" e "mundo", não onde o navegador
+  // preferir: um <br> visível só abaixo de sm força esse ponto específico,
+  // e escondido dali pra cima (onde a frase cabe numa linha, empilhada ou
+  // ao lado do retrato) não deixa rastro. Procura "no mundo" já com o "no"
+  // dentro do primeiro pedaço; nos outros idiomas, que não têm essa
+  // sequência, o índice não bate e a frase inteira cai no primeiro pedaço,
+  // sem quebra nenhuma (mesmo comportamento de antes).
+  const breakMarker = "no mundo";
+  const breakIndex = dict.hero.availability.indexOf(breakMarker);
+  const availabilityBefore =
+    breakIndex === -1
+      ? dict.hero.availability
+      : dict.hero.availability.slice(0, breakIndex + 2);
+  const availabilityAfter =
+    breakIndex === -1 ? "" : dict.hero.availability.slice(breakIndex + 3);
+
   // flex-1, e não h-full: altura percentual não resolve contra um pai que só
   // ganha altura por flex-grow, e o justify-between viraria letra morta.
   //
@@ -197,13 +213,18 @@ function HeroContent({
             demais pra essa frase caber numa linha só, e quebrar violaria a
             própria exigência de "mesma altura" (mais uma linha muda a
             altura da caixa). Abaixo de 2xl ela só empilha depois das outras
-            duas, como um quarto item comum do rodapé. */}
-        <p
+            duas, como um quarto item comum do rodapé. motion.p com o mesmo
+            reveal(3) do grid vizinho: virou irmã dele numa edição anterior
+            e perdeu a entrada animada nessa troca, já que só o motion.div
+            do grid carregava a animação. */}
+        <motion.p
+          {...reveal(3)}
           className="type-mono text-center text-muted 2xl:absolute 2xl:bottom-14 2xl:right-[5vw] 2xl:w-[36vw] 2xl:max-w-[520px]"
           style={{ fontSize: "clamp(0.625rem, 0.55vw, 0.75rem)" }}
         >
-          {dict.hero.availability}
-        </p>
+          {availabilityBefore} <br className="sm:hidden" />
+          {availabilityAfter}
+        </motion.p>
       </div>
     </div>
   );
