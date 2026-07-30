@@ -6,36 +6,19 @@ import {
   useMotionTemplate,
   useMotionValue,
   useSpring,
-  useTransform,
 } from "framer-motion";
 import { profile } from "@/data/profile";
 import type { Dictionary } from "@/i18n/dictionaries";
 
-// Hero com lente: manchete em sans display com uma palavra serif itálica de
-// acento, e um círculo de vidro que segue o mouse revelando uma cópia do
-// conteúdo com aberração cromática (a "tinta molhada" embaixo da lupa).
-// O mesmo cursor acende um brilho radial no fundo. Perto do botão de CTA o
-// raio da lente encolhe até quase sumir, cedendo o palco ao clique.
-// Em telas de toque nada disso roda: sem mousemove, a lente fica com raio zero.
+// Hero minimalista: o nome em display gigante, o subtítulo em serif itálica,
+// e uma mancha de luz que segue o mouse revelando uma cópia do conteúdo com
+// aberração cromática. A revelação usa máscara radial de borda suave, não
+// recorte duro, então a lente é difusa nas beiradas.
+// Perto do CTA a mancha encolhe, cedendo o palco ao clique.
+// Em telas de toque nada disso roda: sem mousemove, o raio fica em zero.
 
-const LENS_MAX = 150;
-const LENS_MIN = 22;
-
-function Headline({ dict }: { dict: Dictionary }) {
-  return (
-    <h1 className="leading-[0.86]">
-      <span className="type-display block text-[16vw] sm:text-[12vw]">
-        {dict.hero.titleTop}
-      </span>
-      <span className="type-serif-display block pl-[6vw] text-[10vw] italic text-accent sm:text-[7vw]">
-        {dict.hero.titleAccent}
-      </span>
-      <span className="type-display block pl-[14vw] text-[16vw] sm:text-[12vw]">
-        {dict.hero.titleBottom}
-      </span>
-    </h1>
-  );
-}
+const LENS_MAX = 210;
+const LENS_MIN = 40;
 
 function HeroContent({
   dict,
@@ -59,11 +42,24 @@ function HeroContent({
           },
         };
 
+    // flex-1, e não h-full: altura percentual não resolve contra um pai que
+    // só ganha altura por flex-grow, e o justify-between viraria letra morta.
   return (
-    <div className="flex h-full flex-col justify-between px-4 pb-8 pt-16 sm:px-8 sm:pt-24">
-      <motion.div {...reveal(0)}>
-        <Headline dict={dict} />
-      </motion.div>
+    <div className="flex flex-1 flex-col justify-between px-4 pb-8 pt-16 sm:px-8 sm:pt-24">
+      <div>
+        <motion.h1
+          {...reveal(0)}
+          className="type-display text-[15vw] leading-[0.86] sm:text-[11vw]"
+        >
+          {profile.name}
+        </motion.h1>
+        <motion.p
+          {...reveal(1)}
+          className="type-serif-display mt-4 pl-[1vw] text-[7vw] italic text-accent sm:text-[4vw]"
+        >
+          {dict.hero.subtitle}
+        </motion.p>
+      </div>
 
       <div className="mt-12 flex flex-col gap-8">
         <motion.div {...reveal(2)}>
@@ -71,9 +67,17 @@ function HeroContent({
             ref={ctaRef}
             href="#work"
             tabIndex={chromatic ? -1 : undefined}
-            className="btn-tactile type-mono inline-block rounded-full border border-line px-7 py-4"
+            className="type-mono group inline-flex items-center gap-3 text-foreground"
           >
-            {dict.hero.cta}
+            <span className="underline decoration-1 underline-offset-8">
+              {dict.hero.cta}
+            </span>
+            <span
+              aria-hidden
+              className="transition-transform duration-300 group-hover:translate-y-1"
+            >
+              ↓
+            </span>
           </a>
         </motion.div>
 
@@ -102,9 +106,9 @@ export function Hero({ dict }: { dict: Dictionary }) {
   const y = useSpring(mouseY, { stiffness: 250, damping: 28, mass: 0.6 });
   const r = useSpring(radius, { stiffness: 180, damping: 24 });
 
-  const clip = useMotionTemplate`circle(${r}px at ${x}px ${y}px)`;
-  const glow = useMotionTemplate`radial-gradient(560px circle at ${x}px ${y}px, color-mix(in srgb, var(--accent) 16%, transparent), transparent 70%)`;
-  const lensSize = useTransform(r, (v) => v * 2);
+  // Máscara de borda suave: opaca no centro, dissolvendo até o raio cheio.
+  const mask = useMotionTemplate`radial-gradient(circle ${r}px at ${x}px ${y}px, black 0%, rgba(0,0,0,0.85) 42%, rgba(0,0,0,0.35) 68%, transparent 100%)`;
+  const glow = useMotionTemplate`radial-gradient(620px circle at ${x}px ${y}px, color-mix(in srgb, var(--accent) 14%, transparent), transparent 72%)`;
 
   const onMouseMove = (event: React.MouseEvent) => {
     const section = sectionRef.current;
@@ -113,7 +117,7 @@ export function Hero({ dict }: { dict: Dictionary }) {
     mouseX.set(event.clientX - rect.left);
     mouseY.set(event.clientY - rect.top);
 
-    // Perto do CTA a lente encolhe: o raio é função da distância ao botão.
+    // Perto do CTA a mancha encolhe: o raio é função da distância ao botão.
     const cta = ctaRef.current?.getBoundingClientRect();
     if (cta) {
       const distance = Math.hypot(
@@ -127,12 +131,14 @@ export function Hero({ dict }: { dict: Dictionary }) {
     }
   };
 
+  // A barra do topo é sticky, logo ocupa espaço no fluxo: descontar a altura
+  // dela é o que faz hero mais cabeçalho darem exatamente uma tela.
   return (
     <section
       ref={sectionRef}
       onMouseMove={onMouseMove}
       onMouseLeave={() => radius.set(0)}
-      className="texture-noise relative flex min-h-[100svh] flex-col overflow-hidden"
+      className="texture-noise relative flex min-h-[calc(100svh-3.5rem)] flex-col overflow-hidden"
       aria-label={profile.name}
     >
       {/* Brilho de fundo que acompanha o cursor */}
@@ -142,31 +148,17 @@ export function Hero({ dict }: { dict: Dictionary }) {
         style={{ background: glow }}
       />
 
-      <div className="relative flex-1">
+      <div className="relative flex flex-1">
         <HeroContent dict={dict} ctaRef={ctaRef} />
 
-        {/* Cópia cromática, visível só dentro do círculo da lente */}
+        {/* Cópia cromática, revelada pela mancha de luz */}
         <motion.div
           aria-hidden
-          className="lens-ink pointer-events-none absolute inset-0"
-          style={{ clipPath: clip }}
+          className="lens-ink pointer-events-none absolute inset-0 flex"
+          style={{ maskImage: mask, WebkitMaskImage: mask }}
         >
           <HeroContent dict={dict} chromatic />
         </motion.div>
-
-        {/* O vidro da lente: aro, reflexo e leve distorção do que há atrás */}
-        <motion.div
-          aria-hidden
-          className="pointer-events-none absolute rounded-full border border-line shadow-[inset_0_1px_8px_rgba(255,255,255,0.25),inset_0_-6px_14px_rgba(0,0,0,0.12)] backdrop-blur-[1.5px]"
-          style={{
-            width: lensSize,
-            height: lensSize,
-            left: x,
-            top: y,
-            translateX: "-50%",
-            translateY: "-50%",
-          }}
-        />
       </div>
     </section>
   );

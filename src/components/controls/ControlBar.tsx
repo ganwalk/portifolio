@@ -32,11 +32,12 @@ export function ControlBar({ locale, dict }: ControlBarProps) {
     return `/${target}${rest || "/"}`;
   };
 
+  // Só texto: nada de moldura nem fundo. O estado ativo se resolve na cor.
   const buttonClass =
-    "btn-tactile type-mono cursor-pointer rounded-md border border-line px-3 py-1.5 hover:bg-foreground hover:text-background transition-colors";
+    "type-mono cursor-pointer text-muted hover:text-foreground transition-colors";
 
   return (
-    <div className="no-print flex flex-wrap items-center gap-2">
+    <div className="no-print flex flex-wrap items-center gap-4">
       <button
         type="button"
         className={buttonClass}

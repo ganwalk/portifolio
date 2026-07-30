@@ -25,8 +25,8 @@ export function Playground({
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
         {experiments.map((experiment, index) => (
           <Reveal key={experiment.id} delay={index * 0.1}>
-            <figure className="card-tactile group rounded-lg border border-line bg-background">
-              <div className="aspect-square overflow-hidden rounded-t-lg bg-surface">
+            <figure className="group border border-line bg-background">
+              <div className="aspect-square overflow-hidden bg-surface">
                 <MediaView
                   media={experiment.media}
                   locale={locale}

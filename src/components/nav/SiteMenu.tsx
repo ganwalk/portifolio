@@ -87,7 +87,7 @@ export function SiteMenu({
       <button
         type="button"
         aria-expanded={open}
-        className="btn-tactile type-mono cursor-pointer rounded-md border border-line px-3 py-1.5 transition-colors hover:bg-foreground hover:text-background"
+        className="type-mono cursor-pointer text-foreground transition-colors hover:text-accent"
         onClick={() => toggle(true)}
       >
         {dict.nav.menu}
@@ -129,7 +129,7 @@ export function SiteMenu({
               <div className="flex items-center justify-end">
                 <button
                   type="button"
-                  className="btn-tactile type-mono cursor-pointer rounded-md border border-line px-3 py-1.5 transition-colors hover:bg-foreground hover:text-background"
+                  className="type-mono cursor-pointer text-foreground transition-colors hover:text-accent"
                   onClick={() => toggle(false)}
                 >
                   {dict.nav.close}

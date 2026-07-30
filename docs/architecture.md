@@ -109,8 +109,8 @@ para quem estiver sem JavaScript. Cada idioma gera HTML próprio com o atributo
 
 | Papel                    | Fonte           | Onde aparece                                  |
 | ------------------------ | --------------- | --------------------------------------------- |
-| Display de cartaz        | Archivo (wdth)  | manchete do hero, momentos lúdicos            |
-| Serif de impresso        | Fraunces        | métricas gigantes, títulos de case            |
+| Display de cartaz        | Archivo (wdth)  | nome na hero, títulos de case                 |
+| Serif de impresso        | Fraunces        | subtítulo da hero, métricas gigantes          |
 | Mono de extrato          | IBM Plex Mono   | legendas técnicas, tags, controles            |
 
 O eixo de largura da Archivo é o que dá o ar de ingresso antigo, por isso a
@@ -118,9 +118,10 @@ importação é do arquivo `wdth.css` e a classe usa `font-stretch`, não o eixo
 
 ## Cores
 
-Base neutra de papel e tinta, com turquesa como único acento, usado com parcimônia:
-links, marcadores, estado ativo. No Modo Boring o acento é abolido, resta preto e
-branco.
+Base neutra de papel e tinta, com um verde turquesa (matiz 162) como único acento,
+usado com parcimônia: links, marcadores, estado ativo, subtítulo da hero. A
+luminosidade dos dois temas é calibrada para o acento poder carregar rótulos
+pequenos. No Modo Boring o acento é abolido, resta preto e branco.
 
 ## Acessibilidade
 
@@ -132,28 +133,32 @@ contínuo lido como texto por leitores de tela, não como animação.
 
 A home é dirigida pela mídia, não pelo texto:
 
-- **Hero com lente** (`Hero`): manchete em sans display com uma palavra serif
-  itálica de acento, e um círculo de vidro que segue o mouse revelando uma
-  cópia do conteúdo com aberração cromática, mais um brilho radial no fundo.
-  Perto do CTA "Veja meu trabalho" o raio da lente encolhe até quase sumir.
+A direção é minimalista: nenhuma moldura, nenhum relevo, nenhuma sombra
+decorativa. O que dá vida é movimento e tipografia, não ornamento.
+
+- **Hero com lente** (`Hero`): o nome em display gigante, o subtítulo em serif
+  itálica de acento, e uma mancha de luz que segue o mouse revelando uma cópia
+  do conteúdo com aberração cromática, mais um brilho radial no fundo. A
+  revelação usa máscara radial de borda suave, não recorte duro, então a lente
+  é difusa nas beiradas. Perto do CTA "Veja meu trabalho" o raio encolhe.
   Em telas de toque a lente fica com raio zero e nada roda.
-- **Tarja de ingresso** (`TicketStrip`): letreiro editorial entre a hero e os
-  projetos, alternando tipo vazado e serif itálica, com costura tracejada.
+  A hero desconta a altura da barra (`100svh` menos `3.5rem`) porque o
+  cabeçalho é sticky e ocupa espaço no fluxo.
 - **Cases como baralho** (`CasePanels`): cada painel gruda no topo (sticky) e
-  o seguinte desliza por cima com canto arredondado e sombra de papel; o
-  painel coberto encolhe e escurece. A mídia segue em parallax dentro de cada
-  carta. O texto longo mora na página do case.
+  o seguinte desliza por cima; o painel coberto encolhe e escurece, e um fio
+  de luz no topo marca a sobreposição. A mídia segue em parallax dentro de
+  cada carta. O texto longo mora na página do case.
 - **Lua de fases** (`MoonPhase`): no canto direito do cabeçalho, percorre as
   fases da lua conforme o scroll, três lunações por página.
 - **Menu overlay** (`SiteMenu`): navegação de tela cheia com tipografia gigante
   e preview de imagem no hover de cada link. Renderiza num portal para o body,
   porque o `backdrop-blur` do cabeçalho criaria um containing block e prenderia
   o overlay dentro da barra. No mobile a mesa de controle mora aqui.
-- **Skeuomorfismo**: teclas com relevo físico (`.btn-tactile`), cartões com
-  peso de papel (`.card-tactile`) e o vidro da lente. Tudo morre no Modo
-  Boring e na impressão.
-- **Cabeçalho**: grid de três colunas (menu, assinatura centralizada, lua),
-  que encorpa ao rolar. `Reveal` dá a entrada padrão das seções de apoio.
+- **Cabeçalho**: uma só ordem de DOM (menu, assinatura, lua) em dois arranjos.
+  No mobile é grid de três colunas, com a assinatura centralizada; no desktop
+  vira flex e a assinatura vai para a frente da fila (`lg:order-first`), com a
+  lua empurrada para a direita. Os controles são só texto, sem moldura nem
+  fundo. `Reveal` dá a entrada padrão das seções de apoio.
 
 Toda mídia passa pelo componente `MediaView`, que decide entre `<video>` (mudo,
 em loop, com poster e camada de fallback) e `<img>`. As URLs vivem nos dados

@@ -23,9 +23,7 @@ export const es: Dictionary = {
     language: "Idioma",
   },
   hero: {
-    titleTop: "Ingeniero",
-    titleAccent: "creativo",
-    titleBottom: "de diseño",
+    subtitle: "Ingeniero creativo de diseño",
     facts: [
       "UX/UI · Webapps · Design Systems",
       "Del banking a la música, y todo lo demás",
@@ -33,15 +31,6 @@ export const es: Dictionary = {
     availability:
       "Desde Brasil · Disponible para proyectos en todo el mundo 🌍",
     cta: "Mira mi trabajo",
-    marquee: [
-      "UX/UI",
-      "Prototipos de alta fidelidad",
-      "Webapps funcionales",
-      "Design Systems",
-      "Banking",
-      "Música",
-      "Análisis de datos",
-    ],
   },
   cases: {
     title: "Proyectos destacados",

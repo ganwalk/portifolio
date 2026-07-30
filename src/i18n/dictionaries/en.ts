@@ -23,24 +23,13 @@ export const en: Dictionary = {
     language: "Language",
   },
   hero: {
-    titleTop: "Creative",
-    titleAccent: "design",
-    titleBottom: "engineer",
+    subtitle: "Creative design engineer",
     facts: [
       "UX/UI · Webapps · Design Systems",
       "From banking to music, and everything between",
     ],
     availability: "Based in Brazil · Available for projects worldwide 🌍",
     cta: "See my work",
-    marquee: [
-      "UX/UI",
-      "High fidelity prototypes",
-      "Working webapps",
-      "Design Systems",
-      "Banking",
-      "Music",
-      "Data analysis",
-    ],
   },
   cases: {
     title: "Featured work",
