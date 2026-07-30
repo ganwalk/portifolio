@@ -23,7 +23,16 @@ export const en: Dictionary = {
     language: "Language",
   },
   hero: {
-    subtitle: "Product designer",
+    subtitlePrefix: "Designer of",
+    subtitleWords: [
+      "products",
+      "experiences",
+      "apps",
+      "interfaces",
+      "systems",
+      "music",
+      "dreams",
+    ],
     facts: [
       "UX/UI · Webapps · Design Systems",
       "From banking to music, and everything between",

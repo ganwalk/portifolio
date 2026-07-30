@@ -8,12 +8,14 @@ import {
   useSpring,
 } from "framer-motion";
 import { SelfPortrait } from "@/components/ui/SelfPortrait";
+import { SubtitleRoulette } from "@/components/ui/SubtitleRoulette";
 import { profile } from "@/data/profile";
 import type { Dictionary } from "@/i18n/dictionaries";
 
 // Hero em preto e branco: o nome em display gigante, uma palavra por linha,
-// alinhado à esquerda, o subtítulo em serif itálica logo abaixo e o retrato
-// animado em flipbook ao lado.
+// alinhado à esquerda, o subtítulo em serif itálica logo abaixo (com a última
+// palavra girando numa roleta sincronizada ao retrato) e o retrato animado em
+// flipbook ao lado.
 //
 // A lente é uma inversão: dentro do círculo que segue o mouse, tinta e papel
 // trocam de lugar. A revelação usa máscara radial de borda suave, não recorte
@@ -55,14 +57,14 @@ function HeroContent({
     <div className="gutter relative flex flex-1 flex-col justify-between pb-14 pt-24 sm:pt-32">
       {/* Retrato ao lado do nome. Posicionado em absoluto para não competir
           com o dimensionamento em vw da manchete: no desktop fica à direita,
-          na altura do nome; no mobile desce para o vazio entre o subtítulo e
-          o rodapé da hero. */}
+          na altura do nome; no mobile desce centralizado para o vazio entre
+          o subtítulo e o rodapé da hero. */}
       <SelfPortrait
         label={dict.hero.portraitAlt}
-        className="pointer-events-none absolute right-0 top-[45%] w-[52vw] sm:top-[9%] sm:w-[31vw] sm:max-w-[430px]"
+        className="pointer-events-none absolute left-1/2 top-[38%] w-[58vw] -translate-x-1/2 sm:left-auto sm:right-0 sm:top-[4%] sm:w-[42vw] sm:max-w-[620px] sm:translate-x-0"
       />
 
-      <div>
+      <div className="text-center sm:text-left">
         <h1 className="type-display text-[17vw] leading-[0.84] sm:text-[12vw]">
           {words.map((word, index) => (
             <span key={word} className="block overflow-hidden">
@@ -89,7 +91,8 @@ function HeroContent({
           {...reveal(1)}
           className="type-serif-display mt-7 text-[6.5vw] italic text-muted sm:mt-9 sm:text-[3.6vw]"
         >
-          {dict.hero.subtitle}
+          {dict.hero.subtitlePrefix}{" "}
+          <SubtitleRoulette words={dict.hero.subtitleWords} />
         </motion.p>
       </div>
 
