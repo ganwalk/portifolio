@@ -120,11 +120,20 @@ function HeroContent({
           colado no cabeçalho (54px, contra os 128px de respiro do h1 antes
           da faixa `pt-32`), mesmo com o centro da imagem já mais ou menos
           alinhado, porque a imagem é alta e sobra pouco embaixo. 14% deixa
-          o topo do retrato perto do topo do h1, com respiro parecido. */}
-      <SelfPortrait
-        label={dict.hero.portraitAlt}
-        className="pointer-events-none relative order-2 w-[52vw] max-w-64 sm:absolute sm:right-[5vw] sm:top-[6%] sm:order-none sm:w-[36vw] sm:max-w-[520px] lg:top-[17%] lg:w-[26vw] lg:max-w-[300px] 2xl:top-[14%] 2xl:w-[36vw] 2xl:max-w-[520px]"
-      />
+          o topo do retrato perto do topo do h1, com respiro parecido.
+
+          A frase de disponibilidade mora aqui dentro, não mais no grid de
+          fatos: as classes de posição (right/top/width por faixa) que antes
+          moravam direto no retrato agora vivem neste contêiner, e o retrato
+          e a legenda empilham dentro dele (w-full herda a largura calculada
+          por faixa), então a legenda sempre fica centralizada bem debaixo
+          do retrato, em qualquer tamanho de tela. */}
+      <div className="pointer-events-none relative order-2 flex w-[52vw] max-w-64 flex-col items-center gap-3 sm:absolute sm:right-[5vw] sm:top-[6%] sm:order-none sm:block sm:w-[36vw] sm:max-w-[520px] lg:top-[17%] lg:w-[26vw] lg:max-w-[300px] 2xl:top-[14%] 2xl:w-[36vw] 2xl:max-w-[520px]">
+        <SelfPortrait label={dict.hero.portraitAlt} className="w-full" />
+        <p className="type-mono text-center text-muted">
+          {dict.hero.availability}
+        </p>
+      </div>
 
       <div className="order-3 flex flex-col items-center gap-8 sm:items-start sm:gap-10 sm:mt-16">
         <motion.div {...reveal(2)}>
@@ -146,20 +155,16 @@ function HeroContent({
           </a>
         </motion.div>
 
-        {/* Três colunas iguais em uma linha só é o layout "de verdade", mas
-            facts[1] ("Do institucional...") é a mais longa das três, e não
-            cabe numa coluna de terço a 12px (o tamanho padrão do
-            .type-mono) antes de telas bem largas. Em vez de esperar uma
-            largura enorme (a rota anterior, só a partir de ~1750px), o
-            texto encolhe um pouco (via style, .type-mono não é layered e
-            venceria uma utilitária comum do Tailwind) especificamente nessa
-            faixa, o suficiente pra caber num terço a partir do 2xl (telas
-            de desktop de verdade, não notebook). Abaixo de 2xl (notebook e
-            menor) facts[1] some e o grid nem tenta three colunas, fica
-            empilhado. */}
+        {/* A disponibilidade saiu daqui (agora mora sob o retrato), então
+            sobram só os dois fatos, lado a lado numa linha só a partir de
+            2xl. facts[1] ("Do institucional...") é a mais longa das duas, e
+            não cabe numa coluna de metade a 12px (o tamanho padrão do
+            .type-mono) antes de telas bem largas, daí o mesmo encolhimento
+            de fonte via style (.type-mono não é layered e venceria uma
+            utilitária comum do Tailwind) usado antes pra caber em três. */}
         <motion.div
           {...reveal(3)}
-          className="grid grid-cols-1 gap-x-12 gap-y-4 text-center sm:text-left 2xl:grid-cols-3"
+          className="grid grid-cols-1 gap-x-12 gap-y-4 text-center sm:text-left 2xl:grid-cols-2"
         >
           <p
             className="type-mono text-muted"
@@ -172,12 +177,6 @@ function HeroContent({
             style={{ fontSize: "clamp(0.625rem, 0.55vw, 0.75rem)" }}
           >
             {dict.hero.facts[1]}
-          </p>
-          <p
-            className="type-mono text-muted"
-            style={{ fontSize: "clamp(0.625rem, 0.55vw, 0.75rem)" }}
-          >
-            {dict.hero.availability}
           </p>
         </motion.div>
       </div>
