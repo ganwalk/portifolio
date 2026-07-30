@@ -52,7 +52,6 @@ export const pt = {
     portraitAlt: "Retrato animado de Armando Custodio, em traço preto e branco",
   },
   cases: {
-    title: "Projetos em destaque",
     viewCase: "Ver case",
     comingSoon: "Case completo em breve",
     metricsDisclaimer:

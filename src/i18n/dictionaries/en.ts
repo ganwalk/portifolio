@@ -45,7 +45,6 @@ export const en: Dictionary = {
     portraitAlt: "Animated portrait of Armando Custodio, in black and white line art",
   },
   cases: {
-    title: "Featured work",
     viewCase: "View case",
     comingSoon: "Full case study coming soon",
     metricsDisclaimer:

@@ -112,10 +112,12 @@ function HeroContent({
           imagem mais baixa (a versão notebook) ancorada no mesmo topo acaba
           com o centro mais alto do que a versão grande, e sai do alinhamento
           vertical com "Armando Custodio". O valor de cada faixa foi calibrado
-          medindo o centro do h1 contra o centro do retrato naquela largura. */}
+          medindo o centro do h1 contra o centro do retrato naquela largura,
+          com um empurrão extra pra baixo por cima disso (ajuste estético, não
+          matemático). */}
       <SelfPortrait
         label={dict.hero.portraitAlt}
-        className="pointer-events-none relative order-2 w-[52vw] max-w-64 sm:absolute sm:right-[5vw] sm:top-[6%] sm:order-none sm:w-[36vw] sm:max-w-[520px] lg:top-[12%] lg:w-[26vw] lg:max-w-[300px] 2xl:top-[6%] 2xl:w-[36vw] 2xl:max-w-[520px]"
+        className="pointer-events-none relative order-2 w-[52vw] max-w-64 sm:absolute sm:right-[5vw] sm:top-[6%] sm:order-none sm:w-[36vw] sm:max-w-[520px] lg:top-[17%] lg:w-[26vw] lg:max-w-[300px] 2xl:top-[6%] 2xl:w-[36vw] 2xl:max-w-[520px]"
       />
 
       <div className="order-3 flex flex-col items-center gap-8 sm:items-start sm:gap-10 sm:mt-16">

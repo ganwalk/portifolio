@@ -155,9 +155,7 @@ export function CasePanels({
   );
 
   return (
-    <section id="work" className="border-t border-line">
-      <h2 className="gutter type-mono py-10">{dict.cases.title}</h2>
-
+    <section id="work">
       <div ref={stackRef} className="relative">
         {cases.map((caseStudy, index) => (
           <Panel

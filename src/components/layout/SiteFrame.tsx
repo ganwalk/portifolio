@@ -23,30 +23,35 @@ import type { Dictionary } from "@/i18n/dictionaries";
 // rolar, a barra encorpa (fundo mais sólido) para não sumir sobre as mídias.
 // Some por completo na impressão.
 //
-// O Modo Boring é o único controle com uma segunda linha própria no mobile:
-// depois de passar por dentro do menu hamburguer (visível demais escondido)
-// e por um botão flutuante solto num canto (achado estranho), a linha extra
-// ficou sendo o meio termo, sempre visível sem competir por espaço com menu,
-// assinatura e lua na primeira linha. No desktop essa segunda linha não
-// existe, o botão já cabe folgado na primeira, junto do menu.
+// O Modo Boring é o único controle com uma segunda linha própria no mobile,
+// em QUALQUER página (Boring incluso): depois de passar por dentro do menu
+// hamburguer (visível demais escondido) e por um botão flutuante solto num
+// canto (achado estranho), a linha extra ficou sendo o meio termo, sempre
+// visível sem competir por espaço com menu, assinatura e lua na primeira
+// linha. No desktop essa segunda linha não existe, o botão já cabe folgado
+// na primeira, junto do menu.
 //
-// No mobile, na home em Modo Criativo, o cabeçalho começa escondido: a hero
-// ocupa a primeira dobra sozinha, sem chrome nenhum por cima, e a barra
-// desliza para dentro assim que o scroll passa da altura da tela. No desktop
-// o cabeçalho é sempre visível, em qualquer página e desde o primeiro pixel:
-// lá o espaço sobra, esconder a barra só tira acesso sem ganhar nada em troca.
-// Em Modo Boring, ou fora da home, o cabeçalho também é sempre visível, em
-// qualquer largura: sem hero para esconder atrás, e o botão de voltar ao
-// criativo precisa estar sempre à mão.
+// No mobile, na home em Modo Criativo, o cabeçalho começa "reduzido": só a
+// segunda linha (o botão do Modo Boring, sem tooltip) fica visível, a
+// primeira linha (menu, assinatura, lua) some até o scroll passar da altura
+// da tela, e a hero fica livre pra ocupar a primeira dobra quase sozinha. A
+// segunda linha nunca fica totalmente ausente: sem ela, sair do Modo
+// Criativo exigiria abrir o menu primeiro, e essa é a única porta de saída
+// de quem não quer ver nem uma animação. No desktop a primeira linha é
+// sempre visível, em qualquer página e desde o primeiro pixel: lá o espaço
+// sobra, esconder a barra só tira acesso sem ganhar nada em troca. Em Modo
+// Boring, ou fora da home, a primeira linha também é sempre visível, em
+// qualquer largura: sem hero para esconder atrás.
 //
 // Na home em Modo Criativo o cabeçalho é `fixed`, não `sticky`: um elemento
-// sticky reserva a própria altura no fluxo do documento mesmo escondido via
-// opacity/transform (são propriedades visuais, não afetam layout), o que
-// deixava uma tarja vazia no topo do mobile antes da hero aparecer. Fixed
-// nunca reserva espaço, então a hero pode ocupar a tela inteira (100svh) e o
-// cabeçalho simplesmente flutua por cima quando decide aparecer. Fora da
-// home (ou em Boring), continua sticky: essas páginas não têm hero e sempre
-// dependeram do cabeçalho empurrando o conteúdo para baixo.
+// sticky reserva a própria altura no fluxo do documento mesmo com a primeira
+// linha escondida via opacity/max-height (são propriedades visuais, não
+// afetam a reserva de espaço do fixed), o que deixava uma tarja vazia no
+// topo do mobile antes da hero aparecer. Fixed nunca reserva espaço, então a
+// hero pode ocupar a tela inteira (100svh) e o cabeçalho flutua por cima
+// dela o tempo todo, mesmo reduzido a uma linha. Fora da home (ou em
+// Boring), continua sticky: essas páginas não têm hero e sempre dependeram
+// do cabeçalho empurrando o conteúdo para baixo.
 
 export function SiteFrame({
   children,
@@ -89,20 +94,25 @@ export function SiteFrame({
       <header
         className={`no-print ${isHomeHero ? "fixed" : "sticky"} top-0 z-40 flex w-full flex-col border-b border-line backdrop-blur transition-all duration-300 ${
           scrolled ? "bg-background/95" : "bg-background/85"
-        } ${
-          headerVisible
-            ? "translate-y-0 opacity-100"
-            : "pointer-events-none -translate-y-full opacity-0"
-        } lg:translate-y-0 lg:opacity-100 lg:pointer-events-auto`}
+        }`}
       >
+        {/* Primeira linha: menu, assinatura, lua. No mobile, na home em Modo
+            Criativo, começa recolhida (max-h-0) até o scroll passar da
+            primeira dobra; max-height em vez de translate/opacity porque
+            translate não retira o espaço reservado no fluxo, e aqui a linha
+            é filha normal do flex-col (não teria como flutuar por cima da
+            segunda linha sem empurrá-la). No desktop, ou fora dessa
+            combinação específica de mobile+home+criativo, sempre expandida. */}
         <div
-          className={`grid grid-cols-[1fr_auto_1fr] items-center gap-2 px-6 transition-all duration-300 sm:px-12 lg:flex lg:gap-8 xl:px-20 ${
-            scrolled ? "py-2" : "py-3"
-          }`}
+          className={`grid grid-cols-[1fr_auto_1fr] items-center gap-2 overflow-hidden px-6 transition-all duration-300 sm:px-12 lg:flex lg:max-h-none lg:gap-8 lg:opacity-100 xl:px-20 ${
+            headerVisible
+              ? "max-h-20 py-3 opacity-100"
+              : "pointer-events-none max-h-0 py-0 opacity-0"
+          } ${scrolled ? "lg:py-2" : "lg:py-3"}`}
         >
           <div className="flex items-center gap-4 justify-self-start">
             <SiteMenu locale={locale} dict={dict} />
-            <div className={isBoringMode ? "flex" : "hidden lg:flex"}>
+            <div className="hidden lg:flex">
               <BoringToggle dict={dict} showTooltip />
             </div>
           </div>
@@ -122,13 +132,14 @@ export function SiteFrame({
           </div>
         </div>
 
-        {/* Segunda linha, só no mobile e fora do Modo Boring (que já mostra
-            o botão na primeira linha, veja acima). */}
-        {!isBoringMode && (
-          <div className="flex justify-center border-t border-line px-6 py-2 lg:hidden">
-            <BoringToggle dict={dict} showTooltip />
-          </div>
-        )}
+        {/* Segunda linha: só o Modo Boring, sempre presente no mobile (em
+            qualquer página, em qualquer modo), sumindo no desktop porque lá
+            já cabe na primeira linha. Sem tooltip enquanto a primeira linha
+            está recolhida: a bolha brigaria com o pouco espaço da barra
+            reduzida. */}
+        <div className="flex justify-center border-t border-line px-6 py-2 lg:hidden">
+          <BoringToggle dict={dict} showTooltip={headerVisible} />
+        </div>
       </header>
 
       <main id="main" className="flex-1">
