@@ -9,10 +9,10 @@ import type { CaseStudy } from "@/data/types";
 import type { Locale } from "@/i18n/config";
 import type { Dictionary } from "@/i18n/dictionaries";
 
-// Os cases como baralho de cartas: cada painel gruda no topo (sticky) e o
-// seguinte desliza por cima, com canto arredondado e sombra de papel pesado.
-// O painel coberto encolhe e escurece de leve, reforçando a profundidade.
-// A mídia continua em parallax dentro de cada carta.
+// Os cases como baralho: cada painel gruda no topo (sticky) e o seguinte
+// desliza por cima. O painel coberto encolhe e escurece de leve, e um fio de
+// luz no topo de cada carta marca a sobreposição, sem moldura nem sombra
+// decorativa. A mídia continua em parallax dentro de cada carta.
 
 function Panel({
   caseStudy,
@@ -58,7 +58,7 @@ function Panel({
           translúcido vazar o painel pinado atrás. */}
       <motion.div
         style={{ scale }}
-        className="h-full overflow-hidden rounded-t-3xl bg-black shadow-[0_-16px_48px_rgba(0,0,0,0.35)] sm:rounded-t-[2.5rem]"
+        className="h-full overflow-hidden bg-black shadow-[0_-1px_0_rgba(255,255,255,0.18)]"
       >
         <Link
           href={`/${locale}/work/${caseStudy.slug}/`}

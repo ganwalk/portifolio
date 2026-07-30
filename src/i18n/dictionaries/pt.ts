@@ -25,10 +25,8 @@ export const pt = {
     language: "Idioma",
   },
   hero: {
-    // Manchete em três partes: sans, serif itálica em acento, sans de novo.
-    titleTop: "Engenheiro",
-    titleAccent: "criativo",
-    titleBottom: "de design",
+    // O título é o nome (vem de profile.name). Aqui vive só o subtítulo.
+    subtitle: "Engenheiro criativo de design",
     facts: [
       "UX/UI · Webapps · Design Systems",
       "Do banking à música, e tudo no meio",
@@ -37,15 +35,6 @@ export const pt = {
     availability:
       "Baseado no Brasil · Disponível para projetos no mundo todo 🌍",
     cta: "Veja meu trabalho",
-    marquee: [
-      "UX/UI",
-      "Protótipos de alta fidelidade",
-      "Webapps funcionais",
-      "Design Systems",
-      "Banking",
-      "Música",
-      "Análise de dados",
-    ],
   },
   cases: {
     title: "Projetos em destaque",

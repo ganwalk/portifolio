@@ -10,11 +10,15 @@ import { profile } from "@/data/profile";
 import type { Locale } from "@/i18n/config";
 import type { Dictionary } from "@/i18n/dictionaries";
 
-// Moldura comum a todas as páginas. O cabeçalho é um grid de três colunas:
-// menu à esquerda, assinatura centralizada, lua do outro lado. No mobile a
-// mesa de controle sai da barra e mora dentro do menu overlay; no desktop
-// fica ao lado do menu. Ao rolar, a barra encorpa (fundo mais sólido e sombra)
-// para não sumir sobre as mídias. Some por completo na impressão.
+// Moldura comum a todas as páginas.
+//
+// O cabeçalho muda de arranjo com a largura, mantendo uma só ordem de DOM
+// (menu, assinatura, lua): no mobile é grid de três colunas, com a assinatura
+// centralizada e a lua do outro lado; no desktop virá flex e a assinatura vai
+// para a frente da fila (order-first), com a lua empurrada para a direita.
+// A mesa de controle mora na barra no desktop e dentro do menu no mobile.
+// Ao rolar, a barra encorpa (fundo mais sólido) para não sumir sobre as
+// mídias. Some por completo na impressão.
 
 export function SiteFrame({
   children,
@@ -45,13 +49,11 @@ export function SiteFrame({
       </a>
 
       <header
-        className={`no-print sticky top-0 z-40 grid grid-cols-[1fr_auto_1fr] items-center gap-2 border-b border-line px-4 backdrop-blur transition-all duration-300 sm:px-8 ${
-          scrolled
-            ? "bg-background/95 py-2 shadow-[0_4px_16px_rgba(0,0,0,0.08)]"
-            : "bg-background/85 py-3"
+        className={`no-print sticky top-0 z-40 grid grid-cols-[1fr_auto_1fr] items-center gap-2 border-b border-line px-4 backdrop-blur transition-all duration-300 sm:px-8 lg:flex lg:gap-6 ${
+          scrolled ? "bg-background/95 py-2" : "bg-background/85 py-3"
         }`}
       >
-        <div className="flex items-center gap-2 justify-self-start">
+        <div className="flex items-center gap-4 justify-self-start">
           <SiteMenu locale={locale} dict={dict} />
           <div className={isBoringMode ? "flex" : "hidden lg:flex"}>
             <ControlBar locale={locale} dict={dict} />
@@ -60,12 +62,12 @@ export function SiteFrame({
 
         <Link
           href={`/${locale}/`}
-          className="type-mono justify-self-center whitespace-nowrap font-bold"
+          className="type-mono justify-self-center whitespace-nowrap font-bold lg:order-first"
         >
           {profile.name}
         </Link>
 
-        <div className="justify-self-end">
+        <div className="justify-self-end lg:ml-auto">
           <MoonPhase className="h-5 w-5" />
         </div>
       </header>
