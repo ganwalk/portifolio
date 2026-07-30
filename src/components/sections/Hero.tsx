@@ -146,24 +146,39 @@ function HeroContent({
           </a>
         </motion.div>
 
-        {/* Medido via Playwright, largura de coluna vs. quantas linhas cada
-            frase ocupa: "UX/UI · Webapps..." e "Baseado no Brasil..." só
-            cabem numa linha só a partir de ~1150px de largura de coluna
-            (viewport ≳1150px com 2 colunas), e facts[1], a mais longa das
-            três, só cabe a partir de ~1750px (3 colunas). Nenhum dos dois
-            valores cai perto de um breakpoint nomeado do Tailwind, daí os
-            arbitrários xl (1280, com folga acima de 1150) e min-[1800px].
-            Até xl fica empilhado (1 coluna): 2 ou 3 colunas mais cedo
-            quebraria linha nas frases mais longas. */}
+        {/* Três colunas iguais em uma linha só é o layout "de verdade", mas
+            facts[1] ("Do institucional...") é a mais longa das três, e não
+            cabe numa coluna de terço a 12px (o tamanho padrão do
+            .type-mono) antes de telas bem largas. Em vez de esperar uma
+            largura enorme (a rota anterior, só a partir de ~1750px), o
+            texto encolhe um pouco (via style, .type-mono não é layered e
+            venceria uma utilitária comum do Tailwind) especificamente nessa
+            faixa, o suficiente pra caber num terço a partir do 2xl (telas
+            de desktop de verdade, não notebook). Abaixo de 2xl (notebook e
+            menor) facts[1] some e o grid nem tenta three colunas, fica
+            empilhado. */}
         <motion.div
           {...reveal(3)}
-          className="grid grid-cols-1 gap-x-12 gap-y-4 text-center sm:text-left xl:grid-cols-2 min-[1800px]:grid-cols-3"
+          className="grid grid-cols-1 gap-x-12 gap-y-4 text-center sm:text-left 2xl:grid-cols-3"
         >
-          <p className="type-mono text-muted">{dict.hero.facts[0]}</p>
-          <p className="type-mono hidden text-muted min-[1800px]:block">
+          <p
+            className="type-mono text-muted"
+            style={{ fontSize: "clamp(0.625rem, 0.55vw, 0.75rem)" }}
+          >
+            {dict.hero.facts[0]}
+          </p>
+          <p
+            className="type-mono hidden text-muted 2xl:block"
+            style={{ fontSize: "clamp(0.625rem, 0.55vw, 0.75rem)" }}
+          >
             {dict.hero.facts[1]}
           </p>
-          <p className="type-mono text-muted">{dict.hero.availability}</p>
+          <p
+            className="type-mono text-muted"
+            style={{ fontSize: "clamp(0.625rem, 0.55vw, 0.75rem)" }}
+          >
+            {dict.hero.availability}
+          </p>
         </motion.div>
       </div>
     </div>
