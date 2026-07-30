@@ -86,11 +86,17 @@ function HeroContent({
             </span>
           ))}
         </h1>
+        {/* No mobile a palavra da roleta desce pra linha de baixo: dividir
+            "Designer de" e a palavra em duas linhas deixa cada uma centrar
+            pela própria largura (flex-col + items-center), em vez de
+            depender do texto inteiro caber numa linha só pra centralizar
+            direito. No desktop (sm:block) volta a ser texto corrido numa
+            linha, como sempre foi. */}
         <motion.p
           {...reveal(1)}
-          className="type-serif-display mt-7 text-[6.5vw] italic text-muted sm:mt-9 sm:text-[3.6vw]"
+          className="type-serif-display mt-7 flex flex-col items-center text-[6.5vw] italic text-muted sm:mt-9 sm:block sm:text-[3.6vw]"
         >
-          {dict.hero.subtitlePrefix}{" "}
+          <span>{dict.hero.subtitlePrefix}</span>{" "}
           <SubtitleRoulette words={dict.hero.subtitleWords} />
         </motion.p>
       </div>
@@ -99,10 +105,17 @@ function HeroContent({
           pra tela de desktop grande. Na faixa de notebook (lg até antes do
           2xl, a maioria das telas de 13" a 16" cai aqui) ele fica pequeno
           demais para o espaço disponível, então encolhe; monitores grandes
-          (2xl) voltam ao tamanho original. */}
+          (2xl) voltam ao tamanho original.
+
+          O top também muda por faixa: `top` é uma porcentagem da altura do
+          contêiner inteiro, não da altura do próprio retrato, então uma
+          imagem mais baixa (a versão notebook) ancorada no mesmo topo acaba
+          com o centro mais alto do que a versão grande, e sai do alinhamento
+          vertical com "Armando Custodio". O valor de cada faixa foi calibrado
+          medindo o centro do h1 contra o centro do retrato naquela largura. */}
       <SelfPortrait
         label={dict.hero.portraitAlt}
-        className="pointer-events-none relative order-2 w-[52vw] max-w-64 sm:absolute sm:right-[5vw] sm:top-[6%] sm:order-none sm:w-[36vw] sm:max-w-[520px] lg:w-[26vw] lg:max-w-[300px] 2xl:w-[36vw] 2xl:max-w-[520px]"
+        className="pointer-events-none relative order-2 w-[52vw] max-w-64 sm:absolute sm:right-[5vw] sm:top-[6%] sm:order-none sm:w-[36vw] sm:max-w-[520px] lg:top-[12%] lg:w-[26vw] lg:max-w-[300px] 2xl:top-[6%] 2xl:w-[36vw] 2xl:max-w-[520px]"
       />
 
       <div className="order-3 flex flex-col items-center gap-8 sm:items-start sm:gap-10 sm:mt-16">
@@ -130,7 +143,11 @@ function HeroContent({
           className="grid grid-cols-1 gap-x-12 gap-y-4 text-center sm:grid-cols-3 sm:text-left"
         >
           <p className="type-mono text-muted">{dict.hero.facts[0]}</p>
-          <p className="type-mono text-muted">{dict.hero.facts[1]}</p>
+          {/* Some no mobile: a tela já está cheia de linha, e essa frase é a
+              menos essencial das três (assinatura de tom, não informação). */}
+          <p className="type-mono hidden text-muted sm:block">
+            {dict.hero.facts[1]}
+          </p>
           <p className="type-mono text-muted">{dict.hero.availability}</p>
         </motion.div>
       </div>

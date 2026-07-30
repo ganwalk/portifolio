@@ -18,10 +18,17 @@ import type { Dictionary } from "@/i18n/dictionaries";
 // (menu+Boring, assinatura, tema/som/idioma+lua): no mobile é grid de três
 // colunas, com a assinatura centralizada; no desktop vira flex e a assinatura
 // vai para a frente da fila (order-first), com o segundo cluster empurrado
-// para a direita. No mobile a mesa de controle inteira mora dentro do menu;
-// no desktop ela se divide nos dois clusters da própria barra. Ao rolar, a
-// barra encorpa (fundo mais sólido) para não sumir sobre as mídias. Some por
-// completo na impressão.
+// para a direita. No mobile a mesa de controle (tema/som/idioma) mora dentro
+// do menu; no desktop ela se divide nos dois clusters da própria barra. Ao
+// rolar, a barra encorpa (fundo mais sólido) para não sumir sobre as mídias.
+// Some por completo na impressão.
+//
+// O Modo Boring é o único controle com uma segunda linha própria no mobile:
+// depois de passar por dentro do menu hamburguer (visível demais escondido)
+// e por um botão flutuante solto num canto (achado estranho), a linha extra
+// ficou sendo o meio termo, sempre visível sem competir por espaço com menu,
+// assinatura e lua na primeira linha. No desktop essa segunda linha não
+// existe, o botão já cabe folgado na primeira, junto do menu.
 //
 // No mobile, na home em Modo Criativo, o cabeçalho começa escondido: a hero
 // ocupa a primeira dobra sozinha, sem chrome nenhum por cima, e a barra
@@ -80,46 +87,49 @@ export function SiteFrame({
       </a>
 
       <header
-        className={`no-print ${isHomeHero ? "fixed" : "sticky"} top-0 z-40 grid w-full grid-cols-[1fr_auto_1fr] items-center gap-2 border-b border-line px-6 backdrop-blur transition-all duration-300 sm:px-12 lg:flex lg:translate-y-0 lg:gap-8 lg:opacity-100 lg:pointer-events-auto xl:px-20 ${
-          scrolled ? "bg-background/95 py-2" : "bg-background/85 py-3"
+        className={`no-print ${isHomeHero ? "fixed" : "sticky"} top-0 z-40 flex w-full flex-col border-b border-line backdrop-blur transition-all duration-300 ${
+          scrolled ? "bg-background/95" : "bg-background/85"
         } ${
           headerVisible
             ? "translate-y-0 opacity-100"
             : "pointer-events-none -translate-y-full opacity-0"
-        }`}
+        } lg:translate-y-0 lg:opacity-100 lg:pointer-events-auto`}
       >
-        <div className="flex items-center gap-4 justify-self-start">
-          <SiteMenu locale={locale} dict={dict} />
-          <div className={isBoringMode ? "flex" : "hidden lg:flex"}>
+        <div
+          className={`grid grid-cols-[1fr_auto_1fr] items-center gap-2 px-6 transition-all duration-300 sm:px-12 lg:flex lg:gap-8 xl:px-20 ${
+            scrolled ? "py-2" : "py-3"
+          }`}
+        >
+          <div className="flex items-center gap-4 justify-self-start">
+            <SiteMenu locale={locale} dict={dict} />
+            <div className={isBoringMode ? "flex" : "hidden lg:flex"}>
+              <BoringToggle dict={dict} showTooltip />
+            </div>
+          </div>
+
+          <Link
+            href={`/${locale}/`}
+            className="type-mono justify-self-center whitespace-nowrap font-bold lg:order-first"
+          >
+            {profile.name}
+          </Link>
+
+          <div className="flex items-center gap-4 justify-self-end lg:ml-auto">
+            <div className="hidden lg:flex">
+              <ControlBar locale={locale} dict={dict} />
+            </div>
+            <MoonPhase className="h-5 w-5" />
+          </div>
+        </div>
+
+        {/* Segunda linha, só no mobile e fora do Modo Boring (que já mostra
+            o botão na primeira linha, veja acima). */}
+        {!isBoringMode && (
+          <div className="flex justify-center border-t border-line px-6 py-2 lg:hidden">
             <BoringToggle dict={dict} showTooltip />
           </div>
-        </div>
-
-        <Link
-          href={`/${locale}/`}
-          className="type-mono justify-self-center whitespace-nowrap font-bold lg:order-first"
-        >
-          {profile.name}
-        </Link>
-
-        <div className="flex items-center gap-4 justify-self-end lg:ml-auto">
-          <div className="hidden lg:flex">
-            <ControlBar locale={locale} dict={dict} />
-          </div>
-          <MoonPhase className="h-5 w-5" />
-        </div>
+        )}
       </header>
-
-      {/* No mobile, em Modo Criativo, o cabeçalho não é um lugar confiável
-          para o Boring morar: na home ele começa escondido até a segunda
-          dobra, e em qualquer página é só texto dentro do menu hamburguer,
-          fácil de nunca notar. Esta cópia flutuante, presa a um canto, fica
-          sempre à mão sem depender de rolagem nem de abrir o menu. Some no
-          Modo Boring porque lá o cabeçalho já é sempre visível e já mostra o
-          próprio botão (veja o cluster da esquerda ali em cima). */}
-      {!isBoringMode && (
-        <BoringToggle dict={dict} showTooltip floating />
-      )}
 
       <main id="main" className="flex-1">
         {children}

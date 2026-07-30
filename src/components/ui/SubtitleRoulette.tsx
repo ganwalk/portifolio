@@ -32,12 +32,13 @@ export function SubtitleRoulette({ words }: { words: readonly string[] }) {
 
   const word = words[tick % words.length];
 
-  // Alinhado à esquerda (padrão): a palavra sempre começa colada no prefixo
-  // "Designer de", então o vão de uma palavra curta como "sites" sobra à
-  // direita, fora da linha de leitura, em vez de abrir um buraco entre o
-  // prefixo e a palavra como aconteceria centralizado.
+  // No mobile a roleta mora na própria linha, embaixo do prefixo (veja
+  // Hero.tsx), então centralizada não sobra vão de nenhum lado: é a própria
+  // linha. No desktop ela volta a ficar colada no prefixo "Designer de", na
+  // mesma linha, e aí alinhada à esquerda: centralizada ali abriria um vão
+  // entre o prefixo e uma palavra curta como "sites".
   return (
-    <span className="relative inline-grid overflow-hidden text-left align-bottom">
+    <span className="relative inline-grid overflow-hidden text-center align-bottom sm:text-left">
       {words.map((w) => (
         <span
           key={w}
