@@ -30,6 +30,7 @@ export const en: Dictionary = {
     ],
     availability: "Based in Brazil · Available for projects worldwide 🌍",
     cta: "See my work",
+    portraitAlt: "Animated portrait of Armando Custodio, in black and white line art",
   },
   cases: {
     title: "Featured work",

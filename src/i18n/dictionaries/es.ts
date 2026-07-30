@@ -31,6 +31,7 @@ export const es: Dictionary = {
     availability:
       "Desde Brasil · Disponible para proyectos en todo el mundo 🌍",
     cta: "Mira mi trabajo",
+    portraitAlt: "Retrato animado de Armando Custodio, en trazo blanco y negro",
   },
   cases: {
     title: "Proyectos destacados",

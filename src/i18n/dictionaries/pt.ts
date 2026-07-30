@@ -35,6 +35,7 @@ export const pt = {
     availability:
       "Baseado no Brasil · Disponível para projetos no mundo todo 🌍",
     cta: "Veja meu trabalho",
+    portraitAlt: "Retrato animado de Armando Custodio, em traço preto e branco",
   },
   cases: {
     title: "Projetos em destaque",

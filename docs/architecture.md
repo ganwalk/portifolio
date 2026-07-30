@@ -160,6 +160,29 @@ decorativa. O que dá vida é movimento e tipografia, não ornamento.
   "Veja meu trabalho" o raio encolhe. Em telas de toque a lente fica com raio
   zero e nada roda. A hero desconta a altura da barra (`100svh` menos
   `3.5rem`) porque o cabeçalho é sticky e ocupa espaço no fluxo.
+- **Retrato animado** (`SelfPortrait`): flipbook ao lado do nome. A volta tem
+  quatro ciclos: os quadros 1 a 12 sempre iguais e o último mudando entre 13,
+  14, 15 e 16, as quatro expressões, que seguram mais tempo no ar (700ms contra
+  85ms) senão a expressão passa batido.
+
+  Os quadros vivem numa folha de sprite 4x4 em `public/frames`, gerada por
+  `scripts/build-frames.mjs` a partir de `frames eu/`. Uma folha em vez de
+  dezesseis arquivos dá uma requisição só, elimina flicker na primeira volta e,
+  porque a URL é a mesma, o bitmap decodificado é compartilhado entre a cópia
+  normal e a cópia invertida que aparece dentro da lente. A animação troca de
+  quadro mexendo apenas em `background-position`, sem tocar no DOM.
+
+  O relógio mora em `src/lib/portrait-frames.ts`, fora do React: a hero
+  renderiza o retrato duas vezes, e dois temporizadores independentes sairiam de
+  sincronia, deixando a lente mostrar um quadro diferente do que está atrás
+  dela. Com um relógio só as duas andam juntas.
+
+  Peso: os PNGs originais somam 16,6 MB. As folhas somam 461 KB no desktop e
+  178 KB no mobile, escolhidas na mão porque o meio tom do desenho é caro de
+  comprimir e a qualidade só derruba o arquivo até certo ponto. `--accent`
+  apontado para a tinta não ajuda aqui: o desenho é cinza dentro de uma
+  silhueta de alfa binário, não uma máscara de uma cor.
+
 - **Cases como baralho** (`CasePanels`): todas as cartas usam a mesma
   composição, mídia de borda a borda com índice e métrica no topo e título no
   pé, porque a repetição aqui é ritmo, não monotonia: o que muda de uma carta
