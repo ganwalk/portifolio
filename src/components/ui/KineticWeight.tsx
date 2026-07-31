@@ -4,16 +4,27 @@ import { useEffect, useRef } from "react";
 import type { MotionValue } from "framer-motion";
 import { useBoringMode } from "@/contexts/BoringModeContext";
 
-// Só o nome na hero reage ao mouse: cada letra engorda (font-weight, Bold
-// pra Black em três degraus) conforme a distância até o ponteiro, gaussiana
-// + suavização por quadro, mesma família do artefato interativo da seção
-// de Contato (InteractiveGridImage). Sem scaleY nem qualquer transform
-// desta vez: a versão anterior deformava a altura da letra e ficou
-// estranha; esta só muda o peso.
+// Só o nome na hero reage ao mouse: cada letra "engorda" conforme a
+// distância até o ponteiro, gaussiana + suavização por quadro, mesma
+// família do artefato interativo da seção de Contato (InteractiveGridImage).
+// Sem scaleY nem qualquer transform desta vez: uma versão anterior
+// deformava a altura da letra e ficou estranha; esta só muda o peso.
 //
-// Posição horizontal sempre fixa, de propósito: cada span trava a própria
-// largura no estado de repouso (medida uma vez, no mount) antes de soltar
-// o peso variável, senão o glifo mais pesado ficaria mais largo e
+// A Whyte Inktrap não é uma fonte variável (vem em arquivos estáticos por
+// peso, ver src/fonts/whyte-inktrap/), então animar font-weight diretamente
+// faz o navegador pular entre os arquivos carregados em vez de interpolar,
+// um efeito visivelmente truncado (a letra "salta" de peso em vez de
+// engordar aos poucos). Em vez disso, cada letra é desenhada duas vezes,
+// empilhada: uma cópia em Bold (sempre visível, é a base) e uma em Black
+// por cima, cuja opacidade acompanha a mesma curva gaussiana suavizada de
+// antes. Opacidade é uma propriedade genuinamente contínua (o navegador
+// faz alpha blending pixel a pixel, não escolhe entre estados discretos),
+// então o resultado é um dissolve fluido entre os dois pesos, líquido de
+// verdade, em vez do degrau antigo.
+//
+// Posição horizontal sempre fixa, de propósito: cada par de letras trava a
+// própria largura no estado de repouso (medida uma vez, no mount) antes de
+// soltar a animação, senão o glifo mais pesado ficaria mais largo e
 // empurraria as letras vizinhas a cada oscilação.
 //
 // A posição do ponteiro vem de fora (pointerX/pointerY/pointerActive, MotionValues
@@ -25,16 +36,9 @@ import { useBoringMode } from "@/contexts/BoringModeContext";
 // compartilhada, as duas cópias respondem em uníssono; sem isso, a cópia
 // da lente ficava sempre no peso de repouso enquanto a de fora reagia,
 // criando uma costura visível bem na borda do círculo da lente.
-//
-// A Whyte Inktrap não é uma fonte variável (vem em arquivos estáticos por
-// peso, ver src/fonts/whyte-inktrap/), então a transição pula entre os
-// pesos carregados em vez de interpolar suave; carregar três (Bold, Heavy,
-// Black) em vez de dois deixa o salto bem menos brusco.
 
 const SIGMA = 55; // px, alcance da influência do ponteiro
-const MIN_WEIGHT = 700; // Bold, o peso de repouso
-const MAX_WEIGHT = 900; // Black, o peso perto do ponteiro
-const EASE = 0.2;
+const EASE = 0.16; // mais baixo que antes: a transição contínua pede um pouco mais de lag pra parecer líquida, não elétrica
 
 export function KineticWeight({
   text,
@@ -51,11 +55,12 @@ export function KineticWeight({
 }) {
   const { isBoringMode } = useBoringMode();
   const letterRefs = useRef<Array<HTMLSpanElement | null>>([]);
-  const stateRef = useRef<Array<{ weight: number }>>([]);
+  const heavyRefs = useRef<Array<HTMLSpanElement | null>>([]);
+  const intensityRef = useRef<number[]>([]);
 
   useEffect(() => {
     if (isBoringMode) return;
-    stateRef.current = text.split("").map(() => ({ weight: MIN_WEIGHT }));
+    intensityRef.current = text.split("").map(() => 0);
 
     letterRefs.current.forEach((el) => {
       if (!el) return;
@@ -69,23 +74,24 @@ export function KineticWeight({
       const py = pointerY.get();
 
       letterRefs.current.forEach((el, i) => {
-        if (!el) return;
+        const heavy = heavyRefs.current[i];
+        if (!el || !heavy) return;
         const rect = el.getBoundingClientRect();
         const cx = rect.left + rect.width / 2;
         const cy = rect.top + rect.height / 2;
 
-        let targetWeight = MIN_WEIGHT;
+        let target = 0;
         if (active) {
           const dx = px - cx;
           const dy = py - cy;
           const d = Math.hypot(dx, dy);
-          const t = Math.exp(-0.5 * (d / SIGMA) ** 2);
-          targetWeight = MIN_WEIGHT + (MAX_WEIGHT - MIN_WEIGHT) * t;
+          target = Math.exp(-0.5 * (d / SIGMA) ** 2);
         }
 
-        const s = stateRef.current[i];
-        s.weight += (targetWeight - s.weight) * EASE;
-        el.style.fontWeight = String(Math.round(s.weight));
+        const eased =
+          intensityRef.current[i] + (target - intensityRef.current[i]) * EASE;
+        intensityRef.current[i] = eased;
+        heavy.style.opacity = String(eased);
       });
       raf = requestAnimationFrame(frame);
     }
@@ -107,13 +113,28 @@ export function KineticWeight({
               letterRefs.current[i] = el;
             }}
             style={{
+              position: "relative",
               display: "inline-block",
               textAlign: "center",
               overflow: "visible",
-              fontWeight: MIN_WEIGHT,
+              fontWeight: 700,
             }}
           >
-            {char === " " ? " " : char}
+            {char === " " ? " " : char}
+            <span
+              ref={(el) => {
+                heavyRefs.current[i] = el;
+              }}
+              aria-hidden="true"
+              style={{
+                position: "absolute",
+                inset: 0,
+                fontWeight: 900,
+                opacity: 0,
+              }}
+            >
+              {char === " " ? " " : char}
+            </span>
           </span>
         ))}
       </span>

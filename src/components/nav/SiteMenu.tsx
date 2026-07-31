@@ -12,9 +12,12 @@ import type { Locale } from "@/i18n/config";
 import type { Dictionary } from "@/i18n/dictionaries";
 
 // Navegação lúdica: botão no cabeçalho abre um overlay de tela cheia com os
-// links em tipografia gigante. Passar o mouse em cada link revela uma imagem
-// de preview flutuando ao lado, com leve rotação, clima de mesa de recortes.
-// No Modo Boring o menu não existe: a página utilitária é uma coluna só.
+// links em tipografia gigante. Passar o mouse em cada link revela uma
+// pré-visualização dentro das próprias letras (a imagem preenche o texto via
+// background-clip: text, não flutua ao lado): duas cópias do mesmo rótulo
+// empilhadas, a de baixo sempre visível, a de cima com a imagem recortada
+// pela forma do texto, ganhando opacidade no hover. No Modo Boring o menu
+// não existe: a página utilitária é uma coluna só.
 
 // Previews placeholder por seção. Sugestão de mídia real: um recorte de cada
 // destino (colagem dos cases, foto do Armando no Sobre, textura de papel no
@@ -52,7 +55,6 @@ export function SiteMenu({
   const { play } = useSound();
   const hydrated = useHydrated();
   const [open, setOpen] = useState(false);
-  const [hovered, setHovered] = useState<string | null>(null);
 
   useEffect(() => {
     if (!open) return;
@@ -79,7 +81,6 @@ export function SiteMenu({
   const toggle = (next: boolean) => {
     play("toggle");
     setOpen(next);
-    if (!next) setHovered(null);
   };
 
   return (
@@ -107,24 +108,6 @@ export function SiteMenu({
             exit={{ clipPath: "inset(0 0 100% 0)" }}
             transition={{ duration: 0.55, ease: [0.76, 0, 0.24, 1] }}
           >
-            {/* Preview flutuante do link em foco, só em telas largas */}
-            <div className="pointer-events-none absolute inset-0 hidden items-center justify-end pr-[8vw] lg:flex">
-              <AnimatePresence mode="wait">
-                {hovered && (
-                  <motion.img
-                    key={hovered}
-                    src={PREVIEWS[hovered]}
-                    alt=""
-                    className="aspect-[4/3] w-[30vw] border border-line object-cover"
-                    initial={{ opacity: 0, scale: 0.9, rotate: -4 }}
-                    animate={{ opacity: 1, scale: 1, rotate: 0 }}
-                    exit={{ opacity: 0, scale: 0.96, rotate: 3 }}
-                    transition={{ duration: 0.3, ease: "easeOut" }}
-                  />
-                )}
-              </AnimatePresence>
-            </div>
-
             <div className="gutter flex h-full flex-col py-3">
               <div className="flex items-center justify-end">
                 <button
@@ -149,18 +132,29 @@ export function SiteMenu({
                       <Link
                         href={`/${locale}/#${item.id}`}
                         className="group flex items-baseline gap-4 py-1"
-                        onMouseEnter={() => {
-                          setHovered(item.id);
-                          play("tick");
-                        }}
-                        onMouseLeave={() => setHovered(null)}
+                        onMouseEnter={() => play("tick")}
                         onClick={() => toggle(false)}
                       >
                         <span className="type-mono text-muted">
                           0{index + 1}
                         </span>
-                        <span className="type-display text-[13vw] leading-none transition-opacity group-hover:opacity-55 sm:text-[7vw]">
-                          {item.label}
+                        {/* Duas cópias do rótulo empilhadas: a de baixo é o
+                            texto normal, a de cima tem a preview da seção
+                            recortada pela forma das próprias letras
+                            (background-clip: text), invisível em repouso e
+                            revelada no hover. A imagem "mora dentro" do
+                            texto em vez de flutuar ao lado dele. */}
+                        <span className="type-display relative inline-block text-[13vw] leading-none sm:text-[7vw]">
+                          <span className="transition-opacity duration-500 ease-out group-hover:opacity-10">
+                            {item.label}
+                          </span>
+                          <span
+                            aria-hidden
+                            className="pointer-events-none absolute inset-0 bg-cover bg-center bg-clip-text text-transparent opacity-0 transition-opacity duration-500 ease-out group-hover:opacity-100"
+                            style={{ backgroundImage: `url(${PREVIEWS[item.id]})` }}
+                          >
+                            {item.label}
+                          </span>
                         </span>
                       </Link>
                     </motion.div>
