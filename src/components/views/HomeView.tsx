@@ -3,7 +3,7 @@
 import { useBoringMode } from "@/contexts/BoringModeContext";
 import { BoringView } from "@/components/boring/BoringView";
 import { Hero } from "@/components/sections/Hero";
-import { CasePanels } from "@/components/sections/CasePanels";
+import { CasesGrid } from "@/components/sections/CasesGrid";
 import { Playground } from "@/components/sections/Playground";
 import { About } from "@/components/sections/About";
 import { Contact } from "@/components/sections/Contact";
@@ -29,7 +29,7 @@ export function HomeView({
   return (
     <>
       <Hero dict={dict} />
-      <CasePanels locale={locale} dict={dict} />
+      <CasesGrid locale={locale} dict={dict} />
       <Playground locale={locale} dict={dict} />
       <About locale={locale} dict={dict} />
       <Contact dict={dict} />

@@ -22,6 +22,7 @@ npm run build   # gera o site estático em out/
 | Cases e métricas             | `src/data/cases.ts`                            |
 | Vídeos e fotos placeholder   | `src/data/cases.ts` e `src/data/experiments.ts` |
 | Frames do retrato da hero    | `frames eu/`, depois `node scripts/build-frames.mjs` |
+| Cursor personalizado         | `cursor/`, depois `node scripts/build-cursors.mjs`  |
 | Contato, habilidades, cargo  | `src/data/profile.ts`                          |
 | Cores, fontes, texturas      | `src/app/globals.css`                          |
 
@@ -31,6 +32,14 @@ regerar as folhas de sprite depois de mexer nos quadros:
 ```bash
 npm install --no-save sharp
 node scripts/build-frames.mjs
+```
+
+O cursor personalizado (a mão apontando, em três poses: repouso, hover,
+clique) segue o mesmo princípio, a partir dos PNGs em `cursor/`:
+
+```bash
+npm install --no-save sharp
+node scripts/build-cursors.mjs
 ```
 
 O sharp fica fora do `package.json` de propósito: é ferramenta de bancada, o
