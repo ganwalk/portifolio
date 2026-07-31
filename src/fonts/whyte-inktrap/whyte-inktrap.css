@@ -1,10 +1,24 @@
-/* Fonte licenciada (ABC Dinamo), não fica no npm: só o peso Black (900),
-   o único usado no site, e só woff2, sem os formatos legados que o kit da
-   fundição inclui (eot/woff/ttf, pensados pra navegador antigo). */
+/* Fonte licenciada (ABC Dinamo), não fica no npm: só os dois pesos usados
+   no site, e só woff2, sem os formatos legados que o kit da fundição
+   inclui (eot/woff/ttf, pensados pra navegador antigo). Black é o peso de
+   repouso dos destaques estáticos; Bold entra só como o extremo "solto" do
+   efeito cinético do nome na hero (ver ui/KineticWeight.tsx), que sobe de
+   Bold pra Black conforme o ponteiro se aproxima de cada letra. Sem fonte
+   variável de verdade aqui (a Whyte Inktrap vem em arquivos estáticos por
+   peso), então a transição pula entre os dois pesos carregados em vez de
+   interpolar suave. */
 @font-face {
   font-family: "Whyte Inktrap";
   src: url("./WhyteInktrap-Black.woff2") format("woff2");
   font-weight: 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Whyte Inktrap";
+  src: url("./WhyteInktrap-Bold.woff2") format("woff2");
+  font-weight: 700;
   font-style: normal;
   font-display: swap;
 }
