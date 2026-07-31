@@ -1,5 +1,6 @@
 import { Reveal } from "@/components/ui/Reveal";
 import { InteractiveGridImage } from "@/components/ui/InteractiveGridImage";
+import { KineticText } from "@/components/ui/KineticText";
 import { profile } from "@/data/profile";
 import type { Dictionary } from "@/i18n/dictionaries";
 
@@ -24,8 +25,8 @@ export function Contact({ dict }: { dict: Dictionary }) {
           horizontal, sem virar um quadrado pequeno preso no meio da seção. */}
       <div className="gutter section-y sm:flex sm:w-1/2 sm:flex-shrink-0 sm:flex-col sm:justify-center sm:py-0">
         <Reveal>
-          <h2 className="type-serif-display hover-grow mb-6 text-5xl sm:text-7xl">
-            {dict.contact.title}
+          <h2 className="type-serif-display mb-6 text-5xl sm:text-7xl">
+            <KineticText text={dict.contact.title} />
           </h2>
           <p className="mb-4 text-muted">{dict.contact.subtitle}</p>
           <p className="type-mono mb-16 text-muted">
