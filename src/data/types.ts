@@ -28,6 +28,14 @@ export interface CaseMetric {
   illustrative: boolean;
 }
 
+/** Um dos projetos que compõem um case "guarda chuva", como os três artistas
+ *  de "Experiências interativas para artistas": cada um ganha o próprio
+ *  campo lado a lado no corpo do case, em vez de se diluir num só texto. */
+export interface CaseSubProject {
+  name: string;
+  media: Media;
+}
+
 export interface CaseStudy {
   slug: string;
   area: CaseArea;
@@ -38,6 +46,9 @@ export interface CaseStudy {
   metrics: CaseMetric[];
   /** Mídia de fundo do painel full bleed na home e da capa do case. */
   cover: Media;
+  /** Projetos individuais dentro do case, exibidos lado a lado no corpo.
+   *  Opcional: sem isso, o corpo do case cai nos placeholders genéricos. */
+  subProjects?: CaseSubProject[];
   /** Case ainda sem página completa publicada. */
   comingSoon: boolean;
   year: string;

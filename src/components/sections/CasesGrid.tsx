@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRef } from "react";
 import {
   motion,
+  useMotionTemplate,
   useMotionValue,
   useScroll,
   useSpring,
@@ -57,6 +58,16 @@ function Card({
   });
   const scrollY = useTransform(scrollYProgress, [0, 1], ["-6%", "6%"]);
 
+  // Foco puxado: a mídia entra um pouco desfocada e ampliada, e assenta
+  // (nítida, no tamanho normal) só quando o cartão chega perto do centro da
+  // viewport. Mesma faixa 0→0.4 de scrollYProgress usada nos dois, pra
+  // desfoque e zoom resolverem juntos. Como os dois nascem do scroll (não de
+  // "entrou na viewport uma vez", como o Reveal), o efeito repete toda vez
+  // que o cartão cruza a tela, na subida ou na descida.
+  const mediaScale = useTransform(scrollYProgress, [0, 0.4], [1.15, 1]);
+  const mediaBlurPx = useTransform(scrollYProgress, [0, 0.35], [6, 0]);
+  const mediaFilter = useMotionTemplate`blur(${mediaBlurPx}px)`;
+
   // Resposta ao cursor: a mídia desliza alguns pontos percentuais na direção
   // do ponteiro dentro do cartão, em camada separada da do parallax de
   // scroll pra as duas não disputarem a mesma propriedade.
@@ -98,7 +109,12 @@ function Card({
           className="absolute inset-x-0 -top-[12%] h-[124%]"
         >
           <motion.div
-            style={{ x: mediaX, y: mediaY }}
+            style={{
+              x: mediaX,
+              y: mediaY,
+              scale: mediaScale,
+              filter: mediaFilter,
+            }}
             className="h-full w-full"
           >
             <MediaView

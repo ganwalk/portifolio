@@ -43,10 +43,17 @@ export function Contact({ dict }: { dict: Dictionary }) {
               da tela (sm:w-1/2), então um tamanho fixo que não encolhe com
               a viewport cedo ou tarde estoura a própria coluna. 2.5vw
               continua a mesma lógica do resto da escala, só que também
-              vale a partir do lg. */}
+              vale a partir do lg.
+
+              sm/lg mais contidos que o resto da escala (2.1vw/1.8vw, não
+              3.4vw/2.35vw): a coluna de texto é metade da viewport inteira,
+              não da seção, então o e-mail em vw cheio cresce rápido demais e
+              chega a cruzar a linha divisória perto da imagem em telas de
+              tablet/notebook. Com valores menores sobra respiro visível até
+              a borda da coluna em qualquer largura. */}
           <a
             href={`mailto:${profile.email}`}
-            className="type-display inline-block whitespace-nowrap text-[4.5vw] underline underline-offset-8 sm:text-[3.4vw] lg:text-[2.35vw]"
+            className="type-display inline-block whitespace-nowrap text-[4.5vw] underline underline-offset-8 sm:text-[2.1vw] lg:text-[1.8vw]"
           >
             {profile.email}
           </a>

@@ -89,10 +89,31 @@ export default async function CasePage({
           locale={locale}
           className="aspect-video w-full object-cover"
         />
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-          <div className="texture-noise aspect-4/3 bg-surface" />
-          <div className="texture-noise aspect-4/3 bg-surface" />
-        </div>
+
+        {caseStudy.subProjects ? (
+          // Um campo por projeto, lado a lado (empilhado no mobile): cada
+          // artista/projeto do case tem a própria mídia e o próprio nome,
+          // em vez de se diluir num só bloco genérico.
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
+            {caseStudy.subProjects.map((subProject) => (
+              <div key={subProject.name}>
+                <MediaView
+                  media={subProject.media}
+                  locale={locale}
+                  className="aspect-[3/4] w-full bg-surface object-cover"
+                />
+                <p className="type-mono mt-4 text-muted">
+                  {subProject.name}
+                </p>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+            <div className="texture-noise aspect-4/3 bg-surface" />
+            <div className="texture-noise aspect-4/3 bg-surface" />
+          </div>
+        )}
       </div>
 
       {caseStudy.metrics.some((m) => m.illustrative) && (
