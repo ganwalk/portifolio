@@ -150,10 +150,27 @@ body {
    existem (.type-display na hero, .type-serif-display no contato): elas
    são compartilhadas com outros lugares que não devem trocar de fonte,
    então a troca entra por uma classe extra, aplicada só nesses dois
-   destaques. font-weight força 900 porque só o peso Black está carregado. */
+   destaques. font-weight força 900 porque só o peso Black está carregado
+   (exceto o nome da hero, que sobrescreve isso letra por letra, ver
+   ui/KineticWeight.tsx).
+
+   A troca de família só liga a partir do sm (640px). Os ink traps da Whyte
+   Inktrap são autênticos (confirmados contra o especime da própria
+   fundição), mas em tamanho de celular (~50px, o "Armando Custodio" da
+   hero) o entalhe vira só uns poucos pixels: sem a tinta escorrendo que o
+   ink trap existe pra compensar em papel, na tela isso não lê como detalhe
+   proposital, lê como traço quebrado. Abaixo do sm cai de volta pra
+   Bricolage Grotesque (--font-headline, sem entalhe), a mesma fonte que já
+   assina o resto do display do site; a partir do sm o entalhe já tem pixel
+   de sobra pra ler como desenho, não como defeito. */
 .type-inktrap {
-  font-family: var(--font-inktrap);
   font-weight: 900;
+}
+
+@media (min-width: 640px) {
+  .type-inktrap {
+    font-family: var(--font-inktrap);
+  }
 }
 
 /* ==========================================================================
