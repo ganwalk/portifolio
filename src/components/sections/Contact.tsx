@@ -24,7 +24,7 @@ export function Contact({ dict }: { dict: Dictionary }) {
           horizontal, sem virar um quadrado pequeno preso no meio da seção. */}
       <div className="gutter section-y sm:flex sm:w-1/2 sm:flex-shrink-0 sm:flex-col sm:justify-center sm:py-0">
         <Reveal>
-          <h2 className="type-serif-display mb-6 text-5xl sm:text-7xl">
+          <h2 className="type-serif-display hover-grow mb-6 text-5xl sm:text-7xl">
             {dict.contact.title}
           </h2>
           <p className="mb-4 text-muted">{dict.contact.subtitle}</p>

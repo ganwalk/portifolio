@@ -128,7 +128,7 @@ export function SiteFrame({
 
           <Link
             href={`/${locale}/`}
-            className="wordmark justify-self-center whitespace-nowrap lg:order-first"
+            className="wordmark hover-grow justify-self-center whitespace-nowrap lg:order-first"
           >
             {profile.name}
           </Link>

@@ -87,7 +87,7 @@ function Card({
       onMouseLeave={onMouseLeave}
       whileHover={{ scale: 1.015 }}
       transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-      className="group relative h-full w-full overflow-hidden rounded-2xl bg-black"
+      className="group relative h-full w-full overflow-hidden bg-black"
     >
       <Link
         href={`/${locale}/work/${caseStudy.slug}/`}
@@ -159,13 +159,18 @@ export function CasesGrid({
   );
 
   return (
-    <section id="work" className="gutter section-y border-t border-line">
-      <Reveal>
-        <h2 className="type-mono mb-2">{dict.cases.title}</h2>
-        <p className="mb-16 max-w-lg text-muted">{dict.cases.subtitle}</p>
-      </Reveal>
+    <section id="work" className="section-y border-t border-line">
+      <div className="gutter">
+        <Reveal>
+          <h2 className="type-mono mb-2">{dict.cases.title}</h2>
+          <p className="mb-16 max-w-lg text-muted">{dict.cases.subtitle}</p>
+        </Reveal>
+      </div>
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3">
+      {/* Sem gap e sem gutter: os cartões colam uns nos outros e vão até a
+          borda da tela, a mesma leitura de "cinema" de antes, só que sem
+          prender o scroll. */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
         {cases.map((caseStudy, index) => {
           const bento = BENTO[index % BENTO.length];
           return (
@@ -186,7 +191,7 @@ export function CasesGrid({
       </div>
 
       {hasIllustrative && (
-        <p className="type-mono mt-8 text-muted">
+        <p className="gutter type-mono mt-8 text-muted">
           * {dict.cases.metricsDisclaimer}
         </p>
       )}

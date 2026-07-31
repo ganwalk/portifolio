@@ -130,33 +130,42 @@ body {
   text-transform: uppercase;
 }
 
-/* Assinatura do cabeçalho: cresce e engorda ao passar o mouse. Usa a Archivo
-   Variable (a mesma do corpo do site, sem fonte extra) porque o @font-face
-   dela já declara o range inteiro dos dois eixos, peso 100-900 e largura
-   62%-125%, então font-weight/font-stretch comuns bastam, sem
-   font-variation-settings. O crescimento é por transform, não font-size: uma
-   mudança de font-size mudaria a largura da coluna do meio na grade do
-   cabeçalho (grid-cols-[1fr_auto_1fr]) a cada hover, e o resto da barra
-   tremeria; transform não afeta layout. */
-.wordmark {
+/* Cresce e engorda ao passar o mouse: usado na assinatura do cabeçalho e no
+   convite de contato ("Vamos conversar?"), as duas fontes variáveis do site
+   (Archivo Variable e Bricolage Grotesque Variable). O alvo é sempre o
+   mesmo, peso 900 e largura 120%, mesmo a Bricolage carregada aqui só cobrir
+   o eixo de peso (200-900, sem font-stretch declarado): fora do range que a
+   fonte registrou, o navegador arredonda pro limite mais próximo sozinho,
+   então um valor sem eixo correspondente não quebra nada, só não faz nada.
+   O crescimento é por transform, não font-size: uma mudança de font-size
+   empurraria o layout ao redor a cada hover (a coluna do meio da grade do
+   cabeçalho, o parágrafo vizinho no convite de contato); transform não
+   afeta layout. */
+.hover-grow {
   display: inline-block;
-  font-family: var(--font-sans);
-  font-size: 0.75rem;
-  font-weight: 700;
-  font-stretch: 100%;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
   transition:
     transform 0.4s cubic-bezier(0.16, 1, 0.3, 1),
     font-weight 0.4s ease,
     font-stretch 0.4s ease;
 }
 
-.wordmark:hover,
-.wordmark:focus-visible {
-  transform: scale(1.1);
+.hover-grow:hover,
+.hover-grow:focus-visible {
+  transform: scale(1.08);
   font-weight: 900;
   font-stretch: 120%;
+}
+
+/* Assinatura do cabeçalho: troca pra Archivo Variable (a mesma do corpo do
+   site, sem fonte extra) porque o @font-face dela já declara o range
+   inteiro dos dois eixos, peso 100-900 e largura 62%-125%. */
+.wordmark {
+  font-family: var(--font-sans);
+  font-size: 0.75rem;
+  font-weight: 700;
+  font-stretch: 100%;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 
 /* ==========================================================================
