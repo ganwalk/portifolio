@@ -96,8 +96,24 @@ function HeroContent({
     <div className="gutter relative flex flex-1 flex-col items-center justify-between pb-14 pt-16 sm:items-stretch sm:pt-32">
       <div className="order-1 text-center sm:text-left">
         <h1 className="type-display type-inktrap text-[13vw] leading-[0.84] sm:text-[8.2vw] lg:text-[10.25vw] 2xl:text-[9.25vw]">
+          {/* leading-[0.84] é mais apertado que a altura real da fonte: sem
+              esse respiro, o overflow-hidden usado pra animação de entrada
+              corta o topo do "A" e de outras letras (fica achatado em vez de
+              pontudo). pt-[0.16em] abre espaço acima da linha; -mt-[0.16em]
+              nas palavras seguintes cancela esse espaço na hora de empilhar,
+              então o espaçamento entre "ARMANDO" e "CUSTODIO" não muda, só a
+              primeira palavra ganha uma folga extra por cima (empurrando o
+              conjunto pra baixo, não pra cima, então não reduz a distância
+              até o cabeçalho). */}
           {words.map((word, index) => (
-            <span key={word} className="block overflow-hidden">
+            <span
+              key={word}
+              className={
+                index === 0
+                  ? "block overflow-hidden pt-[0.16em]"
+                  : "-mt-[0.16em] block overflow-hidden pt-[0.16em]"
+              }
+            >
               <motion.span
                 className="block"
                 initial={mirrored ? undefined : { y: "108%" }}
