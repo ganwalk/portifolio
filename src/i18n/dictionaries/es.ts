@@ -52,6 +52,12 @@ export const es: Dictionary = {
     comingSoon: "Case study completo próximamente",
     metricsDisclaimer:
       "Métricas ilustrativas, números finales en consolidación.",
+    previousProject: "Proyecto anterior",
+    nextProject: "Próximo proyecto",
+    goToProject: "Ir al proyecto",
+    pauseAutoplay: "Pausar rotación automática",
+    resumeAutoplay: "Reanudar rotación automática",
+    fullCase: "Ver página completa",
   },
   playground: {
     title: "Fuera de horario",

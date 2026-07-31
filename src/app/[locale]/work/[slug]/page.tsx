@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { CaseMediaGrid } from "@/components/ui/CaseMediaGrid";
+import { CaseMetrics } from "@/components/ui/CaseMetrics";
 import { MediaView } from "@/components/ui/MediaView";
 import { cases, getCase } from "@/data/cases";
 import { locales, isLocale } from "@/i18n/config";
@@ -62,19 +64,7 @@ export default async function CasePage({
           {caseStudy.statement[locale]}
         </h1>
 
-        <div className="mt-16 flex flex-wrap gap-x-20 gap-y-10">
-          {caseStudy.metrics.map((metric) => (
-            <div key={metric.label[locale]}>
-              <span className="type-serif-display block text-7xl sm:text-8xl">
-                {metric.value}
-              </span>
-              <span className="type-mono text-muted">
-                {metric.label[locale]}
-                {metric.illustrative && " *"}
-              </span>
-            </div>
-          ))}
-        </div>
+        <CaseMetrics caseStudy={caseStudy} locale={locale} className="mt-16" />
 
         <p className="type-mono mt-12 text-muted">
           {caseStudy.tags[locale].join(" • ")}
@@ -90,30 +80,7 @@ export default async function CasePage({
           className="aspect-video w-full object-cover"
         />
 
-        {caseStudy.subProjects ? (
-          // Um campo por projeto, lado a lado (empilhado no mobile): cada
-          // artista/projeto do case tem a própria mídia e o próprio nome,
-          // em vez de se diluir num só bloco genérico.
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
-            {caseStudy.subProjects.map((subProject) => (
-              <div key={subProject.name}>
-                <MediaView
-                  media={subProject.media}
-                  locale={locale}
-                  className="aspect-[3/4] w-full bg-surface object-cover"
-                />
-                <p className="type-mono mt-4 text-muted">
-                  {subProject.name}
-                </p>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-            <div className="texture-noise aspect-4/3 bg-surface" />
-            <div className="texture-noise aspect-4/3 bg-surface" />
-          </div>
-        )}
+        <CaseMediaGrid caseStudy={caseStudy} locale={locale} />
       </div>
 
       {caseStudy.metrics.some((m) => m.illustrative) && (
