@@ -95,7 +95,7 @@ function HeroContent({
   return (
     <div className="gutter relative flex flex-1 flex-col items-center justify-between pb-14 pt-16 sm:items-stretch sm:pt-32">
       <div className="order-1 text-center sm:text-left">
-        <h1 className="type-display type-inktrap text-[13vw] leading-[0.84] sm:text-[8.2vw] lg:text-[10.25vw] 2xl:text-[9.25vw]">
+        <h1 className="type-display type-inktrap text-[13vw] leading-[0.84] sm:text-[8.2vw] lg:text-[11vw] 2xl:text-[10vw]">
           {/* leading-[0.84] é mais apertado que a altura real da fonte: sem
               esse respiro, o overflow-hidden usado pra animação de entrada
               corta o topo do "A" e de outras letras (fica achatado em vez de
