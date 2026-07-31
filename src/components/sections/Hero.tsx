@@ -1,13 +1,12 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useRef } from "react";
 import {
   motion,
   useMotionTemplate,
   useMotionValue,
   useSpring,
 } from "framer-motion";
-import { KineticText } from "@/components/ui/KineticText";
 import { SelfPortrait } from "@/components/ui/SelfPortrait";
 import { SubtitleRoulette } from "@/components/ui/SubtitleRoulette";
 import { profile } from "@/data/profile";
@@ -52,20 +51,6 @@ function HeroContent({
 
   const words = profile.name.split(" ");
 
-  // O clip (overflow-hidden) só existe pra revelação de entrada, quando cada
-  // palavra sobe de baixo pra cima. Depois que ela termina, o clip precisa
-  // sair: o texto vira KineticText, e as letras crescem em altura no hover
-  // do mouse, o que estouraria o próprio clip se ele continuasse ativo (a
-  // deformação ficaria invisível, cortada). A cópia mirrored não anima
-  // (renderiza pronta), então nunca precisa do clip.
-  const [revealed, setRevealed] = useState(Boolean(mirrored));
-
-  useEffect(() => {
-    if (mirrored) return;
-    const timeout = setTimeout(() => setRevealed(true), 1300);
-    return () => clearTimeout(timeout);
-  }, [mirrored]);
-
   // No mobile a frase quebra entre "no" e "mundo", não onde o navegador
   // preferir: um <br> visível só abaixo de sm força esse ponto específico,
   // e escondido dali pra cima (onde a frase cabe numa linha, empilhada ou
@@ -99,12 +84,9 @@ function HeroContent({
   return (
     <div className="gutter relative flex flex-1 flex-col items-center justify-between pb-14 pt-16 sm:items-stretch sm:pt-32">
       <div className="order-1 text-center sm:text-left">
-        <h1 className="type-display text-[17vw] leading-[0.84] sm:text-[12vw]">
+        <h1 className="type-display type-inktrap text-[17vw] leading-[0.84] sm:text-[12vw]">
           {words.map((word, index) => (
-            <span
-              key={word}
-              className={`block ${revealed ? "" : "overflow-hidden"}`}
-            >
+            <span key={word} className="block overflow-hidden">
               <motion.span
                 className="block"
                 initial={mirrored ? undefined : { y: "108%" }}
@@ -119,7 +101,7 @@ function HeroContent({
                       }
                 }
               >
-                <KineticText text={word} />
+                {word}
               </motion.span>
             </span>
           ))}
@@ -147,9 +129,10 @@ function HeroContent({
 
       {/* w-[36vw]/max-w-[520px] é o tamanho "de verdade" do retrato, pensado
           pra tela de desktop grande. Na faixa de notebook (lg até antes do
-          2xl, a maioria das telas de 13" a 16" cai aqui) ele fica pequeno
-          demais para o espaço disponível, então encolhe; monitores grandes
-          (2xl) voltam ao tamanho original.
+          2xl, a maioria das telas de 13" a 16" cai aqui) ele ainda encolhe
+          (o espaço disponível é menor), mas não tanto quanto antes
+          (26vw/300px): folga extra pra crescer sem sair do lugar. Monitores
+          grandes (2xl) voltam ao tamanho original.
 
           O top também muda por faixa: `top` é uma porcentagem da altura do
           contêiner inteiro, não da altura do próprio retrato, então uma
@@ -163,7 +146,7 @@ function HeroContent({
           o topo do retrato perto do topo do h1, com respiro parecido. */}
       <SelfPortrait
         label={dict.hero.portraitAlt}
-        className="pointer-events-none relative order-2 w-[52vw] max-w-64 sm:absolute sm:right-[5vw] sm:top-[6%] sm:order-none sm:w-[36vw] sm:max-w-[520px] lg:top-[17%] lg:w-[26vw] lg:max-w-[300px] 2xl:top-[14%] 2xl:w-[36vw] 2xl:max-w-[520px]"
+        className="pointer-events-none relative order-2 w-[52vw] max-w-64 sm:absolute sm:right-[5vw] sm:top-[6%] sm:order-none sm:w-[36vw] sm:max-w-[520px] lg:top-[17%] lg:w-[30vw] lg:max-w-[340px] 2xl:top-[14%] 2xl:w-[36vw] 2xl:max-w-[520px]"
       />
 
       <div className="order-3 flex flex-col items-center gap-8 sm:items-start sm:gap-10 sm:mt-16">

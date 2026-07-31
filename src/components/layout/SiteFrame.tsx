@@ -6,7 +6,6 @@ import { useEffect, useState, type ReactNode } from "react";
 import { BoringToggle } from "@/components/controls/BoringToggle";
 import { ControlBar } from "@/components/controls/ControlBar";
 import { SiteMenu } from "@/components/nav/SiteMenu";
-import { KineticText } from "@/components/ui/KineticText";
 import { MoonPhase } from "@/components/ui/MoonPhase";
 import { useBoringMode } from "@/contexts/BoringModeContext";
 import { profile } from "@/data/profile";
@@ -129,9 +128,9 @@ export function SiteFrame({
 
           <Link
             href={`/${locale}/`}
-            className="justify-self-center whitespace-nowrap lg:order-first"
+            className="wordmark justify-self-center whitespace-nowrap lg:order-first"
           >
-            <KineticText text={profile.name} className="wordmark" />
+            {profile.name}
           </Link>
 
           <div className="flex items-center gap-4 justify-self-end lg:ml-auto">

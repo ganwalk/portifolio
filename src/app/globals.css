@@ -26,6 +26,11 @@
      hero, título e métrica dos cases, o convite do contato. Todo o resto do
      display (menu, cartaz) continua em Archivo. */
   --font-headline: "Bricolage Grotesque Variable", var(--font-sans);
+  /* Fonte com ink traps de verdade (Whyte Inktrap, licenciada, ver
+     src/fonts/whyte-inktrap/), reservada pros três destaques do site: a
+     assinatura do cabeçalho, o nome na hero e o convite de contato. Só o
+     peso Black (900) está carregado, o único usado. */
+  --font-inktrap: "Whyte Inktrap", var(--font-sans);
 }
 
 .dark {
@@ -76,6 +81,7 @@ html[data-boring="true"] *::after {
   --font-sans: var(--font-sans);
   --font-mono: var(--font-mono);
   --font-headline: var(--font-headline);
+  --font-inktrap: var(--font-inktrap);
 }
 
 /* ==========================================================================
@@ -130,18 +136,24 @@ body {
   text-transform: uppercase;
 }
 
-/* Assinatura do cabeçalho: Bricolage Grotesque Variable, a fonte de manchete
-   do site (mais estilizada que a Archivo usada no resto do menu), a mesma
-   que "Armando Custodio" na hero e "Vamos conversar?" no contato já usam. A
-   deformação letra a letra é o componente KineticText (ui/KineticText.tsx):
-   cada letra cresce em altura e peso conforme a distância até o ponteiro,
-   sem nunca mudar de posição horizontal. */
+/* Assinatura do cabeçalho: fonte com ink traps (ver --font-inktrap acima),
+   a mesma reservada pro nome na hero e pro convite de contato. */
 .wordmark {
-  font-family: var(--font-headline);
+  font-family: var(--font-inktrap);
   font-size: 0.75rem;
-  font-weight: 700;
+  font-weight: 900;
   letter-spacing: 0.08em;
   text-transform: uppercase;
+}
+
+/* Sobrepõe font-family e font-weight das classes de tamanho/peso que já
+   existem (.type-display na hero, .type-serif-display no contato): elas
+   são compartilhadas com outros lugares que não devem trocar de fonte,
+   então a troca entra por uma classe extra, aplicada só nesses dois
+   destaques. font-weight força 900 porque só o peso Black está carregado. */
+.type-inktrap {
+  font-family: var(--font-inktrap);
+  font-weight: 900;
 }
 
 /* ==========================================================================
