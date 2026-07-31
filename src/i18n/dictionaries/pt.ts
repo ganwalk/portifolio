@@ -58,11 +58,6 @@ export const pt = {
     comingSoon: "Case completo em breve",
     metricsDisclaimer:
       "Métricas ilustrativas, números finais em fase de consolidação.",
-    previousProject: "Projeto anterior",
-    nextProject: "Próximo projeto",
-    goToProject: "Ir para o projeto",
-    pauseAutoplay: "Pausar rotação automática",
-    resumeAutoplay: "Retomar rotação automática",
     fullCase: "Ver página completa",
   },
   playground: {

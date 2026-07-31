@@ -171,36 +171,6 @@ body {
   padding-block: 7rem;
 }
 
-/* ==========================================================================
-   CARROSSEL DE PROJETOS
-   Barra de progresso do slide ativo no carrossel de "Projetos em destaque"
-   (CasesGrid). Animação CSS, não do framer-motion: animation-play-state dá
-   pause/resume de verdade (framer não pausa uma animate() em andamento sem
-   guardar o tempo decorrido manualmente), e a troca de key no React reinicia
-   o keyframe do zero a cada slide.
-   ========================================================================== */
-
-@keyframes cases-carousel-progress {
-  from {
-    transform: scaleX(0);
-  }
-  to {
-    transform: scaleX(1);
-  }
-}
-
-/* A rolagem em si continua funcionando (scroll-snap, swipe no touch, setas
-   de teclado); só a barra visual some, pra não competir com o resto do site,
-   que não usa barra de rolagem visível em nenhum outro lugar. */
-.no-scrollbar {
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-}
-
-.no-scrollbar::-webkit-scrollbar {
-  display: none;
-}
-
 @media (min-width: 640px) {
   .gutter {
     padding-inline: 3rem;

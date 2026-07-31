@@ -1,25 +1,18 @@
-/* Fonte licenciada (ABC Dinamo), não fica no npm: só os três pesos usados
+/* Fonte licenciada (ABC Dinamo), não fica no npm: só os dois pesos usados
    no site, e só woff2, sem os formatos legados que o kit da fundição
    inclui (eot/woff/ttf, pensados pra navegador antigo). Black é o peso de
-   repouso dos destaques estáticos; Bold, Heavy e Black juntos são os três
-   degraus do efeito cinético do nome na hero (ver ui/KineticWeight.tsx),
-   que sobe conforme o ponteiro se aproxima de cada letra. Sem fonte
-   variável de verdade aqui (a Whyte Inktrap vem em arquivos estáticos por
-   peso), então a transição pula entre os pesos carregados em vez de
-   interpolar suave, mas com três degraus em vez de dois o salto fica bem
-   menos brusco. */
+   repouso dos destaques estáticos; Bold e Black juntos formam o efeito
+   cinético do nome na hero (ver ui/KineticWeight.tsx): duas cópias de cada
+   letra empilhadas, a Black ganhando opacidade conforme o ponteiro se
+   aproxima, um dissolve contínuo em vez de pular entre pesos (a Whyte
+   Inktrap não é uma fonte variável de verdade, não dá pra interpolar
+   font-weight direto). WhyteInktrap-Heavy.woff2 ainda existe no diretório,
+   licenciado junto com os outros dois, mas sem @font-face nenhum
+   referenciando não é buscado pelo navegador. */
 @font-face {
   font-family: "Whyte Inktrap";
   src: url("./WhyteInktrap-Black.woff2") format("woff2");
   font-weight: 900;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: "Whyte Inktrap";
-  src: url("./WhyteInktrap-Heavy.woff2") format("woff2");
-  font-weight: 800;
   font-style: normal;
   font-display: swap;
 }

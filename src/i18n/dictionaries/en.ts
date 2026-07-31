@@ -51,11 +51,6 @@ export const en: Dictionary = {
     comingSoon: "Full case study coming soon",
     metricsDisclaimer:
       "Illustrative metrics, final numbers being consolidated.",
-    previousProject: "Previous project",
-    nextProject: "Next project",
-    goToProject: "Go to project",
-    pauseAutoplay: "Pause autoplay",
-    resumeAutoplay: "Resume autoplay",
     fullCase: "View full page",
   },
   playground: {
