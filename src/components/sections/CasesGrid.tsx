@@ -129,7 +129,7 @@ function Card({
           </div>
 
           <div>
-            <h3 className="type-display text-2xl leading-[0.95] sm:text-3xl lg:text-4xl">
+            <h3 className="type-display type-inktrap text-2xl leading-[0.95] sm:text-3xl lg:text-4xl">
               {caseStudy.title[locale]}
             </h3>
             <p className="type-mono mt-3 text-white/70">

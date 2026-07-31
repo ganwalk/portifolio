@@ -38,10 +38,15 @@ export function Contact({ dict }: { dict: Dictionary }) {
               navegador decidir onde cortar (o que sempre parecia "email
               cortado"), o tamanho da fonte acompanha a largura da tela em
               vw, então a linha inteira sempre cabe, encolhendo ou crescendo
-              junto com a viewport. */}
+              junto com a viewport. lg:text-4xl (tamanho fixo) sobrepunha a
+              imagem interativa no notebook: a coluna de texto é só metade
+              da tela (sm:w-1/2), então um tamanho fixo que não encolhe com
+              a viewport cedo ou tarde estoura a própria coluna. 2.5vw
+              continua a mesma lógica do resto da escala, só que também
+              vale a partir do lg. */}
           <a
             href={`mailto:${profile.email}`}
-            className="type-display inline-block whitespace-nowrap text-[4.5vw] underline underline-offset-8 sm:text-[3.4vw] lg:text-4xl"
+            className="type-display inline-block whitespace-nowrap text-[4.5vw] underline underline-offset-8 sm:text-[3.4vw] lg:text-[2.35vw]"
           >
             {profile.email}
           </a>

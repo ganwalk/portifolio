@@ -7,6 +7,7 @@ import {
   useMotionValue,
   useSpring,
 } from "framer-motion";
+import { KineticWeight } from "@/components/ui/KineticWeight";
 import { SelfPortrait } from "@/components/ui/SelfPortrait";
 import { SubtitleRoulette } from "@/components/ui/SubtitleRoulette";
 import { profile } from "@/data/profile";
@@ -84,7 +85,7 @@ function HeroContent({
   return (
     <div className="gutter relative flex flex-1 flex-col items-center justify-between pb-14 pt-16 sm:items-stretch sm:pt-32">
       <div className="order-1 text-center sm:text-left">
-        <h1 className="type-display type-inktrap text-[17vw] leading-[0.84] sm:text-[12vw]">
+        <h1 className="type-display type-inktrap text-[13vw] leading-[0.84] sm:text-[8.2vw] lg:text-[10.25vw] 2xl:text-[9.25vw]">
           {words.map((word, index) => (
             <span key={word} className="block overflow-hidden">
               <motion.span
@@ -101,7 +102,7 @@ function HeroContent({
                       }
                 }
               >
-                {word}
+                <KineticWeight text={word} />
               </motion.span>
             </span>
           ))}
