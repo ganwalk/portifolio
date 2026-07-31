@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { CaseMediaGrid } from "@/components/ui/CaseMediaGrid";
 import { CaseMetrics } from "@/components/ui/CaseMetrics";
 import { MediaView } from "@/components/ui/MediaView";
 import { Reveal } from "@/components/ui/Reveal";
@@ -12,23 +11,34 @@ import type { CaseStudy } from "@/data/types";
 import type { Locale } from "@/i18n/config";
 import type { Dictionary } from "@/i18n/dictionaries";
 
-// Carrossel automático: um projeto em cena por vez (vídeo, título, tags e a
-// métrica principal), com os vizinhos espiando cortados nas bordas do palco.
-// Gira sozinho (barra de progresso por baixo), mas para no hover, no foco e
-// enquanto um case está expandido. Clicar no projeto em cena o expande pra
-// tela cheia, com um zoom que nasce exatamente do retângulo do cartão
-// clicado; os dados completos do case aparecem abaixo, dentro do próprio
-// overlay, sem precisar navegar. Substitui a grade bento anterior.
+// Carrossel automático e infinito: um projeto em cena por vez (vídeo,
+// título, tags e a métrica principal), consideravelmente maior que os
+// vizinhos, que espiam cortados nas bordas do palco em qualquer posição,
+// inclusive nas pontas da lista. Gira sozinho (barra de progresso por
+// baixo), mas para no hover, no foco e enquanto um case está expandido.
+// Clicar no projeto em cena o expande pra tela cheia, com um zoom que nasce
+// exatamente do retângulo do cartão clicado; os dados completos do case
+// aparecem abaixo, dentro do próprio overlay, sem precisar navegar.
 //
 // O posicionamento dos slides usa scroll-snap nativo, não transform+posição
 // calculados na mão: cada slide é um item comum de um flex horizontal
-// rolável (snap-center), e "ativar" um projeto é só chamar scrollIntoView
-// nele. Uma primeira versão empilhava os quatro cartões no mesmo ponto e
-// deslocava via x/scale animado, mas caía num bug real de hit-testing (o
-// próprio palco interceptando cliques que deveriam chegar ao cartão) por
-// causa da pilha de elementos sobrepostos. Scroll nativo não sofre disso: o
-// navegador cuida do layout, do snap e até do swipe em touch de graça, e
-// IntersectionObserver diz qual cartão está centralizado.
+// rolável (snap-center), e "ativar" um projeto é só mover o scrollLeft da
+// trilha até ele (scrollToSlide, abaixo; não scrollIntoView, que sobe por
+// qualquer ancestral rolável e chegou a arrastar a página inteira até o
+// carrossel ao carregar). Uma primeira versão empilhava os cartões no mesmo
+// ponto e deslocava via x/scale animado, mas caía num bug real de
+// hit-testing (o próprio palco interceptando cliques que deveriam chegar ao
+// cartão). Scroll nativo não sofre disso: o navegador cuida do layout, do
+// snap e até do swipe em touch de graça, e IntersectionObserver diz qual
+// cartão está centralizado.
+//
+// Infinito de verdade (não só um índice que dá a volta): a trilha renderiza
+// um clone do último projeto antes do primeiro e um clone do primeiro depois
+// do último. Assim sempre existe um vizinho pra espiar dos dois lados, até
+// nas pontas da lista real, sem o vazio feio que sobrava ali antes. Ao
+// pousar num clone, a trilha salta pro slide real equivalente sem animação
+// (mesmo conteúdo, então o salto é imperceptível), e a "próxima" viagem já
+// parte do lugar certo.
 
 const AUTOPLAY_MS = 6000;
 
@@ -36,8 +46,9 @@ function Slide({
   caseStudy,
   locale,
   dict,
-  index,
+  displayIndex,
   isActive,
+  isClone,
   registerRef,
   onSelect,
   onExpand,
@@ -45,8 +56,11 @@ function Slide({
   caseStudy: CaseStudy;
   locale: Locale;
   dict: Dictionary;
-  index: number;
+  /** Número exibido (01, 02...): a posição do case na lista real, mesmo
+   *  quando este slide é um clone de borda. */
+  displayIndex: number;
   isActive: boolean;
+  isClone: boolean;
   registerRef: (el: HTMLDivElement | null) => void;
   onSelect: () => void;
   onExpand: (rect: DOMRect) => void;
@@ -56,15 +70,17 @@ function Slide({
   return (
     <div
       ref={registerRef}
-      className="w-[80vw] max-w-[420px] flex-shrink-0 snap-center sm:w-[58vw] sm:max-w-[760px]"
+      aria-hidden={isClone}
+      className="w-[82vw] max-w-[440px] flex-shrink-0 snap-center sm:w-[60vw] sm:max-w-[820px]"
     >
       <div
         className={`aspect-[4/3] w-full origin-center transition-[transform,opacity] duration-500 ease-out sm:aspect-[16/10] ${
-          isActive ? "scale-100 opacity-100" : "scale-[0.92] opacity-50"
+          isActive ? "scale-100 opacity-100" : "scale-[0.62] opacity-[0.35]"
         }`}
       >
         <button
           type="button"
+          tabIndex={isClone ? -1 : undefined}
           onClick={(event) =>
             isActive
               ? onExpand(event.currentTarget.getBoundingClientRect())
@@ -86,7 +102,7 @@ function Slide({
 
           {!isActive && (
             <p className="type-mono absolute left-5 top-5 text-white/60">
-              {String(index + 1).padStart(2, "0")}
+              {String(displayIndex + 1).padStart(2, "0")}
             </p>
           )}
 
@@ -97,7 +113,7 @@ function Slide({
           >
             <div className="flex items-start justify-between gap-4">
               <p className="type-mono text-white/70">
-                {String(index + 1).padStart(2, "0")} · {caseStudy.year}
+                {String(displayIndex + 1).padStart(2, "0")} · {caseStudy.year}
               </p>
               <p className="text-right">
                 <span className="type-serif-display block text-2xl sm:text-3xl">
@@ -243,8 +259,9 @@ function ExpandedCase({
           {caseStudy.tags[locale].join(" • ")}
         </p>
 
-        <div className="mt-12">
-          <CaseMediaGrid caseStudy={caseStudy} locale={locale} />
+        <div className="mt-12 grid grid-cols-1 gap-6 sm:grid-cols-2">
+          <div className="texture-noise aspect-4/3 bg-surface" />
+          <div className="texture-noise aspect-4/3 bg-surface" />
         </div>
 
         {caseStudy.metrics.some((m) => m.illustrative) && (
@@ -262,6 +279,18 @@ function ExpandedCase({
       </div>
     </motion.div>
   );
+}
+
+const COUNT = cases.length;
+// Clone do último antes do primeiro e clone do primeiro depois do último:
+// a trilha renderizada é sempre [clone, ...cases reais, clone]. loopIndex 0
+// e COUNT+1 são os clones; 1..COUNT são os cases reais (realIndex = loopIndex - 1).
+const loopCases = [cases[COUNT - 1], ...cases, cases[0]];
+
+function realIndexOf(loopIndex: number) {
+  if (loopIndex === 0) return COUNT - 1;
+  if (loopIndex === COUNT + 1) return 0;
+  return loopIndex - 1;
 }
 
 export function CasesGrid({
@@ -287,13 +316,31 @@ export function CasesGrid({
     c.metrics.some((m) => m.illustrative),
   );
 
+  // Rola só a trilha horizontal, nunca a página: scrollIntoView() sobe por
+  // qualquer ancestral rolável pra garantir visibilidade, e como a trilha
+  // carrega no meio da página (abaixo da hora), ele arrastava o scroll
+  // vertical inteiro até o carrossel assim que o efeito de posição inicial
+  // rodava, um bug real (a página "pulava" da hero pro carrossel ao
+  // carregar). Calcular o delta pelo retângulo de cada um e mover só
+  // track.scrollLeft evita esse vazamento por construção.
+  function scrollToSlide(loopIndex: number, behavior: ScrollBehavior) {
+    const track = trackRef.current;
+    const slide = slideRefs.current[loopIndex];
+    if (!track || !slide) return;
+    const trackRect = track.getBoundingClientRect();
+    const slideRect = slide.getBoundingClientRect();
+    const delta =
+      slideRect.left + slideRect.width / 2 - (trackRect.left + trackRect.width / 2);
+    track.scrollTo({ left: track.scrollLeft + delta, behavior });
+  }
+
   // Avanço automático: um setTimeout de verdade, não o "animationend" da
   // barra visual (CSS puro). Um bug real apareceu por causa disso: em
   // headless o Chromium não roda a animação em tempo de parede, então o
-  // animationend disparava quase instantâneo (3 avanços em menos de 1s ao
-  // carregar a página). O timer guarda quanto falta em remainingMsRef, que
-  // um efeito decrementa na pausa e o outro reseta a cada slide novo, então
-  // pausar de verdade preserva o progresso em vez de reiniciar a contagem.
+  // animationend disparava quase instantâneo. O timer guarda quanto falta em
+  // remainingMsRef, que um efeito decrementa na pausa e o outro reseta a
+  // cada slide novo, então pausar de verdade preserva o progresso em vez de
+  // reiniciar a contagem.
   const remainingMsRef = useRef(AUTOPLAY_MS);
 
   useEffect(() => {
@@ -304,18 +351,20 @@ export function CasesGrid({
     if (isPaused) return;
     const start = Date.now();
     const id = setTimeout(() => {
-      goTo(activeIndex + 1);
+      step(1);
     }, remainingMsRef.current);
     return () => {
       clearTimeout(id);
       remainingMsRef.current -= Date.now() - start;
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeIndex, isPaused]);
 
-  // Quem está "ativo" é definido pelo scroll de verdade, não por um índice
-  // só nosso: o observer aponta qual slide está mais visível dentro da
-  // trilha, então clicar num vizinho, arrastar no touch ou usar as setas
-  // chegam todos ao mesmo estado por caminhos diferentes.
+  // Corrige o pouso num clone: some sem animação pro slide real equivalente,
+  // então a "próxima" viagem sempre parte de um índice real, nunca de um
+  // clone. Também define quem está ativo a partir do scroll de verdade, não
+  // de um índice só nosso: clicar num vizinho, arrastar no touch ou usar as
+  // setas chegam todos ao mesmo estado por caminhos diferentes.
   useEffect(() => {
     const track = trackRef.current;
     if (!track) return;
@@ -323,10 +372,15 @@ export function CasesGrid({
       (entries) => {
         for (const entry of entries) {
           if (entry.intersectionRatio > 0.6) {
-            const index = slideRefs.current.indexOf(
+            const loopIndex = slideRefs.current.indexOf(
               entry.target as HTMLDivElement,
             );
-            if (index !== -1) setActiveIndex(index);
+            if (loopIndex === -1) continue;
+            const real = realIndexOf(loopIndex);
+            setActiveIndex(real);
+            if (loopIndex === 0 || loopIndex === COUNT + 1) {
+              scrollToSlide(real + 1, "instant");
+            }
           }
         }
       },
@@ -336,13 +390,24 @@ export function CasesGrid({
     return () => observer.disconnect();
   }, []);
 
-  function goTo(index: number) {
-    const wrapped = ((index % cases.length) + cases.length) % cases.length;
-    slideRefs.current[wrapped]?.scrollIntoView({
-      behavior: "smooth",
-      inline: "center",
-      block: "nearest",
-    });
+  // Salto inicial: sem isso, o primeiro slide em pé no carregamento seria o
+  // clone do último (o primeiro elemento da trilha), não o projeto 01.
+  useEffect(() => {
+    scrollToSlide(1, "instant");
+  }, []);
+
+  /** Pra setas e autoplay: anda um slide na trilha real (pode pousar num
+   *  clone na borda, corrigido pelo observer acima), preservando a sensação
+   *  de vizinho adjacente em vez de pular pro outro lado da lista. */
+  function step(direction: 1 | -1) {
+    scrollToSlide(activeIndex + 1 + direction, "smooth");
+  }
+
+  /** Pros dots: pula direto pro índice real pedido, seja qual for a
+   *  distância na trilha. */
+  function goTo(realIndex: number) {
+    const wrapped = ((realIndex % COUNT) + COUNT) % COUNT;
+    scrollToSlide(wrapped + 1, "smooth");
   }
 
   return (
@@ -361,36 +426,41 @@ export function CasesGrid({
         >
           <div
             ref={trackRef}
-            className="no-scrollbar flex h-[62vw] max-h-[460px] min-h-[300px] snap-x snap-mandatory items-center gap-4 overflow-x-auto scroll-smooth px-[10vw] sm:h-[40vw] sm:max-h-[560px] sm:min-h-[360px] sm:gap-6 sm:px-[21vw]"
+            className="no-scrollbar flex h-[68vw] max-h-[520px] min-h-[320px] snap-x snap-mandatory items-center gap-4 overflow-x-auto scroll-smooth px-[9vw] sm:h-[42vw] sm:max-h-[620px] sm:min-h-[380px] sm:gap-8 sm:px-[20vw]"
           >
-            {cases.map((caseStudy, index) => (
-              <Slide
-                key={caseStudy.slug}
-                caseStudy={caseStudy}
-                locale={locale}
-                dict={dict}
-                index={index}
-                isActive={index === activeIndex}
-                registerRef={(el) => {
-                  slideRefs.current[index] = el;
-                }}
-                onSelect={() => goTo(index)}
-                onExpand={(rect) => setExpanding({ caseStudy, rect })}
-              />
-            ))}
+            {loopCases.map((caseStudy, loopIndex) => {
+              const realIndex = realIndexOf(loopIndex);
+              const isClone = loopIndex === 0 || loopIndex === COUNT + 1;
+              return (
+                <Slide
+                  key={`${caseStudy.slug}-${loopIndex}`}
+                  caseStudy={caseStudy}
+                  locale={locale}
+                  dict={dict}
+                  displayIndex={realIndex}
+                  isActive={realIndex === activeIndex}
+                  isClone={isClone}
+                  registerRef={(el) => {
+                    slideRefs.current[loopIndex] = el;
+                  }}
+                  onSelect={() => scrollToSlide(loopIndex, "smooth")}
+                  onExpand={(rect) => setExpanding({ caseStudy, rect })}
+                />
+              );
+            })}
           </div>
 
           <div className="gutter mt-8 flex items-center gap-6">
             <button
               type="button"
-              onClick={() => goTo(activeIndex - 1)}
+              onClick={() => step(-1)}
               aria-label={dict.cases.previousProject}
               className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full border border-line transition-colors hover:bg-surface"
             >
               <span aria-hidden>←</span>
             </button>
 
-            <div className="flex-1">
+            <div className="min-w-0 flex-1">
               <div className="h-[2px] w-full overflow-hidden bg-foreground/15">
                 <div
                   key={activeIndex}
@@ -402,7 +472,7 @@ export function CasesGrid({
                 />
               </div>
 
-              <div className="mt-4 flex items-center justify-between">
+              <div className="mt-4 flex items-center gap-4">
                 <div className="flex gap-2">
                   {cases.map((caseStudy, index) => (
                     <button
@@ -435,7 +505,7 @@ export function CasesGrid({
 
             <button
               type="button"
-              onClick={() => goTo(activeIndex + 1)}
+              onClick={() => step(1)}
               aria-label={dict.cases.nextProject}
               className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full border border-line transition-colors hover:bg-surface"
             >

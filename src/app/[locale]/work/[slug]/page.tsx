@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { CaseMediaGrid } from "@/components/ui/CaseMediaGrid";
 import { CaseMetrics } from "@/components/ui/CaseMetrics";
 import { MediaView } from "@/components/ui/MediaView";
 import { cases, getCase } from "@/data/cases";
@@ -80,7 +79,10 @@ export default async function CasePage({
           className="aspect-video w-full object-cover"
         />
 
-        <CaseMediaGrid caseStudy={caseStudy} locale={locale} />
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+          <div className="texture-noise aspect-4/3 bg-surface" />
+          <div className="texture-noise aspect-4/3 bg-surface" />
+        </div>
       </div>
 
       {caseStudy.metrics.some((m) => m.illustrative) && (
