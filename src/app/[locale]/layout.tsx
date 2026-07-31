@@ -3,8 +3,8 @@ import type { CSSProperties, ReactNode } from "react";
 // Archivo com o eixo de largura (wdth), que é o que dá o ar de cartaz condensado.
 import "@fontsource-variable/archivo/wdth.css";
 import "@fontsource-variable/bricolage-grotesque";
-import "@fontsource-variable/familjen-grotesk";
 import "@fontsource/ibm-plex-mono/400.css";
+import "../../fonts/whyte-inktrap/whyte-inktrap.css";
 import "../globals.css";
 import { Providers } from "@/components/providers/Providers";
 import { BoringBootScript } from "@/components/providers/BoringBootScript";

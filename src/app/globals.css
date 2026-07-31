@@ -26,10 +26,11 @@
      hero, título e métrica dos cases, o convite do contato. Todo o resto do
      display (menu, cartaz) continua em Archivo. */
   --font-headline: "Bricolage Grotesque Variable", var(--font-sans);
-  /* Fonte com ink traps (os entalhes nos cantos agudos das letras), reservada
-     pros três destaques do site: a assinatura do cabeçalho, o nome na hero e
-     o convite de contato. */
-  --font-inktrap: "Familjen Grotesk Variable", var(--font-sans);
+  /* Fonte com ink traps de verdade (Whyte Inktrap, licenciada, ver
+     src/fonts/whyte-inktrap/), reservada pros três destaques do site: a
+     assinatura do cabeçalho, o nome na hero e o convite de contato. Só o
+     peso Black (900) está carregado, o único usado. */
+  --font-inktrap: "Whyte Inktrap", var(--font-sans);
 }
 
 .dark {
@@ -140,17 +141,19 @@ body {
 .wordmark {
   font-family: var(--font-inktrap);
   font-size: 0.75rem;
-  font-weight: 700;
+  font-weight: 900;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
 
-/* Sobrepõe só a font-family das classes de tamanho/peso que já existem
-   (.type-display na hero, .type-serif-display no contato): elas são
-   compartilhadas com outros lugares que não devem trocar de fonte, então a
-   troca entra por uma classe extra, aplicada só nesses dois destaques. */
+/* Sobrepõe font-family e font-weight das classes de tamanho/peso que já
+   existem (.type-display na hero, .type-serif-display no contato): elas
+   são compartilhadas com outros lugares que não devem trocar de fonte,
+   então a troca entra por uma classe extra, aplicada só nesses dois
+   destaques. font-weight força 900 porque só o peso Black está carregado. */
 .type-inktrap {
   font-family: var(--font-inktrap);
+  font-weight: 900;
 }
 
 /* ==========================================================================
