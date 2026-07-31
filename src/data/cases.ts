@@ -159,6 +159,48 @@ export const cases: CaseStudy[] = [
         es: "Multitud en un concierto, luces de escenario al fondo",
       },
     },
+    // Um campo por artista, lado a lado no corpo do case. Placeholder
+    // seguindo a mesma convenção de picsum.photos com seed usada no resto do
+    // site (Contact, SiteMenu); troca é só apontar src pra mídia real de
+    // cada projeto.
+    subProjects: [
+      {
+        name: "Ganwalk",
+        media: {
+          kind: "image",
+          src: "https://picsum.photos/seed/ganwalk-armando/800/1000",
+          alt: {
+            pt: "Identidade visual do projeto Ganwalk",
+            en: "Ganwalk project visual identity",
+            es: "Identidad visual del proyecto Ganwalk",
+          },
+        },
+      },
+      {
+        name: "Dezert Horse",
+        media: {
+          kind: "image",
+          src: "https://picsum.photos/seed/dezert-horse-armando/800/1000",
+          alt: {
+            pt: "Identidade visual do projeto Dezert Horse",
+            en: "Dezert Horse project visual identity",
+            es: "Identidad visual del proyecto Dezert Horse",
+          },
+        },
+      },
+      {
+        name: "Pink Opala",
+        media: {
+          kind: "image",
+          src: "https://picsum.photos/seed/pink-opala-armando/800/1000",
+          alt: {
+            pt: "Identidade visual do projeto Pink Opala",
+            en: "Pink Opala project visual identity",
+            es: "Identidad visual del proyecto Pink Opala",
+          },
+        },
+      },
+    ],
     comingSoon: true,
   },
   {
