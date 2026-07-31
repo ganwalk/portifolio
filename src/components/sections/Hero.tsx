@@ -1,12 +1,14 @@
 "use client";
 
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   motion,
   useMotionTemplate,
   useMotionValue,
   useSpring,
 } from "framer-motion";
+import { KineticText } from "@/components/ui/KineticText";
+import { OrbitingIcons } from "@/components/ui/OrbitingIcons";
 import { SelfPortrait } from "@/components/ui/SelfPortrait";
 import { SubtitleRoulette } from "@/components/ui/SubtitleRoulette";
 import { profile } from "@/data/profile";
@@ -51,6 +53,20 @@ function HeroContent({
 
   const words = profile.name.split(" ");
 
+  // O clip (overflow-hidden) só existe pra revelação de entrada, quando cada
+  // palavra sobe de baixo pra cima. Depois que ela termina, o clip precisa
+  // sair: o texto vira KineticText, e as letras crescem em altura no hover
+  // do mouse, o que estouraria o próprio clip se ele continuasse ativo (a
+  // deformação ficaria invisível, cortada). A cópia mirrored não anima
+  // (renderiza pronta), então nunca precisa do clip.
+  const [revealed, setRevealed] = useState(Boolean(mirrored));
+
+  useEffect(() => {
+    if (mirrored) return;
+    const timeout = setTimeout(() => setRevealed(true), 1300);
+    return () => clearTimeout(timeout);
+  }, [mirrored]);
+
   // No mobile a frase quebra entre "no" e "mundo", não onde o navegador
   // preferir: um <br> visível só abaixo de sm força esse ponto específico,
   // e escondido dali pra cima (onde a frase cabe numa linha, empilhada ou
@@ -86,7 +102,10 @@ function HeroContent({
       <div className="order-1 text-center sm:text-left">
         <h1 className="type-display text-[17vw] leading-[0.84] sm:text-[12vw]">
           {words.map((word, index) => (
-            <span key={word} className="block overflow-hidden">
+            <span
+              key={word}
+              className={`block ${revealed ? "" : "overflow-hidden"}`}
+            >
               <motion.span
                 className="block"
                 initial={mirrored ? undefined : { y: "108%" }}
@@ -101,7 +120,7 @@ function HeroContent({
                       }
                 }
               >
-                {word}
+                <KineticText text={word} />
               </motion.span>
             </span>
           ))}
@@ -143,10 +162,20 @@ function HeroContent({
           da faixa `pt-32`), mesmo com o centro da imagem já mais ou menos
           alinhado, porque a imagem é alta e sobra pouco embaixo. 14% deixa
           o topo do retrato perto do topo do h1, com respiro parecido. */}
-      <SelfPortrait
-        label={dict.hero.portraitAlt}
-        className="pointer-events-none relative order-2 w-[52vw] max-w-64 sm:absolute sm:right-[5vw] sm:top-[6%] sm:order-none sm:w-[36vw] sm:max-w-[520px] lg:top-[17%] lg:w-[26vw] lg:max-w-[300px] 2xl:top-[14%] 2xl:w-[36vw] 2xl:max-w-[520px]"
-      />
+      {/* Ícones orbitando (OrbitingIcons) precisam de uma caixa própria pra
+          centralizar a órbita: por isso as classes de posição/tamanho que
+          antes moravam direto no SelfPortrait subiram pra este wrapper, e o
+          retrato passa a só preencher 100% dela (w-full). z-10 no retrato
+          encaixa entre os dois z-index que o OrbitingIcons usa (5 atrás, 20
+          na frente), o "3D de mentirinha" da órbita passando atrás e na
+          frente do rosto. */}
+      <div className="pointer-events-none relative order-2 w-[52vw] max-w-64 sm:absolute sm:right-[5vw] sm:top-[6%] sm:order-none sm:w-[36vw] sm:max-w-[520px] lg:top-[17%] lg:w-[26vw] lg:max-w-[300px] 2xl:top-[14%] 2xl:w-[36vw] 2xl:max-w-[520px]">
+        <SelfPortrait
+          label={dict.hero.portraitAlt}
+          className="relative z-10 w-full"
+        />
+        <OrbitingIcons className="-inset-[38%]" />
+      </div>
 
       <div className="order-3 flex flex-col items-center gap-8 sm:items-start sm:gap-10 sm:mt-16">
         <motion.div {...reveal(2)}>
@@ -267,7 +296,7 @@ export function Hero({ dict }: { dict: Dictionary }) {
       ref={sectionRef}
       onMouseMove={onMouseMove}
       onMouseLeave={() => radius.set(0)}
-      className="texture-noise relative flex min-h-[100svh] flex-col overflow-hidden"
+      className="texture-noise texture-noise-animate relative flex min-h-[100svh] flex-col overflow-hidden"
       aria-label={profile.name}
     >
       <div className="relative flex flex-1">

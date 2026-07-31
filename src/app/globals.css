@@ -130,40 +130,16 @@ body {
   text-transform: uppercase;
 }
 
-/* Cresce e engorda ao passar o mouse: usado na assinatura do cabeçalho e no
-   convite de contato ("Vamos conversar?"), as duas fontes variáveis do site
-   (Archivo Variable e Bricolage Grotesque Variable). O alvo é sempre o
-   mesmo, peso 900 e largura 120%, mesmo a Bricolage carregada aqui só cobrir
-   o eixo de peso (200-900, sem font-stretch declarado): fora do range que a
-   fonte registrou, o navegador arredonda pro limite mais próximo sozinho,
-   então um valor sem eixo correspondente não quebra nada, só não faz nada.
-   O crescimento é por transform, não font-size: uma mudança de font-size
-   empurraria o layout ao redor a cada hover (a coluna do meio da grade do
-   cabeçalho, o parágrafo vizinho no convite de contato); transform não
-   afeta layout. */
-.hover-grow {
-  display: inline-block;
-  transition:
-    transform 0.4s cubic-bezier(0.16, 1, 0.3, 1),
-    font-weight 0.4s ease,
-    font-stretch 0.4s ease;
-}
-
-.hover-grow:hover,
-.hover-grow:focus-visible {
-  transform: scale(1.08);
-  font-weight: 900;
-  font-stretch: 120%;
-}
-
-/* Assinatura do cabeçalho: troca pra Archivo Variable (a mesma do corpo do
-   site, sem fonte extra) porque o @font-face dela já declara o range
-   inteiro dos dois eixos, peso 100-900 e largura 62%-125%. */
+/* Assinatura do cabeçalho: Bricolage Grotesque Variable, a fonte de manchete
+   do site (mais estilizada que a Archivo usada no resto do menu), a mesma
+   que "Armando Custodio" na hero e "Vamos conversar?" no contato já usam. A
+   deformação letra a letra é o componente KineticText (ui/KineticText.tsx):
+   cada letra cresce em altura e peso conforme a distância até o ponteiro,
+   sem nunca mudar de posição horizontal. */
 .wordmark {
-  font-family: var(--font-sans);
+  font-family: var(--font-headline);
   font-size: 0.75rem;
   font-weight: 700;
-  font-stretch: 100%;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
@@ -290,6 +266,51 @@ html:not([data-boring="true"]) [role="button"]:active {
 
 html[data-boring="true"] .texture-noise::after {
   display: none;
+}
+
+/* Variante animada, só na hera: o mesmo ruído, mas vivo, como grão de filme
+   flutuando. steps(), não uma curva suave: grão que desliza suavemente lê
+   como neblina, grão que pula de posição em saltos lê como estática, mais
+   perto do efeito analógico que o resto do site já persegue (ver
+   .lens-invert, o retrato em flipbook). Só a posição do tile se move, a
+   textura em si (o SVG) não é regerada a cada quadro, então o custo é o de
+   uma animação de CSS comum. */
+.texture-noise-animate::after {
+  animation: texture-drift 9s steps(7) infinite;
+}
+
+@keyframes texture-drift {
+  0%,
+  100% {
+    background-position: 0% 0%;
+  }
+  14% {
+    background-position: -18% 9%;
+  }
+  28% {
+    background-position: 12% -14%;
+  }
+  42% {
+    background-position: -9% 20%;
+  }
+  57% {
+    background-position: 18% 6%;
+  }
+  71% {
+    background-position: -14% -11%;
+  }
+  85% {
+    background-position: 6% 16%;
+  }
+}
+
+/* Tracejado "andando" da trajetória dos ícones orbitando o retrato (ver
+   ui/OrbitingIcons.tsx): o dashoffset caminha, dando a impressão de um traço
+   sendo desenhado em looping, não uma linha parada. */
+@keyframes orbit-trail {
+  to {
+    stroke-dashoffset: -56;
+  }
 }
 
 /* Respeito ao sistema: se a pessoa pediu menos movimento, o site obedece
