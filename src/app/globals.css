@@ -304,15 +304,6 @@ html[data-boring="true"] .texture-noise::after {
   }
 }
 
-/* Tracejado "andando" da trajetória dos ícones orbitando o retrato (ver
-   ui/OrbitingIcons.tsx): o dashoffset caminha, dando a impressão de um traço
-   sendo desenhado em looping, não uma linha parada. */
-@keyframes orbit-trail {
-  to {
-    stroke-dashoffset: -56;
-  }
-}
-
 /* Respeito ao sistema: se a pessoa pediu menos movimento, o site obedece
    mesmo fora do Modo Boring. */
 @media (prefers-reduced-motion: reduce) {

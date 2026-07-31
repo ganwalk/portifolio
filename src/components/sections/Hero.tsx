@@ -8,7 +8,6 @@ import {
   useSpring,
 } from "framer-motion";
 import { KineticText } from "@/components/ui/KineticText";
-import { OrbitingIcons } from "@/components/ui/OrbitingIcons";
 import { SelfPortrait } from "@/components/ui/SelfPortrait";
 import { SubtitleRoulette } from "@/components/ui/SubtitleRoulette";
 import { profile } from "@/data/profile";
@@ -162,20 +161,10 @@ function HeroContent({
           da faixa `pt-32`), mesmo com o centro da imagem já mais ou menos
           alinhado, porque a imagem é alta e sobra pouco embaixo. 14% deixa
           o topo do retrato perto do topo do h1, com respiro parecido. */}
-      {/* Ícones orbitando (OrbitingIcons) precisam de uma caixa própria pra
-          centralizar a órbita: por isso as classes de posição/tamanho que
-          antes moravam direto no SelfPortrait subiram pra este wrapper, e o
-          retrato passa a só preencher 100% dela (w-full). z-10 no retrato
-          encaixa entre os dois z-index que o OrbitingIcons usa (5 atrás, 20
-          na frente), o "3D de mentirinha" da órbita passando atrás e na
-          frente do rosto. */}
-      <div className="pointer-events-none relative order-2 w-[52vw] max-w-64 sm:absolute sm:right-[5vw] sm:top-[6%] sm:order-none sm:w-[36vw] sm:max-w-[520px] lg:top-[17%] lg:w-[26vw] lg:max-w-[300px] 2xl:top-[14%] 2xl:w-[36vw] 2xl:max-w-[520px]">
-        <SelfPortrait
-          label={dict.hero.portraitAlt}
-          className="relative z-10 w-full"
-        />
-        <OrbitingIcons className="-inset-[38%]" />
-      </div>
+      <SelfPortrait
+        label={dict.hero.portraitAlt}
+        className="pointer-events-none relative order-2 w-[52vw] max-w-64 sm:absolute sm:right-[5vw] sm:top-[6%] sm:order-none sm:w-[36vw] sm:max-w-[520px] lg:top-[17%] lg:w-[26vw] lg:max-w-[300px] 2xl:top-[14%] 2xl:w-[36vw] 2xl:max-w-[520px]"
+      />
 
       <div className="order-3 flex flex-col items-center gap-8 sm:items-start sm:gap-10 sm:mt-16">
         <motion.div {...reveal(2)}>
