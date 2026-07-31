@@ -219,18 +219,24 @@ decorativa. O que dá vida é movimento e tipografia, não ornamento.
   mais longa da lista fica empilhada por baixo via grid, só para reservar a
   largura: sem ela, a rotação empurraria o texto ao lado a cada troca.
 
-- **Cases como baralho** (`CasePanels`): todas as cartas usam a mesma
-  composição, mídia de borda a borda com índice e métrica no topo e título no
-  pé, porque a repetição aqui é ritmo, não monotonia: o que muda de uma carta
-  para a outra é a mídia. Cada painel tem exatamente uma tela de altura e gruda
-  no topo, então a carta seguinte começa a subir no mesmo instante em que a
-  atual fixa, e a sobreposição vira um movimento contínuo, sem pausas. A carta
-  coberta encolhe e escurece, e um fio de luz no topo de cada uma marca a
-  passagem. A mídia corre em parallax dentro da carta.
+- **Cases em grade bento** (`CasesGrid`): a versão anterior prendia o scroll
+  uma tela por vez, um baralho de cartas empilhadas em `sticky`. Efeito e
+  tanto, mas cansava rápido e lia como apresentação forçada, não como
+  destaque. A grade atual é conteúdo em fluxo normal: cada case é um cartão
+  de tamanho próprio, dois grandes e dois pequenos alternando na diagonal
+  (o padrão de `col-span` se repete a cada quatro cases, se a lista crescer),
+  todos com a mesma composição interna, índice e métrica no topo, título e
+  tags no pé, mídia de borda a borda dentro do próprio cartão.
 
-  O conteúdo da carta tem folga generosa no topo (`pt-24`): a carta fixa em
-  `top-0` para a mídia sangrar até a borda da tela, e sem essa folga a linha de
-  índice e ano ficaria escondida atrás da barra sticky.
+  O dinamismo vem de dois lugares: a entrada em cascata (`Reveal`, um atraso
+  por índice, o mesmo componente que a seção Fora do Expediente usa) e a
+  resposta ao cursor dentro de cada cartão, a mídia desloca alguns pontos
+  percentuais na direção do ponteiro (camada separada do parallax de
+  scroll, que continua existindo, ambiente, movendo a mídia enquanto o
+  cartão atravessa a viewport). `onMouseMove`, não `onPointerMove`: em tela
+  de toque o evento não dispara, então a inclinação nunca ativa lá, mesmo
+  princípio que já mantém a lente da hera parada no mobile. O cartão inteiro
+  também cresce de leve no hover.
 - **Lua de fases** (`MoonPhase`): no canto direito do cabeçalho, percorre as
   fases da lua conforme o scroll, três lunações por página.
 - **Menu overlay** (`SiteMenu`): navegação de tela cheia com tipografia gigante

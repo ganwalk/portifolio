@@ -46,6 +46,8 @@ export const es: Dictionary = {
     portraitAlt: "Retrato animado de Armando Custodio, en trazo blanco y negro",
   },
   cases: {
+    title: "Proyectos destacados",
+    subtitle: "Del banking a la música, proyectos que llevé del problema al resultado.",
     viewCase: "Ver case",
     comingSoon: "Case study completo próximamente",
     metricsDisclaimer:
