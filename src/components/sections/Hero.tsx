@@ -51,21 +51,23 @@ function HeroContent({
 
   const words = profile.name.split(" ");
 
-  // No mobile a frase quebra entre "no" e "mundo", não onde o navegador
-  // preferir: um <br> visível só abaixo de sm força esse ponto específico,
-  // e escondido dali pra cima (onde a frase cabe numa linha, empilhada ou
-  // ao lado do retrato) não deixa rastro. Procura "no mundo" já com o "no"
-  // dentro do primeiro pedaço; nos outros idiomas, que não têm essa
-  // sequência, o índice não bate e a frase inteira cai no primeiro pedaço,
-  // sem quebra nenhuma (mesmo comportamento de antes).
-  const breakMarker = "no mundo";
+  // No mobile a frase quebra nas duas orações que o "·" já separa (mesmo
+  // ponto onde ela se separa em voz alta), não onde o navegador preferir: um
+  // <br> visível só abaixo de sm força esse ponto específico, e escondido
+  // dali pra cima (onde a frase cabe numa linha, empilhada ou ao lado do
+  // retrato) não deixa rastro. O "·" some da quebra: como marcador de
+  // separação ele faz sentido numa linha só, não como bullet solto no fim
+  // ou começo de uma linha empilhada.
+  const breakMarker = " · ";
   const breakIndex = dict.hero.availability.indexOf(breakMarker);
   const availabilityBefore =
     breakIndex === -1
       ? dict.hero.availability
-      : dict.hero.availability.slice(0, breakIndex + 2);
+      : dict.hero.availability.slice(0, breakIndex);
   const availabilityAfter =
-    breakIndex === -1 ? "" : dict.hero.availability.slice(breakIndex + 3);
+    breakIndex === -1
+      ? ""
+      : dict.hero.availability.slice(breakIndex + breakMarker.length);
 
   // flex-1, e não h-full: altura percentual não resolve contra um pai que só
   // ganha altura por flex-grow, e o justify-between viraria letra morta.
@@ -83,8 +85,8 @@ function HeroContent({
   // nasce atrás da tarja.
   return (
     <div className="gutter relative flex flex-1 flex-col items-center justify-between pb-14 pt-16 sm:items-stretch sm:pt-32">
-      <div className="order-1 text-center sm:text-left">
-        <h1 className="type-display type-inktrap text-[13vw] leading-[0.84] sm:text-[8.2vw] lg:text-[11vw] 2xl:text-[10vw]">
+      <div className="order-1 mt-6 text-center sm:mt-0 sm:text-left">
+        <h1 className="type-display type-inktrap text-[14.5vw] leading-[0.84] tracking-[0.015em] sm:text-[8.2vw] lg:text-[11vw] 2xl:text-[10vw]">
           {/* leading-[0.84] é mais apertado que a altura real da fonte: sem
               esse respiro, o overflow-hidden usado pra animação de entrada
               corta o topo do "A" e de outras letras (fica achatado em vez de
@@ -231,7 +233,9 @@ function HeroContent({
             className="type-mono mt-8 text-center text-muted sm:mt-0 sm:text-right"
             style={{ fontSize: "clamp(0.625rem, 0.55vw, 0.75rem)" }}
           >
-            {availabilityBefore} <br className="sm:hidden" />
+            {availabilityBefore}
+            <span className="hidden sm:inline"> · </span>
+            <br className="sm:hidden" />
             {availabilityAfter}
           </motion.p>
         </div>
@@ -284,10 +288,10 @@ export function Hero({ dict }: { dict: Dictionary }) {
       ref={sectionRef}
       onMouseMove={onMouseMove}
       onMouseLeave={() => radius.set(0)}
-      className="texture-noise texture-noise-animate relative flex min-h-[100svh] flex-col overflow-hidden"
+      className="texture-noise texture-noise-animate texture-film relative flex min-h-[100svh] flex-col overflow-hidden"
       aria-label={profile.name}
     >
-      <div className="relative flex flex-1">
+      <div className="relative z-10 flex flex-1">
         <HeroContent dict={dict} ctaRef={ctaRef} />
 
         {/* Cópia invertida, revelada pela lente */}
