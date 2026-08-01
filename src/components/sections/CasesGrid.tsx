@@ -438,7 +438,7 @@ export function CasesGrid({
 
   return (
     <section id="work" className="border-t border-line">
-      <div className="gutter section-y">
+      <div className="gutter pt-28 pb-8 sm:pt-36 sm:pb-10 xl:pt-44 xl:pb-12">
         <Reveal>
           <h2 className="type-mono mb-2">{dict.cases.title}</h2>
           <p className="max-w-lg text-muted">{dict.cases.subtitle}</p>
