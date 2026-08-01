@@ -5,6 +5,7 @@ import "@fontsource-variable/archivo/wdth.css";
 import "@fontsource-variable/bricolage-grotesque";
 import "@fontsource/ibm-plex-mono/400.css";
 import "../../fonts/whyte-inktrap/whyte-inktrap.css";
+import "../../fonts/array/array.css";
 import "../globals.css";
 import { Providers } from "@/components/providers/Providers";
 import { BoringBootScript } from "@/components/providers/BoringBootScript";

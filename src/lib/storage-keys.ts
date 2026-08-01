@@ -6,4 +6,3 @@
 
 export const BORING_STORAGE_KEY = "boring-mode";
 export const BORING_ATTRIBUTE = "data-boring";
-export const SOUND_STORAGE_KEY = "ui-sound";

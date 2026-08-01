@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { useBoringMode } from "@/contexts/BoringModeContext";
-import { useSound } from "@/contexts/SoundContext";
 import { useHydrated } from "@/lib/use-hydrated";
 import type { Dictionary } from "@/i18n/dictionaries";
 
@@ -40,7 +39,6 @@ export function BoringToggle({
   dismissTooltip = false,
 }: BoringToggleProps) {
   const { isBoringMode, toggleBoringMode } = useBoringMode();
-  const { play } = useSound();
   const mounted = useHydrated();
 
   const [tooltipDismissed, setTooltipDismissed] = useState(false);
@@ -61,7 +59,6 @@ export function BoringToggle({
         title={dict.controls.boringHint}
         onClick={() => {
           setTooltipDismissed(true);
-          play("toggle");
           toggleBoringMode();
         }}
       >

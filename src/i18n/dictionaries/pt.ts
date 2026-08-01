@@ -22,7 +22,6 @@ export const pt = {
     boringHint: "Pra você que gosta das coisas direto ao ponto ;)",
     boringTooltip: "eu ODEIO animações!",
     theme: "Alternar tema",
-    sound: "Som da interface",
     language: "Idioma",
   },
   hero: {
@@ -53,7 +52,6 @@ export const pt = {
   },
   cases: {
     title: "Projetos em destaque",
-    subtitle: "Do banking à música, projetos que peguei do problema ao resultado.",
     viewCase: "Ver case",
     comingSoon: "Case completo em breve",
     metricsDisclaimer:

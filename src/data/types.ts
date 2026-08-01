@@ -41,6 +41,12 @@ export interface CaseStudy {
   /** Case ainda sem página completa publicada. */
   comingSoon: boolean;
   year: string;
+  /**
+   * Cases adjacentes com o mesmo `group` viram uma fatia só do carrossel da
+   * home, lado a lado em vez de empilhados (ver CasesGrid). Não afeta a
+   * página própria do case nem nenhum outro lugar que leia `cases`.
+   */
+  group?: string;
 }
 
 export interface Experiment {
