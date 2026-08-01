@@ -6,7 +6,7 @@ entra aqui.
 ## O que este site é
 
 Portfólio de Armando Custodio, Design Engineer. Duas experiências no mesmo
-conteúdo: a criativa, com textura, movimento e som, e a utilitária (Modo Boring),
+conteúdo: a criativa, com textura e movimento, e a utilitária (Modo Boring),
 que também serve de currículo imprimível.
 
 ## Decisões travadas
@@ -21,7 +21,8 @@ que também serve de currículo imprimível.
 | Tipografia          | Híbrida por contexto (ver abaixo)                                        |
 | Brasilidade         | Calor no tom de voz, visual universal                                    |
 | Habilidades extras  | Prova viva no próprio site mais um bloco compacto na home                |
-| Som                 | Sintetizado no navegador, muito sutil, desligado por padrão              |
+| Botões              | Sempre quadrados, sem arredondamento                                     |
+| Som                 | Nenhum: interface silenciosa, sem camada de áudio                        |
 | Custo               | Zero, em todas as camadas                                                |
 
 ## Stack
@@ -47,7 +48,7 @@ src/
     globals.css           tokens, temas, Modo Boring e regras de impressão
   components/
     boring/BoringView.tsx    single page utilitária, também é o currículo
-    controls/ControlBar.tsx  Modo Boring, tema, som e idioma
+    controls/ControlBar.tsx  Modo Boring, tema e idioma
     layout/SiteFrame.tsx     cabeçalho fixo, rodapé, atalho de acessibilidade
     providers/Providers.tsx  ordem dos contextos
     sections/                Hero, CasesGrid, Playground, About, Contact
@@ -55,15 +56,20 @@ src/
     views/HomeView.tsx       o interruptor entre as duas experiências
   contexts/
     BoringModeContext.tsx    estado global, persiste em localStorage
-    SoundContext.tsx         camada de som, depende do Modo Boring
   data/
     cases.ts                 cases com métricas e textos nos três idiomas
     profile.ts               dados de contato, habilidades, experiência
     experiments.ts           bloco Fora do expediente
     types.ts                 contratos de conteúdo
+  fonts/
+    whyte-inktrap/            fonte licenciada, peso Black, três destaques do site
+    array/                    fonte Fontshare, só no selo que persegue o cursor
   i18n/
     config.ts                idiomas suportados
     dictionaries/            pt (fonte da verdade), en, es
+  lib/
+    use-hydrated.ts           diz se o React já hidratou
+    use-media-query.ts        matchMedia hidratação segura, mesmo padrão
 public/
   index.html                 porta de entrada, detecta o idioma do navegador
 docs/
@@ -81,7 +87,7 @@ docs/
 2. **Framer Motion**: `MotionConfig` recebe `reducedMotion="always"`, então nenhum
    componente anima mesmo que peça.
 3. **React**: `HomeView` troca a home inteira pela `BoringView`, uma single page em
-   tabela, e o botão de som desaparece da barra.
+   tabela.
 
 Fora do Modo Boring, `MotionConfig` fica em `reducedMotion="user"`, ou seja, quem
 configurou menos movimento no sistema já recebe o site calmo sem precisar apertar
@@ -112,6 +118,7 @@ para quem estiver sem JavaScript. Cada idioma gera HTML próprio com o atributo
 | Corpo de texto           | Archivo (wdth)     | parágrafos, listas, texto corrido              |
 | Manchete                 | Bricolage Grotesque | nome na hero, título e métrica dos cases, convite do contato, menu overlay |
 | Mono de extrato          | IBM Plex Mono      | legendas técnicas, tags, controles             |
+| Selo do cursor           | Array (Fontshare)  | só o rótulo ferrofluido dos projetos em destaque |
 
 `--font-headline` é a variável que carrega a Bricolage Grotesque, referenciada
 direto dentro de `.type-display` e `.type-serif-display` (os nomes das classes
@@ -221,25 +228,46 @@ decorativa. O que dá vida é movimento e tipografia, não ornamento.
 
 - **Projetos em destaque presos ao scroll** (`CasesGrid`): depois de passar
   por um baralho preso ao scroll e depois por uma grade bento, a seção
-  voltou a prender o scroll, mas com a lição da grade incorporada. A seção é
-  alta (uma tela inteira por projeto) e fica `sticky` enquanto o visitante
-  rola; cada projeto se desdobra a partir de uma cortina fechada no centro
-  (`clip-path` fechado nas bordas superior e inferior, abrindo conforme o
-  scroll avança) e fecha de volta pra dar lugar ao próximo. Rolar é a
-  navegação inteira: sem seta, sem play/pause, sem índice próprio brigando
-  com o scroll de verdade. Primeiro e último projeto não têm a metade da
-  transição que não existe (o primeiro já nasce aberto, o último fica aberto
-  até o fim da seção). Clicar no projeto em cena expande pra tela cheia com
-  os dados completos do case (mesmo FLIP manual descrito abaixo em "Menu
-  overlay" e "Transição de modo": o overlay nasce encolhido sobre o
-  retângulo clicado e anima até a identidade).
+  voltou a prender o scroll, mas com a lição da grade incorporada. Sai
+  direto da hero, sem título nem subtítulo próprios (só um `aria-label` no
+  `<section>` pra quem usa leitor de tela, reaproveitando o texto que antes
+  era visível): a primeira fatia já entra prendendo o scroll, sem dobra de
+  transição no meio. A seção é alta (uma tela inteira por fatia) e fica
+  `sticky` enquanto o visitante rola; cada fatia se desdobra a partir de uma
+  cortina fechada no centro (`clip-path` fechado nas bordas superior e
+  inferior, abrindo conforme o scroll avança) e fecha de volta pra dar lugar
+  à próxima. Rolar é a navegação inteira: sem seta, sem play/pause, sem
+  índice próprio brigando com o scroll de verdade. Primeira e última fatia
+  não têm a metade da transição que não existe (a primeira já nasce aberta,
+  a última fica aberta até o fim da seção). Clicar no projeto em cena
+  expande pra tela cheia com os dados completos do case (mesmo FLIP manual
+  descrito abaixo em "Menu overlay" e "Transição de modo": o overlay nasce
+  encolhido sobre o retângulo clicado e anima até a identidade).
+
+  **Fatia nem sempre é um case só.** No desktop (`min-width: 1024px`, via
+  `useMediaQuery`, `src/lib/use-media-query.ts`), cases adjacentes que
+  compartilham `group` no dado (o trio Ganwalk/Dezert Horse/Pink Opala, hoje)
+  viram uma fatia lado a lado dentro da mesma cortina, em vez de três
+  aberturas separadas: `buildSlides` monta as duas versões (`flatSlides`,
+  uma fatia por case; `groupedSlides`, o trio fundido) uma vez só, fora do
+  componente, porque `cases` é estático. No mobile a distinção não existe,
+  cada case continua empilhado na sua própria fatia, o comportamento de
+  sempre. `SlidePanel` cuida da cortina (compartilhada por toda a fatia) e
+  distribui as colunas (`CaseColumn`) num `flex` de largura igual; o rótulo
+  de índice de cada coluna ("03 / 06") sempre conta cases da lista inteira,
+  não fatias, então a numeração não muda com o agrupamento. Título e métrica
+  encolhem (`multi`) quando a coluna é uma de três, pra não vazar de um
+  terço da largura. Como a largura da tela só é conhecida depois de
+  hidratar, o servidor sempre prevê a versão empilhada (`flatSlides`); no
+  desktop a seção recalcula o número de fatias assim que o React sincroniza
+  com o `matchMedia`.
 
   Quatro camadas de vocabulário de agência vivem em cima da cortina, todas
   atrás do `MotionConfig` do Modo Boring:
   1. **Texto em máscara escalonada**: índice, métrica, título, tags e o
      convite de "ver caso" moram cada um no seu próprio `overflow-hidden` e
-     sobem do zero num instante diferente dentro da janela de abertura do
-     próprio projeto, em vez do bloco inteiro nascer junto num só fade. O
+     sobem do zero num instante diferente dentro da janela de abertura da
+     própria fatia, em vez do bloco inteiro nascer junto num só fade. O
      título tem a janela mais longa e entra por último, o elemento que
      merece mais peso na composição.
   2. **Cor como recompensa do foco**: a mídia nasce em preto e branco
@@ -249,17 +277,29 @@ decorativa. O que dá vida é movimento e tipografia, não ornamento.
   3. **Paralaxe magnética**: a mídia do projeto em cena desliza alguns
      pontos percentuais na direção do ponteiro, por cima do zoom de
      abertura, a mesma resposta que a grade bento tinha antes.
-  4. **Rótulo que segue o cursor**: em vez de deixar o cursor do sistema
-     sozinho, um selo com "ver caso" acompanha o ponteiro com atraso de mola
-     enquanto ele sobrevoa o projeto ativo, complementar ao selo estático
-     (que continua ali por acessibilidade e por quem usa toque).
+  4. **Rótulo ferrofluido**: em vez de deixar o cursor do sistema sozinho,
+     um rastro de gotas persegue o ponteiro em cadeia (cada gota segue a
+     mola da gota anterior, não o ponteiro direto, cada vez mais mole) e
+     termina no selo "ver caso" (fonte Array, só usada aqui, ver
+     `src/fonts/array/`), deslocado bem à direita e um pouco abaixo da
+     cabeça do rastro: cursores grandes cobrem a área logo ao lado da
+     ponta. O rastro vive atrás de um filtro CSS "goo" (`blur` alto +
+     `contrast` alto), que funde as gotas próximas numa mancha líquida só,
+     o efeito clássico de ferrofluido, sem nenhuma biblioteca. Mola em
+     cadeia em vez de reiniciar uma animação por tempo a cada movimento do
+     mouse: mola integra velocidade quadro a quadro, então o rastro nunca
+     "reinicia" e fica contínuo. Complementar ao selo estático dentro do
+     texto (que continua ali por acessibilidade e por quem usa toque). O
+     selo e o rastro são quadrados/sem `rounded-full`, como o resto dos
+     controles do site (só as gotas do rastro continuam redondas, não são
+     botão, são partícula).
 
   `onMouseMove`, não `onPointerMove`, em todas as quatro: em tela de toque o
   evento não dispara, então nada disso ativa lá, mesmo princípio que já
   mantém a lente da hero parada no mobile. O contador de posição no rodapé
-  do painel (`01 / 06`) e o ponto ativo entre os marcadores também animam a
-  troca em vez de só substituir o texto, a mesma lógica de máscara em
-  miniatura.
+  do painel (`01 / 06` no mobile, `01 / 04` no desktop com o trio agrupado)
+  e o ponto ativo entre os marcadores também animam a troca em vez de só
+  substituir o texto, a mesma lógica de máscara em miniatura.
 - **Lua de fases** (`MoonPhase`): no canto direito do cabeçalho, percorre as
   fases da lua conforme o scroll, três lunações por página.
 - **Menu overlay** (`SiteMenu`): navegação de tela cheia com tipografia gigante
@@ -325,6 +365,8 @@ Com domínio próprio ou na Vercel, basta não definir essa variável.
 2. Calibrar as métricas dos cases com os números reais e tirar o aviso de
    métrica ilustrativa de cada uma que for confirmada.
 3. Escrever o corpo dos quatro cases.
-4. Completar `src/data/profile.ts`: LinkedIn, cidade, ano de entrada na AUVP.
+4. Completar `src/data/profile.ts`: LinkedIn, Instagram, cidade, ano de
+   entrada na AUVP. O WhatsApp já está pronto (`profile.links.whatsapp`),
+   com mensagem inicial preenchida.
 5. Ligar Microsoft Clarity e Google Analytics quando os IDs existirem.
 6. Recortes de colagem em volta do nome no hero, quando chegarem.
