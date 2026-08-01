@@ -118,7 +118,7 @@ para quem estiver sem JavaScript. Cada idioma gera HTML próprio com o atributo
 | Corpo de texto           | Archivo (wdth)     | parágrafos, listas, texto corrido              |
 | Manchete                 | Bricolage Grotesque | nome na hero, título e métrica dos cases, convite do contato, menu overlay |
 | Mono de extrato          | IBM Plex Mono      | legendas técnicas, tags, controles             |
-| Selo do cursor           | Array (Fontshare)  | só o rótulo ferrofluido dos projetos em destaque |
+| Selo do cursor           | Array (Fontshare)  | só o letreiro do selo que segue o cursor nos projetos em destaque |
 
 `--font-headline` é a variável que carrega a Bricolage Grotesque, referenciada
 direto dentro de `.type-display` e `.type-serif-display` (os nomes das classes
@@ -168,21 +168,37 @@ A home é dirigida pela mídia, não pelo texto:
 A direção é minimalista: nenhuma moldura, nenhum relevo, nenhuma sombra
 decorativa. O que dá vida é movimento e tipografia, não ornamento.
 
-- **Hero com lente** (`Hero`): o nome em display gigante, uma palavra por linha.
-  A lente que segue o mouse é uma inversão: dentro dela tinta e papel trocam de
-  lugar, sem nenhuma cor entrar na conta. A revelação usa máscara radial de
-  borda suave, não recorte duro, então o círculo é difuso nas beiradas. Perto
-  do CTA "Veja meu trabalho" o raio encolhe. Em telas de toque a lente fica com
-  raio zero e nada roda. A hero desconta a altura da barra (`100svh` menos
-  `3.5rem`) porque o cabeçalho é sticky e ocupa espaço no fluxo.
+- **Hero com lente** (`Hero`): o nome em display gigante, uma palavra por linha,
+  com um pouco de tracking (`0.015em`) pra não parecer colado numa fonte tão
+  grande. A lente que segue o mouse é uma inversão: dentro dela tinta e papel
+  trocam de lugar, sem nenhuma cor entrar na conta. A revelação usa máscara
+  radial de borda suave, não recorte duro, então o círculo é difuso nas
+  beiradas. Perto do CTA "Veja meu trabalho" o raio encolhe. Em telas de
+  toque a lente fica com raio zero e nada roda. A hero desconta a altura da
+  barra (`100svh` menos `3.5rem`) porque o cabeçalho é sticky e ocupa espaço
+  no fluxo. Por cima de tudo, `.texture-film` soma uma vinheta escura nas
+  quinas (sempre em preto, mesmo no tema escuro, porque é a queda de
+  exposição de uma lente física, não uma cor de marca) ao grão já existente
+  do `.texture-noise`, um pouco mais forte aqui que o padrão: junto, o efeito
+  lê como textura de filme de verdade, não só aspereza sutil.
 
-  No desktop o retrato é posicionado em absoluto, à direita, alinhado ao topo
-  do nome, e o resto (nome, subtítulo, CTA, fatos) fica alinhado à esquerda. No
-  mobile o retrato deixa de ser absoluto e passa a ser um terceiro item do
-  flex (via `order`), entre o bloco de título e o de CTA: o `justify-between`
-  do contêiner reparte o espaço entre os três, então o retrato nunca sobrepõe
-  o botão nem o subtítulo, porque participa da mesma conta de altura, e tudo
-  (título, subtítulo, retrato, CTA, fatos) fica centralizado.
+  No mobile o H1 é um pouco maior (`14.5vw`, contra `13vw` antes) e o bloco
+  de título ganha uma folga extra por cima (`mt-6`), descendo um pouco em
+  relação ao cabeçalho. No desktop o retrato é posicionado em absoluto, à
+  direita, alinhado ao topo do nome, e o resto (nome, subtítulo, CTA, fatos)
+  fica alinhado à esquerda. No mobile o retrato deixa de ser absoluto e
+  passa a ser um terceiro item do flex (via `order`), entre o bloco de
+  título e o de CTA: o `justify-between` do contêiner reparte o espaço entre
+  os três, então o retrato nunca sobrepõe o botão nem o subtítulo, porque
+  participa da mesma conta de altura, e tudo (título, subtítulo, retrato,
+  CTA, fatos) fica centralizado.
+
+  A frase de disponibilidade ("Baseado no Brasil · Disponível para projetos
+  no mundo todo") quebra no mobile nas duas orações que o "·" já separa (um
+  `<br>` visível só abaixo de `sm`), e o "·" some da quebra: como marcador
+  de separação ele faz sentido numa linha só, não como bullet solto no fim
+  ou começo de uma linha empilhada. No desktop (`sm:inline`) ele volta,
+  porque ali as duas orações continuam na mesma linha.
 - **Retrato animado** (`SelfPortrait`): flipbook ao lado do nome. A volta tem
   quatro ciclos: os quadros 1 a 12 sempre iguais e o último mudando entre 13,
   14, 15 e 16, as quatro expressões, que seguram mais tempo no ar (700ms contra
@@ -262,39 +278,51 @@ decorativa. O que dá vida é movimento e tipografia, não ornamento.
   desktop a seção recalcula o número de fatias assim que o React sincroniza
   com o `matchMedia`.
 
-  Quatro camadas de vocabulário de agência vivem em cima da cortina, todas
+  A fatia do trio ganha uma quarta coluna, estreita, à esquerda das três:
+  só a frase "Experiências interativas" girada 90° (`writing-mode:
+  vertical-rl`), uma régua de contexto, não um case clicável. E a entrada
+  dela é outra: em vez da cortina abrindo (o "deslocamento" que toda outra
+  fatia usa), cada uma das três colunas só dá zoom, cada uma com sua
+  própria curva sobre o mesmo `openT` (`SINGLE_ZOOM`/`MULTI_ZOOMS` em
+  `CasesGrid.tsx`), pra não lerem como clones umas das outras: a primeira
+  vem de mais longe, a segunda respira num ponto do meio antes de assentar,
+  a terceira dispara rápido no início e desacelera devagar no fim. A
+  cortina daquela fatia continua existindo (sem ela, a fatia fica visível
+  por trás de qualquer outra que ainda esteja abrindo), só abre quase
+  instantânea, sem nenhum "esticar" visível: quem carrega a entrada é
+  inteiramente o zoom de cada coluna.
+
+  Três camadas de vocabulário de agência vivem em cima da cortina, todas
   atrás do `MotionConfig` do Modo Boring:
   1. **Texto em máscara escalonada**: índice, métrica, título, tags e o
      convite de "ver caso" moram cada um no seu próprio `overflow-hidden` e
      sobem do zero num instante diferente dentro da janela de abertura da
      própria fatia, em vez do bloco inteiro nascer junto num só fade. O
      título tem a janela mais longa e entra por último, o elemento que
-     merece mais peso na composição.
+     merece mais peso na composição. O wrapper do título tem `pt-[0.16em]`
+     pelo mesmo motivo do H1 da hera (ver abaixo): sem essa folga, o
+     `overflow-hidden` da máscara corta o topo das letras da Whyte Inktrap.
   2. **Cor como recompensa do foco**: a mídia nasce em preto e branco
      (`grayscale`) e ganha cor só quando o projeto termina de abrir, o
      mesmo princípio do resto do site (preto e branco, cor só vem da mídia)
      agora também contando o próprio ato de focar um projeto.
-  3. **Paralaxe magnética**: a mídia do projeto em cena desliza alguns
-     pontos percentuais na direção do ponteiro, por cima do zoom de
-     abertura, a mesma resposta que a grade bento tinha antes.
-  4. **Rótulo ferrofluido**: em vez de deixar o cursor do sistema sozinho,
-     um rastro de gotas persegue o ponteiro em cadeia (cada gota segue a
-     mola da gota anterior, não o ponteiro direto, cada vez mais mole) e
-     termina no selo "ver caso" (fonte Array, só usada aqui, ver
-     `src/fonts/array/`), deslocado bem à direita e um pouco abaixo da
-     cabeça do rastro: cursores grandes cobrem a área logo ao lado da
-     ponta. O rastro vive atrás de um filtro CSS "goo" (`blur` alto +
-     `contrast` alto), que funde as gotas próximas numa mancha líquida só,
-     o efeito clássico de ferrofluido, sem nenhuma biblioteca. Mola em
-     cadeia em vez de reiniciar uma animação por tempo a cada movimento do
-     mouse: mola integra velocidade quadro a quadro, então o rastro nunca
-     "reinicia" e fica contínuo. Complementar ao selo estático dentro do
-     texto (que continua ali por acessibilidade e por quem usa toque). O
-     selo e o rastro são quadrados/sem `rounded-full`, como o resto dos
-     controles do site (só as gotas do rastro continuam redondas, não são
-     botão, são partícula).
+  3. **Selo que segue o cursor**: em vez de deixar o cursor do sistema
+     sozinho, um selo com "ver caso" acompanha o ponteiro (mola só,
+     deslocada bem à direita e um pouco abaixo da ponta: cursores grandes
+     cobrem a área logo ao lado dela), quadrado como o resto dos controles
+     do site (sem `rounded-full`). O texto dentro dele roda num letreiro
+     horizontal contínuo, como uma placa luminosa antiga: a pílula é uma
+     janela de largura fixa e menor que o conteúdo (`overflow-hidden`), com
+     duas cópias idênticas do texto lado a lado andando de 0% a -50% pra
+     sempre, então o instante em que a primeira sai pela esquerda é o
+     instante em que a segunda cópia chega no início, sem costura no loop.
+     Complementar ao selo estático dentro do texto (que continua ali por
+     acessibilidade e por quem usa toque). A mídia também desliza alguns
+     pontos percentuais na direção do ponteiro (paralaxe magnética), por
+     cima do zoom de abertura, a mesma resposta que a grade bento tinha
+     antes.
 
-  `onMouseMove`, não `onPointerMove`, em todas as quatro: em tela de toque o
+  `onMouseMove`, não `onPointerMove`, em todas: em tela de toque o
   evento não dispara, então nada disso ativa lá, mesmo princípio que já
   mantém a lente da hero parada no mobile. O contador de posição no rodapé
   do painel (`01 / 06` no mobile, `01 / 04` no desktop com o trio agrupado)
