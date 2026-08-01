@@ -219,24 +219,47 @@ decorativa. O que dá vida é movimento e tipografia, não ornamento.
   mais longa da lista fica empilhada por baixo via grid, só para reservar a
   largura: sem ela, a rotação empurraria o texto ao lado a cada troca.
 
-- **Cases em grade bento** (`CasesGrid`): a versão anterior prendia o scroll
-  uma tela por vez, um baralho de cartas empilhadas em `sticky`. Efeito e
-  tanto, mas cansava rápido e lia como apresentação forçada, não como
-  destaque. A grade atual é conteúdo em fluxo normal: cada case é um cartão
-  de tamanho próprio, dois grandes e dois pequenos alternando na diagonal
-  (o padrão de `col-span` se repete a cada quatro cases, se a lista crescer),
-  todos com a mesma composição interna, índice e métrica no topo, título e
-  tags no pé, mídia de borda a borda dentro do próprio cartão.
+- **Projetos em destaque presos ao scroll** (`CasesGrid`): depois de passar
+  por um baralho preso ao scroll e depois por uma grade bento, a seção
+  voltou a prender o scroll, mas com a lição da grade incorporada. A seção é
+  alta (uma tela inteira por projeto) e fica `sticky` enquanto o visitante
+  rola; cada projeto se desdobra a partir de uma cortina fechada no centro
+  (`clip-path` fechado nas bordas superior e inferior, abrindo conforme o
+  scroll avança) e fecha de volta pra dar lugar ao próximo. Rolar é a
+  navegação inteira: sem seta, sem play/pause, sem índice próprio brigando
+  com o scroll de verdade. Primeiro e último projeto não têm a metade da
+  transição que não existe (o primeiro já nasce aberto, o último fica aberto
+  até o fim da seção). Clicar no projeto em cena expande pra tela cheia com
+  os dados completos do case (mesmo FLIP manual descrito abaixo em "Menu
+  overlay" e "Transição de modo": o overlay nasce encolhido sobre o
+  retângulo clicado e anima até a identidade).
 
-  O dinamismo vem de dois lugares: a entrada em cascata (`Reveal`, um atraso
-  por índice, o mesmo componente que a seção Fora do Expediente usa) e a
-  resposta ao cursor dentro de cada cartão, a mídia desloca alguns pontos
-  percentuais na direção do ponteiro (camada separada do parallax de
-  scroll, que continua existindo, ambiente, movendo a mídia enquanto o
-  cartão atravessa a viewport). `onMouseMove`, não `onPointerMove`: em tela
-  de toque o evento não dispara, então a inclinação nunca ativa lá, mesmo
-  princípio que já mantém a lente da hera parada no mobile. O cartão inteiro
-  também cresce de leve no hover.
+  Quatro camadas de vocabulário de agência vivem em cima da cortina, todas
+  atrás do `MotionConfig` do Modo Boring:
+  1. **Texto em máscara escalonada**: índice, métrica, título, tags e o
+     convite de "ver caso" moram cada um no seu próprio `overflow-hidden` e
+     sobem do zero num instante diferente dentro da janela de abertura do
+     próprio projeto, em vez do bloco inteiro nascer junto num só fade. O
+     título tem a janela mais longa e entra por último, o elemento que
+     merece mais peso na composição.
+  2. **Cor como recompensa do foco**: a mídia nasce em preto e branco
+     (`grayscale`) e ganha cor só quando o projeto termina de abrir, o
+     mesmo princípio do resto do site (preto e branco, cor só vem da mídia)
+     agora também contando o próprio ato de focar um projeto.
+  3. **Paralaxe magnética**: a mídia do projeto em cena desliza alguns
+     pontos percentuais na direção do ponteiro, por cima do zoom de
+     abertura, a mesma resposta que a grade bento tinha antes.
+  4. **Rótulo que segue o cursor**: em vez de deixar o cursor do sistema
+     sozinho, um selo com "ver caso" acompanha o ponteiro com atraso de mola
+     enquanto ele sobrevoa o projeto ativo, complementar ao selo estático
+     (que continua ali por acessibilidade e por quem usa toque).
+
+  `onMouseMove`, não `onPointerMove`, em todas as quatro: em tela de toque o
+  evento não dispara, então nada disso ativa lá, mesmo princípio que já
+  mantém a lente da hero parada no mobile. O contador de posição no rodapé
+  do painel (`01 / 06`) e o ponto ativo entre os marcadores também animam a
+  troca em vez de só substituir o texto, a mesma lógica de máscara em
+  miniatura.
 - **Lua de fases** (`MoonPhase`): no canto direito do cabeçalho, percorre as
   fases da lua conforme o scroll, três lunações por página.
 - **Menu overlay** (`SiteMenu`): navegação de tela cheia com tipografia gigante
