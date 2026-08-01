@@ -6,7 +6,6 @@ import { createPortal } from "react-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import { ControlBar } from "@/components/controls/ControlBar";
 import { useBoringMode } from "@/contexts/BoringModeContext";
-import { useSound } from "@/contexts/SoundContext";
 import { useHydrated } from "@/lib/use-hydrated";
 import type { Locale } from "@/i18n/config";
 import type { Dictionary } from "@/i18n/dictionaries";
@@ -52,7 +51,6 @@ export function SiteMenu({
   dict: Dictionary;
 }) {
   const { isBoringMode } = useBoringMode();
-  const { play } = useSound();
   const hydrated = useHydrated();
   const [open, setOpen] = useState(false);
 
@@ -78,10 +76,7 @@ export function SiteMenu({
     { id: "contact", label: dict.nav.contact },
   ];
 
-  const toggle = (next: boolean) => {
-    play("toggle");
-    setOpen(next);
-  };
+  const toggle = (next: boolean) => setOpen(next);
 
   return (
     <>
@@ -132,7 +127,6 @@ export function SiteMenu({
                       <Link
                         href={`/${locale}/#${item.id}`}
                         className="group flex items-baseline gap-4 py-1"
-                        onMouseEnter={() => play("tick")}
                         onClick={() => toggle(false)}
                       >
                         <span className="type-mono text-muted">

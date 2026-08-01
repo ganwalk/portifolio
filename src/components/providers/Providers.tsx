@@ -5,9 +5,8 @@ import { MotionConfig } from "framer-motion";
 import type { ReactNode } from "react";
 import { BoringModeProvider, useBoringMode } from "@/contexts/BoringModeContext";
 import { ModeTransitionOverlay } from "@/components/providers/ModeTransitionOverlay";
-import { SoundProvider } from "@/contexts/SoundContext";
 
-// Ordem importa: BoringMode envolve tudo, pois som e animação dependem dele.
+// Ordem importa: BoringMode envolve tudo, pois a animação depende dele.
 // MotionConfig com reducedMotion="user" respeita prefers-reduced-motion do sistema;
 // no Modo Boring, força "always", nenhum componente Framer Motion anima.
 
@@ -25,9 +24,7 @@ export function Providers({ children }: { children: ReactNode }) {
     <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
       <BoringModeProvider>
         <ModeTransitionOverlay />
-        <MotionGate>
-          <SoundProvider>{children}</SoundProvider>
-        </MotionGate>
+        <MotionGate>{children}</MotionGate>
       </BoringModeProvider>
     </ThemeProvider>
   );
