@@ -6,9 +6,7 @@ import {
   useMotionTemplate,
   useMotionValue,
   useSpring,
-  type MotionValue,
 } from "framer-motion";
-import { KineticWeight } from "@/components/ui/KineticWeight";
 import { SelfPortrait } from "@/components/ui/SelfPortrait";
 import { SubtitleRoulette } from "@/components/ui/SubtitleRoulette";
 import { profile } from "@/data/profile";
@@ -32,20 +30,11 @@ function HeroContent({
   dict,
   mirrored,
   ctaRef,
-  pointerX,
-  pointerY,
-  pointerActive,
 }: {
   dict: Dictionary;
   /** Cópia dentro da lente: entra pronta, sem repetir a animação de entrada. */
   mirrored?: boolean;
   ctaRef?: React.RefObject<HTMLAnchorElement | null>;
-  /** Compartilhados com as duas cópias (ver KineticWeight): a da lente vive
-   *  atrás de um pointer-events: none e nunca receberia um onMouseMove
-   *  próprio. */
-  pointerX: MotionValue<number>;
-  pointerY: MotionValue<number>;
-  pointerActive: MotionValue<number>;
 }) {
   const reveal = (index: number): object =>
     mirrored
@@ -128,12 +117,7 @@ function HeroContent({
                       }
                 }
               >
-                <KineticWeight
-                  text={word}
-                  pointerX={pointerX}
-                  pointerY={pointerY}
-                  pointerActive={pointerActive}
-                />
+                {word}
               </motion.span>
             </span>
           ))}
@@ -264,18 +248,6 @@ export function Hero({ dict }: { dict: Dictionary }) {
   const mouseY = useMotionValue(-600);
   const radius = useMotionValue(0);
 
-  // Posição do ponteiro em coordenadas de viewport (não relativas à seção,
-  // como mouseX/mouseY acima): KineticWeight mede cada letra com
-  // getBoundingClientRect(), que já vem em coordenadas de viewport, então
-  // comparar direto evita converter de um lado pro outro. pointerActive
-  // existe à parte da lente: reseta no mouseleave junto com o raio, mas
-  // mouseX/mouseY continuam com o último valor conhecido (a lente só
-  // encolhe o raio a zero, não "esquece" a posição), o que serviria mal de
-  // sinal de "ponteiro dentro da hero".
-  const pointerX = useMotionValue(-9999);
-  const pointerY = useMotionValue(-9999);
-  const pointerActive = useMotionValue(0);
-
   const x = useSpring(mouseX, { stiffness: 250, damping: 28, mass: 0.6 });
   const y = useSpring(mouseY, { stiffness: 250, damping: 28, mass: 0.6 });
   const r = useSpring(radius, { stiffness: 180, damping: 24 });
@@ -289,9 +261,6 @@ export function Hero({ dict }: { dict: Dictionary }) {
     const rect = section.getBoundingClientRect();
     mouseX.set(event.clientX - rect.left);
     mouseY.set(event.clientY - rect.top);
-    pointerX.set(event.clientX);
-    pointerY.set(event.clientY);
-    pointerActive.set(1);
 
     // Perto do CTA a lente encolhe: o raio é função da distância ao botão.
     const cta = ctaRef.current?.getBoundingClientRect();
@@ -314,21 +283,12 @@ export function Hero({ dict }: { dict: Dictionary }) {
     <section
       ref={sectionRef}
       onMouseMove={onMouseMove}
-      onMouseLeave={() => {
-        radius.set(0);
-        pointerActive.set(0);
-      }}
+      onMouseLeave={() => radius.set(0)}
       className="texture-noise texture-noise-animate relative flex min-h-[100svh] flex-col overflow-hidden"
       aria-label={profile.name}
     >
       <div className="relative flex flex-1">
-        <HeroContent
-          dict={dict}
-          ctaRef={ctaRef}
-          pointerX={pointerX}
-          pointerY={pointerY}
-          pointerActive={pointerActive}
-        />
+        <HeroContent dict={dict} ctaRef={ctaRef} />
 
         {/* Cópia invertida, revelada pela lente */}
         <motion.div
@@ -336,13 +296,7 @@ export function Hero({ dict }: { dict: Dictionary }) {
           className="lens-invert pointer-events-none absolute inset-0 flex"
           style={{ maskImage: mask, WebkitMaskImage: mask }}
         >
-          <HeroContent
-            dict={dict}
-            mirrored
-            pointerX={pointerX}
-            pointerY={pointerY}
-            pointerActive={pointerActive}
-          />
+          <HeroContent dict={dict} mirrored />
         </motion.div>
       </div>
     </section>
