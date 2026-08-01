@@ -17,9 +17,9 @@ export const cases: CaseStudy[] = [
     area: "banking",
     year: "2024/2026",
     title: {
-      pt: "Intranet AUVP",
-      en: "AUVP Intranet",
-      es: "Intranet AUVP",
+      pt: "Intranet completa",
+      en: "Complete intranet",
+      es: "Intranet completa",
     },
     statement: {
       pt: "Construí uma intranet robusta com Design System completo e manual de tom e voz para todo o ecossistema.",
@@ -55,13 +55,13 @@ export const cases: CaseStudy[] = [
     // reveal dos componentes do Design System em grid.
     cover: {
       kind: "video",
-      src: "https://videos.pexels.com/video-files/3129671/3129671-hd_1920_1080_30fps.mp4",
+      src: "https://videos.pexels.com/video-files/10469563/10469563-hd_1920_1080_25fps.mp4",
       poster:
-        "https://images.pexels.com/videos/3129671/free-video-3129671.jpg?auto=compress&w=1280",
+        "https://images.pexels.com/videos/10469563/pexels-photo-10469563.jpeg?auto=compress&w=1280",
       alt: {
-        pt: "Projeção digital de linhas geométricas abstratas",
-        en: "Digital projection of abstract geometric lines",
-        es: "Proyección digital de líneas geométricas abstractas",
+        pt: "Animação digital colorida em movimento",
+        en: "Colorful digital animation in motion",
+        es: "Animación digital colorida en movimiento",
       },
     },
     comingSoon: true,
@@ -109,13 +109,13 @@ export const cases: CaseStudy[] = [
     // diferentes, ou zoom out de um dashboard do Clarity/GA com dados reais.
     cover: {
       kind: "video",
-      src: "https://videos.pexels.com/video-files/3141210/3141210-hd_1920_1080_25fps.mp4",
+      src: "https://videos.pexels.com/video-files/8333185/8333185-hd_1080_1080_30fps.mp4",
       poster:
-        "https://images.pexels.com/videos/3141210/free-video-3141210.jpg?auto=compress&w=1280",
+        "https://images.pexels.com/videos/8333185/abstract-art-artistic-background-8333185.jpeg?auto=compress&w=1280",
       alt: {
-        pt: "Cálculo digital em simetria geométrica",
-        en: "Digital calculation in geometric symmetry",
-        es: "Cálculo digital en simetría geométrica",
+        pt: "Fundo abstrato colorido com gradientes em movimento",
+        en: "Abstract colorful background with moving gradients",
+        es: "Fondo abstracto colorido con degradados en movimiento",
       },
     },
     comingSoon: true,
