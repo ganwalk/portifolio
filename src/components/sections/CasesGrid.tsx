@@ -162,22 +162,45 @@ function SlidePanel({
 }) {
   const { input, output } = segmentRange(index, count);
   const openT = useTransform(scrollYProgress, input, output);
+  const multi = slide.length > 1;
 
   // A "cortina": fechada como uma fresta no centro, abrindo pras bordas.
   // clip-path em vez de scaleY porque não distorce o conteúdo por baixo, só
-  // revela mais dele, o desdobrar parece uma abertura, não um esticar. Uma
-  // cortina só por fatia, mesmo com três colunas lado a lado dentro dela:
-  // abrem juntas, como um projeto só.
-  const insetPercent = useTransform(openT, [0, 1], [46, 0]);
+  // revela mais dele, o desdobrar parece uma abertura, não um esticar.
+  // Continua existindo em toda fatia, mesmo a do trio: sem ela, a fatia
+  // fica sem fechar quando inativa (não é só decoração, é o que garante que
+  // uma fatia escondida não vaze por trás da fatia realmente ativa
+  // enquanto a cortina dela ainda está abrindo). A diferença é só a curva:
+  // na fatia do trio a cortina abre quase instantânea (não há "esticar"
+  // visível pra ver), porque a entrada de verdade ali é o zoom distinto de
+  // cada coluna (ver CaseColumn), não o desdobrar da cortina.
+  const insetPercent = useTransform(
+    openT,
+    multi ? [0, 0.02, 1] : [0, 1],
+    multi ? [46, 0, 0] : [46, 0],
+  );
   const clipPath = useMotionTemplate`inset(${insetPercent}% 0% ${insetPercent}% 0%)`;
 
   return (
     <motion.div
       aria-hidden={!isActive}
       className="absolute inset-0 h-full w-full overflow-hidden bg-black"
-      style={{ clipPath, zIndex: isActive ? count + 1 : index }}
+      style={{
+        clipPath,
+        zIndex: isActive ? count + 1 : index,
+      }}
     >
       <div className="flex h-full w-full">
+        {multi && (
+          <div className="flex w-10 shrink-0 items-center justify-center sm:w-14">
+            <span
+              className="type-mono whitespace-nowrap text-white/50"
+              style={{ writingMode: "vertical-rl", transform: "rotate(180deg)" }}
+            >
+              {dict.cases.interactiveExperiences}
+            </span>
+          </div>
+        )}
         {slide.map(({ caseStudy, flatIndex }, columnIndex) => (
           <CaseColumn
             key={caseStudy.slug}
@@ -189,8 +212,9 @@ function SlidePanel({
             openT={openT}
             isActive={isActive}
             isNearActive={isNearActive}
-            multi={slide.length > 1}
-            dividerLeft={columnIndex > 0}
+            multi={multi}
+            columnIndex={columnIndex}
+            dividerLeft={multi}
             onExpand={onExpand}
           />
         ))}
@@ -198,6 +222,20 @@ function SlidePanel({
     </motion.div>
   );
 }
+
+// Um "zoom" distinto por coluna do trio, no lugar da cortina compartilhada
+// (que é a fatia inteira abrindo junto, um deslocamento das bordas): cada
+// coluna entra sozinha, só dando zoom, cada uma com seu próprio ponto de
+// partida e sua própria curva ao longo do mesmo openT, pra não ficarem
+// clonadas umas das outras. A primeira nasce de mais longe (zoom out
+// grande), a segunda respira num meio de caminho antes de assentar, a
+// terceira dispara rápido no começo e desacelera devagar no fim.
+const SINGLE_ZOOM = { input: [0, 1], output: [1.18, 1] };
+const MULTI_ZOOMS = [
+  { input: [0, 1], output: [1.55, 1] },
+  { input: [0, 0.55, 1], output: [1.1, 1.32, 1] },
+  { input: [0, 0.7, 1], output: [1.65, 1.06, 1] },
+];
 
 function CaseColumn({
   caseStudy,
@@ -209,6 +247,7 @@ function CaseColumn({
   isActive,
   isNearActive,
   multi,
+  columnIndex,
   dividerLeft,
   onExpand,
 }: {
@@ -223,13 +262,18 @@ function CaseColumn({
   /** Uma de três colunas lado a lado, não o painel cheio: título e métrica
    *  encolhem pra caber num terço da largura em vez de vazar. */
   multi: boolean;
-  /** Segunda ou terceira coluna do trio: ganha um fio vertical à esquerda,
-   *  a única separação entre elas (nenhuma moldura, nenhuma sombra). */
+  /** Posição dentro do trio (0, 1 ou 2): escolhe qual das três curvas de
+   *  zoom distintas essa coluna usa. Ignorado fora do trio. */
+  columnIndex: number;
+  /** Fio vertical à esquerda: toda coluna do trio ganha (a régua vertical
+   *  já mora imediatamente antes da primeira), nenhuma moldura além dessa
+   *  linha fina entre elas. */
   dividerLeft: boolean;
   onExpand: (caseStudy: CaseStudy, rect: DOMRect) => void;
 }) {
   const metric = caseStudy.metrics[0];
-  const mediaZoom = useTransform(openT, [0, 1], [1.18, 1]);
+  const zoomRecipe = multi ? MULTI_ZOOMS[columnIndex % MULTI_ZOOMS.length] : SINGLE_ZOOM;
+  const mediaZoom = useTransform(openT, zoomRecipe.input, zoomRecipe.output);
   const mediaGrayscale = useTransform(openT, [0, 1], [1, 0]);
   const mediaFilter = useMotionTemplate`grayscale(${mediaGrayscale})`;
   const contentOpacity = useTransform(openT, [0, 0.55, 1], [0, 1, 1]);
@@ -252,25 +296,14 @@ function CaseColumn({
   const mediaTiltX = useTransform(tiltSpringX, [-0.5, 0.5], ["-3%", "3%"]);
   const mediaTiltY = useTransform(tiltSpringY, [-0.5, 0.5], ["-3%", "3%"]);
 
-  // Rastro ferrofluido: posição bruta do ponteiro alimentando uma cadeia de
-  // molas, cada uma perseguindo a mola anterior (não o ponteiro direto),
-  // cada vez mais mole. É o que dá o rastro contínuo, tipo gotas de líquido
-  // magnético esticando atrás da cabeça: mola integra velocidade quadro a
-  // quadro, então nunca "reinicia" a cada novo movimento do mouse, ao
-  // contrário de reiniciar uma animação por tempo (o efeito truncado de
-  // antes). A cabeça (leadX/leadY) também é a âncora do selo "ver caso",
-  // deslocado bem à direita e um pouco abaixo dela: cursores grandes do
-  // sistema cobrem a área logo ao lado da ponta.
+  // Selo que segue o cursor: posição bruta do ponteiro suavizada por uma
+  // mola só (sem rastro de partículas), deslocada bem à direita e um pouco
+  // abaixo da ponta: cursores grandes do sistema cobrem a área logo ao lado
+  // dela.
   const pointerRawX = useMotionValue(0);
   const pointerRawY = useMotionValue(0);
   const leadX = useSpring(pointerRawX, { stiffness: 55, damping: 16, mass: 0.8 });
   const leadY = useSpring(pointerRawY, { stiffness: 55, damping: 16, mass: 0.8 });
-  const tailX1 = useSpring(leadX, { stiffness: 40, damping: 14, mass: 1 });
-  const tailY1 = useSpring(leadY, { stiffness: 40, damping: 14, mass: 1 });
-  const tailX2 = useSpring(tailX1, { stiffness: 28, damping: 14, mass: 1.2 });
-  const tailY2 = useSpring(tailY1, { stiffness: 28, damping: 14, mass: 1.2 });
-  const tailX3 = useSpring(tailX2, { stiffness: 18, damping: 14, mass: 1.4 });
-  const tailY3 = useSpring(tailY2, { stiffness: 18, damping: 14, mass: 1.4 });
   const labelX = useTransform(leadX, (v) => v + 80);
   const labelY = useTransform(leadY, (v) => v + 22);
 
@@ -362,7 +395,12 @@ function CaseColumn({
           </div>
 
           <div>
-            <div className="overflow-hidden">
+            {/* pt-[0.16em] no wrapper: leading-[0.9] é mais apertado que a
+                altura real da Whyte Inktrap, sem esse respiro o
+                overflow-hidden usado pra máscara de entrada corta o topo do
+                "A" e de outras letras (mesmo ajuste do H1 na hero, ver
+                Hero.tsx). */}
+            <div className="overflow-hidden pt-[0.16em]">
               <motion.h3
                 style={{ y: titleY }}
                 className={`type-display type-inktrap leading-[0.9] ${
@@ -390,53 +428,41 @@ function CaseColumn({
         </motion.div>
       </div>
 
-      {/* Rastro ferrofluido: gotas encadeadas por mola, fundidas num líquido
-          só pelo filtro "goo" (blur alto + contraste alto). Fica atrás do
-          selo, que é o elemento crisp (sem blur) por cima. */}
-      <motion.div
-        aria-hidden
-        animate={{ opacity: isActive && hovering ? 1 : 0 }}
-        transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-        style={{ filter: "blur(7px) contrast(24)" }}
-        className="pointer-events-none absolute inset-0 z-10 hidden sm:block"
-      >
-        <motion.span
-          className="absolute left-0 top-0 h-4 w-4 rounded-full bg-white"
-          style={{ x: leadX, y: leadY }}
-        />
-        <motion.span
-          className="absolute left-0 top-0 h-3 w-3 rounded-full bg-white"
-          style={{ x: tailX1, y: tailY1 }}
-        />
-        <motion.span
-          className="absolute left-0 top-0 h-2 w-2 rounded-full bg-white"
-          style={{ x: tailX2, y: tailY2 }}
-        />
-        <motion.span
-          className="absolute left-0 top-0 h-1 w-1 rounded-full bg-white"
-          style={{ x: tailX3, y: tailY3 }}
-        />
-      </motion.div>
-
-      {/* Selo "ver caso": âncora crisp do rastro, deslocado bem à direita e
-          um pouco abaixo da cabeça. Só desktop (hover real existe), e só
-          quando o painel está de fato em cena. */}
+      {/* Selo "ver caso": segue o cursor deslocado bem à direita e um pouco
+          abaixo dele. Só desktop (hover real existe), e só quando o painel
+          está de fato em cena. O texto roda num letreiro horizontal
+          contínuo, como uma placa luminosa antiga: a pílula é uma janela de
+          largura fixa (overflow-hidden), menor que o conteúdo, e a faixa lá
+          dentro tem DUAS cópias do texto uma atrás da outra, andando de 0%
+          a -50% pra sempre. Como as duas cópias são idênticas, o instante em
+          que a primeira sai pela esquerda é exatamente o instante em que a
+          segunda chega no início, o loop não tem costura. */}
       <motion.div
         aria-hidden
         style={{ x: labelX, y: labelY }}
         className="pointer-events-none absolute left-0 top-0 z-10 hidden sm:block"
       >
-        <motion.span
+        <motion.div
           animate={{
             opacity: isActive && hovering ? 1 : 0,
             scale: isActive && hovering ? 1 : 0.6,
           }}
           transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-          className="type-mono inline-flex items-center gap-2 bg-white px-5 py-2 text-black"
-          style={{ fontFamily: "var(--font-array)" }}
+          className="w-44 overflow-hidden bg-white py-2.5 text-black"
         >
-          {caseStudy.comingSoon ? dict.cases.comingSoon : dict.cases.viewCase} →
-        </motion.span>
+          <motion.div
+            className="type-mono flex w-max items-center whitespace-nowrap"
+            style={{ fontFamily: "var(--font-array)" }}
+            animate={{ x: ["0%", "-50%"] }}
+            transition={{ duration: 6, ease: "linear", repeat: Infinity }}
+          >
+            {[0, 1].map((copy) => (
+              <span key={copy} className="flex shrink-0 items-center gap-2 px-4">
+                {caseStudy.comingSoon ? dict.cases.comingSoon : dict.cases.viewCase} →
+              </span>
+            ))}
+          </motion.div>
+        </motion.div>
       </motion.div>
     </motion.button>
   );
