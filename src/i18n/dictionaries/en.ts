@@ -20,7 +20,6 @@ export const en: Dictionary = {
     boringHint: "For those who like it straight to the point ;)",
     boringTooltip: "i HATE animations!",
     theme: "Toggle theme",
-    sound: "Interface sound",
     language: "Language",
   },
   hero: {
@@ -46,7 +45,6 @@ export const en: Dictionary = {
   },
   cases: {
     title: "Featured projects",
-    subtitle: "From banking to music, projects I took from problem to result.",
     viewCase: "View case",
     comingSoon: "Full case study coming soon",
     metricsDisclaimer:

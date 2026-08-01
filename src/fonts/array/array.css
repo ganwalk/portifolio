@@ -1,0 +1,19 @@
+/* Array (Fontshare, ITF), licença de uso livre para autohospedagem.
+   Baixados via api.fontshare.com/v2/css, só woff2, sem os formatos legados
+   (woff/ttf) que a resposta padrão inclui. Só os dois pesos usados no site,
+   o resto não é buscado pelo navegador porque não tem @font-face aqui. */
+@font-face {
+  font-family: "Array";
+  src: url("./Array-Regular.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Array";
+  src: url("./Array-Bold.woff2") format("woff2");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}

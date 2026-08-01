@@ -123,6 +123,9 @@ export const cases: CaseStudy[] = [
   {
     slug: "ganwalk",
     area: "music",
+    // Os três artistas ficam lado a lado no carrossel da home (desktop),
+    // ver CasesGrid: mesmo group, adjacentes no array.
+    group: "artistas",
     year: "2022/2026",
     title: {
       pt: "Ganwalk",
@@ -166,6 +169,7 @@ export const cases: CaseStudy[] = [
   {
     slug: "dezert-horse",
     area: "music",
+    group: "artistas",
     year: "2022/2026",
     title: {
       pt: "Dezert Horse",
@@ -209,6 +213,7 @@ export const cases: CaseStudy[] = [
   {
     slug: "pink-opala",
     area: "music",
+    group: "artistas",
     year: "2022/2026",
     title: {
       pt: "Pink Opala",

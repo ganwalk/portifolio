@@ -4,7 +4,6 @@ import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   AnimatePresence,
-  animate,
   motion,
   useMotionTemplate,
   useMotionValue,
@@ -12,28 +11,40 @@ import {
   useScroll,
   useSpring,
   useTransform,
+  type MotionValue,
 } from "framer-motion";
 import { CaseMetrics } from "@/components/ui/CaseMetrics";
 import { MediaView } from "@/components/ui/MediaView";
-import { Reveal } from "@/components/ui/Reveal";
 import { cases } from "@/data/cases";
 import type { CaseStudy } from "@/data/types";
 import type { Locale } from "@/i18n/config";
 import type { Dictionary } from "@/i18n/dictionaries";
+import { useMediaQuery } from "@/lib/use-media-query";
 
 // Projetos em destaque como uma sequência amarrada ao scroll da própria
-// página, não um carrossel com botões e timer: a seção é alta (uma tela
-// inteira por projeto) e fica presa (position: sticky) enquanto o visitante
-// rola por ela, e cada projeto se desdobra a partir de uma cortina fechada
-// no centro (clip-path fechado nas bordas superior e inferior, abrindo
-// conforme o scroll avança), com o texto entrando um instante depois, e
-// fecha de volta pra dar lugar ao próximo. Rolar É a navegação: sem seta,
-// sem play/pause, sem índice próprio brigando com o scroll de verdade.
+// página, não um carrossel com botões e timer: a seção sai direto da hero
+// (sem título nem subtítulo próprios, só um rótulo acessível no <section>
+// pra quem usa leitor de tela) e já entra prendendo o scroll. É alta (uma
+// tela inteira por projeto) e fica presa (position: sticky) enquanto o
+// visitante rola por ela, e cada projeto se desdobra a partir de uma cortina
+// fechada no centro (clip-path fechado nas bordas superior e inferior,
+// abrindo conforme o scroll avança), com o texto entrando um instante
+// depois, e fecha de volta pra dar lugar ao próximo. Rolar É a navegação:
+// sem seta, sem play/pause, sem índice próprio brigando com o scroll de
+// verdade.
 //
-// Cada projeto ocupa uma fatia igual de scrollYProgress (1/N da seção).
-// Nas pontas (primeiro e último projeto) a fatia não tem a metade que não
-// existe: o primeiro já nasce aberto (nada "antes" dele pra desdobrar de),
-// o último fica aberto até o fim da seção (nada "depois").
+// Cada FATIA ocupa uma porção igual de scrollYProgress (1/N da seção), mas
+// uma fatia nem sempre é um case só: no desktop (min-width 1024px, ver
+// useMediaQuery), cases adjacentes que compartilham `group` (o trio de
+// artistas, hoje) viram uma fatia lado a lado, dentro da mesma cortina, em
+// vez de três aberturas separadas (buildSlides monta as duas versões,
+// flatSlides pro mobile e groupedSlides pro desktop, uma vez só, fora do
+// componente porque `cases` é estático). O rótulo de índice de cada coluna
+// ("03 / 06") sempre conta cases, não fatias: SlidePanel repassa o índice
+// original (`flatIndex`) pra cada CaseColumn, independente de quantas
+// fatias existem. Nas pontas (primeira e última fatia) a fatia não tem a
+// metade que não existe: a primeira já nasce aberta (nada "antes" dela pra
+// desdobrar de), a última fica aberta até o fim da seção (nada "depois").
 //
 // Quatro camadas de vocabulário de agência por cima da cortina, todas
 // escondidas atrás do MotionConfig do Modo Boring:
@@ -49,12 +60,20 @@ import type { Dictionary } from "@/i18n/dictionaries";
 // 3. Paralaxe magnética: a mídia do projeto em cena desliza alguns pontos
 //    percentuais na direção do ponteiro, a mesma resposta que a grade bento
 //    tinha antes, devolvida aqui em cima do zoom de abertura.
-// 4. Rótulo que segue o cursor: em vez do cursor do sistema, um selo com
-//    "ver caso" acompanha o ponteiro com atraso de mola enquanto ele
-//    sobrevoa o projeto ativo, complementar ao selo estático (que continua
-//    ali por acessibilidade e pra quem usa toque). onMouseMove, não
-//    onPointerMove: em toque o evento não dispara, então a mola nunca ativa
-//    lá, mesmo princípio que já mantém a lente da hero parada no mobile.
+// 4. Rótulo ferrofluido: em vez do cursor do sistema, um rastro de gotas
+//    persegue o ponteiro em cadeia (cada gota segue a mola da gota anterior,
+//    não o ponteiro direto) e termina no selo "ver caso", deslocado bem à
+//    direita da ponta (cursores grandes do sistema cobrem a área logo ao
+//    lado dela). O rastro vive atrás de um filtro CSS de blur alto e
+//    contraste alto ("goo"): gotas próximas se fundem numa mancha líquida só,
+//    o efeito clássico de ferrofluido, puro CSS. Mola em cadeia em vez de
+//    reiniciar uma animação por tempo a cada movimento do mouse: mola
+//    integra velocidade quadro a quadro, então o rastro nunca "reinicia" (o
+//    que soava truncado); tween reiniciado, sim. Complementar ao selo
+//    estático dentro do texto (que continua ali por acessibilidade e pra
+//    quem usa toque). onMouseMove, não onPointerMove: em toque o evento não
+//    dispara, então a mola nunca ativa lá, mesmo princípio que já mantém a
+//    lente da hero parada no mobile.
 //
 // Clicar no projeto em cena ainda expande pra tela cheia com os dados
 // completos do case, igual antes; só a navegação ENTRE projetos mudou.
@@ -82,8 +101,45 @@ function segmentRange(index: number, count: number) {
   };
 }
 
-function ProjectPanel({
-  caseStudy,
+interface SlideCase {
+  caseStudy: CaseStudy;
+  /** Posição do case na lista completa (0-based), independente de slide:
+   *  o rótulo de índice de cada coluna ("03 / 06") conta projetos, não
+   *  fatias de scroll. */
+  flatIndex: number;
+}
+
+/** Agrupa cases adjacentes que compartilham `group` numa fatia só de scroll
+ *  (lado a lado, ver SlidePanel); `grouped: false` devolve uma fatia por
+ *  case, o comportamento empilhado de sempre (usado no mobile). */
+function buildSlides(list: CaseStudy[], grouped: boolean): SlideCase[][] {
+  if (!grouped) return list.map((caseStudy, flatIndex) => [{ caseStudy, flatIndex }]);
+
+  const slides: SlideCase[][] = [];
+  let i = 0;
+  while (i < list.length) {
+    const group = list[i].group;
+    const slide: SlideCase[] = [{ caseStudy: list[i], flatIndex: i }];
+    i++;
+    while (group && i < list.length && list[i].group === group) {
+      slide.push({ caseStudy: list[i], flatIndex: i });
+      i++;
+    }
+    slides.push(slide);
+  }
+  return slides;
+}
+
+// `cases` é estático (import), então as duas versões cabem calcular uma vez
+// só, fora do componente: flat é o empilhado de sempre (mobile), grouped
+// funde o trio de artistas numa fatia lado a lado (desktop, ver
+// CasesGrid).
+const flatSlides = buildSlides(cases, false);
+const groupedSlides = buildSlides(cases, true);
+
+function SlidePanel({
+  slide,
+  totalCases,
   locale,
   dict,
   index,
@@ -93,7 +149,8 @@ function ProjectPanel({
   isNearActive,
   onExpand,
 }: {
-  caseStudy: CaseStudy;
+  slide: SlideCase[];
+  totalCases: number;
   locale: Locale;
   dict: Dictionary;
   index: number;
@@ -101,17 +158,77 @@ function ProjectPanel({
   scrollYProgress: ReturnType<typeof useScroll>["scrollYProgress"];
   isActive: boolean;
   isNearActive: boolean;
-  onExpand: (rect: DOMRect) => void;
+  onExpand: (caseStudy: CaseStudy, rect: DOMRect) => void;
 }) {
-  const metric = caseStudy.metrics[0];
   const { input, output } = segmentRange(index, count);
   const openT = useTransform(scrollYProgress, input, output);
 
   // A "cortina": fechada como uma fresta no centro, abrindo pras bordas.
   // clip-path em vez de scaleY porque não distorce o conteúdo por baixo, só
-  // revela mais dele, o desdobrar parece uma abertura, não um esticar.
+  // revela mais dele, o desdobrar parece uma abertura, não um esticar. Uma
+  // cortina só por fatia, mesmo com três colunas lado a lado dentro dela:
+  // abrem juntas, como um projeto só.
   const insetPercent = useTransform(openT, [0, 1], [46, 0]);
   const clipPath = useMotionTemplate`inset(${insetPercent}% 0% ${insetPercent}% 0%)`;
+
+  return (
+    <motion.div
+      aria-hidden={!isActive}
+      className="absolute inset-0 h-full w-full overflow-hidden bg-black"
+      style={{ clipPath, zIndex: isActive ? count + 1 : index }}
+    >
+      <div className="flex h-full w-full">
+        {slide.map(({ caseStudy, flatIndex }, columnIndex) => (
+          <CaseColumn
+            key={caseStudy.slug}
+            caseStudy={caseStudy}
+            flatIndex={flatIndex}
+            totalCases={totalCases}
+            locale={locale}
+            dict={dict}
+            openT={openT}
+            isActive={isActive}
+            isNearActive={isNearActive}
+            multi={slide.length > 1}
+            dividerLeft={columnIndex > 0}
+            onExpand={onExpand}
+          />
+        ))}
+      </div>
+    </motion.div>
+  );
+}
+
+function CaseColumn({
+  caseStudy,
+  flatIndex,
+  totalCases,
+  locale,
+  dict,
+  openT,
+  isActive,
+  isNearActive,
+  multi,
+  dividerLeft,
+  onExpand,
+}: {
+  caseStudy: CaseStudy;
+  flatIndex: number;
+  totalCases: number;
+  locale: Locale;
+  dict: Dictionary;
+  openT: MotionValue<number>;
+  isActive: boolean;
+  isNearActive: boolean;
+  /** Uma de três colunas lado a lado, não o painel cheio: título e métrica
+   *  encolhem pra caber num terço da largura em vez de vazar. */
+  multi: boolean;
+  /** Segunda ou terceira coluna do trio: ganha um fio vertical à esquerda,
+   *  a única separação entre elas (nenhuma moldura, nenhuma sombra). */
+  dividerLeft: boolean;
+  onExpand: (caseStudy: CaseStudy, rect: DOMRect) => void;
+}) {
+  const metric = caseStudy.metrics[0];
   const mediaZoom = useTransform(openT, [0, 1], [1.18, 1]);
   const mediaGrayscale = useTransform(openT, [0, 1], [1, 0]);
   const mediaFilter = useMotionTemplate`grayscale(${mediaGrayscale})`;
@@ -127,11 +244,7 @@ function ProjectPanel({
   const tagsY = useTransform(openT, [0.32, 0.62], ["100%", "0%"]);
   const ctaY = useTransform(openT, [0.42, 0.7], ["100%", "0%"]);
 
-  // Paralaxe magnética + rótulo que segue o cursor, os dois lidos do mesmo
-  // movimento de mouse dentro do painel ativo. A mídia usa mola (resposta
-  // física, desloca pouco); o rótulo usa um tween com ease-in-out em vez de
-  // mola, de propósito mais lento e "arrastado" que a resposta imediata de
-  // uma mola, para não parecer grudado no cursor do sistema.
+  // Paralaxe magnética da mídia: mola contida, desloca pouco.
   const tiltX = useMotionValue(0);
   const tiltY = useMotionValue(0);
   const tiltSpringX = useSpring(tiltX, { stiffness: 150, damping: 20 });
@@ -139,14 +252,27 @@ function ProjectPanel({
   const mediaTiltX = useTransform(tiltSpringX, [-0.5, 0.5], ["-3%", "3%"]);
   const mediaTiltY = useTransform(tiltSpringY, [-0.5, 0.5], ["-3%", "3%"]);
 
-  // Deslocado bem pra direita e um pouco pra baixo do ponteiro: cursores
-  // grandes (acessibilidade ou tema do sistema) cobrem a área logo ao lado
-  // da ponta, então o selo precisa de mais distância pra não nascer atrás
-  // do próprio cursor.
-  const cursorDisplayX = useMotionValue(0);
-  const cursorDisplayY = useMotionValue(0);
-  const labelX = useTransform(cursorDisplayX, (v) => v + 44);
-  const labelY = useTransform(cursorDisplayY, (v) => v + 16);
+  // Rastro ferrofluido: posição bruta do ponteiro alimentando uma cadeia de
+  // molas, cada uma perseguindo a mola anterior (não o ponteiro direto),
+  // cada vez mais mole. É o que dá o rastro contínuo, tipo gotas de líquido
+  // magnético esticando atrás da cabeça: mola integra velocidade quadro a
+  // quadro, então nunca "reinicia" a cada novo movimento do mouse, ao
+  // contrário de reiniciar uma animação por tempo (o efeito truncado de
+  // antes). A cabeça (leadX/leadY) também é a âncora do selo "ver caso",
+  // deslocado bem à direita e um pouco abaixo dela: cursores grandes do
+  // sistema cobrem a área logo ao lado da ponta.
+  const pointerRawX = useMotionValue(0);
+  const pointerRawY = useMotionValue(0);
+  const leadX = useSpring(pointerRawX, { stiffness: 55, damping: 16, mass: 0.8 });
+  const leadY = useSpring(pointerRawY, { stiffness: 55, damping: 16, mass: 0.8 });
+  const tailX1 = useSpring(leadX, { stiffness: 40, damping: 14, mass: 1 });
+  const tailY1 = useSpring(leadY, { stiffness: 40, damping: 14, mass: 1 });
+  const tailX2 = useSpring(tailX1, { stiffness: 28, damping: 14, mass: 1.2 });
+  const tailY2 = useSpring(tailY1, { stiffness: 28, damping: 14, mass: 1.2 });
+  const tailX3 = useSpring(tailX2, { stiffness: 18, damping: 14, mass: 1.4 });
+  const tailY3 = useSpring(tailY2, { stiffness: 18, damping: 14, mass: 1.4 });
+  const labelX = useTransform(leadX, (v) => v + 80);
+  const labelY = useTransform(leadY, (v) => v + 22);
 
   const [hovering, setHovering] = useState(false);
 
@@ -156,8 +282,8 @@ function ProjectPanel({
     const relY = event.clientY - rect.top;
     tiltX.set(relX / rect.width - 0.5);
     tiltY.set(relY / rect.height - 0.5);
-    animate(cursorDisplayX, relX, { duration: 0.6, ease: "easeInOut" });
-    animate(cursorDisplayY, relY, { duration: 0.6, ease: "easeInOut" });
+    pointerRawX.set(relX);
+    pointerRawY.set(relY);
   }
 
   function handleMouseLeave() {
@@ -170,7 +296,7 @@ function ProjectPanel({
     <motion.button
       type="button"
       onClick={(event) =>
-        isActive && onExpand(event.currentTarget.getBoundingClientRect())
+        isActive && onExpand(caseStudy, event.currentTarget.getBoundingClientRect())
       }
       onMouseMove={handleMouseMove}
       onMouseEnter={() => setHovering(true)}
@@ -178,84 +304,123 @@ function ProjectPanel({
       tabIndex={isActive ? 0 : -1}
       aria-hidden={!isActive}
       aria-label={caseStudy.title[locale]}
-      className={`absolute inset-0 block h-full w-full overflow-hidden bg-black text-left ${
-        isActive ? "" : "pointer-events-none"
-      }`}
-      style={{ clipPath, zIndex: isActive ? count + 1 : index }}
+      className={`relative block h-full flex-1 bg-black text-left ${
+        dividerLeft ? "border-l border-white/15" : ""
+      } ${isActive ? "" : "pointer-events-none"}`}
     >
-      <motion.div
-        style={{ scale: mediaZoom, filter: mediaFilter }}
-        className="absolute inset-0"
-      >
+      {/* Tudo que precisa de corte (zoom da mídia, máscara do texto) vive
+          aqui dentro; o botão em si fica sem overflow-hidden pra não cortar
+          o rastro ferrofluido e o selo, que podem passar do próprio limite
+          da coluna quando o cursor chega perto da borda. */}
+      <div className="absolute inset-0 overflow-hidden">
         <motion.div
-          style={{ x: mediaTiltX, y: mediaTiltY }}
-          className="h-full w-full"
+          style={{ scale: mediaZoom, filter: mediaFilter }}
+          className="absolute inset-0"
         >
-          {isNearActive ? (
-            <MediaView
-              media={caseStudy.cover}
-              locale={locale}
-              className="h-full w-full object-cover"
-            />
-          ) : (
-            <div className="h-full w-full bg-surface" />
-          )}
+          <motion.div
+            style={{ x: mediaTiltX, y: mediaTiltY }}
+            className="h-full w-full"
+          >
+            {isNearActive ? (
+              <MediaView
+                media={caseStudy.cover}
+                locale={locale}
+                className="h-full w-full object-cover"
+              />
+            ) : (
+              <div className="h-full w-full bg-surface" />
+            )}
+          </motion.div>
         </motion.div>
-      </motion.div>
-      <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/10 to-black/45" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/10 to-black/45" />
 
+        <motion.div
+          style={{ opacity: contentOpacity }}
+          className="gutter relative flex h-full flex-col justify-between py-24 text-white sm:py-28"
+        >
+          <div className="flex items-start justify-between gap-4">
+            <div className="overflow-hidden">
+              <motion.p style={{ y: kickerY }} className="type-mono text-white/70">
+                {pad(flatIndex + 1)} / {pad(totalCases)} · {caseStudy.year}
+              </motion.p>
+            </div>
+            <div className="overflow-hidden text-right">
+              <motion.p style={{ y: metricY }}>
+                <span
+                  className={`type-serif-display block ${
+                    multi ? "text-3xl sm:text-4xl" : "text-4xl sm:text-6xl"
+                  }`}
+                >
+                  {metric.value}
+                </span>
+                <span className="type-mono text-white/70">
+                  {metric.label[locale]}
+                  {metric.illustrative && " *"}
+                </span>
+              </motion.p>
+            </div>
+          </div>
+
+          <div>
+            <div className="overflow-hidden">
+              <motion.h3
+                style={{ y: titleY }}
+                className={`type-display type-inktrap leading-[0.9] ${
+                  multi ? "text-[9vw] sm:text-[3.4vw]" : "text-[12vw] sm:text-[6vw]"
+                }`}
+              >
+                {caseStudy.title[locale]}
+              </motion.h3>
+            </div>
+            <div className="mt-4 overflow-hidden">
+              <motion.p style={{ y: tagsY }} className="type-mono text-white/70">
+                {caseStudy.tags[locale].join(" • ")}
+              </motion.p>
+            </div>
+            <div className="mt-8 inline-block overflow-hidden">
+              <motion.span
+                style={{ y: ctaY }}
+                className="type-mono inline-flex items-center gap-3 border border-white/40 px-6 py-3 backdrop-blur-sm"
+              >
+                {caseStudy.comingSoon ? dict.cases.comingSoon : dict.cases.viewCase}
+                <span aria-hidden>→</span>
+              </motion.span>
+            </div>
+          </div>
+        </motion.div>
+      </div>
+
+      {/* Rastro ferrofluido: gotas encadeadas por mola, fundidas num líquido
+          só pelo filtro "goo" (blur alto + contraste alto). Fica atrás do
+          selo, que é o elemento crisp (sem blur) por cima. */}
       <motion.div
-        style={{ opacity: contentOpacity }}
-        className="gutter relative flex h-full flex-col justify-between py-24 text-white sm:py-28"
+        aria-hidden
+        animate={{ opacity: isActive && hovering ? 1 : 0 }}
+        transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+        style={{ filter: "blur(7px) contrast(24)" }}
+        className="pointer-events-none absolute inset-0 z-10 hidden sm:block"
       >
-        <div className="flex items-start justify-between gap-4">
-          <div className="overflow-hidden">
-            <motion.p style={{ y: kickerY }} className="type-mono text-white/70">
-              {pad(index + 1)} / {pad(count)} · {caseStudy.year}
-            </motion.p>
-          </div>
-          <div className="overflow-hidden text-right">
-            <motion.p style={{ y: metricY }}>
-              <span className="type-serif-display block text-4xl sm:text-6xl">
-                {metric.value}
-              </span>
-              <span className="type-mono text-white/70">
-                {metric.label[locale]}
-                {metric.illustrative && " *"}
-              </span>
-            </motion.p>
-          </div>
-        </div>
-
-        <div>
-          <div className="overflow-hidden">
-            <motion.h3
-              style={{ y: titleY }}
-              className="type-display type-inktrap text-[12vw] leading-[0.9] sm:text-[6vw]"
-            >
-              {caseStudy.title[locale]}
-            </motion.h3>
-          </div>
-          <div className="mt-4 overflow-hidden">
-            <motion.p style={{ y: tagsY }} className="type-mono text-white/70">
-              {caseStudy.tags[locale].join(" • ")}
-            </motion.p>
-          </div>
-          <div className="mt-8 inline-block overflow-hidden">
-            <motion.span
-              style={{ y: ctaY }}
-              className="type-mono inline-flex items-center gap-3 rounded-full border border-white/40 px-6 py-3 backdrop-blur-sm"
-            >
-              {caseStudy.comingSoon ? dict.cases.comingSoon : dict.cases.viewCase}
-              <span aria-hidden>→</span>
-            </motion.span>
-          </div>
-        </div>
+        <motion.span
+          className="absolute left-0 top-0 h-4 w-4 rounded-full bg-white"
+          style={{ x: leadX, y: leadY }}
+        />
+        <motion.span
+          className="absolute left-0 top-0 h-3 w-3 rounded-full bg-white"
+          style={{ x: tailX1, y: tailY1 }}
+        />
+        <motion.span
+          className="absolute left-0 top-0 h-2 w-2 rounded-full bg-white"
+          style={{ x: tailX2, y: tailY2 }}
+        />
+        <motion.span
+          className="absolute left-0 top-0 h-1 w-1 rounded-full bg-white"
+          style={{ x: tailX3, y: tailY3 }}
+        />
       </motion.div>
 
-      {/* Rótulo magnético: acompanha o cursor por cima do projeto ativo em
-          vez de deixar o ponteiro do sistema sozinho. Só desktop (hover real
-          existe), e só quando o painel está de fato em cena. */}
+      {/* Selo "ver caso": âncora crisp do rastro, deslocado bem à direita e
+          um pouco abaixo da cabeça. Só desktop (hover real existe), e só
+          quando o painel está de fato em cena. */}
       <motion.div
         aria-hidden
         style={{ x: labelX, y: labelY }}
@@ -267,7 +432,8 @@ function ProjectPanel({
             scale: isActive && hovering ? 1 : 0.6,
           }}
           transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-          className="type-mono inline-flex items-center gap-2 rounded-full bg-white px-5 py-2 text-black"
+          className="type-mono inline-flex items-center gap-2 bg-white px-5 py-2 text-black"
+          style={{ fontFamily: "var(--font-array)" }}
         >
           {caseStudy.comingSoon ? dict.cases.comingSoon : dict.cases.viewCase} →
         </motion.span>
@@ -373,7 +539,7 @@ function ExpandedCase({
           type="button"
           onClick={onClose}
           aria-label={dict.nav.close}
-          className="absolute right-5 top-5 z-10 flex h-11 w-11 items-center justify-center rounded-full border border-white/30 text-white backdrop-blur-sm transition-colors hover:bg-white/10 sm:right-8 sm:top-8"
+          className="absolute right-5 top-5 z-10 flex h-11 w-11 items-center justify-center border border-white/30 text-white backdrop-blur-sm transition-colors hover:bg-white/10 sm:right-8 sm:top-8"
         >
           <span aria-hidden>✕</span>
         </button>
@@ -426,7 +592,14 @@ export function CasesGrid({
     rect: DOMRect;
   } | null>(null);
 
-  const count = cases.length;
+  // Trio de artistas lado a lado só faz sentido com espaço de sobra: no
+  // mobile cada case continua sua própria fatia de scroll, empilhado como
+  // sempre foi (ver buildSlides). O padrão de "false" antes de hidratar
+  // bate com o prerender estático, que não sabe a largura de tela de quem
+  // vai abrir.
+  const isDesktop = useMediaQuery("(min-width: 1024px)");
+  const slides = isDesktop ? groupedSlides : flatSlides;
+  const count = slides.length;
   const hasIllustrative = cases.some((c) =>
     c.metrics.some((m) => m.illustrative),
   );
@@ -442,24 +615,18 @@ export function CasesGrid({
   });
 
   return (
-    <section id="work" className="border-t border-line">
-      <div className="gutter pt-28 pb-8 sm:pt-36 sm:pb-10 xl:pt-44 xl:pb-12">
-        <Reveal>
-          <h2 className="type-mono mb-2">{dict.cases.title}</h2>
-          <p className="max-w-lg text-muted">{dict.cases.subtitle}</p>
-        </Reveal>
-      </div>
-
+    <section id="work" aria-label={dict.cases.title} className="border-t border-line">
       <div
         ref={sectionRef}
         className="relative"
         style={{ height: `${count * 100}vh` }}
       >
         <div className="sticky top-0 h-svh w-full overflow-hidden">
-          {cases.map((caseStudy, index) => (
-            <ProjectPanel
-              key={caseStudy.slug}
-              caseStudy={caseStudy}
+          {slides.map((slide, index) => (
+            <SlidePanel
+              key={slide.map(({ caseStudy }) => caseStudy.slug).join("+")}
+              slide={slide}
+              totalCases={cases.length}
               locale={locale}
               dict={dict}
               index={index}
@@ -467,7 +634,7 @@ export function CasesGrid({
               scrollYProgress={scrollYProgress}
               isActive={index === activeIndex}
               isNearActive={Math.abs(index - activeIndex) <= 1}
-              onExpand={(rect) => setExpanding({ caseStudy, rect })}
+              onExpand={(caseStudy, rect) => setExpanding({ caseStudy, rect })}
             />
           ))}
 
@@ -492,9 +659,9 @@ export function CasesGrid({
               </AnimatePresence>
             </span>
             <div className="flex gap-2">
-              {cases.map((caseStudy, index) => (
+              {slides.map((slide, index) => (
                 <motion.span
-                  key={caseStudy.slug}
+                  key={slide.map(({ caseStudy }) => caseStudy.slug).join("+")}
                   animate={{ scale: index === activeIndex ? 1.4 : 1 }}
                   transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
                   className={`h-2 w-2 rounded-full transition-colors ${
