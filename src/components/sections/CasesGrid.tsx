@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   AnimatePresence,
+  animate,
   motion,
   useMotionTemplate,
   useMotionValue,
@@ -127,8 +128,10 @@ function ProjectPanel({
   const ctaY = useTransform(openT, [0.42, 0.7], ["100%", "0%"]);
 
   // Paralaxe magnética + rótulo que segue o cursor, os dois lidos do mesmo
-  // movimento de mouse dentro do painel ativo. Molas separadas: a da mídia é
-  // mais contida (desloca pouco), a do rótulo persegue o ponteiro de perto.
+  // movimento de mouse dentro do painel ativo. A mídia usa mola (resposta
+  // física, desloca pouco); o rótulo usa um tween com ease-in-out em vez de
+  // mola, de propósito mais lento e "arrastado" que a resposta imediata de
+  // uma mola, para não parecer grudado no cursor do sistema.
   const tiltX = useMotionValue(0);
   const tiltY = useMotionValue(0);
   const tiltSpringX = useSpring(tiltX, { stiffness: 150, damping: 20 });
@@ -136,12 +139,14 @@ function ProjectPanel({
   const mediaTiltX = useTransform(tiltSpringX, [-0.5, 0.5], ["-3%", "3%"]);
   const mediaTiltY = useTransform(tiltSpringY, [-0.5, 0.5], ["-3%", "3%"]);
 
-  const cursorX = useMotionValue(0);
-  const cursorY = useMotionValue(0);
-  const cursorSpringX = useSpring(cursorX, { stiffness: 300, damping: 30 });
-  const cursorSpringY = useSpring(cursorY, { stiffness: 300, damping: 30 });
-  const labelX = useTransform(cursorSpringX, (v) => v + 20);
-  const labelY = useTransform(cursorSpringY, (v) => v + 20);
+  // Deslocado bem pra direita e um pouco pra baixo do ponteiro: cursores
+  // grandes (acessibilidade ou tema do sistema) cobrem a área logo ao lado
+  // da ponta, então o selo precisa de mais distância pra não nascer atrás
+  // do próprio cursor.
+  const cursorDisplayX = useMotionValue(0);
+  const cursorDisplayY = useMotionValue(0);
+  const labelX = useTransform(cursorDisplayX, (v) => v + 44);
+  const labelY = useTransform(cursorDisplayY, (v) => v + 16);
 
   const [hovering, setHovering] = useState(false);
 
@@ -151,8 +156,8 @@ function ProjectPanel({
     const relY = event.clientY - rect.top;
     tiltX.set(relX / rect.width - 0.5);
     tiltY.set(relY / rect.height - 0.5);
-    cursorX.set(relX);
-    cursorY.set(relY);
+    animate(cursorDisplayX, relX, { duration: 0.6, ease: "easeInOut" });
+    animate(cursorDisplayY, relY, { duration: 0.6, ease: "easeInOut" });
   }
 
   function handleMouseLeave() {
@@ -438,7 +443,7 @@ export function CasesGrid({
 
   return (
     <section id="work" className="border-t border-line">
-      <div className="gutter section-y">
+      <div className="gutter pt-28 pb-8 sm:pt-36 sm:pb-10 xl:pt-44 xl:pb-12">
         <Reveal>
           <h2 className="type-mono mb-2">{dict.cases.title}</h2>
           <p className="max-w-lg text-muted">{dict.cases.subtitle}</p>
