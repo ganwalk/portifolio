@@ -1,5 +1,10 @@
 // Dados públicos de contato e perfil.
-// TODO(Armando): confirmar/completar os campos marcados, LinkedIn, cidade e links extras.
+// TODO(Armando): confirmar/completar os campos marcados, LinkedIn, Instagram, cidade.
+
+// Mensagem pronta do WhatsApp: preenche o campo de texto assim que o link
+// abre, quem visita só precisa apertar enviar. Sem travessão nem sublinhado,
+// mesma regra do resto do texto visível (ver docs/tom-de-voz.md).
+const WHATSAPP_MESSAGE = "Oi, Armando! Vi seu portfólio e queria conversar sobre um projeto.";
 
 export const profile = {
   name: "Armando Custodio",
@@ -9,7 +14,8 @@ export const profile = {
   links: {
     github: "https://github.com/ganwalk",
     linkedin: "", // TODO(Armando): URL do LinkedIn
-    // Espaço para Behance, Instagram, etc., adicionar conforme fornecido.
+    instagram: "", // TODO(Armando): URL do Instagram
+    whatsapp: `https://wa.me/5562992174047?text=${encodeURIComponent(WHATSAPP_MESSAGE)}`,
   },
   languages: [
     { code: "pt", level: { pt: "Nativo", en: "Native", es: "Nativo" } },
