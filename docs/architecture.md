@@ -118,7 +118,7 @@ para quem estiver sem JavaScript. Cada idioma gera HTML próprio com o atributo
 | Corpo de texto           | Archivo (wdth)     | parágrafos, listas, texto corrido              |
 | Manchete                 | Bricolage Grotesque | nome na hero, título e métrica dos cases, convite do contato, menu overlay |
 | Mono de extrato          | IBM Plex Mono      | legendas técnicas, tags, controles             |
-| Selo do cursor           | Array (Fontshare)  | só o letreiro do selo que segue o cursor nos projetos em destaque |
+| Subtítulo da hero        | Switzer (Fontshare) | só o "Designer de [roleta]" abaixo do nome, combina com a Whyte Inktrap |
 
 `--font-headline` é a variável que carrega a Bricolage Grotesque, referenciada
 direto dentro de `.type-display` e `.type-serif-display` (os nomes das classes
@@ -128,9 +128,10 @@ uma com peso e entrelinha próprios). `--font-sans`, usada pelo `body` e por
 `--font-headline` como fallback, continua em Archivo: só o corpo de texto e
 nada de manchete usa essa variável diretamente.
 
-Bricolage Grotesque não tem eixo de largura nem itálico de verdade: onde o
-subtítulo da hero pede itálico, o navegador sintetiza (oblíqua), efeito aceito
-de propósito em fontes grotescas, ao contrário de uma serifa.
+Bricolage Grotesque não tem eixo de largura nem itálico de verdade, mas o
+subtítulo da hero não usa Bricolage: usa Switzer (ver `--font-switzer` em
+`globals.css` e `src/fonts/switzer/`), que tem itálico desenhado de verdade,
+não sintetizado pelo navegador.
 
 ## Cores
 
@@ -250,9 +251,12 @@ decorativa. O que dá vida é movimento e tipografia, não ornamento.
   era visível): a primeira fatia já entra prendendo o scroll, sem dobra de
   transição no meio. A seção é alta (uma tela inteira por fatia) e fica
   `sticky` enquanto o visitante rola; cada fatia se desdobra a partir de uma
-  cortina fechada no centro (`clip-path` fechado nas bordas superior e
-  inferior, abrindo conforme o scroll avança) e fecha de volta pra dar lugar
-  à próxima. Rolar é a navegação inteira: sem seta, sem play/pause, sem
+  íris fechada no centro (`clip-path: circle()`, raio crescendo de 0% a
+  102% conforme o scroll avança, mais interessante que a cortina de barras
+  que existia antes) e fecha de volta pra dar lugar à próxima. Um leve
+  `scale` no conteúdo (de 1.08 a 1, numa camada interna separada do
+  `clip-path`) acompanha a abertura, reforçando a sensação de zoom saindo
+  do centro. Rolar é a navegação inteira: sem seta, sem play/pause, sem
   índice próprio brigando com o scroll de verdade. Primeira e última fatia
   não têm a metade da transição que não existe (a primeira já nasce aberta,
   a última fica aberta até o fim da seção). Clicar no projeto em cena
@@ -260,43 +264,41 @@ decorativa. O que dá vida é movimento e tipografia, não ornamento.
   descrito abaixo em "Menu overlay" e "Transição de modo": o overlay nasce
   encolhido sobre o retângulo clicado e anima até a identidade).
 
-  **Fatia nem sempre é um case só.** No desktop (`min-width: 1024px`, via
-  `useMediaQuery`, `src/lib/use-media-query.ts`), cases adjacentes que
-  compartilham `group` no dado (o trio Ganwalk/Dezert Horse/Pink Opala, hoje)
-  viram uma fatia lado a lado dentro da mesma cortina, em vez de três
-  aberturas separadas: `buildSlides` monta as duas versões (`flatSlides`,
-  uma fatia por case; `groupedSlides`, o trio fundido) uma vez só, fora do
-  componente, porque `cases` é estático. No mobile a distinção não existe,
-  cada case continua empilhado na sua própria fatia, o comportamento de
-  sempre. `SlidePanel` cuida da cortina (compartilhada por toda a fatia) e
-  distribui as colunas (`CaseColumn`) num `flex` de largura igual; o rótulo
-  de índice de cada coluna ("03 / 06") sempre conta cases da lista inteira,
-  não fatias, então a numeração não muda com o agrupamento. Título e métrica
-  encolhem (`multi`) quando a coluna é uma de três, pra não vazar de um
-  terço da largura. Como a largura da tela só é conhecida depois de
-  hidratar, o servidor sempre prevê a versão empilhada (`flatSlides`); no
-  desktop a seção recalcula o número de fatias assim que o React sincroniza
-  com o `matchMedia`.
+  **Fatia nem sempre é um case só.** Cases adjacentes que compartilham
+  `group` no dado (o trio Ganwalk/Dezert Horse/Pink Opala, hoje) sempre
+  viram uma única fatia dentro da mesma íris, em vez de três aberturas
+  separadas: `buildSlides` agrupa cases adjacentes de mesmo `group` numa só
+  passada, direto do dado, sem depender do tamanho da tela nem de
+  `matchMedia`. `SlidePanel` distribui as colunas (`CaseColumn`) empilhadas
+  na vertical por padrão e lado a lado num `flex` a partir do breakpoint
+  `lg:` (CSS puro: sem hook de media query, sem risco de descompasso entre
+  o HTML do servidor e o do cliente). O mobile ganha o mesmo benefício do
+  desktop, uma fatia por trio em vez de três, então o scroll da seção fica
+  mais curto lá também. O rótulo de índice de cada coluna ("03 / 06") sempre
+  conta cases da lista inteira, não fatias, então a numeração não muda com o
+  agrupamento. Título e métrica encolhem (`multi`) quando a coluna é uma de
+  três, pra não vazar de um terço da largura (ou da fatia vertical de altura
+  empilhada, no mobile).
 
   A fatia do trio ganha uma quarta coluna, estreita, à esquerda das três:
   só a frase "Experiências interativas" girada 90° (`writing-mode:
   vertical-rl`), na Whyte Inktrap (mesma fonte dos títulos, não a mono do
   resto dos rótulos), uma régua de contexto, não um case clicável.
 
-  Duas camadas de vocabulário de agência vivem em cima da cortina, atrás do
-  `MotionConfig` do Modo Boring:
-  1. **Texto em máscara escalonada**: índice, métrica, título, tags e o
-     convite de "ver caso" moram cada um no seu próprio `overflow-hidden` e
-     sobem do zero num instante diferente dentro da janela de abertura da
-     própria fatia, em vez do bloco inteiro nascer junto num só fade. O
-     título tem a janela mais longa e entra por último, o elemento que
-     merece mais peso na composição. O wrapper do título tem `pt-[0.16em]`
-     pelo mesmo motivo do H1 da hero (ver acima): sem essa folga, o
-     `overflow-hidden` da máscara corta o topo das letras da Whyte Inktrap.
-  2. **Cor como recompensa do foco**: a mídia nasce em preto e branco
-     (`grayscale`) e ganha cor só quando o projeto termina de abrir, o
-     mesmo princípio do resto do site (preto e branco, cor só vem da mídia)
-     agora também contando o próprio ato de focar um projeto.
+  Uma camada de vocabulário de agência vive em cima da íris, atrás do
+  `MotionConfig` do Modo Boring: texto em máscara escalonada. Índice,
+  métrica, título, tags e o convite de "ver caso" moram cada um no seu
+  próprio `overflow-hidden` e sobem do zero num instante diferente dentro
+  da janela de abertura da própria fatia, em vez do bloco inteiro nascer
+  junto num só fade. O título tem a janela mais longa e entra por último,
+  o elemento que merece mais peso na composição. O `pt-[0.16em]` mora no
+  próprio `<motion.h3>` do título, não no wrapper que faz o
+  `overflow-hidden`: `em` resolve contra o tamanho de fonte do próprio
+  elemento, não herda do filho, então a folga só funciona no elemento que
+  de fato tem a fonte grande (mesmo motivo do H1 da hero, ver acima). A
+  mídia fica colorida o tempo todo, sem passar por preto e branco na
+  transição: a única cor do site já vem dela, e um efeito de grayscale
+  competia com a abertura da íris em vez de reforçá-la.
 
   O fundo de cada card é estático: só a mídia, sem deslocar com o cursor. O
   único movimento que resta nela é um zoom sutil (`scale`, via `animate`),
@@ -309,11 +311,12 @@ decorativa. O que dá vida é movimento e tipografia, não ornamento.
   cobrem a área logo ao lado dela), quadrado como o resto dos controles do
   site (sem `rounded-full`). O texto dentro dele roda num letreiro
   horizontal contínuo, como uma placa luminosa antiga: a pílula é uma
-  janela de largura fixa e menor que o conteúdo (`overflow-hidden`), com
-  duas cópias idênticas do texto lado a lado, sem seta nem espaço entre
-  elas (só o ponto final de cada cópia separando da próxima: "ver
-  case.ver case."), andando de 0% a -50% pra sempre. Como as duas cópias
-  são idênticas, o instante em que a primeira sai pela esquerda é
+  janela de largura fixa e menor que o conteúdo (`overflow-hidden`), na
+  mesma fonte mono dos outros rótulos técnicos do site (`.type-mono`, a
+  mesma de "UX/UI · Webapps · Design Systems" na hero), com duas cópias
+  idênticas do texto lado a lado, separadas por um bullet com espaço dos
+  dois lados (" • ver caso • ver caso"), andando de 0% a -50% pra sempre.
+  Como as duas cópias são idênticas, o instante em que a primeira sai pela esquerda é
   exatamente o instante em que a segunda chega no início, sem costura no
   loop. Complementar ao selo estático dentro do texto (que continua ali
   por acessibilidade e por quem usa toque).
