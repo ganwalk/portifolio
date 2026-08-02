@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   AnimatePresence,
   motion,
@@ -72,9 +72,13 @@ import type { Dictionary } from "@/i18n/dictionaries";
 // dos dois lados (não espaço literal, refém da fonte), andando de 0% a
 // -50% pra sempre, sem costura no loop. Complementar ao selo estático
 // dentro do texto (que continua ali por acessibilidade e pra quem usa
-// toque). onMouseMove, não onPointerMove: em toque o evento não dispara,
-// então nada disso ativa lá, mesmo princípio que já mantém a lente da hero
-// parada no mobile.
+// toque). O selo é um só pra seção inteira (rastreado em `CasesGrid`, não
+// um por coluna): todos os painéis ocupam o mesmo retângulo da tela, então
+// a posição do cursor não muda quando o scroll troca qual fatia está por
+// cima, só o alvo do hover muda, recalculado tanto a cada movimento real do
+// mouse quanto sempre que a fatia ativa troca. onMouseMove, não
+// onPointerMove: em toque o evento não dispara, então nada disso ativa lá,
+// mesmo princípio que já mantém a lente da hero parada no mobile.
 //
 // Clicar no projeto em cena ainda expande pra tela cheia com os dados
 // completos do case, igual antes; só a navegação ENTRE projetos mudou.
@@ -142,6 +146,7 @@ function SlidePanel({
   scrollYProgress,
   isActive,
   isNearActive,
+  hoveredSlug,
   onExpand,
 }: {
   slide: SlideCase[];
@@ -153,6 +158,7 @@ function SlidePanel({
   scrollYProgress: ReturnType<typeof useScroll>["scrollYProgress"];
   isActive: boolean;
   isNearActive: boolean;
+  hoveredSlug: string | null;
   onExpand: (caseStudy: CaseStudy, rect: DOMRect) => void;
 }) {
   const multi = slide.length > 1;
@@ -217,6 +223,7 @@ function SlidePanel({
               enterT={enterT}
               isActive={isActive}
               isNearActive={isNearActive}
+              isHovered={hoveredSlug === caseStudy.slug}
               multi={multi}
               dividerLeft={multi}
               onExpand={onExpand}
@@ -237,6 +244,7 @@ function CaseColumn({
   enterT,
   isActive,
   isNearActive,
+  isHovered,
   multi,
   dividerLeft,
   onExpand,
@@ -249,6 +257,11 @@ function CaseColumn({
   enterT: MotionValue<number>;
   isActive: boolean;
   isNearActive: boolean;
+  /** Se ESTE case é o alvo do cursor agora, decidido uma vez só lá em cima
+   *  em CasesGrid (ver comentário no selo que segue o cursor) em vez de
+   *  cada coluna rastrear seu próprio hover: o zoom sutil da mídia usa o
+   *  mesmo valor. */
+  isHovered: boolean;
   /** Uma de três, não o painel cheio: título, métrica e respiro encolhem
    *  pra caber num terço do espaço (da largura no lg:, da altura antes
    *  disso, ver dividerLeft) em vez de vazar. */
@@ -275,42 +288,13 @@ function CaseColumn({
   const tagsY = useTransform(enterT, [0.32, 0.62], ["100%", "0%"]);
   const ctaY = useTransform(enterT, [0.42, 0.7], ["100%", "0%"]);
 
-  // Selo que segue o cursor: posição bruta do ponteiro suavizada por uma
-  // mola só (sem rastro de partículas), deslocada bem à direita e um pouco
-  // abaixo da ponta: cursores grandes do sistema cobrem a área logo ao lado
-  // dela.
-  const pointerRawX = useMotionValue(0);
-  const pointerRawY = useMotionValue(0);
-  const leadX = useSpring(pointerRawX, { stiffness: 55, damping: 16, mass: 0.8 });
-  const leadY = useSpring(pointerRawY, { stiffness: 55, damping: 16, mass: 0.8 });
-  const labelX = useTransform(leadX, (v) => v + 80);
-  const labelY = useTransform(leadY, (v) => v + 22);
-
-  const [hovering, setHovering] = useState(false);
-
-  // O fundo do card é estático, só o vídeo/imagem em si: nada de deslocar
-  // com o mouse. O único movimento que resta na mídia é o zoom, e esse é só
-  // no hover (não mais amarrado ao scroll): mais previsível, sem o "pulo"
-  // de zoom que a rolagem causava antes de chegar num projeto.
-  function handleMouseMove(event: React.MouseEvent<HTMLButtonElement>) {
-    const rect = event.currentTarget.getBoundingClientRect();
-    pointerRawX.set(event.clientX - rect.left);
-    pointerRawY.set(event.clientY - rect.top);
-  }
-
-  function handleMouseLeave() {
-    setHovering(false);
-  }
-
   return (
     <motion.button
       type="button"
+      data-case-slug={caseStudy.slug}
       onClick={(event) =>
         isActive && onExpand(caseStudy, event.currentTarget.getBoundingClientRect())
       }
-      onMouseMove={handleMouseMove}
-      onMouseEnter={() => setHovering(true)}
-      onMouseLeave={handleMouseLeave}
       tabIndex={isActive ? 0 : -1}
       aria-hidden={!isActive}
       aria-label={caseStudy.title[locale]}
@@ -319,12 +303,11 @@ function CaseColumn({
       } ${isActive ? "" : "pointer-events-none"}`}
     >
       {/* Tudo que precisa de corte (zoom da mídia, máscara do texto) vive
-          aqui dentro; o botão em si fica sem overflow-hidden pra não cortar
-          o selo, que pode passar do próprio limite da coluna quando o
-          cursor chega perto da borda. */}
+          aqui dentro; o selo que segue o cursor não mora mais aqui (ver
+          CasesGrid: um selo só, no nível da seção, não um por coluna). */}
       <div className="absolute inset-0 overflow-hidden">
         <motion.div
-          animate={{ scale: hovering ? 1.06 : 1 }}
+          animate={{ scale: isHovered ? 1.06 : 1 }}
           transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
           className="absolute inset-0"
         >
@@ -421,52 +404,6 @@ function CaseColumn({
         </motion.div>
       </div>
 
-      {/* Selo "ver caso": segue o cursor deslocado bem à direita e um pouco
-          abaixo dele. Só desktop (hover real existe), e só quando o painel
-          está de fato em cena. O texto roda num letreiro horizontal
-          contínuo, como uma placa luminosa antiga, na mesma mono dos fatos
-          da hera ("UX/UI · Webapps · Design Systems"): a pílula é uma
-          janela de largura fixa (overflow-hidden), menor que o conteúdo, e
-          a faixa lá dentro tem DUAS cópias do texto uma atrás da outra,
-          separadas por "•" (o mesmo separador de bullet usado em tags e
-          fatos pelo site inteiro), andando de 0% a -50% pra sempre. Como as
-          duas cópias são idênticas, o instante em que a primeira sai pela
-          esquerda é exatamente o instante em que a segunda chega no
-          início, o loop não tem costura. */}
-      <motion.div
-        aria-hidden
-        style={{ x: labelX, y: labelY }}
-        className="pointer-events-none absolute left-0 top-0 z-10 hidden sm:block"
-      >
-        <motion.div
-          animate={{
-            opacity: isActive && hovering ? 1 : 0,
-            scale: isActive && hovering ? 1 : 0.6,
-          }}
-          transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-          className="w-44 overflow-hidden bg-white py-2.5 text-black"
-        >
-          <motion.div
-            className="type-mono flex w-max items-center whitespace-nowrap"
-            animate={{ x: ["0%", "-50%"] }}
-            transition={{ duration: 6, ease: "linear", repeat: Infinity }}
-          >
-            {/* Bullet num span próprio com padding igual dos dois lados
-                (px-3), não espaço literal: um espaço de texto some ao
-                sabor da fonte e do letter-spacing do .type-mono, padding é
-                pixel exato, então a distância antes e depois do "•" fica
-                garantidamente igual. */}
-            {[0, 1].map((copy) => (
-              <span key={copy} className="flex shrink-0 items-center">
-                <span aria-hidden className="px-3">
-                  •
-                </span>
-                {caseStudy.comingSoon ? dict.cases.comingSoon : dict.cases.viewCase}
-              </span>
-            ))}
-          </motion.div>
-        </motion.div>
-      </motion.div>
     </motion.button>
   );
 }
@@ -641,6 +578,58 @@ export function CasesGrid({
     setActiveIndex(next);
   });
 
+  // Selo "ver caso" que segue o cursor: um só pra seção inteira, não um por
+  // coluna. Cada painel é absolute inset-0 (mesmo retângulo da tela pros
+  // quatro), então a posição do cursor relativa à seção não muda quando o
+  // scroll troca qual fatia está por cima, só o que está ATIVO embaixo dele
+  // muda. Um selo por coluna, cada um com seu próprio estado de posição,
+  // ficava para trás quando a rolagem trocava a fatia ativa sem o mouse se
+  // mexer: o card que passava a ficar ativo nunca tinha recebido um
+  // mousemove de verdade, então sua posição salva continuava a última (às
+  // vezes a inicial, 0,0), o selo "pulava" pro canto errado até o próximo
+  // movimento real do mouse. Centralizando aqui, a posição bruta do
+  // ponteiro só é atualizada por um mousemove de verdade (sempre correta,
+  // porque rolar sem mexer o mouse não muda onde ele está na tela), e o
+  // alvo do hover é recalculado tanto a cada mousemove quanto sempre que a
+  // fatia ativa muda (`refreshHoverAt` no efeito abaixo), usando a última
+  // posição bruta conhecida.
+  const pointerRawX = useMotionValue(0);
+  const pointerRawY = useMotionValue(0);
+  const leadX = useSpring(pointerRawX, { stiffness: 55, damping: 16, mass: 0.8 });
+  const leadY = useSpring(pointerRawY, { stiffness: 55, damping: 16, mass: 0.8 });
+  const labelX = useTransform(leadX, (v) => v + 80);
+  const labelY = useTransform(leadY, (v) => v + 22);
+
+  const [hoveredSlug, setHoveredSlug] = useState<string | null>(null);
+  const lastClientPos = useRef<{ x: number; y: number } | null>(null);
+
+  const refreshHoverAt = useCallback((clientX: number, clientY: number) => {
+    const el = document.elementFromPoint(clientX, clientY);
+    const caseEl = el instanceof Element ? el.closest<HTMLElement>("[data-case-slug]") : null;
+    setHoveredSlug(caseEl?.dataset.caseSlug ?? null);
+  }, []);
+
+  useEffect(() => {
+    if (lastClientPos.current) {
+      refreshHoverAt(lastClientPos.current.x, lastClientPos.current.y);
+    }
+  }, [activeIndex, refreshHoverAt]);
+
+  function handleStickyMouseMove(event: React.MouseEvent<HTMLDivElement>) {
+    const rect = event.currentTarget.getBoundingClientRect();
+    pointerRawX.set(event.clientX - rect.left);
+    pointerRawY.set(event.clientY - rect.top);
+    lastClientPos.current = { x: event.clientX, y: event.clientY };
+    refreshHoverAt(event.clientX, event.clientY);
+  }
+
+  function handleStickyMouseLeave() {
+    lastClientPos.current = null;
+    setHoveredSlug(null);
+  }
+
+  const hoveredCase = cases.find((c) => c.slug === hoveredSlug) ?? null;
+
   return (
     <section id="work" aria-label={dict.cases.title} className="border-t border-line">
       <div
@@ -648,7 +637,11 @@ export function CasesGrid({
         className="relative"
         style={{ height: `${count * 100}vh` }}
       >
-        <div className="sticky top-0 h-svh w-full overflow-hidden">
+        <div
+          className="sticky top-0 h-svh w-full overflow-hidden"
+          onMouseMove={handleStickyMouseMove}
+          onMouseLeave={handleStickyMouseLeave}
+        >
           {slides.map((slide, index) => (
             <SlidePanel
               key={slide.map(({ caseStudy }) => caseStudy.slug).join("+")}
@@ -661,6 +654,7 @@ export function CasesGrid({
               scrollYProgress={scrollYProgress}
               isActive={index === activeIndex}
               isNearActive={Math.abs(index - activeIndex) <= 1}
+              hoveredSlug={hoveredSlug}
               onExpand={(caseStudy, rect) => setExpanding({ caseStudy, rect })}
             />
           ))}
@@ -687,6 +681,52 @@ export function CasesGrid({
               ))}
             </div>
           </div>
+
+          {/* Selo "ver caso": segue o cursor deslocado bem à direita e um
+              pouco abaixo dele. Só desktop (hover real existe). O texto
+              roda num letreiro horizontal contínuo, como uma placa
+              luminosa antiga, na mesma mono dos fatos da hero ("UX/UI ·
+              Webapps · Design Systems"): a pílula é uma janela de largura
+              fixa (overflow-hidden), menor que o conteúdo, e a faixa lá
+              dentro tem DUAS cópias do texto uma atrás da outra, separadas
+              por um bullet com padding igual dos dois lados (não espaço
+              literal, refém da fonte), andando de 0% a -50% pra sempre.
+              Como as duas cópias são idênticas, o instante em que a
+              primeira sai pela esquerda é exatamente o instante em que a
+              segunda chega no início, o loop não tem costura. */}
+          <motion.div
+            aria-hidden
+            style={{ x: labelX, y: labelY }}
+            className="pointer-events-none absolute left-0 top-0 z-40 hidden sm:block"
+          >
+            <motion.div
+              animate={{
+                opacity: hoveredCase ? 1 : 0,
+                scale: hoveredCase ? 1 : 0.6,
+              }}
+              transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+              className="w-44 overflow-hidden bg-white py-2.5 text-black"
+            >
+              <motion.div
+                className="type-mono flex w-max items-center whitespace-nowrap"
+                animate={{ x: ["0%", "-50%"] }}
+                transition={{ duration: 6, ease: "linear", repeat: Infinity }}
+              >
+                {[0, 1].map((copy) => (
+                  <span key={copy} className="flex shrink-0 items-center">
+                    <span aria-hidden className="px-3">
+                      •
+                    </span>
+                    {hoveredCase
+                      ? hoveredCase.comingSoon
+                        ? dict.cases.comingSoon
+                        : dict.cases.viewCase
+                      : ""}
+                  </span>
+                ))}
+              </motion.div>
+            </motion.div>
+          </motion.div>
         </div>
       </div>
 

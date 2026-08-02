@@ -8,14 +8,19 @@ import type { Locale } from "@/i18n/config";
 
 // Experimento único de WebGL do site (o resto é CSS/Framer Motion de
 // propósito): uma ondulação que segue o cursor sobre a capa do projeto em
-// cena, um "lente" de deslocamento em vez do zoom plano que existia antes.
-// Escopo deliberadamente pequeno: só a capa ATIVA (uma por vez, três no
-// máximo num trio) ganha o efeito, nunca a seção inteira, e o loop de
-// desenho só roda enquanto o cursor está de fato em cima (custo zero
-// parado). Cai pro <MediaView> comum (sempre presente, por baixo) sem
+// cena, com aberração cromática (cada canal de cor lê a textura com uma
+// amplitude de onda diferente, então a franja de cor cresce e encolhe junto
+// com a força do hover), no lugar do zoom plano que existia antes. Escopo
+// deliberadamente pequeno: só a capa ATIVA (uma por vez, três no máximo num
+// trio) ganha o efeito, nunca a seção inteira, e o loop de desenho só roda
+// enquanto o cursor está de fato em cima (custo zero parado). Um aceno de
+// estreia toca sozinho, centralizado, na primeira vez que cada projeto
+// entra em cena (sobe e desce em ~1.1s): sem ele o efeito inteiro dependia
+// de alguém descobrir que passar o mouse ali fazia diferença, fácil de
+// nunca acontecer. Cai pro <MediaView> comum (sempre presente, por baixo) sem
 // nenhuma diferença visível quando o WebGL falha, é desligado no sistema
 // (prefers-reduced-motion) ou estamos no Modo Boring: informação, não
-// vitrine, o Boring não ganha nenhum canvas.
+// vitrine, o Boring não ganha nenhum canvas nem aceno.
 
 const VERTEX_SRC = `
 attribute vec2 aPosition;
@@ -37,18 +42,27 @@ uniform float uAspect;
 uniform vec2 uUvScale;
 uniform vec2 uUvOffset;
 
-void main() {
-  vec2 uv = vUv;
+vec2 warp(vec2 uv, float amp) {
   vec2 toMouse = uv - uMouse;
   toMouse.x *= uAspect;
   float dist = length(toMouse);
-  float falloff = smoothstep(0.45, 0.0, dist);
-  float ripple = sin(dist * 28.0 - uTime * 3.2) * 0.035 * uHover * falloff;
+  float falloff = smoothstep(0.55, 0.0, dist);
+  float ripple = sin(dist * 10.0 - uTime * 3.6) * amp * uHover * falloff;
   vec2 dir = dist > 0.0001 ? normalize(toMouse) : vec2(0.0);
   dir.x /= uAspect;
-  vec2 warped = uv + dir * ripple;
-  vec2 texUv = warped * uUvScale + uUvOffset;
-  gl_FragColor = texture2D(uTexture, texUv);
+  return uv + dir * ripple;
+}
+
+void main() {
+  // Aberração cromática: cada canal de cor amostra a mesma ondulação com
+  // uma amplitude levemente diferente, então a franja de cor cresce e
+  // encolhe junto com a força do hover, um efeito bem mais "tecnológico"
+  // do que só empurrar os pixels juntos, sem custo extra (mesma textura,
+  // três leituras).
+  float r = texture2D(uTexture, warp(vUv, 0.055) * uUvScale + uUvOffset).r;
+  float g = texture2D(uTexture, warp(vUv, 0.042) * uUvScale + uUvOffset).g;
+  float b = texture2D(uTexture, warp(vUv, 0.03) * uUvScale + uUvOffset).b;
+  gl_FragColor = vec4(r, g, b, 1.0);
 }
 `;
 
@@ -237,8 +251,26 @@ export function HoverWarpMedia({
     container.addEventListener("mouseenter", onEnter);
     container.addEventListener("mouseleave", onLeave);
 
+    // Aceno de estreia: a primeira vez que um projeto entra em cena, o
+    // efeito se apresenta sozinho por um instante (centro do card, força
+    // sobe e desce), em vez de ficar inteiramente escondido atrás da
+    // descoberta de passar o mouse por cima. Só essa vez; hover de verdade
+    // manda depois.
+    mouse.x = 0.5;
+    mouse.y = 0.5;
+    hoverTarget = 1;
+    canvas.style.opacity = "1";
+    ensureLoop();
+    const pulseTimer = window.setTimeout(() => {
+      if (destroyed) return;
+      hoverTarget = 0;
+      canvas.style.opacity = "0";
+      ensureLoop();
+    }, 1100);
+
     return () => {
       destroyed = true;
+      window.clearTimeout(pulseTimer);
       cancelAnimationFrame(rafId);
       resizeObserver.disconnect();
       container.removeEventListener("mousemove", onMove);
