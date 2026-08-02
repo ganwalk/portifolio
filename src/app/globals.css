@@ -320,6 +320,37 @@ html[data-boring="true"] .texture-noise::after {
   }
 }
 
+/* Vinheta de filme: escurece as quinas da hero por cima do grão
+   (.texture-noise, já aplicado ali), o resto do efeito de "textura de
+   filme". Sempre em preto, mesmo no tema escuro: é a queda de exposição de
+   uma lente física, não uma cor de marca, então não usa os tokens de tema
+   (--foreground inverteria a vinheta pra branco no escuro, o oposto do que
+   uma vinheta faz). z-index acima do conteúdo, como um filtro de verdade
+   por cima da cena, não atrás dela. */
+.texture-film::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: radial-gradient(
+    ellipse at center,
+    transparent 45%,
+    rgba(0, 0, 0, 0.45) 100%
+  );
+}
+
+html[data-boring="true"] .texture-film::before {
+  display: none;
+}
+
+/* Grão um pouco mais presente aqui que o padrão do .texture-noise (usado
+   também em blocos pequenos e estáticos, onde 0.05 já basta): a hera é
+   tela cheia e quer ler como filme de verdade, não só uma aspereza sutil. */
+.texture-film.texture-noise::after {
+  opacity: 0.08;
+}
+
 /* Respeito ao sistema: se a pessoa pediu menos movimento, o site obedece
    mesmo fora do Modo Boring. */
 @media (prefers-reduced-motion: reduce) {
