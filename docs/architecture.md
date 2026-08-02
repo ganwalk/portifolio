@@ -176,11 +176,9 @@ decorativa. O que dá vida é movimento e tipografia, não ornamento.
   beiradas. Perto do CTA "Veja meu trabalho" o raio encolhe. Em telas de
   toque a lente fica com raio zero e nada roda. A hero desconta a altura da
   barra (`100svh` menos `3.5rem`) porque o cabeçalho é sticky e ocupa espaço
-  no fluxo. Por cima de tudo, `.texture-film` soma uma vinheta escura nas
-  quinas (sempre em preto, mesmo no tema escuro, porque é a queda de
-  exposição de uma lente física, não uma cor de marca) ao grão já existente
-  do `.texture-noise`, um pouco mais forte aqui que o padrão: junto, o efeito
-  lê como textura de filme de verdade, não só aspereza sutil.
+  no fluxo. `.texture-noise-animate` sobre a hero inteira dá o grão de
+  filme flutuando, partículas sutis, sem vinheta nem nenhum outro efeito
+  por cima.
 
   No mobile o H1 é um pouco maior (`14.5vw`, contra `13vw` antes) e o bloco
   de título ganha uma folga extra por cima (`mt-6`), descendo um pouco em
@@ -191,7 +189,9 @@ decorativa. O que dá vida é movimento e tipografia, não ornamento.
   título e o de CTA: o `justify-between` do contêiner reparte o espaço entre
   os três, então o retrato nunca sobrepõe o botão nem o subtítulo, porque
   participa da mesma conta de altura, e tudo (título, subtítulo, retrato,
-  CTA, fatos) fica centralizado.
+  CTA, fatos) fica centralizado. O subtítulo ("Designer de [roleta]") usa
+  peso 400, mais leve que o padrão (700) de `.type-serif-display`: peso
+  cheio competia demais com o nome acima.
 
   A frase de disponibilidade ("Baseado no Brasil · Disponível para projetos
   no mundo todo") quebra no mobile nas duas orações que o "·" já separa (um
@@ -280,54 +280,52 @@ decorativa. O que dá vida é movimento e tipografia, não ornamento.
 
   A fatia do trio ganha uma quarta coluna, estreita, à esquerda das três:
   só a frase "Experiências interativas" girada 90° (`writing-mode:
-  vertical-rl`), uma régua de contexto, não um case clicável. E a entrada
-  dela é outra: em vez da cortina abrindo (o "deslocamento" que toda outra
-  fatia usa), cada uma das três colunas só dá zoom, cada uma com sua
-  própria curva sobre o mesmo `openT` (`SINGLE_ZOOM`/`MULTI_ZOOMS` em
-  `CasesGrid.tsx`), pra não lerem como clones umas das outras: a primeira
-  vem de mais longe, a segunda respira num ponto do meio antes de assentar,
-  a terceira dispara rápido no início e desacelera devagar no fim. A
-  cortina daquela fatia continua existindo (sem ela, a fatia fica visível
-  por trás de qualquer outra que ainda esteja abrindo), só abre quase
-  instantânea, sem nenhum "esticar" visível: quem carrega a entrada é
-  inteiramente o zoom de cada coluna.
+  vertical-rl`), na Whyte Inktrap (mesma fonte dos títulos, não a mono do
+  resto dos rótulos), uma régua de contexto, não um case clicável.
 
-  Três camadas de vocabulário de agência vivem em cima da cortina, todas
-  atrás do `MotionConfig` do Modo Boring:
+  Duas camadas de vocabulário de agência vivem em cima da cortina, atrás do
+  `MotionConfig` do Modo Boring:
   1. **Texto em máscara escalonada**: índice, métrica, título, tags e o
      convite de "ver caso" moram cada um no seu próprio `overflow-hidden` e
      sobem do zero num instante diferente dentro da janela de abertura da
      própria fatia, em vez do bloco inteiro nascer junto num só fade. O
      título tem a janela mais longa e entra por último, o elemento que
      merece mais peso na composição. O wrapper do título tem `pt-[0.16em]`
-     pelo mesmo motivo do H1 da hera (ver abaixo): sem essa folga, o
+     pelo mesmo motivo do H1 da hero (ver acima): sem essa folga, o
      `overflow-hidden` da máscara corta o topo das letras da Whyte Inktrap.
   2. **Cor como recompensa do foco**: a mídia nasce em preto e branco
      (`grayscale`) e ganha cor só quando o projeto termina de abrir, o
      mesmo princípio do resto do site (preto e branco, cor só vem da mídia)
      agora também contando o próprio ato de focar um projeto.
-  3. **Selo que segue o cursor**: em vez de deixar o cursor do sistema
-     sozinho, um selo com "ver caso" acompanha o ponteiro (mola só,
-     deslocada bem à direita e um pouco abaixo da ponta: cursores grandes
-     cobrem a área logo ao lado dela), quadrado como o resto dos controles
-     do site (sem `rounded-full`). O texto dentro dele roda num letreiro
-     horizontal contínuo, como uma placa luminosa antiga: a pílula é uma
-     janela de largura fixa e menor que o conteúdo (`overflow-hidden`), com
-     duas cópias idênticas do texto lado a lado andando de 0% a -50% pra
-     sempre, então o instante em que a primeira sai pela esquerda é o
-     instante em que a segunda cópia chega no início, sem costura no loop.
-     Complementar ao selo estático dentro do texto (que continua ali por
-     acessibilidade e por quem usa toque). A mídia também desliza alguns
-     pontos percentuais na direção do ponteiro (paralaxe magnética), por
-     cima do zoom de abertura, a mesma resposta que a grade bento tinha
-     antes.
 
-  `onMouseMove`, não `onPointerMove`, em todas: em tela de toque o
-  evento não dispara, então nada disso ativa lá, mesmo princípio que já
-  mantém a lente da hero parada no mobile. O contador de posição no rodapé
-  do painel (`01 / 06` no mobile, `01 / 04` no desktop com o trio agrupado)
-  e o ponto ativo entre os marcadores também animam a troca em vez de só
-  substituir o texto, a mesma lógica de máscara em miniatura.
+  O fundo de cada card é estático: só a mídia, sem deslocar com o cursor. O
+  único movimento que resta nela é um zoom sutil (`scale`, via `animate`),
+  e esse é só no hover, não no scroll, pra não competir com a máscara de
+  texto pela atenção nem parecer que o zoom "pula" cada vez que um projeto
+  novo entra em cena.
+
+  Um selo "ver caso" acompanha o cursor (mola só, sem rastro de partículas,
+  deslocado bem à direita e um pouco abaixo da ponta: cursores grandes
+  cobrem a área logo ao lado dela), quadrado como o resto dos controles do
+  site (sem `rounded-full`). O texto dentro dele roda num letreiro
+  horizontal contínuo, como uma placa luminosa antiga: a pílula é uma
+  janela de largura fixa e menor que o conteúdo (`overflow-hidden`), com
+  duas cópias idênticas do texto lado a lado, sem seta nem espaço entre
+  elas (só o ponto final de cada cópia separando da próxima: "ver
+  case.ver case."), andando de 0% a -50% pra sempre. Como as duas cópias
+  são idênticas, o instante em que a primeira sai pela esquerda é
+  exatamente o instante em que a segunda chega no início, sem costura no
+  loop. Complementar ao selo estático dentro do texto (que continua ali
+  por acessibilidade e por quem usa toque).
+
+  `onMouseMove`, não `onPointerMove`, no selo e no zoom de hover: em tela
+  de toque o evento não dispara, então nada disso ativa lá, mesmo
+  princípio que já mantém a lente da hero parada no mobile. A contagem de
+  posição já mora em cada card (`03 / 06`, o índice do case na lista
+  inteira, não da fatia), então não existe uma segunda contagem em nível
+  de fatia competindo com ela: o rodapé da seção tem só um lembrete de que
+  rolar é a navegação ("role para navegar") e os pontos de posição
+  (`gap-2`), que animam a troca em vez de só saltar de um pro outro.
 - **Lua de fases** (`MoonPhase`): no canto direito do cabeçalho, percorre as
   fases da lua conforme o scroll, três lunações por página.
 - **Menu overlay** (`SiteMenu`): navegação de tela cheia com tipografia gigante
