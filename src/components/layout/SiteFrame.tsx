@@ -40,8 +40,18 @@ import type { Dictionary } from "@/i18n/dictionaries";
 // de quem não quer ver nem uma animação. No desktop a primeira linha é
 // sempre visível, em qualquer página e desde o primeiro pixel: lá o espaço
 // sobra, esconder a barra só tira acesso sem ganhar nada em troca. Em Modo
-// Boring, ou fora da home, a primeira linha também é sempre visível, em
-// qualquer largura: sem hero para esconder atrás.
+// Boring fora da home, a primeira linha também é sempre visível, em qualquer
+// largura: sem hero para esconder atrás.
+//
+// No mobile, na home em Modo Boring, a primeira linha some pelo mesmo
+// motivo oposto: a própria BoringView já abre com o nome como H1 do próprio
+// conteúdo (o "cabeçalho de currículo"), então repetir a assinatura na barra
+// fixa no mesmo instante é redundância pura numa tela estreita. A linha
+// reaparece assim que o scroll alcança a seção "Sobre" (`#about`, logo
+// abaixo), o mesmo ponto em que a assinatura do documento já saiu da vista e
+// a barra passa a ser a única referência de identidade na tela. No desktop
+// a primeira linha continua sempre visível, mesmo critério de sobra de
+// espaço do restante do cabeçalho.
 //
 // Na home em Modo Criativo o cabeçalho é `fixed`, não `sticky`: um elemento
 // sticky reserva a própria altura no fluxo do documento mesmo com a primeira
@@ -66,21 +76,27 @@ export function SiteFrame({
   const pathname = usePathname();
   const [scrolled, setScrolled] = useState(false);
   const [pastFirstFold, setPastFirstFold] = useState(false);
+  const [pastAbout, setPastAbout] = useState(false);
 
-  const isHomeHero =
-    !isBoringMode && (pathname === `/${locale}` || pathname === `/${locale}/`);
+  const isHome = pathname === `/${locale}` || pathname === `/${locale}/`;
+  const isHomeHero = !isBoringMode && isHome;
+  const isBoringHome = isBoringMode && isHome;
 
   useEffect(() => {
     const onScroll = () => {
       setScrolled(window.scrollY > 24);
       setPastFirstFold(window.scrollY > window.innerHeight * 0.9);
+      if (isBoringHome) {
+        const aboutTop = document.getElementById("about")?.getBoundingClientRect().top;
+        setPastAbout(aboutTop !== undefined && aboutTop <= 80);
+      }
     };
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
-  }, []);
+  }, [isBoringHome]);
 
-  const headerVisible = !isHomeHero || pastFirstFold;
+  const headerVisible = isBoringHome ? pastAbout : !isHomeHero || pastFirstFold;
 
   return (
     <div className="flex min-h-svh flex-col">

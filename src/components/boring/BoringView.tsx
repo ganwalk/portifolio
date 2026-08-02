@@ -34,8 +34,9 @@ export function BoringView({
         </p>
       </header>
 
-      {/* Sobre */}
-      <section className="mb-10">
+      {/* Sobre: o id é o gancho que o SiteFrame usa, no mobile, pra saber
+          quando revelar a assinatura no cabeçalho (ver SiteFrame.tsx). */}
+      <section id="about" className="mb-10">
         <h2 className="type-mono mb-3 font-bold">{dict.about.title}</h2>
         <div className="space-y-3 text-sm leading-relaxed">
           {dict.about.bio.map((paragraph) => (
