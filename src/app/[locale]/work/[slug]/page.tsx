@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { CaseMetrics } from "@/components/ui/CaseMetrics";
 import { MediaView } from "@/components/ui/MediaView";
 import { cases, getCase } from "@/data/cases";
-import { locales, isLocale } from "@/i18n/config";
+import { locales, isLocale, defaultLocale, type Locale } from "@/i18n/config";
 import { getDictionary } from "@/i18n/dictionaries";
 
 // Cada case em rota própria: link direto para mandar a um recrutador,
@@ -22,14 +22,35 @@ export async function generateMetadata({
   params: Promise<{ locale: string; slug: string }>;
 }) {
   const { locale: raw, slug } = await params;
-  const locale = isLocale(raw) ? raw : "pt";
+  const locale: Locale = isLocale(raw) ? raw : defaultLocale;
   const caseStudy = getCase(slug);
+  const path = `/${locale}/work/${slug}/`;
+
+  if (!caseStudy) {
+    return { title: "Armando Custodio" };
+  }
+
+  const title = `${caseStudy.title[locale]} · Armando Custodio`;
+  const description = caseStudy.statement[locale];
 
   return {
-    title: caseStudy
-      ? `${caseStudy.title[locale]} · Armando Custodio`
-      : "Armando Custodio",
-    description: caseStudy?.statement[locale],
+    title,
+    description,
+    alternates: {
+      canonical: path,
+      languages: {
+        pt: `/pt/work/${slug}/`,
+        en: `/en/work/${slug}/`,
+        es: `/es/work/${slug}/`,
+        "x-default": `/pt/work/${slug}/`,
+      },
+    },
+    openGraph: {
+      title,
+      description,
+      url: path,
+      type: "article",
+    },
   };
 }
 

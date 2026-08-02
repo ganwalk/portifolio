@@ -17,6 +17,15 @@ export const htmlLang: Record<Locale, string> = {
   es: "es",
 };
 
+// Formato underscore do Open Graph (og:locale), diferente do BCP47 de
+// htmlLang. en/es não miram uma região específica, então usam a variante mais
+// comum (US/ES) só para preencher a tag, sem afetar o conteúdo servido.
+export const ogLocale: Record<Locale, string> = {
+  pt: "pt_BR",
+  en: "en_US",
+  es: "es_ES",
+};
+
 export function isLocale(value: string): value is Locale {
   return (locales as readonly string[]).includes(value);
 }

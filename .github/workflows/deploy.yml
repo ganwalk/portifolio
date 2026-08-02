@@ -29,9 +29,12 @@ jobs:
 
       - name: Gerar o site estático
         # O site vive num subcaminho do domínio do GitHub Pages.
-        # Com domínio próprio, é só remover esta variável.
+        # Com domínio próprio, é só remover NEXT_PUBLIC_BASE_PATH e trocar
+        # NEXT_PUBLIC_SITE_URL pelo domínio novo (usada em metadados que
+        # precisam de URL absoluta: sitemap, robots, Open Graph, JSON-LD).
         env:
           NEXT_PUBLIC_BASE_PATH: /portifolio
+          NEXT_PUBLIC_SITE_URL: https://ganwalk.github.io/portifolio
         run: npm run build
 
       - name: Impedir que o Pages processe o build com Jekyll

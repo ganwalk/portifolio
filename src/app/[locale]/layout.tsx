@@ -11,8 +11,18 @@ import { Providers } from "@/components/providers/Providers";
 import { BoringBootScript } from "@/components/providers/BoringBootScript";
 import { ScrollRestorationScript } from "@/components/providers/ScrollRestorationScript";
 import { SiteFrame } from "@/components/layout/SiteFrame";
-import { locales, htmlLang, isLocale, type Locale } from "@/i18n/config";
+import { PersonJsonLd } from "@/components/seo/PersonJsonLd";
+import {
+  locales,
+  htmlLang,
+  ogLocale,
+  isLocale,
+  defaultLocale,
+  type Locale,
+} from "@/i18n/config";
 import { getDictionary } from "@/i18n/dictionaries";
+import { profile } from "@/data/profile";
+import { siteUrl } from "@/lib/site";
 
 // Este é o root layout do site. Ele vive sob [locale] para que cada idioma
 // gere um HTML com o atributo lang correto, coisa que um layout único acima
@@ -40,12 +50,37 @@ export async function generateMetadata({
 }: {
   params: Promise<{ locale: string }>;
 }): Promise<Metadata> {
-  const { locale } = await params;
-  const dict = getDictionary(isLocale(locale) ? locale : "pt");
+  const { locale: raw } = await params;
+  const locale: Locale = isLocale(raw) ? raw : defaultLocale;
+  const dict = getDictionary(locale);
+  const path = `/${locale}/`;
 
   return {
+    metadataBase: new URL(siteUrl),
     title: dict.meta.title,
     description: dict.meta.description,
+    alternates: {
+      canonical: path,
+      languages: {
+        pt: "/pt/",
+        en: "/en/",
+        es: "/es/",
+        "x-default": "/pt/",
+      },
+    },
+    openGraph: {
+      title: dict.meta.title,
+      description: dict.meta.description,
+      url: path,
+      siteName: profile.name,
+      locale: ogLocale[locale],
+      type: "website",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: dict.meta.title,
+      description: dict.meta.description,
+    },
   };
 }
 
@@ -57,12 +92,13 @@ export default async function LocaleLayout({
   params: Promise<{ locale: string }>;
 }) {
   const { locale: raw } = await params;
-  const locale: Locale = isLocale(raw) ? raw : "pt";
+  const locale: Locale = isLocale(raw) ? raw : defaultLocale;
   const dict = getDictionary(locale);
 
   return (
     <html lang={htmlLang[locale]} suppressHydrationWarning style={cursorVars}>
       <body>
+        <PersonJsonLd locale={locale} />
         <BoringBootScript />
         <ScrollRestorationScript />
         <Providers>

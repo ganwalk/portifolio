@@ -430,11 +430,48 @@ real. Trocar placeholder por mídia final é editar só o bloco `cover`/`media`.
 No Modo Boring nada disso existe: sem lua, sem menu, sem vídeo, só a página
 utilitária.
 
+## SEO
+
+`src/lib/site.ts` exporta `siteUrl`, a URL pública completa (domínio +
+basePath), fonte de verdade de todo metadado que precisa de URL absoluta:
+
+- `metadataBase` em `[locale]/layout.tsx`, base de toda URL relativa nos
+  metadados (imagem OG incluída).
+- `alternates.canonical` e `alternates.languages` (hreflang) em cada página,
+  home e case: cada idioma aponta pros outros dois como versão alternativa,
+  mais `x-default` apontando pro pt.
+- `openGraph` e `twitter` em `generateMetadata`: título, descrição e locale
+  (`ogLocale` em `i18n/config.ts`, formato underscore, diferente do
+  `htmlLang` em BCP47).
+- `app/robots.ts` e `app/sitemap.ts`: gerados como `robots.txt` e
+  `sitemap.xml` estáticos no build (com `export const dynamic =
+  "force-static"`, exigido nesta versão do Next pra rotas especiais dentro de
+  `output: "export"`, mesmo sem nada de dinâmico no arquivo). O sitemap
+  inclui o hreflang de cada URL, espelhando o `alternates.languages` da
+  página.
+- `opengraph-image.tsx` (home e case, via `next/og`): cartão gerado no build,
+  texto puro em preto e branco (`src/lib/og-card.tsx`), porque ainda não
+  existe um retrato único, só a folha de sprite do retrato animado da hero,
+  feita pra `background-position`, não pra aparecer inteira numa imagem só.
+  O Next reaproveita a mesma imagem pro `twitter:image`, sem precisar de um
+  `twitter-image.tsx` separado.
+- `PersonJsonLd` (`src/components/seo/PersonJsonLd.tsx`), renderizado no
+  layout: schema.org `Person` com nome, cargo, URL, redes (`sameAs`) e
+  `worksFor`. Sem `image`, pelo mesmo motivo do cartão OG.
+
+Tudo isso assume `siteUrl` correto. O fallback embutido em `site.ts` já bate
+com o GitHub Pages atual (`https://ganwalk.github.io/portifolio`); com
+domínio próprio, atualiza só o `NEXT_PUBLIC_SITE_URL` do workflow (ver
+Deploy, abaixo).
+
 ## Deploy
 
 GitHub Actions publica no GitHub Pages a cada push na branch principal. O build
-define `NEXT_PUBLIC_BASE_PATH=/portifolio`, porque o site vive num subcaminho.
-Com domínio próprio ou na Vercel, basta não definir essa variável.
+define `NEXT_PUBLIC_BASE_PATH=/portifolio`, porque o site vive num subcaminho,
+e `NEXT_PUBLIC_SITE_URL=https://ganwalk.github.io/portifolio`, usada nos
+metadados que precisam de URL absoluta (ver SEO, acima). Com domínio próprio
+ou na Vercel, basta não definir `NEXT_PUBLIC_BASE_PATH` e trocar
+`NEXT_PUBLIC_SITE_URL` pelo domínio novo.
 
 ## Próximos passos
 
@@ -442,8 +479,9 @@ Com domínio próprio ou na Vercel, basta não definir essa variável.
 2. Calibrar as métricas dos cases com os números reais e tirar o aviso de
    métrica ilustrativa de cada uma que for confirmada.
 3. Escrever o corpo dos quatro cases.
-4. Completar `src/data/profile.ts`: LinkedIn, Instagram, cidade, ano de
-   entrada na AUVP. O WhatsApp já está pronto (`profile.links.whatsapp`),
-   com mensagem inicial preenchida.
+4. Completar `src/data/profile.ts`: cidade e ano de entrada na AUVP. LinkedIn,
+   Instagram e WhatsApp já estão prontos (`profile.links`).
 5. Ligar Microsoft Clarity e Google Analytics quando os IDs existirem.
 6. Recortes de colagem em volta do nome no hero, quando chegarem.
+7. Registrar domínio próprio e verificar a propriedade no Google Search
+   Console e no Bing Webmaster Tools, depois de trocar `NEXT_PUBLIC_SITE_URL`.
