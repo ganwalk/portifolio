@@ -428,14 +428,21 @@ function CaseColumn({
           className="w-44 overflow-hidden bg-white py-2.5 text-black"
         >
           <motion.div
-            className="type-mono flex w-max whitespace-nowrap"
+            className="type-mono flex w-max items-center whitespace-nowrap"
             animate={{ x: ["0%", "-50%"] }}
             transition={{ duration: 6, ease: "linear", repeat: Infinity }}
           >
+            {/* Bullet num span próprio com padding igual dos dois lados
+                (px-3), não espaço literal: um espaço de texto some ao
+                sabor da fonte e do letter-spacing do .type-mono, padding é
+                pixel exato, então a distância antes e depois do "•" fica
+                garantidamente igual. */}
             {[0, 1].map((copy) => (
-              <span key={copy} className="shrink-0">
-                {" "}
-                • {caseStudy.comingSoon ? dict.cases.comingSoon : dict.cases.viewCase}
+              <span key={copy} className="flex shrink-0 items-center">
+                <span aria-hidden className="px-3">
+                  •
+                </span>
+                {caseStudy.comingSoon ? dict.cases.comingSoon : dict.cases.viewCase}
               </span>
             ))}
           </motion.div>
