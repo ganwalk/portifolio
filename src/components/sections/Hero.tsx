@@ -130,15 +130,18 @@ function HeroContent({
             depender do texto inteiro caber numa linha só pra centralizar
             direito. No desktop (sm:block) volta a ser texto corrido numa
             linha, como sempre foi. */}
-        {/* font-weight mais leve que o padrão de .type-serif-display (700):
-            aqui é subtítulo, não manchete, e o peso cheio competia demais com
-            o nome acima. Inline porque .type-serif-display não é layered
-            (vence utilitária comum do Tailwind de propósito), então só
-            style sobrescreve. */}
+        {/* Fonte e peso diferentes do padrão de .type-serif-display (Bricolage
+            Grotesque, 700): aqui é subtítulo, não manchete, e nem a fonte nem
+            o peso cheio da manchete combinavam com o nome em Whyte Inktrap
+            acima. Switzer (Fontshare, ver src/fonts/switzer/) tem um desenho
+            que conversa melhor com a Whyte, num peso mais leve (400), e
+            itálico de verdade (não sintetizado). Inline porque
+            .type-serif-display não é layered (vence utilitária comum do
+            Tailwind de propósito), então só style sobrescreve. */}
         <motion.p
           {...reveal(1)}
           className="type-serif-display mt-7 flex flex-col items-center text-[6.5vw] italic text-muted sm:mt-9 sm:block sm:text-[3.6vw]"
-          style={{ fontWeight: 400 }}
+          style={{ fontFamily: "var(--font-switzer)", fontWeight: 400 }}
         >
           <span>{dict.hero.subtitlePrefix}</span>{" "}
           <SubtitleRoulette words={dict.hero.subtitleWords} />
