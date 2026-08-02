@@ -595,8 +595,8 @@ export function CasesGrid({
   // posição bruta conhecida.
   const pointerRawX = useMotionValue(0);
   const pointerRawY = useMotionValue(0);
-  const leadX = useSpring(pointerRawX, { stiffness: 55, damping: 16, mass: 0.8 });
-  const leadY = useSpring(pointerRawY, { stiffness: 55, damping: 16, mass: 0.8 });
+  const leadX = useSpring(pointerRawX, { stiffness: 400, damping: 35, mass: 0.5 });
+  const leadY = useSpring(pointerRawY, { stiffness: 400, damping: 35, mass: 0.5 });
   const labelX = useTransform(leadX, (v) => v + 80);
   const labelY = useTransform(leadY, (v) => v + 22);
 
