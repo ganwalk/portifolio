@@ -37,8 +37,17 @@ export function SubtitleRoulette({ words }: { words: readonly string[] }) {
   // linha. No desktop ela volta a ficar colada no prefixo "Designer de", na
   // mesma linha, e aí alinhada à esquerda: centralizada ali abriria um vão
   // entre o prefixo e uma palavra curta como "sites".
+  // pb-[0.22em]: .type-serif-display, herdado do parágrafo em volta, tem
+  // line-height 0.95, mais apertado que a altura de descendentes como "p",
+  // "g" e "q", que o overflow-hidden cortava reto embaixo sem essa folga
+  // (overflow corta na borda externa do padding, não do conteúdo, então
+  // esse respiro extra é o suficiente). Mesmo problema do pt-[0.16em] usado
+  // no título dos cases (contra o corte de ascendentes), só que embaixo; e
+  // a mesma solução de lá pro efeito colateral dele: -mb-[0.22em] cancela o
+  // espaço extra que o padding abriria na hora do align-bottom encaixar a
+  // roleta com "Designer de" (senão a palavra sobe visivelmente).
   return (
-    <span className="relative inline-grid overflow-hidden text-center align-bottom sm:text-left">
+    <span className="relative -mb-[0.22em] inline-grid overflow-hidden pb-[0.22em] text-center align-bottom sm:text-left">
       {words.map((w) => (
         <span
           key={w}
