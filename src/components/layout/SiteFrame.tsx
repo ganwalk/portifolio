@@ -132,7 +132,6 @@ export function SiteFrame({
           } ${scrolled ? "lg:py-2" : "lg:py-3"}`}
         >
           <div className="flex items-center gap-4 justify-self-start">
-            <SiteMenu locale={locale} dict={dict} />
             <div className="hidden lg:flex">
               <BoringToggle
                 dict={dict}
@@ -140,6 +139,7 @@ export function SiteFrame({
                 dismissTooltip={pastFirstFold}
               />
             </div>
+            <SiteMenu locale={locale} dict={dict} />
           </div>
 
           <Link

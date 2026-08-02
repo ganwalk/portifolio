@@ -1,9 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 import { useBoringMode } from "@/contexts/BoringModeContext";
 import { useHydrated } from "@/lib/use-hydrated";
 import type { Dictionary } from "@/i18n/dictionaries";
+
+const ROTATE_MS = 3200;
 
 // O interruptor do Modo Boring, isolado do resto da mesa de controle porque
 // mora do outro lado do cabeçalho: no desktop fica à esquerda, junto do menu,
@@ -43,6 +46,22 @@ export function BoringToggle({
 
   const [tooltipDismissed, setTooltipDismissed] = useState(false);
 
+  // O rótulo alterna entre duas descrições da mesma ação ("vá direto ao
+  // ponto" e "veja meu currículo", o Modo Boring é as duas coisas ao mesmo
+  // tempo). Relógio próprio, não o mesmo de subscribeRouletteTick (Hero):
+  // este botão mora no cabeçalho, presente em toda página, não só na home,
+  // não faz sentido girar em sincronia com o retrato da hero.
+  const onLabels = dict.controls.boringOn;
+  const [labelIndex, setLabelIndex] = useState(0);
+
+  useEffect(() => {
+    if (isBoringMode || onLabels.length <= 1) return;
+    const interval = window.setInterval(() => {
+      setLabelIndex((i) => (i + 1) % onLabels.length);
+    }, ROTATE_MS);
+    return () => window.clearInterval(interval);
+  }, [isBoringMode, onLabels.length]);
+
   const tooltipVisible =
     showTooltip &&
     !tooltipDismissed &&
@@ -54,7 +73,7 @@ export function BoringToggle({
     <div className="relative">
       <button
         type="button"
-        className="type-mono cursor-pointer border border-line px-3 py-1.5 transition-colors hover:bg-foreground hover:text-background"
+        className="type-mono relative inline-grid cursor-pointer overflow-hidden border border-line px-3 py-1.5 transition-colors hover:bg-foreground hover:text-background"
         aria-pressed={isBoringMode}
         title={dict.controls.boringHint}
         onClick={() => {
@@ -62,9 +81,33 @@ export function BoringToggle({
           toggleBoringMode();
         }}
       >
-        {mounted && isBoringMode
-          ? dict.controls.boringOff
-          : dict.controls.boringOn}
+        {/* Todo rótulo possível empilhado, invisível, na mesma célula do
+            grid: é o próprio motor de layout do navegador, que já sabe a
+            largura real de cada string nesta fonte, quem decide a largura
+            reservada da caixa (contar caracteres erra sempre que a fonte
+            não é monoespaçada, mesmo raciocínio do SubtitleRoulette). Sem
+            isso, o botão mudaria de tamanho a cada troca de rótulo. */}
+        {[...onLabels, dict.controls.boringOff].map((label) => (
+          <span
+            key={label}
+            aria-hidden
+            className="invisible col-start-1 row-start-1 whitespace-nowrap"
+          >
+            {label}
+          </span>
+        ))}
+        <AnimatePresence initial={false} mode="wait">
+          <motion.span
+            key={mounted && isBoringMode ? dict.controls.boringOff : onLabels[labelIndex]}
+            className="col-start-1 row-start-1 whitespace-nowrap"
+            initial={{ y: "40%", opacity: 0 }}
+            animate={{ y: "0%", opacity: 1 }}
+            exit={{ y: "-40%", opacity: 0 }}
+            transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+          >
+            {mounted && isBoringMode ? dict.controls.boringOff : onLabels[labelIndex]}
+          </motion.span>
+        </AnimatePresence>
       </button>
 
       {tooltipVisible && (
