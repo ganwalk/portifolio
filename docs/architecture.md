@@ -315,10 +315,23 @@ decorativa. O que dá vida é movimento e tipografia, não ornamento.
   transição: a única cor do site já vem dela.
 
   O fundo de cada card é estático: só a mídia, sem deslocar com o cursor. O
-  único movimento que resta nela é um zoom sutil (`scale`, via `animate`),
-  e esse é só no hover, não no scroll, pra não competir com a máscara de
-  texto pela atenção nem parecer que o zoom "pula" cada vez que um projeto
-  novo entra em cena.
+  movimento que resta nela é um zoom sutil (`scale`, via `animate`), e esse
+  é só no hover, não no scroll, pra não competir com a máscara de texto
+  pela atenção nem parecer que o zoom "pula" cada vez que um projeto novo
+  entra em cena. Só na capa que está de fato em cena (`HoverWarpMedia.tsx`),
+  o hover ganha uma segunda camada por cima do zoom: uma ondulação que
+  segue o cursor, WebGL cru (sem three.js nem nenhuma biblioteca, um
+  triângulo cheio de tela e um fragment shader), o único uso de WebGL do
+  site de propósito, escopo mínimo: um experimento de "lente" de
+  deslocamento, não uma reescrita do vocabulário de movimento inteiro. O
+  `<canvas>` fica por cima do `<MediaView>` de sempre (que continua
+  renderizado, é o que aparece quando o WebGL não roda) e só some/aparece
+  via `opacity`; o loop de desenho (`requestAnimationFrame`) só roda
+  enquanto o cursor está de fato em cima, parado o resto do tempo, custo
+  zero fora do hover. Não roda no Modo Boring nem quando o sistema pede
+  menos movimento (`prefers-reduced-motion`), e cai pro `<MediaView>` sem
+  nenhuma diferença visível se o navegador não tiver WebGL: a checagem de
+  suporte é só tentar criar o contexto e desistir em silêncio se vier nulo.
 
   Um selo "ver caso" acompanha o cursor (mola só, sem rastro de partículas,
   deslocado bem à direita e um pouco abaixo da ponta: cursores grandes

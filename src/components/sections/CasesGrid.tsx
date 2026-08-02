@@ -13,6 +13,7 @@ import {
   type MotionValue,
 } from "framer-motion";
 import { CaseMetrics } from "@/components/ui/CaseMetrics";
+import { HoverWarpMedia } from "@/components/ui/HoverWarpMedia";
 import { MediaView } from "@/components/ui/MediaView";
 import { cases } from "@/data/cases";
 import type { CaseStudy } from "@/data/types";
@@ -328,11 +329,18 @@ function CaseColumn({
           className="absolute inset-0"
         >
           {isNearActive ? (
-            <MediaView
-              media={caseStudy.cover}
-              locale={locale}
-              className="h-full w-full object-cover"
-            />
+            isActive ? (
+              // Único experimento de WebGL do site, e só aqui: a capa em
+              // cena de fato (não as vizinhas, que só pré-carregam) ganha a
+              // ondulação que segue o cursor, ver HoverWarpMedia.
+              <HoverWarpMedia media={caseStudy.cover} locale={locale} className="h-full w-full" />
+            ) : (
+              <MediaView
+                media={caseStudy.cover}
+                locale={locale}
+                className="h-full w-full object-cover"
+              />
+            )
           ) : (
             <div className="h-full w-full bg-surface" />
           )}
