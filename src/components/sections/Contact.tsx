@@ -3,9 +3,11 @@ import { InteractiveGridImage } from "@/components/ui/InteractiveGridImage";
 import { profile } from "@/data/profile";
 import type { Dictionary } from "@/i18n/dictionaries";
 
-// Placeholder até a imagem definitiva chegar: mesma convenção de picsum.photos
-// usada no resto do site (SiteMenu, cases, experiments) para mídia provisória.
-const CONTACT_IMAGE = "https://picsum.photos/seed/contato-armando-grade/900/900";
+// basePath não é aplicado a src montado à mão em JS (só a next/image e
+// links internos do próprio Next): o mesmo motivo do --portrait-lg em
+// SelfPortrait.tsx.
+const basePath = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
+const CONTACT_IMAGE = `${basePath}/photos/armando-contato.webp`;
 
 export function Contact({ dict }: { dict: Dictionary }) {
   const links = Object.entries(profile.links).filter(([, url]) => url);
