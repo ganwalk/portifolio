@@ -7,9 +7,9 @@ import type { CaseStudy } from "./types";
 // Métricas com value "+XX%" são placeholders explícitos até calibração com números reais.
 // Telas dos cases de Banking serão recriadas/anonimizadas até autorização formal de uso.
 //
-// Capas: vídeos e fotos do Pexels, e fotos seed do picsum.photos como
-// placeholder, escolhidos pelo clima de cada case. Para trocar pela mídia
-// real, basta substituir src (e poster) no bloco cover.
+// Capas: todas em vídeo (nenhuma foto estática), placeholders do Pexels
+// escolhidos pelo clima de cada case. Para trocar pela mídia real, basta
+// substituir src (e poster) no bloco cover.
 
 export const cases: CaseStudy[] = [
   {
@@ -55,13 +55,13 @@ export const cases: CaseStudy[] = [
     // reveal dos componentes do Design System em grid.
     cover: {
       kind: "video",
-      src: "https://videos.pexels.com/video-files/10469563/10469563-hd_1920_1080_25fps.mp4",
+      src: "https://videos.pexels.com/video-files/7101965/7101965-uhd_1440_2190_25fps.mp4",
       poster:
-        "https://images.pexels.com/videos/10469563/pexels-photo-10469563.jpeg?auto=compress&w=1280",
+        "https://images.pexels.com/videos/7101965/abstract-abstract-background-background-gradient-7101965.jpeg?auto=compress&w=1280",
       alt: {
-        pt: "Animação digital colorida em movimento",
-        en: "Colorful digital animation in motion",
-        es: "Animación digital colorida en movimiento",
+        pt: "Gradiente abstrato colorido em movimento",
+        en: "Colorful abstract gradient in motion",
+        es: "Degradado abstracto colorido en movimiento",
       },
     },
     comingSoon: true,
@@ -156,12 +156,14 @@ export const cases: CaseStudy[] = [
     // Sugestão de mídia real: screencast navegando pela experiência, com o
     // áudio do artista tocando ao fundo.
     cover: {
-      kind: "image",
-      src: "https://picsum.photos/seed/ganwalk-armando/1280/800",
+      kind: "video",
+      src: "https://videos.pexels.com/video-files/35340079/14973729_1080_1920_60fps.mp4",
+      poster:
+        "https://images.pexels.com/videos/35340079/pexels-photo-35340079.jpeg?auto=compress&w=1280",
       alt: {
-        pt: "Identidade visual do projeto Ganwalk",
-        en: "Ganwalk project visual identity",
-        es: "Identidad visual del proyecto Ganwalk",
+        pt: "Multidão vibrante numa apresentação, luzes de celular acesas",
+        en: "Vibrant crowd at a performance, cellphone lights on",
+        es: "Multitud vibrante en una presentación, luces de celular encendidas",
       },
     },
     comingSoon: true,
@@ -200,12 +202,14 @@ export const cases: CaseStudy[] = [
     // Sugestão de mídia real: screencast navegando pela experiência, com o
     // áudio da banda tocando ao fundo.
     cover: {
-      kind: "image",
-      src: "https://picsum.photos/seed/dezert-horse-armando/1280/800",
+      kind: "video",
+      src: "https://videos.pexels.com/video-files/9145177/9145177-uhd_2560_1440_30fps.mp4",
+      poster:
+        "https://images.pexels.com/videos/9145177/3d-rendering-abstract-art-backdrop-9145177.jpeg?auto=compress&w=1280",
       alt: {
-        pt: "Identidade visual do projeto Dezert Horse",
-        en: "Dezert Horse project visual identity",
-        es: "Identidad visual del proyecto Dezert Horse",
+        pt: "Curvas de neon abstratas em movimento",
+        en: "Abstract neon curves in motion",
+        es: "Curvas de neón abstractas en movimiento",
       },
     },
     comingSoon: true,
@@ -244,12 +248,14 @@ export const cases: CaseStudy[] = [
     // Sugestão de mídia real: screencast navegando pela experiência, com o
     // áudio do artista tocando ao fundo.
     cover: {
-      kind: "image",
-      src: "https://picsum.photos/seed/pink-opala-armando/1280/800",
+      kind: "video",
+      src: "https://videos.pexels.com/video-files/30636173/13112850_1080_1920_30fps.mp4",
+      poster:
+        "https://images.pexels.com/videos/30636173/pexels-photo-30636173.jpeg?auto=compress&w=1280",
       alt: {
-        pt: "Identidade visual do projeto Pink Opala",
-        en: "Pink Opala project visual identity",
-        es: "Identidad visual del proyecto Pink Opala",
+        pt: "Show energético num clube, luzes dinâmicas e coloridas",
+        en: "Energetic club performance, dynamic colorful lighting",
+        es: "Show enérgico en un club, luces dinámicas y coloridas",
       },
     },
     comingSoon: true,

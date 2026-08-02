@@ -138,7 +138,7 @@ function HeroContent({
         <motion.p
           {...reveal(1)}
           className="type-serif-display mt-7 flex flex-col items-center text-[6.5vw] italic text-muted sm:mt-9 sm:block sm:text-[3.6vw]"
-          style={{ fontWeight: 500 }}
+          style={{ fontWeight: 400 }}
         >
           <span>{dict.hero.subtitlePrefix}</span>{" "}
           <SubtitleRoulette words={dict.hero.subtitleWords} />
@@ -288,10 +288,10 @@ export function Hero({ dict }: { dict: Dictionary }) {
       ref={sectionRef}
       onMouseMove={onMouseMove}
       onMouseLeave={() => radius.set(0)}
-      className="texture-noise texture-noise-animate texture-film relative flex min-h-[100svh] flex-col overflow-hidden"
+      className="texture-noise texture-noise-animate relative flex min-h-[100svh] flex-col overflow-hidden"
       aria-label={profile.name}
     >
-      <div className="relative z-10 flex flex-1">
+      <div className="relative flex flex-1">
         <HeroContent dict={dict} ctaRef={ctaRef} />
 
         {/* Cópia invertida, revelada pela lente */}
