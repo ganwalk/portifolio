@@ -71,9 +71,9 @@ export const cases: CaseStudy[] = [
     area: "banking",
     year: "2023/2026",
     title: {
-      pt: "Ecossistema de sites AUVP Capital",
-      en: "AUVP Capital web ecosystem",
-      es: "Ecosistema web AUVP Capital",
+      pt: "Sites AUVP",
+      en: "AUVP websites",
+      es: "Sitios AUVP",
     },
     statement: {
       pt: "Desenho e mantenho o ecossistema de webpages da AUVP Capital, guiado por métricas, SEO e performance.",
