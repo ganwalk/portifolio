@@ -39,15 +39,19 @@ import { useMediaQuery } from "@/lib/use-media-query";
 // artistas, hoje) viram uma fatia lado a lado, dentro da mesma cortina, em
 // vez de três aberturas separadas (buildSlides monta as duas versões,
 // flatSlides pro mobile e groupedSlides pro desktop, uma vez só, fora do
-// componente porque `cases` é estático). O rótulo de índice de cada coluna
-// ("03 / 06") sempre conta cases, não fatias: SlidePanel repassa o índice
-// original (`flatIndex`) pra cada CaseColumn, independente de quantas
-// fatias existem. Nas pontas (primeira e última fatia) a fatia não tem a
-// metade que não existe: a primeira já nasce aberta (nada "antes" dela pra
-// desdobrar de), a última fica aberta até o fim da seção (nada "depois").
+// componente porque `cases` é estático). Essa fatia ganha uma quarta
+// coluna, estreita, à esquerda das três: só a frase "Experiências
+// interativas" girada 90°, na Whyte Inktrap, uma régua de contexto, não um
+// case clicável. O rótulo de índice de cada coluna ("03 / 06") sempre conta
+// cases, não fatias: SlidePanel repassa o índice original (`flatIndex`) pra
+// cada CaseColumn, independente de quantas fatias existem; é a ÚNICA
+// contagem da seção, não existe outra em nível de fatia competindo com ela.
+// Nas pontas (primeira e última fatia) a fatia não tem a metade que não
+// existe: a primeira já nasce aberta (nada "antes" dela pra desdobrar de),
+// a última fica aberta até o fim da seção (nada "depois").
 //
-// Quatro camadas de vocabulário de agência por cima da cortina, todas
-// escondidas atrás do MotionConfig do Modo Boring:
+// Duas camadas de vocabulário de agência por cima da cortina, atrás do
+// MotionConfig do Modo Boring:
 // 1. Texto em máscara escalonada: cada linha (índice, métrica, título, tags,
 //    convite) mora num overflow-hidden próprio e sobe do zero por baixo dele
 //    num instante diferente, em vez do bloco inteiro nascer junto num só
@@ -57,23 +61,20 @@ import { useMediaQuery } from "@/lib/use-media-query";
 //    (grayscale) e ganha cor só quando o projeto termina de abrir, o mesmo
 //    princípio do resto do site (preto e branco, cor só vem da mídia), agora
 //    também contando o próprio ato de focar um projeto.
-// 3. Paralaxe magnética: a mídia do projeto em cena desliza alguns pontos
-//    percentuais na direção do ponteiro, a mesma resposta que a grade bento
-//    tinha antes, devolvida aqui em cima do zoom de abertura.
-// 4. Rótulo ferrofluido: em vez do cursor do sistema, um rastro de gotas
-//    persegue o ponteiro em cadeia (cada gota segue a mola da gota anterior,
-//    não o ponteiro direto) e termina no selo "ver caso", deslocado bem à
-//    direita da ponta (cursores grandes do sistema cobrem a área logo ao
-//    lado dela). O rastro vive atrás de um filtro CSS de blur alto e
-//    contraste alto ("goo"): gotas próximas se fundem numa mancha líquida só,
-//    o efeito clássico de ferrofluido, puro CSS. Mola em cadeia em vez de
-//    reiniciar uma animação por tempo a cada movimento do mouse: mola
-//    integra velocidade quadro a quadro, então o rastro nunca "reinicia" (o
-//    que soava truncado); tween reiniciado, sim. Complementar ao selo
-//    estático dentro do texto (que continua ali por acessibilidade e pra
-//    quem usa toque). onMouseMove, não onPointerMove: em toque o evento não
-//    dispara, então a mola nunca ativa lá, mesmo princípio que já mantém a
-//    lente da hero parada no mobile.
+//
+// O fundo de cada card é estático (só a mídia, sem deslocar com o cursor):
+// o único movimento que resta nela é um zoom sutil, e esse é só no hover,
+// não no scroll, pra não competir com a máscara de texto pela atenção. Um
+// selo "ver caso" acompanha o cursor (mola só, sem rastro de partículas),
+// deslocado bem à direita e um pouco abaixo da ponta (cursores grandes do
+// sistema cobrem a área logo ao lado dela), com o texto rodando num
+// letreiro horizontal contínuo, como uma placa luminosa antiga: duas cópias
+// idênticas do texto lado a lado, sem seta nem espaço, só o ponto final de
+// cada cópia separando da próxima, andando de 0% a -50% pra sempre, sem
+// costura no loop. Complementar ao selo estático dentro do texto (que
+// continua ali por acessibilidade e pra quem usa toque). onMouseMove, não
+// onPointerMove: em toque o evento não dispara, então nada disso ativa lá,
+// mesmo princípio que já mantém a lente da hero parada no mobile.
 //
 // Clicar no projeto em cena ainda expande pra tela cheia com os dados
 // completos do case, igual antes; só a navegação ENTRE projetos mudou.
@@ -166,19 +167,10 @@ function SlidePanel({
 
   // A "cortina": fechada como uma fresta no centro, abrindo pras bordas.
   // clip-path em vez de scaleY porque não distorce o conteúdo por baixo, só
-  // revela mais dele, o desdobrar parece uma abertura, não um esticar.
-  // Continua existindo em toda fatia, mesmo a do trio: sem ela, a fatia
-  // fica sem fechar quando inativa (não é só decoração, é o que garante que
-  // uma fatia escondida não vaze por trás da fatia realmente ativa
-  // enquanto a cortina dela ainda está abrindo). A diferença é só a curva:
-  // na fatia do trio a cortina abre quase instantânea (não há "esticar"
-  // visível pra ver), porque a entrada de verdade ali é o zoom distinto de
-  // cada coluna (ver CaseColumn), não o desdobrar da cortina.
-  const insetPercent = useTransform(
-    openT,
-    multi ? [0, 0.02, 1] : [0, 1],
-    multi ? [46, 0, 0] : [46, 0],
-  );
+  // revela mais dele, o desdobrar parece uma abertura, não um esticar. Uma
+  // cortina só por fatia, mesmo com três colunas lado a lado dentro dela:
+  // abrem juntas, como um projeto só.
+  const insetPercent = useTransform(openT, [0, 1], [46, 0]);
   const clipPath = useMotionTemplate`inset(${insetPercent}% 0% ${insetPercent}% 0%)`;
 
   return (
@@ -194,14 +186,14 @@ function SlidePanel({
         {multi && (
           <div className="flex w-10 shrink-0 items-center justify-center sm:w-14">
             <span
-              className="type-mono whitespace-nowrap text-white/50"
+              className="type-inktrap whitespace-nowrap text-xs uppercase tracking-widest text-white/50"
               style={{ writingMode: "vertical-rl", transform: "rotate(180deg)" }}
             >
               {dict.cases.interactiveExperiences}
             </span>
           </div>
         )}
-        {slide.map(({ caseStudy, flatIndex }, columnIndex) => (
+        {slide.map(({ caseStudy, flatIndex }) => (
           <CaseColumn
             key={caseStudy.slug}
             caseStudy={caseStudy}
@@ -213,7 +205,6 @@ function SlidePanel({
             isActive={isActive}
             isNearActive={isNearActive}
             multi={multi}
-            columnIndex={columnIndex}
             dividerLeft={multi}
             onExpand={onExpand}
           />
@@ -222,20 +213,6 @@ function SlidePanel({
     </motion.div>
   );
 }
-
-// Um "zoom" distinto por coluna do trio, no lugar da cortina compartilhada
-// (que é a fatia inteira abrindo junto, um deslocamento das bordas): cada
-// coluna entra sozinha, só dando zoom, cada uma com seu próprio ponto de
-// partida e sua própria curva ao longo do mesmo openT, pra não ficarem
-// clonadas umas das outras. A primeira nasce de mais longe (zoom out
-// grande), a segunda respira num meio de caminho antes de assentar, a
-// terceira dispara rápido no começo e desacelera devagar no fim.
-const SINGLE_ZOOM = { input: [0, 1], output: [1.18, 1] };
-const MULTI_ZOOMS = [
-  { input: [0, 1], output: [1.55, 1] },
-  { input: [0, 0.55, 1], output: [1.1, 1.32, 1] },
-  { input: [0, 0.7, 1], output: [1.65, 1.06, 1] },
-];
 
 function CaseColumn({
   caseStudy,
@@ -247,7 +224,6 @@ function CaseColumn({
   isActive,
   isNearActive,
   multi,
-  columnIndex,
   dividerLeft,
   onExpand,
 }: {
@@ -262,9 +238,6 @@ function CaseColumn({
   /** Uma de três colunas lado a lado, não o painel cheio: título e métrica
    *  encolhem pra caber num terço da largura em vez de vazar. */
   multi: boolean;
-  /** Posição dentro do trio (0, 1 ou 2): escolhe qual das três curvas de
-   *  zoom distintas essa coluna usa. Ignorado fora do trio. */
-  columnIndex: number;
   /** Fio vertical à esquerda: toda coluna do trio ganha (a régua vertical
    *  já mora imediatamente antes da primeira), nenhuma moldura além dessa
    *  linha fina entre elas. */
@@ -272,8 +245,6 @@ function CaseColumn({
   onExpand: (caseStudy: CaseStudy, rect: DOMRect) => void;
 }) {
   const metric = caseStudy.metrics[0];
-  const zoomRecipe = multi ? MULTI_ZOOMS[columnIndex % MULTI_ZOOMS.length] : SINGLE_ZOOM;
-  const mediaZoom = useTransform(openT, zoomRecipe.input, zoomRecipe.output);
   const mediaGrayscale = useTransform(openT, [0, 1], [1, 0]);
   const mediaFilter = useMotionTemplate`grayscale(${mediaGrayscale})`;
   const contentOpacity = useTransform(openT, [0, 0.55, 1], [0, 1, 1]);
@@ -288,14 +259,6 @@ function CaseColumn({
   const tagsY = useTransform(openT, [0.32, 0.62], ["100%", "0%"]);
   const ctaY = useTransform(openT, [0.42, 0.7], ["100%", "0%"]);
 
-  // Paralaxe magnética da mídia: mola contida, desloca pouco.
-  const tiltX = useMotionValue(0);
-  const tiltY = useMotionValue(0);
-  const tiltSpringX = useSpring(tiltX, { stiffness: 150, damping: 20 });
-  const tiltSpringY = useSpring(tiltY, { stiffness: 150, damping: 20 });
-  const mediaTiltX = useTransform(tiltSpringX, [-0.5, 0.5], ["-3%", "3%"]);
-  const mediaTiltY = useTransform(tiltSpringY, [-0.5, 0.5], ["-3%", "3%"]);
-
   // Selo que segue o cursor: posição bruta do ponteiro suavizada por uma
   // mola só (sem rastro de partículas), deslocada bem à direita e um pouco
   // abaixo da ponta: cursores grandes do sistema cobrem a área logo ao lado
@@ -309,19 +272,17 @@ function CaseColumn({
 
   const [hovering, setHovering] = useState(false);
 
+  // O fundo do card é estático, só o vídeo/imagem em si: nada de deslocar
+  // com o mouse. O único movimento que resta na mídia é o zoom, e esse é só
+  // no hover (não mais amarrado ao scroll): mais previsível, sem o "pulo"
+  // de zoom que a rolagem causava antes de chegar num projeto.
   function handleMouseMove(event: React.MouseEvent<HTMLButtonElement>) {
     const rect = event.currentTarget.getBoundingClientRect();
-    const relX = event.clientX - rect.left;
-    const relY = event.clientY - rect.top;
-    tiltX.set(relX / rect.width - 0.5);
-    tiltY.set(relY / rect.height - 0.5);
-    pointerRawX.set(relX);
-    pointerRawY.set(relY);
+    pointerRawX.set(event.clientX - rect.left);
+    pointerRawY.set(event.clientY - rect.top);
   }
 
   function handleMouseLeave() {
-    tiltX.set(0);
-    tiltY.set(0);
     setHovering(false);
   }
 
@@ -343,27 +304,24 @@ function CaseColumn({
     >
       {/* Tudo que precisa de corte (zoom da mídia, máscara do texto) vive
           aqui dentro; o botão em si fica sem overflow-hidden pra não cortar
-          o rastro ferrofluido e o selo, que podem passar do próprio limite
-          da coluna quando o cursor chega perto da borda. */}
+          o selo, que pode passar do próprio limite da coluna quando o
+          cursor chega perto da borda. */}
       <div className="absolute inset-0 overflow-hidden">
         <motion.div
-          style={{ scale: mediaZoom, filter: mediaFilter }}
+          animate={{ scale: hovering ? 1.06 : 1 }}
+          transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+          style={{ filter: mediaFilter }}
           className="absolute inset-0"
         >
-          <motion.div
-            style={{ x: mediaTiltX, y: mediaTiltY }}
-            className="h-full w-full"
-          >
-            {isNearActive ? (
-              <MediaView
-                media={caseStudy.cover}
-                locale={locale}
-                className="h-full w-full object-cover"
-              />
-            ) : (
-              <div className="h-full w-full bg-surface" />
-            )}
-          </motion.div>
+          {isNearActive ? (
+            <MediaView
+              media={caseStudy.cover}
+              locale={locale}
+              className="h-full w-full object-cover"
+            />
+          ) : (
+            <div className="h-full w-full bg-surface" />
+          )}
         </motion.div>
         <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/10 to-black/45" />
 
@@ -433,10 +391,12 @@ function CaseColumn({
           está de fato em cena. O texto roda num letreiro horizontal
           contínuo, como uma placa luminosa antiga: a pílula é uma janela de
           largura fixa (overflow-hidden), menor que o conteúdo, e a faixa lá
-          dentro tem DUAS cópias do texto uma atrás da outra, andando de 0%
-          a -50% pra sempre. Como as duas cópias são idênticas, o instante em
-          que a primeira sai pela esquerda é exatamente o instante em que a
-          segunda chega no início, o loop não tem costura. */}
+          dentro tem DUAS cópias do texto uma atrás da outra, sem seta nem
+          espaço entre elas, só o ponto final de cada cópia separando da
+          próxima ("ver case.ver case."), andando de 0% a -50% pra sempre.
+          Como as duas cópias são idênticas, o instante em que a primeira
+          sai pela esquerda é exatamente o instante em que a segunda chega
+          no início, o loop não tem costura. */}
       <motion.div
         aria-hidden
         style={{ x: labelX, y: labelY }}
@@ -451,14 +411,14 @@ function CaseColumn({
           className="w-44 overflow-hidden bg-white py-2.5 text-black"
         >
           <motion.div
-            className="type-mono flex w-max items-center whitespace-nowrap"
+            className="type-mono flex w-max whitespace-nowrap"
             style={{ fontFamily: "var(--font-array)" }}
             animate={{ x: ["0%", "-50%"] }}
             transition={{ duration: 6, ease: "linear", repeat: Infinity }}
           >
             {[0, 1].map((copy) => (
-              <span key={copy} className="flex shrink-0 items-center gap-2 px-4">
-                {caseStudy.comingSoon ? dict.cases.comingSoon : dict.cases.viewCase} →
+              <span key={copy} className="shrink-0">
+                {caseStudy.comingSoon ? dict.cases.comingSoon : dict.cases.viewCase}.
               </span>
             ))}
           </motion.div>
@@ -664,26 +624,15 @@ export function CasesGrid({
             />
           ))}
 
-          {/* Leitura de posição, não navegação: informa onde o scroll está,
-              não oferece atalho de clique (é a rolagem que manda agora). O
-              número desliza pro lugar do anterior a cada troca, em vez de só
-              trocar de texto, o mesmo princípio de máscara escalonada dos
-              painéis, só que em miniatura. */}
+          {/* A contagem já mora em cada card ("03 / 06", o índice do case na
+              lista inteira), então o rodapé não repete outra em nível de
+              fatia: só um lembrete de que rolar é a navegação, no lugar
+              onde um contador "01 / 04" ficava antes. Os pontos continuam
+              como leitura de posição (não navegação, não oferecem atalho de
+              clique), animando a troca em vez de só saltar de um pro
+              outro. */}
           <div className="gutter pointer-events-none absolute inset-x-0 bottom-8 z-20 flex items-center justify-between text-white">
-            <span className="type-mono relative inline-block overflow-hidden">
-              <AnimatePresence mode="popLayout" initial={false}>
-                <motion.span
-                  key={activeIndex}
-                  initial={{ y: "100%" }}
-                  animate={{ y: "0%" }}
-                  exit={{ y: "-100%" }}
-                  transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-                  className="block"
-                >
-                  {pad(activeIndex + 1)} / {pad(count)}
-                </motion.span>
-              </AnimatePresence>
-            </span>
+            <span className="type-mono text-white/50">{dict.cases.scrollHint}</span>
             <div className="flex gap-2">
               {slides.map((slide, index) => (
                 <motion.span

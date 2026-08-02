@@ -53,6 +53,7 @@ export const pt = {
   cases: {
     title: "Projetos em destaque",
     interactiveExperiences: "Experiências interativas",
+    scrollHint: "Role para navegar",
     viewCase: "Ver case",
     comingSoon: "Case completo em breve",
     metricsDisclaimer:
