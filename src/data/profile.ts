@@ -18,14 +18,21 @@ export const profile = {
     whatsapp: `https://wa.me/5562992174047?text=${encodeURIComponent(WHATSAPP_MESSAGE)}`,
   },
   languages: [
-    { code: "pt", level: { pt: "Nativo", en: "Native", es: "Nativo" } },
-    { code: "en", level: { pt: "Fluente", en: "Fluent", es: "Fluido" } },
+    {
+      code: "pt",
+      level: { pt: "Nativo", en: "Native", es: "Nativo", zh: "母语" },
+    },
+    {
+      code: "en",
+      level: { pt: "Fluente", en: "Fluent", es: "Fluido", zh: "流利" },
+    },
     {
       code: "es",
       level: {
         pt: "Compreensão",
         en: "Reading/listening",
         es: "Comprensión",
+        zh: "理解",
       },
     },
   ],
@@ -59,6 +66,7 @@ export const profile = {
         pt: "Design Engineer, responsável pelo design digital do ecossistema (webpages, produto e marca)",
         en: "Design Engineer, responsible for the ecosystem's digital design (webpages, product and brand)",
         es: "Design Engineer, responsable del diseño digital del ecosistema (webpages, producto y marca)",
+        zh: "Design Engineer，负责生态系统的数字设计（网页、产品与品牌）",
       },
       period: "20XX até hoje", // TODO(Armando): ano de início
     },

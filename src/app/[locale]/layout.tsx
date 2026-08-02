@@ -23,6 +23,7 @@ import {
 import { getDictionary } from "@/i18n/dictionaries";
 import { profile } from "@/data/profile";
 import { siteUrl } from "@/lib/site";
+import { localeAlternates } from "@/lib/hreflang";
 
 // Este é o root layout do site. Ele vive sob [locale] para que cada idioma
 // gere um HTML com o atributo lang correto, coisa que um layout único acima
@@ -61,12 +62,7 @@ export async function generateMetadata({
     description: dict.meta.description,
     alternates: {
       canonical: path,
-      languages: {
-        pt: "/pt/",
-        en: "/en/",
-        es: "/es/",
-        "x-default": "/pt/",
-      },
+      languages: localeAlternates((loc) => `/${loc}/`),
     },
     openGraph: {
       title: dict.meta.title,

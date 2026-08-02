@@ -5,6 +5,7 @@ import { MediaView } from "@/components/ui/MediaView";
 import { cases, getCase } from "@/data/cases";
 import { locales, isLocale, defaultLocale, type Locale } from "@/i18n/config";
 import { getDictionary } from "@/i18n/dictionaries";
+import { localeAlternates } from "@/lib/hreflang";
 
 // Cada case em rota própria: link direto para mandar a um recrutador,
 // e uma página por idioma para o buscador entender.
@@ -38,12 +39,7 @@ export async function generateMetadata({
     description,
     alternates: {
       canonical: path,
-      languages: {
-        pt: `/pt/work/${slug}/`,
-        en: `/en/work/${slug}/`,
-        es: `/es/work/${slug}/`,
-        "x-default": `/pt/work/${slug}/`,
-      },
+      languages: localeAlternates((loc) => `/${loc}/work/${slug}/`),
     },
     openGraph: {
       title,

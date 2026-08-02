@@ -134,6 +134,18 @@ body {
   letter-spacing: -0.02em;
 }
 
+/* CJK ocupa quase o quadrado inteiro do em (ao contrário de letras latinas,
+   que sobram x-height/cap-height livre acima e abaixo), então o
+   line-height bem apertado das classes de destaque acima, pensado pra
+   letras latinas, colide entre linhas em textos longos que quebram em
+   chinês (ex: a manchete de um case na própria página dele).
+   :lang(zh) alcança qualquer texto marcado como chinês (o <html lang> de
+   cada página), sem precisar de uma variante por componente. */
+:lang(zh) .type-display,
+:lang(zh) .type-serif-display {
+  line-height: 1.3;
+}
+
 /* Mono "extrato": detalhes, legendas técnicas, separadores por bullet. */
 .type-mono {
   font-family: var(--font-mono);
