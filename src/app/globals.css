@@ -31,9 +31,11 @@
      assinatura do cabeçalho, o nome na hero e o convite de contato. Só o
      peso Black (900) está carregado, o único usado. */
   --font-inktrap: "Whyte Inktrap", var(--font-sans);
-  /* Array (Fontshare, ver src/fonts/array/), só no selo que persegue o
-     cursor nos projetos em destaque: o resto do site não usa. */
-  --font-array: "Array", var(--font-sans);
+  /* Switzer (Fontshare, ver src/fonts/switzer/), só no subtítulo da hero (o
+     "Designer de [roleta]"): combina melhor com a Whyte Inktrap do nome
+     acima do que a fonte de manchete padrão, e tem itálico de verdade (não
+     sintetizado). O resto do site não usa. */
+  --font-switzer: "Switzer", var(--font-sans);
 }
 
 .dark {
@@ -85,7 +87,7 @@ html[data-boring="true"] *::after {
   --font-mono: var(--font-mono);
   --font-headline: var(--font-headline);
   --font-inktrap: var(--font-inktrap);
-  --font-array: var(--font-array);
+  --font-switzer: var(--font-switzer);
 }
 
 /* ==========================================================================

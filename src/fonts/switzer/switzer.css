@@ -1,0 +1,21 @@
+/* Switzer (Fontshare, ITF), licença de uso livre para autohospedagem.
+   Baixados via api.fontshare.com/v2/css, só woff2, sem os formatos legados
+   (woff/ttf) que a resposta padrão inclui. Regular e o itálico de verdade
+   (não sintetizado pelo navegador, ao contrário da Bricolage Grotesque em
+   outros lugares do site): só o subtítulo da hero usa esta fonte, então só
+   os dois estilos que ele precisa estão aqui. */
+@font-face {
+  font-family: "Switzer";
+  src: url("./Switzer-Regular.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Switzer";
+  src: url("./Switzer-Italic.woff2") format("woff2");
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
