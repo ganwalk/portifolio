@@ -13,10 +13,10 @@ import {
   type MotionValue,
 } from "framer-motion";
 import { CaseMetrics } from "@/components/ui/CaseMetrics";
-import { HoverWarpMedia } from "@/components/ui/HoverWarpMedia";
+import { SceneCoverMedia } from "@/components/ui/SceneCoverMedia";
 import { MediaView } from "@/components/ui/MediaView";
 import { cases } from "@/data/cases";
-import type { CaseStudy } from "@/data/types";
+import type { CaseStudy, Media } from "@/data/types";
 import type { Locale } from "@/i18n/config";
 import type { Dictionary } from "@/i18n/dictionaries";
 
@@ -138,6 +138,7 @@ const groupedSlides = buildSlides(cases);
 
 function SlidePanel({
   slide,
+  previousSlide,
   totalCases,
   locale,
   dict,
@@ -150,6 +151,12 @@ function SlidePanel({
   onExpand,
 }: {
   slide: SlideCase[];
+  /** A fatia anterior, pela mesma ordem de colunas: a coluna N desta fatia
+   *  funde da capa da coluna N ali (ver `fromCover` abaixo) em vez de
+   *  simplesmente aparecer por cima. `undefined` na primeira fatia (nada
+   *  antes dela) e em colunas novas que não existiam na fatia anterior (o
+   *  trio ganhando duas colunas que o painel de antes não tinha). */
+  previousSlide?: SlideCase[];
   totalCases: number;
   locale: Locale;
   dict: Dictionary;
@@ -212,10 +219,11 @@ function SlidePanel({
             empilhando cada artista na fatia dele, sem abrir mão do "lado a
             lado" onde sobra largura. */}
         <div className="flex min-w-0 flex-1 flex-col lg:flex-row">
-          {slide.map(({ caseStudy, flatIndex }) => (
+          {slide.map(({ caseStudy, flatIndex }, colIndex) => (
             <CaseColumn
               key={caseStudy.slug}
               caseStudy={caseStudy}
+              fromCover={previousSlide?.[colIndex]?.caseStudy.cover}
               flatIndex={flatIndex}
               totalCases={totalCases}
               locale={locale}
@@ -237,6 +245,7 @@ function SlidePanel({
 
 function CaseColumn({
   caseStudy,
+  fromCover,
   flatIndex,
   totalCases,
   locale,
@@ -250,6 +259,11 @@ function CaseColumn({
   onExpand,
 }: {
   caseStudy: CaseStudy;
+  /** Capa da mesma coluna na fatia anterior: a transição WebGL funde dela
+   *  pra capa deste case conforme `enterT` sobe (ver SceneCoverMedia).
+   *  `undefined` quando não há coluna equivalente antes (primeira fatia, ou
+   *  coluna nova que a fatia anterior não tinha). */
+  fromCover?: Media;
   flatIndex: number;
   totalCases: number;
   locale: Locale;
@@ -315,8 +329,16 @@ function CaseColumn({
             isActive ? (
               // Único experimento de WebGL do site, e só aqui: a capa em
               // cena de fato (não as vizinhas, que só pré-carregam) ganha a
-              // ondulação que segue o cursor, ver HoverWarpMedia.
-              <HoverWarpMedia media={caseStudy.cover} locale={locale} className="h-full w-full" />
+              // ondulação que segue o cursor e, enquanto a fatia ainda está
+              // entrando, funde da capa anterior pra esta (ver
+              // SceneCoverMedia).
+              <SceneCoverMedia
+                media={caseStudy.cover}
+                fromMedia={fromCover}
+                progress={enterT}
+                locale={locale}
+                className="h-full w-full"
+              />
             ) : (
               <MediaView
                 media={caseStudy.cover}
@@ -646,6 +668,7 @@ export function CasesGrid({
             <SlidePanel
               key={slide.map(({ caseStudy }) => caseStudy.slug).join("+")}
               slide={slide}
+              previousSlide={index > 0 ? slides[index - 1] : undefined}
               totalCases={cases.length}
               locale={locale}
               dict={dict}
