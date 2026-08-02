@@ -17,7 +17,10 @@ export const pt = {
     skipToContent: "Pular para o conteúdo",
   },
   controls: {
-    boringOn: "Vá direto ao ponto!",
+    // Duas maneiras de descrever a mesma ação (o Modo Boring também é o
+    // currículo, ver docs/architecture.md), alternando no botão em vez de
+    // fixar uma só (ver BoringToggle.tsx).
+    boringOn: ["Vá direto ao ponto", "Veja meu currículo"],
     boringOff: "Me surpreenda",
     boringHint: "Pra você que gosta das coisas direto ao ponto ;)",
     boringTooltip: "eu ODEIO animações!",

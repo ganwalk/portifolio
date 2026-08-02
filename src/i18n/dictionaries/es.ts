@@ -15,7 +15,7 @@ export const es: Dictionary = {
     skipToContent: "Saltar al contenido",
   },
   controls: {
-    boringOn: "¡Ve al grano!",
+    boringOn: ["Ve al grano", "Mira mi currículum"],
     boringOff: "Sorpréndeme",
     boringHint: "Para quien prefiere las cosas directas al grano ;)",
     boringTooltip: "¡yo ODIO las animaciones!",

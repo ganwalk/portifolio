@@ -49,12 +49,43 @@ export function InteractiveGridImage({
     let H = 0;
     let dpr = 1;
     let raf = 0;
+    // Retângulo "cover" dentro da imagem original (crop centralizado, sem
+    // esticar): recalculado a cada resize, porque a proporção do contêiner
+    // muda entre mobile (aspect-[4/3]) e desktop (altura da coluna de
+    // texto). Sem isso, dividir a imagem inteira em COLS×ROWS e desenhar
+    // direto no retângulo do contêiner distorcia a foto pra proporção da
+    // tela em vez de recortar.
+    let cropX = 0;
+    let cropY = 0;
+    let cropW = 1;
+    let cropH = 1;
 
     const colW = new Array(COLS).fill(1);
     const rowW = new Array(ROWS).fill(1);
     const colT = new Array(COLS).fill(1);
     const rowT = new Array(ROWS).fill(1);
     const pointer = { x: 0, y: 0, active: false };
+
+    function updateCrop() {
+      if (!img.naturalWidth || !img.naturalHeight || !W || !H) return;
+      const containerAspect = W / H;
+      const imgAspect = img.naturalWidth / img.naturalHeight;
+      if (imgAspect > containerAspect) {
+        // Imagem relativamente mais larga: corta as laterais, mantém a
+        // altura inteira.
+        cropH = img.naturalHeight;
+        cropW = cropH * containerAspect;
+        cropX = (img.naturalWidth - cropW) / 2;
+        cropY = 0;
+      } else {
+        // Imagem relativamente mais alta: corta topo/rodapé, mantém a
+        // largura inteira.
+        cropW = img.naturalWidth;
+        cropH = cropW / containerAspect;
+        cropX = 0;
+        cropY = (img.naturalHeight - cropH) / 2;
+      }
+    }
 
     function resize() {
       const rect = container!.getBoundingClientRect();
@@ -65,6 +96,7 @@ export function InteractiveGridImage({
       canvas!.height = Math.round(H * dpr);
       canvas!.style.width = `${W}px`;
       canvas!.style.height = `${H}px`;
+      updateCrop();
     }
 
     // converte pesos em posições acumuladas que somam o tamanho total
@@ -110,8 +142,8 @@ export function InteractiveGridImage({
 
       const { sizes: cw, pos: cx } = tracks(colW, W);
       const { sizes: rh, pos: cy } = tracks(rowW, H);
-      const srcW = img.naturalWidth / COLS;
-      const srcH = img.naturalHeight / ROWS;
+      const srcW = cropW / COLS;
+      const srcH = cropH / ROWS;
 
       let n = 1;
       for (let r = 0; r < ROWS; r++) {
@@ -121,7 +153,17 @@ export function InteractiveGridImage({
           const dw = Math.max(cw[c] - GAP, 0.5);
           const dh = Math.max(rh[r] - GAP, 0.5);
 
-          ctx!.drawImage(img, c * srcW, r * srcH, srcW, srcH, dx, dy, dw, dh);
+          ctx!.drawImage(
+            img,
+            cropX + c * srcW,
+            cropY + r * srcH,
+            srcW,
+            srcH,
+            dx,
+            dy,
+            dw,
+            dh,
+          );
 
           const fs = Math.max(8, Math.min(dw, dh) * 0.16);
           const label = String(n);
