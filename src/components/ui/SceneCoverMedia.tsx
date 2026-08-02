@@ -161,6 +161,15 @@ function createCoverTexture(gl: WebGLRenderingContext) {
 
 type CoverSource = HTMLImageElement | HTMLVideoElement;
 
+/** O vídeo, se existir, nunca o poster: `MediaView` renderiza o `<img>` do
+ *  poster ANTES do `<video>` no DOM (camada de fallback por baixo), e
+ *  `querySelector("img, video")` devolve o primeiro elemento que casa no
+ *  documento, não o primeiro da lista de seletores, então pegava sempre o
+ *  poster estático em vez do vídeo ao vivo. */
+function pickCoverSource(root: ParentNode): CoverSource | null {
+  return root.querySelector<HTMLVideoElement>("video") ?? root.querySelector<HTMLImageElement>("img");
+}
+
 function sourceNaturalSize(el: CoverSource): { w: number; h: number; ready: boolean } {
   if (el instanceof HTMLVideoElement) {
     return { w: el.videoWidth, h: el.videoHeight, ready: el.readyState >= 2 };
@@ -214,15 +223,20 @@ export function SceneCoverMedia({
     const canvas = canvasRef.current;
     if (!container || !canvas) return;
 
-    const toSourceElOrNull = container.querySelector<CoverSource>("img, video");
+    const toSourceElOrNull = pickCoverSource(container);
     if (!toSourceElOrNull) return;
     const toSourceEl = toSourceElOrNull;
     const fromSourceEl = fromMedia
-      ? (fromWrapperRef.current?.querySelector<CoverSource>("img, video") ?? null)
+      ? (fromWrapperRef.current ? pickCoverSource(fromWrapperRef.current) : null)
       : null;
 
     const gl = canvas.getContext("webgl", { premultipliedAlpha: false });
     if (!gl) return;
+
+    // Fontes de vídeo/imagem no DOM já vêm com a linha 0 no topo (convenção
+    // do navegador); sem isso, a textura sai de cabeça pra baixo, porque o
+    // WebGL trata v=0 como o RODAPÉ da imagem (convenção OpenGL, o oposto).
+    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
 
     const program = createProgram(gl);
     if (!program) return;
@@ -262,10 +276,15 @@ export function SceneCoverMedia({
 
     function resize() {
       if (!container || !canvas || !gl) return;
-      const rect = container.getBoundingClientRect();
+      // offsetWidth/Height, não getBoundingClientRect: o zoom sutil de
+      // hover (scale via CSS) é uma transformação visual por cima, não uma
+      // mudança de layout, e o buffer do canvas não deveria acompanhar o
+      // scale (o próprio elemento já escala visualmente por conta do CSS,
+      // dobrar isso na resolução interna é redundante e, se um resize real
+      // acontecer no meio da animação, mede um tamanho errado).
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
-      canvas.width = Math.max(1, Math.round(rect.width * dpr));
-      canvas.height = Math.max(1, Math.round(rect.height * dpr));
+      canvas.width = Math.max(1, Math.round(container.offsetWidth * dpr));
+      canvas.height = Math.max(1, Math.round(container.offsetHeight * dpr));
       gl.viewport(0, 0, canvas.width, canvas.height);
     }
 
@@ -324,6 +343,12 @@ export function SceneCoverMedia({
       const settled = hoverTarget === 0 && Math.abs(hover) < 0.001 && !transitioning;
       if (settled) {
         running = false;
+        // A fusão de scroll acorda o canvas sozinha (`progress.on("change")`
+        // abaixo), sem passar por onEnter/onLeave: sem isso aqui, assim que
+        // ela termina e o loop para, o canvas fica preso mostrando o último
+        // frame desenhado por cima do vídeo de verdade, que continua
+        // tocando embaixo dele, parecendo que "o efeito parou".
+        canvas.style.opacity = "0";
         return;
       }
       rafId = requestAnimationFrame(draw);
