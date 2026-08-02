@@ -318,7 +318,7 @@ decorativa. O que dá vida é movimento e tipografia, não ornamento.
   movimento que resta nela é um zoom sutil (`scale`, via `animate`), e esse
   é só no hover, não no scroll, pra não competir com a máscara de texto
   pela atenção nem parecer que o zoom "pula" cada vez que um projeto novo
-  entra em cena. Só na capa que está de fato em cena (`HoverWarpMedia.tsx`),
+  entra em cena. Só na capa que está de fato em cena (`SceneCoverMedia.tsx`),
   o hover ganha uma segunda camada por cima do zoom: uma ondulação que
   segue o cursor, com aberração cromática (cada canal RGB lê a textura com
   uma amplitude de onda diferente, então a franja de cor cresce e encolhe
@@ -326,18 +326,27 @@ decorativa. O que dá vida é movimento e tipografia, não ornamento.
   biblioteca, um triângulo cheio de tela e um fragment shader), o único uso
   de WebGL do site de propósito, escopo mínimo: um experimento de "lente"
   de deslocamento, não uma reescrita do vocabulário de movimento inteiro.
-  Um aceno de estreia toca sozinho, centralizado, na primeira vez que cada
-  projeto entra em cena (sobe e desce em ~1,1s): sem ele o efeito inteiro
-  dependia de alguém descobrir que passar o mouse ali fazia diferença. O
-  `<canvas>` fica por cima do `<MediaView>` de sempre (que continua
-  renderizado, é o que aparece quando o WebGL não roda) e só some/aparece
-  via `opacity`; o loop de desenho (`requestAnimationFrame`) só roda
-  enquanto o cursor está de fato em cima (ou durante o aceno de estreia),
-  parado o resto do tempo, custo zero fora disso. Não roda no Modo Boring
-  nem quando o sistema pede menos movimento (`prefers-reduced-motion`), e
-  cai pro `<MediaView>` sem nenhuma diferença visível se o navegador não
-  tiver WebGL: a checagem de suporte é só tentar criar o contexto e
-  desistir em silêncio se vier nulo.
+  A mesma capa também funde da capa anterior (mesma posição de coluna, ver
+  `fromCover` em `CasesGrid.tsx`) pra si conforme a fatia sobe pelo scroll:
+  o shader lê as duas texturas e cruza uma pela outra de baixo pra cima,
+  com ruído na borda pra ficar orgânica, no lugar de simplesmente aparecer
+  por cima. Inspirado numa referência de navegação em WebGL (Awwwards, Vero
+  New York / Rodéo Studio). Só acontece quando existe uma capa anterior na
+  mesma coluna (a primeira fatia da seção e as colunas novas que o trio
+  ganha não têm uma); nesses casos, um aceno de estreia toca sozinho,
+  centralizado, na primeira vez que o projeto entra em cena (sobe e desce
+  em ~1,1s), cumprindo o mesmo papel de descoberta que a fusão cumpre nos
+  outros: sem um dos dois, o efeito inteiro dependia de alguém descobrir
+  que passar o mouse ali fazia diferença. O `<canvas>` fica por cima do
+  `<MediaView>` de sempre (que continua renderizado, é o que aparece
+  quando o WebGL não roda) e só some/aparece via `opacity`; o loop de
+  desenho (`requestAnimationFrame`) só roda enquanto o cursor está de fato
+  em cima, a fusão de scroll ainda está em andamento, ou durante o aceno de
+  estreia, parado o resto do tempo, custo zero fora disso. Não roda no
+  Modo Boring nem quando o sistema pede menos movimento
+  (`prefers-reduced-motion`), e cai pro `<MediaView>` sem nenhuma
+  diferença visível se o navegador não tiver WebGL: a checagem de suporte
+  é só tentar criar o contexto e desistir em silêncio se vier nulo.
 
   Um selo "ver caso" acompanha o cursor (mola só, sem rastro de partículas,
   deslocado bem à direita e um pouco abaixo da ponta: cursores grandes
