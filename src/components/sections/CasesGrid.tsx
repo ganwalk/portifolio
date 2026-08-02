@@ -5,7 +5,6 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import {
   AnimatePresence,
   motion,
-  useMotionTemplate,
   useMotionValue,
   useMotionValueEvent,
   useScroll,
@@ -25,12 +24,13 @@ import type { Dictionary } from "@/i18n/dictionaries";
 // (sem título nem subtítulo próprios, só um rótulo acessível no <section>
 // pra quem usa leitor de tela) e já entra prendendo o scroll. É alta (uma
 // tela inteira por fatia) e fica presa (position: sticky) enquanto o
-// visitante rola por ela, e cada fatia se revela a partir de uma íris
-// fechada no centro (clip-path circle(), raio 0% a 102%, que é exatamente a
-// distância até o canto mais longe a partir do centro) com um leve zoom
-// junto, e fecha de volta pra dar lugar à próxima. Rolar É a navegação: sem
-// seta, sem play/pause, sem índice próprio brigando com o scroll de
-// verdade.
+// visitante rola por ela, e cada fatia entra deslizando de baixo pra cima
+// (translateY, não clip-path) até assentar no lugar, empilhando por cima da
+// anterior como um baralho de cartas: a fatia que fica por baixo encolhe um
+// pouco e escurece enquanto a próxima sobe sobre ela, dando profundidade
+// física à pilha, e não se move mais depois de coberta, só recebe a
+// próxima por cima. Rolar É a navegação: sem seta, sem play/pause, sem
+// índice próprio brigando com o scroll de verdade.
 //
 // Cada FATIA ocupa uma porção igual de scrollYProgress (1/N da seção), mas
 // uma fatia nem sempre é um case só: cases adjacentes que compartilham
@@ -51,7 +51,7 @@ import type { Dictionary } from "@/i18n/dictionaries";
 // "antes" dela pra desdobrar de), a última fica aberta até o fim da seção
 // (nada "depois").
 //
-// Texto em máscara escalonada por cima da cortina, atrás do MotionConfig do
+// Texto em máscara escalonada por cima da pilha, atrás do MotionConfig do
 // Modo Boring: cada linha (índice, métrica, título, tags, convite) mora num
 // overflow-hidden próprio e sobe do zero por baixo dele num instante
 // diferente, em vez do bloco inteiro nascer junto num só fade. O atraso
@@ -67,12 +67,13 @@ import type { Dictionary } from "@/i18n/dictionaries";
 // deslocado bem à direita e um pouco abaixo da ponta (cursores grandes do
 // sistema cobrem a área logo ao lado dela), com o texto rodando num
 // letreiro horizontal contínuo, como uma placa luminosa antiga: duas cópias
-// idênticas do texto lado a lado, sem seta nem espaço, só o ponto final de
-// cada cópia separando da próxima, andando de 0% a -50% pra sempre, sem
-// costura no loop. Complementar ao selo estático dentro do texto (que
-// continua ali por acessibilidade e pra quem usa toque). onMouseMove, não
-// onPointerMove: em toque o evento não dispara, então nada disso ativa lá,
-// mesmo princípio que já mantém a lente da hero parada no mobile.
+// idênticas do texto lado a lado, separadas por um bullet com padding igual
+// dos dois lados (não espaço literal, refém da fonte), andando de 0% a
+// -50% pra sempre, sem costura no loop. Complementar ao selo estático
+// dentro do texto (que continua ali por acessibilidade e pra quem usa
+// toque). onMouseMove, não onPointerMove: em toque o evento não dispara,
+// então nada disso ativa lá, mesmo princípio que já mantém a lente da hero
+// parada no mobile.
 //
 // Clicar no projeto em cena ainda expande pra tela cheia com os dados
 // completos do case, igual antes; só a navegação ENTRE projetos mudou.
@@ -81,23 +82,21 @@ function pad(n: number) {
   return String(n).padStart(2, "0");
 }
 
-/** Ranges de entrada/saída de scrollYProgress pra useTransform, com o caso
- *  especial das pontas: o primeiro projeto não tem fase de entrada (já
- *  nasce aberto) e o último não tem fase de saída (fica aberto até o fim). */
-function segmentRange(index: number, count: number) {
+/** Range de entrada de scrollYProgress pra useTransform: sobe de 0 a 1
+ *  durante a subida da fatia (`enterEnd`) e trava em 1 pra sempre depois
+ *  disso (clamp padrão do useTransform fora do domínio de `input`), mesmo
+ *  quando a próxima fatia começa a cobri-la por cima. É esse travamento que
+ *  faz a fatia SUBIR uma vez só e nunca descer de volta: uma curva que
+ *  também recuasse na saída faria a fatia deslizar de volta pra baixo bem
+ *  no instante em que ela devia só ficar parada, recebendo a próxima em
+ *  cima. A primeira fatia não tem fase de entrada, já nasce no lugar (nada
+ *  "antes" dela pra subir de). */
+function enterRange(index: number, count: number) {
+  if (index === 0) return { input: [0, 1] as [number, number], output: [1, 1] as [number, number] };
   const span = 1 / count;
   const start = index * span;
-  const end = start + span;
-  const enterEnd = start + span * 0.3;
-  const exitStart = start + span * 0.7;
-
-  if (index === 0) return { input: [start, exitStart, end], output: [1, 1, 0] };
-  if (index === count - 1)
-    return { input: [start, enterEnd, end], output: [0, 1, 1] };
-  return {
-    input: [start, enterEnd, exitStart, end],
-    output: [0, 1, 1, 0],
-  };
+  const enterEnd = start + span * 0.4;
+  return { input: [start, enterEnd] as [number, number], output: [0, 1] as [number, number] };
 }
 
 interface SlideCase {
@@ -155,32 +154,40 @@ function SlidePanel({
   isNearActive: boolean;
   onExpand: (caseStudy: CaseStudy, rect: DOMRect) => void;
 }) {
-  const { input, output } = segmentRange(index, count);
-  const openT = useTransform(scrollYProgress, input, output);
   const multi = slide.length > 1;
 
-  // Íris: um círculo que cresce do centro até cobrir as quatro quinas
-  // (100% de raio, na definição de clip-path, é exatamente a distância até
-  // o canto mais longe a partir do centro), no lugar da cortina antiga de
-  // barras horizontais fechando/abrindo. Fechado (raio 0) ainda é só um
-  // ponto, mesma proteção contra vazar por trás de outra fatia enquanto
-  // ela ainda abre. Por cima, um leve zoom no conteúdo (não no clip-path
-  // em si, numa camada à parte) dá uma sensação de aproximação junto da
-  // abertura, em vez de um recorte estático crescendo.
-  const irisRadius = useTransform(openT, [0, 1], [0, 102]);
-  const clipPath = useMotionTemplate`circle(${irisRadius}% at 50% 50%)`;
-  const panelScale = useTransform(openT, [0, 1], [1.08, 1]);
+  // Empilhamento: a fatia sobe de baixo (translateY 100% a 0%) e assenta,
+  // igual um baralho recebendo carta por cima, travada no lugar depois (ver
+  // enterRange). zIndex sobe com o índice, não com isActive: a ordem de
+  // empilhamento acompanha a ordem de rolagem, então a fatia N+1 sempre
+  // cobre a N ao chegar, nunca o contrário.
+  const { input: enterInput, output: enterOutput } = enterRange(index, count);
+  const enterT = useTransform(scrollYProgress, enterInput, enterOutput);
+  const slideY = useTransform(enterT, [0, 1], ["100%", "0%"]);
+
+  // A fatia que vem depois cobrindo esta: enquanto ela sobe por cima,
+  // ESTA aqui encolhe um pouco e escurece, o cartão de baixo recuando na
+  // pilha. A última fatia nunca é coberta (nada depois dela).
+  const nextEnter = index < count - 1 ? enterRange(index + 1, count) : { input: [0, 1] as [number, number], output: [0, 0] as [number, number] };
+  const coveringT = useTransform(scrollYProgress, nextEnter.input, nextEnter.output);
+  const coveredScale = useTransform(coveringT, [0, 1], [1, 0.94]);
+  const coveredDim = useTransform(coveringT, [0, 1], [0, 0.45]);
 
   return (
     <motion.div
       aria-hidden={!isActive}
       className="absolute inset-0 h-full w-full overflow-hidden bg-black"
       style={{
-        clipPath,
-        zIndex: isActive ? count + 1 : index,
+        y: slideY,
+        zIndex: index,
       }}
     >
-      <motion.div style={{ scale: panelScale }} className="flex h-full w-full">
+      <motion.div style={{ scale: coveredScale }} className="flex h-full w-full">
+        <motion.div
+          aria-hidden
+          style={{ opacity: coveredDim }}
+          className="pointer-events-none absolute inset-0 z-10 bg-black"
+        />
         {multi && (
           <div className="flex w-8 shrink-0 items-center justify-center sm:w-10 lg:w-14">
             <span
@@ -206,7 +213,7 @@ function SlidePanel({
               totalCases={totalCases}
               locale={locale}
               dict={dict}
-              openT={openT}
+              enterT={enterT}
               isActive={isActive}
               isNearActive={isNearActive}
               multi={multi}
@@ -226,7 +233,7 @@ function CaseColumn({
   totalCases,
   locale,
   dict,
-  openT,
+  enterT,
   isActive,
   isNearActive,
   multi,
@@ -238,7 +245,7 @@ function CaseColumn({
   totalCases: number;
   locale: Locale;
   dict: Dictionary;
-  openT: MotionValue<number>;
+  enterT: MotionValue<number>;
   isActive: boolean;
   isNearActive: boolean;
   /** Uma de três, não o painel cheio: título, métrica e respiro encolhem
@@ -251,17 +258,21 @@ function CaseColumn({
   onExpand: (caseStudy: CaseStudy, rect: DOMRect) => void;
 }) {
   const metric = caseStudy.metrics[0];
-  const contentOpacity = useTransform(openT, [0, 0.55, 1], [0, 1, 1]);
+  // `enterT`, não uma curva com fase de saída: o conteúdo sobe e fica,
+  // continua visível mesmo depois de coberto pela próxima fatia (é a fatia
+  // INTEIRA que encolhe e escurece nesse momento, ver coveredScale/
+  // coveredDim em SlidePanel), em vez de desaparecer sozinho antes disso.
+  const contentOpacity = useTransform(enterT, [0, 0.55], [0, 1]);
 
   // Máscara escalonada: cada linha sobe do zero num instante diferente
-  // dentro da própria abertura da cortina, em vez do bloco de texto inteiro
+  // dentro da própria subida da fatia, em vez do bloco de texto inteiro
   // nascer junto. Título por último e com a janela mais longa, é o elemento
   // que merece mais peso na entrada.
-  const kickerY = useTransform(openT, [0.05, 0.4], ["100%", "0%"]);
-  const metricY = useTransform(openT, [0.1, 0.45], ["100%", "0%"]);
-  const titleY = useTransform(openT, [0.18, 0.58], ["100%", "0%"]);
-  const tagsY = useTransform(openT, [0.32, 0.62], ["100%", "0%"]);
-  const ctaY = useTransform(openT, [0.42, 0.7], ["100%", "0%"]);
+  const kickerY = useTransform(enterT, [0.05, 0.4], ["100%", "0%"]);
+  const metricY = useTransform(enterT, [0.1, 0.45], ["100%", "0%"]);
+  const titleY = useTransform(enterT, [0.18, 0.58], ["100%", "0%"]);
+  const tagsY = useTransform(enterT, [0.32, 0.62], ["100%", "0%"]);
+  const ctaY = useTransform(enterT, [0.42, 0.7], ["100%", "0%"]);
 
   // Selo que segue o cursor: posição bruta do ponteiro suavizada por uma
   // mola só (sem rastro de partículas), deslocada bem à direita e um pouco

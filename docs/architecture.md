@@ -250,23 +250,35 @@ decorativa. O que dá vida é movimento e tipografia, não ornamento.
   `<section>` pra quem usa leitor de tela, reaproveitando o texto que antes
   era visível): a primeira fatia já entra prendendo o scroll, sem dobra de
   transição no meio. A seção é alta (uma tela inteira por fatia) e fica
-  `sticky` enquanto o visitante rola; cada fatia se desdobra a partir de uma
-  íris fechada no centro (`clip-path: circle()`, raio crescendo de 0% a
-  102% conforme o scroll avança, mais interessante que a cortina de barras
-  que existia antes) e fecha de volta pra dar lugar à próxima. Um leve
-  `scale` no conteúdo (de 1.08 a 1, numa camada interna separada do
-  `clip-path`) acompanha a abertura, reforçando a sensação de zoom saindo
-  do centro. Rolar é a navegação inteira: sem seta, sem play/pause, sem
-  índice próprio brigando com o scroll de verdade. Primeira e última fatia
-  não têm a metade da transição que não existe (a primeira já nasce aberta,
-  a última fica aberta até o fim da seção). Clicar no projeto em cena
-  expande pra tela cheia com os dados completos do case (mesmo FLIP manual
-  descrito abaixo em "Menu overlay" e "Transição de modo": o overlay nasce
-  encolhido sobre o retângulo clicado e anima até a identidade).
+  `sticky` enquanto o visitante rola; cada fatia entra deslizando de baixo
+  pra cima (`translateY` de 100% a 0%, não `clip-path`) até assentar no
+  lugar, empilhando por cima da fatia anterior como um baralho recebendo
+  carta: a fatia que fica por baixo encolhe um pouco e escurece
+  (`scale` e uma camada preta com `opacity` crescendo) enquanto a próxima
+  sobe sobre ela, dando profundidade física à pilha (`zIndex` cresce com o
+  índice, então a ordem de empilhamento sempre acompanha a ordem de
+  rolagem). Uma vez assentada, a fatia não se move mais: o valor que rege a
+  subida (`enterT`, ver `enterRange` em `CasesGrid.tsx`) trava em 1 depois
+  de completo, mesmo quando a próxima fatia começa a cobri-la, então ela só
+  recebe a próxima por cima em vez de deslizar de volta pra baixo. Duas
+  transições anteriores foram tentadas e descartadas aqui: uma cortina de
+  barras (abria e fechava, lida como mecânica demais) e uma íris circular
+  (`clip-path: circle()`, lida como fraca demais); o empilhamento com
+  profundidade é a terceira tentativa, inspirada no vocabulário de scroll
+  storytelling de sites premiados (cartões que se empilham com profundidade
+  em vez de um recorte abrindo e fechando no mesmo lugar). Rolar é a
+  navegação inteira: sem seta, sem play/pause, sem índice próprio brigando
+  com o scroll de verdade. Primeira e última fatia não têm a metade da
+  transição que não existe (a primeira já nasce aberta, sem fase de
+  entrada; a última nunca é coberta, fica aberta até o fim da seção).
+  Clicar no projeto em cena expande pra tela cheia com os dados completos
+  do case (mesmo FLIP manual descrito abaixo em "Menu overlay" e "Transição
+  de modo": o overlay nasce encolhido sobre o retângulo clicado e anima até
+  a identidade).
 
   **Fatia nem sempre é um case só.** Cases adjacentes que compartilham
   `group` no dado (o trio Ganwalk/Dezert Horse/Pink Opala, hoje) sempre
-  viram uma única fatia dentro da mesma íris, em vez de três aberturas
+  viram uma única fatia dentro da mesma pilha, em vez de três subidas
   separadas: `buildSlides` agrupa cases adjacentes de mesmo `group` numa só
   passada, direto do dado, sem depender do tamanho da tela nem de
   `matchMedia`. `SlidePanel` distribui as colunas (`CaseColumn`) empilhadas
@@ -285,20 +297,22 @@ decorativa. O que dá vida é movimento e tipografia, não ornamento.
   vertical-rl`), na Whyte Inktrap (mesma fonte dos títulos, não a mono do
   resto dos rótulos), uma régua de contexto, não um case clicável.
 
-  Uma camada de vocabulário de agência vive em cima da íris, atrás do
+  Uma camada de vocabulário de agência vive em cima da pilha, atrás do
   `MotionConfig` do Modo Boring: texto em máscara escalonada. Índice,
   métrica, título, tags e o convite de "ver caso" moram cada um no seu
   próprio `overflow-hidden` e sobem do zero num instante diferente dentro
-  da janela de abertura da própria fatia, em vez do bloco inteiro nascer
-  junto num só fade. O título tem a janela mais longa e entra por último,
-  o elemento que merece mais peso na composição. O `pt-[0.16em]` mora no
-  próprio `<motion.h3>` do título, não no wrapper que faz o
+  da própria subida da fatia, em vez do bloco inteiro nascer junto num só
+  fade; regidos por `enterT` (não por uma curva com fase de saída), o texto
+  continua visível mesmo depois de coberto pela próxima fatia, é a fatia
+  INTEIRA que encolhe e escurece nesse momento, não o texto que desaparece
+  sozinho antes disso. O título tem a janela mais longa e entra por
+  último, o elemento que merece mais peso na composição. O `pt-[0.16em]`
+  mora no próprio `<motion.h3>` do título, não no wrapper que faz o
   `overflow-hidden`: `em` resolve contra o tamanho de fonte do próprio
   elemento, não herda do filho, então a folga só funciona no elemento que
   de fato tem a fonte grande (mesmo motivo do H1 da hero, ver acima). A
   mídia fica colorida o tempo todo, sem passar por preto e branco na
-  transição: a única cor do site já vem dela, e um efeito de grayscale
-  competia com a abertura da íris em vez de reforçá-la.
+  transição: a única cor do site já vem dela.
 
   O fundo de cada card é estático: só a mídia, sem deslocar com o cursor. O
   único movimento que resta nela é um zoom sutil (`scale`, via `animate`),
