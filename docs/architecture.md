@@ -320,33 +320,54 @@ decorativa. O que dá vida é movimento e tipografia, não ornamento.
   pela atenção nem parecer que o zoom "pula" cada vez que um projeto novo
   entra em cena. Só na capa que está de fato em cena (`HoverWarpMedia.tsx`),
   o hover ganha uma segunda camada por cima do zoom: uma ondulação que
-  segue o cursor, WebGL cru (sem three.js nem nenhuma biblioteca, um
-  triângulo cheio de tela e um fragment shader), o único uso de WebGL do
-  site de propósito, escopo mínimo: um experimento de "lente" de
-  deslocamento, não uma reescrita do vocabulário de movimento inteiro. O
+  segue o cursor, com aberração cromática (cada canal RGB lê a textura com
+  uma amplitude de onda diferente, então a franja de cor cresce e encolhe
+  junto com a força do hover), WebGL cru (sem three.js nem nenhuma
+  biblioteca, um triângulo cheio de tela e um fragment shader), o único uso
+  de WebGL do site de propósito, escopo mínimo: um experimento de "lente"
+  de deslocamento, não uma reescrita do vocabulário de movimento inteiro.
+  Um aceno de estreia toca sozinho, centralizado, na primeira vez que cada
+  projeto entra em cena (sobe e desce em ~1,1s): sem ele o efeito inteiro
+  dependia de alguém descobrir que passar o mouse ali fazia diferença. O
   `<canvas>` fica por cima do `<MediaView>` de sempre (que continua
   renderizado, é o que aparece quando o WebGL não roda) e só some/aparece
   via `opacity`; o loop de desenho (`requestAnimationFrame`) só roda
-  enquanto o cursor está de fato em cima, parado o resto do tempo, custo
-  zero fora do hover. Não roda no Modo Boring nem quando o sistema pede
-  menos movimento (`prefers-reduced-motion`), e cai pro `<MediaView>` sem
-  nenhuma diferença visível se o navegador não tiver WebGL: a checagem de
-  suporte é só tentar criar o contexto e desistir em silêncio se vier nulo.
+  enquanto o cursor está de fato em cima (ou durante o aceno de estreia),
+  parado o resto do tempo, custo zero fora disso. Não roda no Modo Boring
+  nem quando o sistema pede menos movimento (`prefers-reduced-motion`), e
+  cai pro `<MediaView>` sem nenhuma diferença visível se o navegador não
+  tiver WebGL: a checagem de suporte é só tentar criar o contexto e
+  desistir em silêncio se vier nulo.
 
   Um selo "ver caso" acompanha o cursor (mola só, sem rastro de partículas,
   deslocado bem à direita e um pouco abaixo da ponta: cursores grandes
   cobrem a área logo ao lado dela), quadrado como o resto dos controles do
-  site (sem `rounded-full`). O texto dentro dele roda num letreiro
+  site (sem `rounded-full`). Um selo só pra seção inteira, rastreado em
+  `CasesGrid`, não um por coluna: todo painel é `absolute inset-0` (mesmo
+  retângulo da tela pros quatro), então a posição do cursor relativa à
+  seção não muda quando o scroll troca qual fatia está por cima, só o alvo
+  do hover muda. Um selo por coluna, cada um com seu próprio estado de
+  posição, ficava pra trás quando a rolagem trocava a fatia ativa sem o
+  mouse se mexer (o card que passava a ficar ativo nunca tinha recebido um
+  mousemove de verdade, sua posição salva continuava a inicial, o selo
+  pulava pro canto errado até o próximo movimento real do mouse);
+  centralizando, a posição bruta do ponteiro só atualiza com um mousemove
+  de verdade (sempre correta, porque rolar sem mexer o mouse não muda onde
+  ele está na tela) e o alvo do hover é recalculado a cada mousemove e
+  também sempre que a fatia ativa muda, usando a última posição bruta
+  conhecida (`document.elementFromPoint`, que já respeita `pointer-events:
+  none` nas colunas inativas). O texto dentro do selo roda num letreiro
   horizontal contínuo, como uma placa luminosa antiga: a pílula é uma
   janela de largura fixa e menor que o conteúdo (`overflow-hidden`), na
   mesma fonte mono dos outros rótulos técnicos do site (`.type-mono`, a
   mesma de "UX/UI · Webapps · Design Systems" na hero), com duas cópias
-  idênticas do texto lado a lado, separadas por um bullet com espaço dos
-  dois lados (" • ver caso • ver caso"), andando de 0% a -50% pra sempre.
-  Como as duas cópias são idênticas, o instante em que a primeira sai pela esquerda é
-  exatamente o instante em que a segunda chega no início, sem costura no
-  loop. Complementar ao selo estático dentro do texto (que continua ali
-  por acessibilidade e por quem usa toque).
+  idênticas do texto lado a lado, separadas por um bullet com padding igual
+  dos dois lados (não espaço literal, refém da fonte: " • ver caso • ver
+  caso"), andando de 0% a -50% pra sempre. Como as duas cópias são
+  idênticas, o instante em que a primeira sai pela esquerda é exatamente o
+  instante em que a segunda chega no início, sem costura no loop.
+  Complementar ao selo estático dentro do texto (que continua ali por
+  acessibilidade e por quem usa toque).
 
   `onMouseMove`, não `onPointerMove`, no selo e no zoom de hover: em tela
   de toque o evento não dispara, então nada disso ativa lá, mesmo
