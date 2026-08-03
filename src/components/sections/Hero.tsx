@@ -7,6 +7,7 @@ import {
   useMotionValue,
   useReducedMotion,
   useSpring,
+  useTransform,
   type MotionValue,
 } from "framer-motion";
 import { HeroTitleGL } from "@/components/ui/HeroTitleGL";
@@ -344,6 +345,19 @@ export function Hero({ dict }: { dict: Dictionary }) {
   // Máscara de borda suave: opaca no centro, dissolvendo até o raio cheio.
   const mask = useMotionTemplate`radial-gradient(circle ${r}px at ${x}px ${y}px, black 0%, rgba(0,0,0,0.9) 46%, rgba(0,0,0,0.4) 72%, transparent 100%)`;
 
+  // A máscara sozinha NÃO fecha a lente. Com raio zero (nenhum cursor na
+  // hero: antes do primeiro movimento, depois que ele sai, e a vida inteira
+  // em tela de toque) o gradiente fica degenerado, e o Chromium, em vez de
+  // tratar isso como área vazia, ignora a máscara e revela a cópia inteira.
+  // O sintoma era a hero nascer com DOIS nomes: o de verdade subindo pela
+  // animação de entrada e o da cópia, que entra pronta por definição, parado
+  // no lugar final atrás dele.
+  //
+  // A opacidade fecha por fora, sem depender de como cada navegador resolve
+  // um gradiente de raio zero. Sai do mesmo raio, então acompanha a mola: a
+  // lente abre e fecha junto com o círculo em vez de piscar.
+  const lensOpacity = useTransform(r, [0, 8], [0, 1]);
+
   const onMouseMove = (event: React.MouseEvent) => {
     const section = sectionRef.current;
     if (!section) return;
@@ -395,7 +409,7 @@ export function Hero({ dict }: { dict: Dictionary }) {
         <motion.div
           aria-hidden
           className="lens-invert pointer-events-none absolute inset-0 flex"
-          style={{ maskImage: mask, WebkitMaskImage: mask }}
+          style={{ maskImage: mask, WebkitMaskImage: mask, opacity: lensOpacity }}
         >
           <HeroContent
             dict={dict}

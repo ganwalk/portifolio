@@ -175,7 +175,20 @@ decorativa. O que dá vida é movimento e tipografia, não ornamento.
   trocam de lugar, sem nenhuma cor entrar na conta. A revelação usa máscara
   radial de borda suave, não recorte duro, então o círculo é difuso nas
   beiradas. Perto do CTA "Veja meu trabalho" o raio encolhe. Em telas de
-  toque a lente fica com raio zero e nada roda. A hero desconta a altura da
+  toque a lente fica com raio zero e nada roda.
+
+  **A máscara sozinha não fecha a lente.** Com raio zero (nenhum cursor na
+  hero: antes do primeiro movimento, depois que ele sai, e a vida inteira em
+  tela de toque) o gradiente radial fica degenerado, e o Chromium, em vez de
+  tratar isso como área vazia, ignora a máscara e revela a cópia inteira. O
+  sintoma era a hero nascer com DOIS nomes: o de verdade subindo pela
+  animação de entrada e o da cópia, que entra pronta por definição, parado no
+  lugar final atrás dele. Por isso a opacidade da cópia também sai do raio
+  (`lensOpacity`): fecha por fora, sem depender de como cada navegador
+  resolve um gradiente de raio zero, e acompanha a mesma mola, então a lente
+  abre e fecha junto com o círculo em vez de piscar.
+
+  A hero desconta a altura da
   barra (`100svh` menos `3.5rem`) porque o cabeçalho é sticky e ocupa espaço
   no fluxo. `.texture-noise-animate` sobre a hero inteira dá o grão de
   filme flutuando, partículas sutis, sem vinheta nem nenhum outro efeito
@@ -223,7 +236,13 @@ decorativa. O que dá vida é movimento e tipografia, não ornamento.
   O `<h1>` continua no DOM sempre: é ele que o leitor de tela lê, que o
   buscador indexa, que anima na entrada e de onde saem as medidas. Fica
   transparente, e não escondido, e só depois que o canvas confirma que
-  desenhou. Nada disso é montado quando não há cursor de verdade
+  desenhou. O canvas, por sua vez, nasce transparente e aparece no MESMO
+  instante, nessa ordem: os dois desenhos são idênticos e sobrepô-los por um
+  quadro não se vê, enquanto o inverso abriria um quadro de hero sem nome.
+  Antes o canvas nascia visível e só a transparência do `<h1>` esperava, e
+  com a fonte pronta cedo o texto do canvas aparecia parado no lugar final
+  enquanto o `<h1>` ainda subia: mais uma versão do mesmo defeito de dois
+  nomes. Nada disso é montado quando não há cursor de verdade
   (`hover: hover` e `pointer: fine`), quando o sistema pede menos movimento,
   ou quando o WebGL não sobe: nesses casos o título é só o `<h1>`, com o
   texto selecionável de sempre.
@@ -467,6 +486,22 @@ chega em magenta e ciano puros é ela que passa a mandar na página, no lugar do
 trabalho. A leva atual é toda de cor natural (concreto, telhado, areia, luz
 âmbar de estúdio, nuvem de fim de tarde, papel), que convive com o preto e
 branco em vez de gritar por cima dele. Vale para a mídia final também.
+
+**Imagens próprias** (o retrato da hero, os cursores e a foto do Contato) não
+são placeholder e não passam pelo `MediaView`: são convertidas na bancada por
+um script em `scripts/`, com `sharp` instalado por fora
+(`npm install --no-save sharp`, ele não entra no `package.json` porque é
+ferramenta de quem edita, não dependência do site), e o resultado versionado
+em `public/`.
+
+As três compartilham o mesmo tratamento de gravura, linhas onduladas em meio
+tom, e por isso o mesmo problema: trama fina é ruído de alta frequência, o
+pior caso para qualquer compressor. A mesma foto do Contato sai com 76 KB
+quando é lisa e passa de 400 KB com a trama, na mesma resolução e qualidade.
+A saída é qualidade baixa (28 nos três casos): de 18 a 62 o resultado é
+visualmente indistinguível, porque a trama já é quase binária e não sobra
+gradiente sutil para o compressor estragar, mas o arquivo varia quase o dobro.
+
 
 No Modo Boring nada disso existe: sem lua, sem menu, sem vídeo, só a página
 utilitária.

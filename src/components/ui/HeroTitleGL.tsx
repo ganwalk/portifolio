@@ -347,8 +347,18 @@ export function HeroTitleGL({
       gl.clear(gl.COLOR_BUFFER_BIT);
       gl.drawArrays(gl.TRIANGLES, 0, 3);
 
+      // A troca acontece num quadro só: o canvas aparece e, no commit
+      // seguinte, o <h1> fica transparente. Nessa ordem de propósito, porque
+      // os dois desenhos são idênticos e sobrepô-los por um quadro não se vê,
+      // enquanto o inverso abriria um quadro de hero sem nome.
+      //
+      // Antes o canvas nascia visível e só a transparência do <h1> esperava:
+      // com a fonte pronta cedo, o texto do canvas aparecia PARADO no lugar
+      // final enquanto o <h1> ainda subia pela animação de entrada, e a hero
+      // mostrava dois nomes.
       if (!announced && entered && painted) {
         announced = true;
+        canvas.style.opacity = "1";
         onDrawing();
       }
 
@@ -458,7 +468,7 @@ export function HeroTitleGL({
     <canvas
       ref={canvasRef}
       aria-hidden
-      className="no-print pointer-events-none absolute inset-0 h-full w-full"
+      className="no-print pointer-events-none absolute inset-0 h-full w-full opacity-0"
     />
   );
 }
