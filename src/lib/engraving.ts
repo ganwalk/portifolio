@@ -1,11 +1,16 @@
-// A gravura em linha do fundo da hero, como SVG montado em código.
+// A gravura em linha das imagens sociais, como SVG montado em código.
 //
-// O desenho é o mesmo de `.hero-engraving` em globals.css, e a explicação do
-// porquê dele mora lá (e em docs/architecture.md). Aqui existe uma segunda
-// cópia porque os dois usos são incompatíveis: no site a gravura entra como
-// MÁSCARA, e a cor vem do tema; nas imagens sociais ela entra como imagem
-// chapada, com a cor já decidida, porque um PNG não tem tema. Mexeu na forma
-// num lugar, tem que mexer no outro.
+// O desenho é o mesmo tratamento de linhas onduladas em meio tom que o
+// retrato da hero, os cursores e a foto do Contato compartilham, mas numa
+// escala muito maior: na escala original a trama brigaria com o retrato ao
+// lado e ainda criaria moiré. Ampliada, lê como a chapa em que o retrato foi
+// impresso.
+//
+// Só as imagens sociais usam. O site chegou a ter a mesma gravura no fundo da
+// hero e ela foi revertida: em movimento, com a lente passando por cima e o
+// grão de filme rodando, a onda competia com o nome em vez de sustentá-lo.
+// Numa imagem parada, que é o que um cartão social é, ela faz o trabalho que
+// prometia, e é aqui que ela sobrevive.
 
 export function engravingSvg({
   ink,

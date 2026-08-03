@@ -279,61 +279,6 @@ html:not([data-boring="true"]) [role="button"]:active {
   cursor: var(--cursor-clique);
 }
 
-/* Fundo da hero: a mesma gravura do retrato, ampliada.
-   O retrato da hero, os cursores e a foto do Contato compartilham um
-   tratamento de linhas onduladas em meio tom. Aqui essa mesma trama vira o
-   fundo, mas numa escala muito maior (linha de 3.4 contra o fio quase binário
-   das fotos): na escala original ela brigaria com o retrato logo em cima e
-   ainda criaria moiré. Ampliada, lê como a chapa em que o retrato foi
-   impresso, não como uma segunda textura disputando atenção.
-   Linha, e não grade: a grade de colunas que morou aqui antes era lida como
-   papel quadriculado, e uma malha regular sempre volta a ser lida assim. Onda
-   não tem repetição visível pra virar padrão.
-
-   O desenho é um SVG inline, pelo mesmo motivo do ruído logo abaixo: sem
-   requisição, sem asset, e sem passar pelo url() do CSS, que não recebe o
-   basePath do GitHub Pages. Ele entra como MÁSCARA sobre uma camada de
-   var(--foreground), não como imagem: assim a cor vem do tema e o mesmo
-   arquivo serve claro, escuro e a inversão da lente, sem uma segunda versão.
-
-   Dentro do SVG: um padrão de linhas retas passa por um feDisplacementMap
-   (é o que ondula) e o MESMO feTurbulence volta como alfa no feColorMatrix
-   (é o que apaga a trama em manchas, como a densidade irregular de uma
-   gravura de verdade). Uma turbulência só, reaproveitada nos dois papéis:
-   duas custariam o dobro na rasterização. O degradê vertical no <mask> abre
-   espaço em cima, onde o nome mora, e fecha embaixo.
-
-   Existe uma segunda cópia desta forma em src/lib/engraving.ts, para as
-   imagens sociais, que precisam da cor já decidida porque um PNG não tem
-   tema. Mexeu aqui, tem que mexer lá. */
-.hero-engraving {
-  --engraving: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1600' height='1000' viewBox='0 0 1600 1000'%3E%3Cdefs%3E%3Cpattern id='l' width='1600' height='44' patternUnits='userSpaceOnUse'%3E%3Crect width='1600' height='3.4' fill='%23fff'/%3E%3C/pattern%3E%3ClinearGradient id='g' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%23000'/%3E%3Cstop offset='.28' stop-color='%23fff'/%3E%3Cstop offset='.78' stop-color='%23fff'/%3E%3Cstop offset='1' stop-color='%23000'/%3E%3C/linearGradient%3E%3Cmask id='m'%3E%3Crect width='1600' height='1000' fill='url(%23g)'/%3E%3C/mask%3E%3Cfilter id='f' x='-20%25' y='-20%25' width='140%25' height='140%25' color-interpolation-filters='sRGB'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.0012 0.003' numOctaves='2' seed='3' result='w'/%3E%3CfeDisplacementMap in='SourceGraphic' in2='w' scale='240' xChannelSelector='R' yChannelSelector='G' result='d'/%3E%3CfeColorMatrix in='w' type='matrix' values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 1 0 -0.18' result='t'/%3E%3CfeComposite in='d' in2='t' operator='in'/%3E%3C/filter%3E%3C/defs%3E%3Cg mask='url(%23m)'%3E%3Crect x='-300' y='-300' width='2200' height='1600' fill='url(%23l)' filter='url(%23f)'/%3E%3C/g%3E%3C/svg%3E");
-  background-color: var(--foreground);
-  opacity: 0.28;
-  -webkit-mask: var(--engraving) center / cover no-repeat;
-  mask: var(--engraving) center / cover no-repeat;
-}
-
-/* No escuro a mesma opacidade rende menos: linha clara sobre preto tem menos
-   contraste percebido que linha escura sobre branco. */
-.dark .hero-engraving {
-  opacity: 0.36;
-}
-
-/* Dentro da lente a gravura inverte junto com o resto da hero. Sem isto ela
-   simplesmente sumiria embaixo do disco de tinta, e a lente abriria um buraco
-   no fundo em vez de virar ele do avesso. */
-.lens-invert .hero-engraving {
-  background-color: var(--background);
-}
-
-/* O React nem monta a hero em Modo Boring, mas o HTML estático já vem com ela
-   e o script de boot marca o atributo antes da primeira pintura: cortar aqui
-   evita a gravura piscar antes da hidratação. */
-html[data-boring="true"] .hero-engraving {
-  display: none;
-}
-
 /* Textura de ruído analógico, desligada no Modo Boring e na impressão.
    (SVG inline: gratuito, sem asset externo; substituível por textura real depois.) */
 .texture-noise {

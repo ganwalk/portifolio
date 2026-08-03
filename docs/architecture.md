@@ -200,48 +200,18 @@ decorativa. O que dá vida é movimento e tipografia, não ornamento.
   acabamento. 0.10 é o ponto em que ele aparece sem começar a acinzentar o
   branco.
 
-  **O fundo é a mesma gravura do retrato, ampliada** (`.hero-engraving` em
-  `globals.css`). O retrato da hero, os cursores e a foto do Contato
-  compartilham um tratamento de linhas onduladas em meio tom, e é essa trama
-  que vira o fundo, numa escala muito maior: na escala original ela brigaria
-  com o retrato logo em cima e ainda criaria moiré. Ampliada, lê como a chapa
-  em que o retrato foi impresso, e não como uma segunda textura disputando
-  atenção com a primeira.
+  **O fundo é papel liso, e o grão é a única textura.** Já teve gravura em
+  linha, a mesma trama ondulada do retrato ampliada, e foi revertida: parada
+  numa imagem ela sustentava o nome, mas na hero, com a lente passando por
+  cima e o grão de filme rodando, virava mais uma coisa competindo pelo mesmo
+  retângulo. É a terceira tentativa de fundo a cair pelo mesmo motivo (antes
+  dela, a textura de papel e a grade de colunas em fio de um pixel, esta
+  última descrita na lente do nome, logo abaixo), e as três ensinaram a mesma
+  coisa: a hero não tem espaço para um segundo assunto.
 
-  Linha, e não grade. A grade de colunas em fio de um pixel que morou aqui
-  antes (ver a lente do nome, abaixo) acabou lida como papel quadriculado, o
-  mesmo destino da textura de papel que já tinha sido revertida antes dela:
-  malha regular sempre volta a ser lida assim. Onda não tem repetição visível
-  para virar padrão.
-
-  O desenho é um SVG inline, pelo mesmo motivo do ruído: sem requisição, sem
-  asset, e sem passar pelo `url()` do CSS, que não recebe o basePath do GitHub
-  Pages. Ele entra como MÁSCARA sobre uma camada de `var(--foreground)`, não
-  como imagem, então a cor vem do tema e o mesmo arquivo serve claro, escuro e
-  a inversão da lente, sem uma segunda versão. Dentro do SVG, um padrão de
-  linhas retas passa por um `feDisplacementMap` (é o que ondula) e o MESMO
-  `feTurbulence` volta como alfa num `feColorMatrix` (é o que apaga a trama em
-  manchas, como a densidade irregular de uma gravura de verdade). Uma
-  turbulência só, reaproveitada nos dois papéis: duas custariam o dobro na
-  rasterização. O degradê vertical do `<mask>` abre espaço em cima, onde o
-  nome mora, e fecha embaixo.
-
-  A máscara é `cover`, então a onda cresce junto com a tela em vez de manter
-  espessura fixa em pixel. É de propósito: a hero inteira é medida em `vw` (o
-  nome, o subtítulo, o retrato), e um fundo que não acompanhasse seria a única
-  peça da composição mudando de proporção conforme o monitor. Do notebook ao
-  monitor grande a hero é a mesma imagem, só maior.
-
-  A camada mora dentro do `HeroContent`, e não solta no `<section>`, pelo
-  mesmo motivo do canvas do nome: a cópia espelhada também recebe o fundo,
-  então a lente inverte a gravura junto com o resto (linha clara sobre o disco
-  de tinta) em vez de abrir um buraco nela.
-
-  O fundo é parado de propósito. A hero já tem o grão flutuando, a entrada do
-  nome, a lente, o retrato em flipbook e a roleta do subtítulo: mais uma coisa
-  se mexendo no mesmo retângulo é a lição que a ondulação em WebGL das capas
-  já ensinou (ver `CasesGrid`, abaixo). O que dá vida ao fundo é a lente
-  passando por cima dele.
+  A gravura sobreviveu onde faz sentido, nas imagens sociais
+  (`src/lib/engraving.ts`, ver SEO), que são paradas por definição e não
+  disputam com movimento nenhum.
 
   **O nome é atravessado por uma lente que segue o cursor** (`HeroTitleGL`,
   o único uso de WebGL do site). Onde o ponteiro passa, "ARMANDO CUSTODIO"
@@ -602,13 +572,13 @@ basePath), fonte de verdade de todo metadado que precisa de URL absoluta:
   recortado pelo mesmo script para `src/lib/og/retrato.png`. Os três arquivos
   são lidos do disco no build e nunca chegam ao navegador.
 
-  A gravura do fundo entra como `<img>`, e não como `background-image`: satori
-  resolve background com um raster próprio que ignora filtro de SVG, e é
-  filtro que faz a onda. O desenho vem de `src/lib/engraving.ts`, uma segunda
-  cópia da forma que `.hero-engraving` tem em `globals.css`, porque os dois
-  usos são incompatíveis (lá é máscara e a cor vem do tema, aqui é imagem
-  chapada e um PNG não tem tema). Mexeu na forma num lugar, tem que mexer no
-  outro.
+  A gravura do fundo é a mesma trama ondulada do retrato, ampliada, e vem de
+  `src/lib/engraving.ts`. Ela chegou a ser o fundo da hero e foi revertida de
+  lá (ver Mídia e movimento, acima): aqui ficou, porque um cartão é parado por
+  definição e não disputa espaço com movimento nenhum. Entra como `<img>`, e
+  não como `background-image`: satori resolve background com um raster próprio
+  que ignora filtro de SVG, e é filtro (`feTurbulence` somado a
+  `feDisplacementMap`) que faz a onda.
 - `PersonJsonLd` (`src/components/seo/PersonJsonLd.tsx`), renderizado no
   layout: schema.org `Person` com nome, cargo, URL, redes (`sameAs`) e
   `worksFor`. Ainda sem `image`: agora existe um retrato parado
