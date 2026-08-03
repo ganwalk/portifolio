@@ -1,6 +1,8 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { useCallback, useState } from "react";
+import { motion, useReducedMotion, type MotionValue } from "framer-motion";
+import { HeroGridGL } from "@/components/ui/HeroGridGL";
 
 // Fundo da hero: as colunas do próprio layout, visíveis. Nenhuma textura,
 // nenhum gradiente, nenhum ornamento: só fios de um pixel nas divisões da
@@ -38,7 +40,64 @@ const COLUMNS = 8;
  *  seria textura de fundo, exatamente o que já foi tentado e revertido. */
 const REGISTRY_ROWS = [0.28, 0.5, 0.72];
 
-export function HeroGrid({ mirrored }: { mirrored?: boolean }) {
+/** O decisor: a grade reage ao cursor em WebGL (`HeroGridGL`) quando dá, e
+ *  cai pra versão em DOM abaixo quando não dá. Não dá em três casos, todos
+ *  já previstos pelo resto do site: navegador sem WebGL, sistema pedindo
+ *  menos movimento (uma grade que se entorta atrás do texto é movimento) e o
+ *  primeiro render, antes de o efeito confirmar que subiu. Nos três a grade
+ *  continua ali, parada, no lugar exato: o desenho é o mesmo, a versão em
+ *  DOM só não reage.
+ *
+ *  Os dois caminhos convivem no primeiro quadro de propósito: a versão em
+ *  DOM é o que sai do servidor, então nunca existe um instante de hero sem
+ *  fundo enquanto o contexto WebGL é criado. */
+export function HeroGrid({
+  mirrored,
+  pointerX,
+  pointerY,
+  lensRadius,
+  sectionRef,
+}: {
+  mirrored?: boolean;
+  pointerX: MotionValue<number>;
+  pointerY: MotionValue<number>;
+  lensRadius: MotionValue<number>;
+  sectionRef: React.RefObject<HTMLElement | null>;
+}) {
+  const reduceMotion = useReducedMotion();
+  const [gl, setGl] = useState<"pending" | "drawing" | "unsupported">("pending");
+  const onUnsupported = useCallback(() => setGl("unsupported"), []);
+  const onDrawing = useCallback(() => setGl("drawing"), []);
+
+  if (reduceMotion || gl === "unsupported") return <HeroGridStatic mirrored={mirrored} />;
+
+  return (
+    <>
+      <HeroGridStatic mirrored={mirrored} hiddenBehindCanvas={gl === "drawing"} />
+      <HeroGridGL
+        mirrored={mirrored}
+        pointerX={pointerX}
+        pointerY={pointerY}
+        lensRadius={lensRadius}
+        sectionRef={sectionRef}
+        onUnsupported={onUnsupported}
+        onDrawing={onDrawing}
+      />
+    </>
+  );
+}
+
+function HeroGridStatic({
+  mirrored,
+  hiddenBehindCanvas,
+}: {
+  mirrored?: boolean;
+  /** O canvas assume o desenho: a versão em DOM continua no HTML (é ela que
+   *  o servidor manda e o que aparece no primeiro quadro), mas some assim
+   *  que o WebGL começa a desenhar por cima, senão as duas se somam e a
+   *  grade fica com o dobro da intensidade. */
+  hiddenBehindCanvas?: boolean;
+}) {
   /** Comum às linhas e às marcas: as duas nascem da mesma coluna, então a
    *  regra de quem some no mobile também é a mesma. */
   const hiddenOnMobile = (column: number) => (column % 2 ? "hidden sm:block" : "block");
@@ -53,7 +112,9 @@ export function HeroGrid({ mirrored }: { mirrored?: boolean }) {
   return (
     <div
       aria-hidden
-      className="gutter no-print pointer-events-none absolute inset-0"
+      className={`gutter no-print pointer-events-none absolute inset-0 ${
+        hiddenBehindCanvas ? "opacity-0" : ""
+      }`}
     >
       <div className="hero-grid relative h-full w-full">
         {Array.from({ length: COLUMNS + 1 }, (_, column) => (

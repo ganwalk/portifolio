@@ -14,10 +14,9 @@ import {
   type MotionValue,
 } from "framer-motion";
 import { CaseMetrics } from "@/components/ui/CaseMetrics";
-import { SceneCoverMedia } from "@/components/ui/SceneCoverMedia";
 import { MediaView } from "@/components/ui/MediaView";
 import { cases } from "@/data/cases";
-import type { CaseStudy, Media } from "@/data/types";
+import type { CaseStudy } from "@/data/types";
 import type { Locale } from "@/i18n/config";
 import type { Dictionary } from "@/i18n/dictionaries";
 
@@ -34,8 +33,11 @@ import type { Dictionary } from "@/i18n/dictionaries";
 // próxima por cima. Rolar É a navegação: sem seta, sem play/pause, sem
 // índice próprio brigando com o scroll de verdade.
 //
-// Cada FATIA ocupa uma porção igual de scrollYProgress (1/N da seção), mas
-// uma fatia nem sempre é um case só: cases adjacentes que compartilham
+// Cada FATIA ocupa uma janela própria de scrollYProgress (ver slideWindows).
+// Quase todas valem o mesmo; a PRIMEIRA vale menos, porque é a única sem fase
+// de entrada e, com peso igual, virava uma tela inteira de rolagem sem nada
+// acontecendo antes da primeira transição, contra pouco mais de meia tela de
+// pausa nas demais. Uma fatia nem sempre é um case só: cases adjacentes que compartilham
 // `group` no dado (o trio de artistas, hoje) viram uma fatia só
 // (`buildSlides`, calculado uma vez fora do componente porque `cases` é
 // estático), lado a lado a partir do `lg:` (1024px) ou empilhados
@@ -62,9 +64,12 @@ import type { Dictionary } from "@/i18n/dictionaries";
 // entra na conta aqui, ao contrário do resto do site: a exceção é
 // proposital, é o próprio projeto quem fala).
 //
-// O fundo de cada card é estático (só a mídia, sem deslocar com o cursor):
-// o único movimento que resta nela é um zoom sutil, e esse é só no hover,
-// não no scroll, pra não competir com a máscara de texto pela atenção. Um
+// O fundo de cada card é a mídia e nada mais: nenhum shader, nenhum canvas.
+// Uma ondulação em WebGL que seguia o cursor e fundia uma capa na outra morou
+// aqui e saiu; o único WebGL do site hoje é a grade da hero (HeroGridGL), onde
+// o efeito É o desenho, não uma camada por cima de um vídeo que já tem
+// movimento próprio. O que restou de movimento na mídia são dois, os dois
+// discretos: um zoom no hover e o paralaxe de scroll (abaixo). Um
 // selo "ver caso" acompanha o cursor (mola só, sem rastro de partículas),
 // deslocado bem à direita e um pouco abaixo da ponta (cursores grandes do
 // sistema cobrem a área logo ao lado dela), com o texto rodando num
@@ -113,6 +118,47 @@ function pad(n: number) {
   return String(n).padStart(2, "0");
 }
 
+/** Fração da janela de uma fatia gasta subindo. O resto é a pausa em que ela
+ *  fica assentada em cena, recebendo a próxima por cima. */
+const ENTER_FRACTION = 0.45;
+
+/** Peso da PRIMEIRA fatia na altura da seção, contra 1 das demais.
+ *
+ *  Ela é a única sem fase de entrada: já nasce no lugar, porque não existe
+ *  nada antes dela pra subir de. Com todas as fatias recebendo a mesma altura
+ *  de scroll, essa diferença virava uma tela inteira de rolagem sem NADA
+ *  acontecendo antes da primeira transição, contra 55% de uma tela de pausa
+ *  em cada fatia seguinte. Na prática a seção parecia travada logo na
+ *  entrada, e a mão de quem rola aprendia um ritmo que a seção não cumpria
+ *  depois. Dando à primeira só o peso da pausa (o que sobra depois da subida
+ *  que ela não tem), a espera entre uma transição e a próxima fica igual do
+ *  começo ao fim. */
+const FIRST_SLIDE_WEIGHT = 1 - ENTER_FRACTION;
+
+interface SlideWindow {
+  /** Início e fim desta fatia em scrollYProgress (0 a 1 da seção). */
+  start: number;
+  end: number;
+}
+
+/** Divide o progresso da seção entre as fatias, com a primeira valendo menos
+ *  que as outras (ver FIRST_SLIDE_WEIGHT). `total` é a altura da seção em
+ *  telas: não é mais `count`, já que as fatias não valem todas o mesmo. */
+function slideWindows(count: number): { windows: SlideWindow[]; total: number } {
+  const weights = Array.from({ length: count }, (_, index) =>
+    index === 0 ? FIRST_SLIDE_WEIGHT : 1,
+  );
+  const total = weights.reduce((sum, weight) => sum + weight, 0);
+  const windows: SlideWindow[] = [];
+  let acc = 0;
+  for (const weight of weights) {
+    const start = acc / total;
+    acc += weight;
+    windows.push({ start, end: acc / total });
+  }
+  return { windows, total };
+}
+
 /** Range de entrada de scrollYProgress pra useTransform: sobe de 0 a 1
  *  durante a subida da fatia (`enterEnd`) e trava em 1 pra sempre depois
  *  disso (clamp padrão do useTransform fora do domínio de `input`), mesmo
@@ -120,14 +166,24 @@ function pad(n: number) {
  *  faz a fatia SUBIR uma vez só e nunca descer de volta: uma curva que
  *  também recuasse na saída faria a fatia deslizar de volta pra baixo bem
  *  no instante em que ela devia só ficar parada, recebendo a próxima em
- *  cima. A primeira fatia não tem fase de entrada, já nasce no lugar (nada
- *  "antes" dela pra subir de). */
-function enterRange(index: number, count: number) {
+ *  cima. */
+function enterRange(index: number, windows: SlideWindow[]) {
   if (index === 0) return { input: [0, 1] as [number, number], output: [1, 1] as [number, number] };
-  const span = 1 / count;
-  const start = index * span;
-  const enterEnd = start + span * 0.45;
-  return { input: [start, enterEnd] as [number, number], output: [0, 1] as [number, number] };
+  const { start, end } = windows[index];
+  return {
+    input: [start, start + (end - start) * ENTER_FRACTION] as [number, number],
+    output: [0, 1] as [number, number],
+  };
+}
+
+/** Qual fatia está em cena num dado progresso. Varre de trás pra frente
+ *  porque as janelas não têm mais largura igual, então não dá pra dividir o
+ *  progresso pelo número de fatias e arredondar. */
+function activeSlideAt(progress: number, windows: SlideWindow[]) {
+  for (let index = windows.length - 1; index > 0; index--) {
+    if (progress >= windows[index].start) return index;
+  }
+  return 0;
 }
 
 interface SlideCase {
@@ -164,12 +220,11 @@ const groupedSlides = buildSlides(cases);
 
 function SlidePanel({
   slide,
-  previousSlide,
   totalCases,
   locale,
   dict,
   index,
-  count,
+  windows,
   progress,
   parallax,
   isActive,
@@ -178,17 +233,13 @@ function SlidePanel({
   onExpand,
 }: {
   slide: SlideCase[];
-  /** A fatia anterior, pela mesma ordem de colunas: a coluna N desta fatia
-   *  funde da capa da coluna N ali (ver `fromCover` abaixo) em vez de
-   *  simplesmente aparecer por cima. `undefined` na primeira fatia (nada
-   *  antes dela) e em colunas novas que não existiam na fatia anterior (o
-   *  trio ganhando duas colunas que o painel de antes não tinha). */
-  previousSlide?: SlideCase[];
   totalCases: number;
   locale: Locale;
   dict: Dictionary;
   index: number;
-  count: number;
+  /** Janelas de scroll de todas as fatias (ver slideWindows): a fatia
+   *  precisa das vizinhas, não só da própria, pra saber quando é coberta. */
+  windows: SlideWindow[];
   /** Progresso da seção já amortecido pela mola (ver CasesGrid): é ele, e
    *  não o scroll cru, que rege toda transformação daqui pra baixo. */
   progress: MotionValue<number>;
@@ -207,7 +258,7 @@ function SlidePanel({
   // enterRange). zIndex sobe com o índice, não com isActive: a ordem de
   // empilhamento acompanha a ordem de rolagem, então a fatia N+1 sempre
   // cobre a N ao chegar, nunca o contrário.
-  const { input: enterInput, output: enterOutput } = enterRange(index, count);
+  const { input: enterInput, output: enterOutput } = enterRange(index, windows);
   const enterT = useTransform(progress, enterInput, enterOutput);
   const slideY = useTransform(enterT, [0, 1], ["100%", "0%"]);
 
@@ -216,10 +267,9 @@ function SlidePanel({
   // ao contrário de `enterT`, que trava em 1 assim que a fatia assenta, este
   // continua andando durante a pausa, que é justamente onde a rolagem
   // precisava de vida.
-  const span = 1 / count;
   const stayT = useTransform(
     progress,
-    [index * span, (index + 1) * span],
+    [windows[index].start, windows[index].end],
     [0, 1],
   );
 
@@ -229,7 +279,7 @@ function SlidePanel({
   // outra" de "página sendo virada": sem ela, a fatia de baixo fica parada
   // como um fundo, e a profundidade some. A última fatia nunca é coberta
   // (nada depois dela).
-  const nextEnter = index < count - 1 ? enterRange(index + 1, count) : { input: [0, 1] as [number, number], output: [0, 0] as [number, number] };
+  const nextEnter = index < windows.length - 1 ? enterRange(index + 1, windows) : { input: [0, 1] as [number, number], output: [0, 0] as [number, number] };
   const coveringT = useTransform(progress, nextEnter.input, nextEnter.output);
   const coveredScale = useTransform(coveringT, [0, 1], [1, 0.94]);
   const coveredY = useTransform(coveringT, [0, 1], ["0%", "-4%"]);
@@ -270,11 +320,10 @@ function SlidePanel({
             empilhando cada artista na fatia dele, sem abrir mão do "lado a
             lado" onde sobra largura. */}
         <div className="flex min-w-0 flex-1 flex-col lg:flex-row">
-          {slide.map(({ caseStudy, flatIndex }, colIndex) => (
+          {slide.map(({ caseStudy, flatIndex }) => (
             <CaseColumn
               key={caseStudy.slug}
               caseStudy={caseStudy}
-              fromCover={previousSlide?.[colIndex]?.caseStudy.cover}
               flatIndex={flatIndex}
               totalCases={totalCases}
               locale={locale}
@@ -298,7 +347,6 @@ function SlidePanel({
 
 function CaseColumn({
   caseStudy,
-  fromCover,
   flatIndex,
   totalCases,
   locale,
@@ -314,11 +362,6 @@ function CaseColumn({
   onExpand,
 }: {
   caseStudy: CaseStudy;
-  /** Capa da mesma coluna na fatia anterior: a transição WebGL funde dela
-   *  pra capa deste case conforme `enterT` sobe (ver SceneCoverMedia).
-   *  `undefined` quando não há coluna equivalente antes (primeira fatia, ou
-   *  coluna nova que a fatia anterior não tinha). */
-  fromCover?: Media;
   flatIndex: number;
   totalCases: number;
   locale: Locale;
@@ -401,36 +444,21 @@ function CaseColumn({
           style={{ y: mediaY, scale: mediaScale }}
           className="absolute inset-0"
         >
-        <motion.div
-          animate={{ scale: isHovered ? 1.06 : 1 }}
-          transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-          className="absolute inset-0"
-        >
-          {isNearActive ? (
-            isActive ? (
-              // Único experimento de WebGL do site, e só aqui: a capa em
-              // cena de fato (não as vizinhas, que só pré-carregam) ganha a
-              // ondulação que segue o cursor e, enquanto a fatia ainda está
-              // entrando, funde da capa anterior pra esta (ver
-              // SceneCoverMedia).
-              <SceneCoverMedia
-                media={caseStudy.cover}
-                fromMedia={fromCover}
-                progress={enterT}
-                locale={locale}
-                className="h-full w-full"
-              />
-            ) : (
+          <motion.div
+            animate={{ scale: isHovered ? 1.06 : 1 }}
+            transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+            className="absolute inset-0"
+          >
+            {isNearActive ? (
               <MediaView
                 media={caseStudy.cover}
                 locale={locale}
                 className="h-full w-full object-cover"
               />
-            )
-          ) : (
-            <div className="h-full w-full bg-surface" />
-          )}
-        </motion.div>
+            ) : (
+              <div className="h-full w-full bg-surface" />
+            )}
+          </motion.div>
         </motion.div>
         <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/10 to-black/45" />
 
@@ -667,7 +695,7 @@ export function CasesGrid({
   // antes disso (ver SlidePanel). Reduz o scroll do trio a 1/3 também no
   // mobile, em vez de um projeto por tela inteira.
   const slides = groupedSlides;
-  const count = slides.length;
+  const { windows, total: sectionScreens } = slideWindows(slides.length);
   const hasIllustrative = cases.some((c) =>
     c.metrics.some((m) => m.illustrative),
   );
@@ -704,8 +732,7 @@ export function CasesGrid({
   // A LÓGICA continua no scroll cru: qual fatia é clicável e recebe foco de
   // teclado não pode chegar uns décimos atrasada da mão de quem rola.
   useMotionValueEvent(scrollYProgress, "change", (v) => {
-    const next = Math.min(count - 1, Math.max(0, Math.floor(v * count)));
-    setActiveIndex(next);
+    setActiveIndex(activeSlideAt(v, windows));
   });
 
   // Selo "ver caso" que segue o cursor: um só pra seção inteira, não um por
@@ -765,7 +792,7 @@ export function CasesGrid({
       <div
         ref={sectionRef}
         className="relative"
-        style={{ height: `${count * 100}vh` }}
+        style={{ height: `${sectionScreens * 100}vh` }}
       >
         <div
           className="sticky top-0 h-svh w-full overflow-hidden"
@@ -776,12 +803,11 @@ export function CasesGrid({
             <SlidePanel
               key={slide.map(({ caseStudy }) => caseStudy.slug).join("+")}
               slide={slide}
-              previousSlide={index > 0 ? slides[index - 1] : undefined}
               totalCases={cases.length}
               locale={locale}
               dict={dict}
               index={index}
-              count={count}
+              windows={windows}
               progress={progress}
               parallax={parallax}
               isActive={index === activeIndex}
