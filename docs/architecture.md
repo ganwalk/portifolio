@@ -62,7 +62,7 @@ src/
     experiments.ts           bloco Fora do expediente
     types.ts                 contratos de conteúdo
   fonts/
-    whyte-inktrap/            fonte licenciada, peso Black, três destaques do site
+    whyte-inktrap/            fonte licenciada, peso Black, destaques do site
     array/                    fonte Fontshare, só no selo que persegue o cursor
   i18n/
     config.ts                idiomas suportados
@@ -116,7 +116,8 @@ para quem estiver sem JavaScript. Cada idioma gera HTML próprio com o atributo
 | Papel                    | Fonte              | Onde aparece                                  |
 | ------------------------ | ------------------ | ---------------------------------------------- |
 | Corpo de texto           | Archivo (wdth)     | parágrafos, listas, texto corrido              |
-| Manchete                 | Bricolage Grotesque | nome na hero, título e métrica dos cases, convite do contato, menu overlay |
+| Manchete                 | Bricolage Grotesque | título e métrica dos cases                    |
+| Destaque com ink traps   | Whyte Inktrap (licenciada) | assinatura do cabeçalho, nome na hero, rótulos do menu overlay, convite do contato |
 | Mono de extrato          | IBM Plex Mono      | legendas técnicas, tags, controles             |
 | Subtítulo da hero        | Switzer (Fontshare) | só o "Designer de [roleta]" abaixo do nome, combina com a Whyte Inktrap |
 
@@ -451,9 +452,11 @@ decorativa. O que dá vida é movimento e tipografia, não ornamento.
 - **Lua de fases** (`MoonPhase`): no canto direito do cabeçalho, percorre as
   fases da lua conforme o scroll, três lunações por página.
 - **Menu overlay** (`SiteMenu`): navegação de tela cheia com tipografia gigante
-  e preview de imagem no hover de cada link. Renderiza num portal para o body,
-  porque o `backdrop-blur` do cabeçalho criaria um containing block e prenderia
-  o overlay dentro da barra. No mobile a mesa de controle mora aqui.
+  (Whyte Inktrap, via `.type-inktrap` somada ao `.type-display` que já dava
+  tamanho e caixa alta) e preview de imagem no hover de cada link. Renderiza
+  num portal para o body, porque o `backdrop-blur` do cabeçalho criaria um
+  containing block e prenderia o overlay dentro da barra. No mobile a mesa de
+  controle mora aqui.
 - **Cabeçalho**: uma só ordem de DOM (menu, assinatura, lua) em dois arranjos.
   No mobile é grid de três colunas, com a assinatura centralizada; no desktop
   vira flex e a assinatura vai para a frente da fila (`lg:order-first`), com a

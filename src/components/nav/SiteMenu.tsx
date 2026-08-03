@@ -15,8 +15,9 @@ import type { Dictionary } from "@/i18n/dictionaries";
 // pré-visualização dentro das próprias letras (a imagem preenche o texto via
 // background-clip: text, não flutua ao lado): duas cópias do mesmo rótulo
 // empilhadas, a de baixo sempre visível, a de cima com a imagem recortada
-// pela forma do texto, ganhando opacidade no hover. No Modo Boring o menu
-// não existe: a página utilitária é uma coluna só.
+// pela forma do texto, ganhando opacidade no hover. Os rótulos vão na Whyte
+// Inktrap (.type-inktrap), a mesma dos outros destaques do site. No Modo
+// Boring o menu não existe: a página utilitária é uma coluna só.
 
 // Previews placeholder por seção. Sugestão de mídia real: um recorte de cada
 // destino (colagem dos cases, foto do Armando no Sobre, textura de papel no
@@ -138,7 +139,7 @@ export function SiteMenu({
                             (background-clip: text), invisível em repouso e
                             revelada no hover. A imagem "mora dentro" do
                             texto em vez de flutuar ao lado dele. */}
-                        <span className="type-display relative inline-block text-[13vw] leading-none sm:text-[7vw]">
+                        <span className="type-display type-inktrap relative inline-block text-[13vw] leading-none sm:text-[7vw]">
                           <span className="transition-opacity duration-500 ease-out group-hover:opacity-10">
                             {item.label}
                           </span>

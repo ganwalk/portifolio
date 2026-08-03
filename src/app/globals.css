@@ -24,12 +24,12 @@
   --font-mono: "IBM Plex Mono", ui-monospace, monospace;
   /* Reservada para os poucos momentos de "manchete de verdade": o nome na
      hero, título e métrica dos cases, o convite do contato. Todo o resto do
-     display (menu, cartaz) continua em Archivo. */
+     display (cartaz) continua em Archivo. */
   --font-headline: "Bricolage Grotesque Variable", var(--font-sans);
   /* Fonte com ink traps de verdade (Whyte Inktrap, licenciada, ver
-     src/fonts/whyte-inktrap/), reservada pros três destaques do site: a
-     assinatura do cabeçalho, o nome na hero e o convite de contato. Só o
-     peso Black (900) está carregado, o único usado. */
+     src/fonts/whyte-inktrap/), reservada pros destaques do site: a
+     assinatura do cabeçalho, o nome na hero, os rótulos do menu e o convite
+     de contato. Só o peso Black (900) está carregado, o único usado. */
   --font-inktrap: "Whyte Inktrap", var(--font-sans);
   /* Switzer (Fontshare, ver src/fonts/switzer/), só no subtítulo da hero (o
      "Designer de [roleta]"): combina melhor com a Whyte Inktrap do nome
@@ -165,9 +165,9 @@ body {
 }
 
 /* Sobrepõe font-family e font-weight das classes de tamanho/peso que já
-   existem (.type-display na hero, .type-serif-display no contato): elas
-   são compartilhadas com outros lugares que não devem trocar de fonte,
-   então a troca entra por uma classe extra, aplicada só nesses dois
+   existem (.type-display na hero e no menu, .type-serif-display no
+   contato): elas são compartilhadas com outros lugares que não devem trocar
+   de fonte, então a troca entra por uma classe extra, aplicada só nesses
    destaques. font-weight força 900 porque só o peso Black está carregado. */
 .type-inktrap {
   font-family: var(--font-inktrap);
