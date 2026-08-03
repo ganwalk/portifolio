@@ -112,6 +112,13 @@ function HeroContent({
   // nasce atrás da tarja.
   return (
     <div className="gutter relative flex flex-1 flex-col items-center justify-between pb-14 pt-16 sm:items-stretch sm:pt-32">
+      {/* Fundo em gravura de linha (ver .hero-engraving em globals.css). Mora
+          aqui dentro, e não solto no <section>, pelo mesmo motivo do canvas do
+          nome: a cópia espelhada também recebe o fundo, então a lente inverte
+          a gravura junto com o resto em vez de abrir um buraco nela. Primeiro
+          no DOM e sem z-index, fica atrás de todos os irmãos posicionados. */}
+      <div aria-hidden className="hero-engraving no-print pointer-events-none absolute inset-0" />
+
       {/* Dentro do HeroContent, e não solto no <section>: assim a cópia
           espelhada também recebe o canvas, e o nome deformado inverte junto
           com o resto em vez de sumir atrás do disco de tinta da lente. */}

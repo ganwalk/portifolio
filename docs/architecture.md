@@ -194,6 +194,49 @@ decorativa. O que dá vida é movimento e tipografia, não ornamento.
   filme flutuando, partículas sutis, sem vinheta nem nenhum outro efeito
   por cima.
 
+  **O fundo é a mesma gravura do retrato, ampliada** (`.hero-engraving` em
+  `globals.css`). O retrato da hero, os cursores e a foto do Contato
+  compartilham um tratamento de linhas onduladas em meio tom, e é essa trama
+  que vira o fundo, numa escala muito maior: na escala original ela brigaria
+  com o retrato logo em cima e ainda criaria moiré. Ampliada, lê como a chapa
+  em que o retrato foi impresso, e não como uma segunda textura disputando
+  atenção com a primeira.
+
+  Linha, e não grade. A grade de colunas em fio de um pixel que morou aqui
+  antes (ver a lente do nome, abaixo) acabou lida como papel quadriculado, o
+  mesmo destino da textura de papel que já tinha sido revertida antes dela:
+  malha regular sempre volta a ser lida assim. Onda não tem repetição visível
+  para virar padrão.
+
+  O desenho é um SVG inline, pelo mesmo motivo do ruído: sem requisição, sem
+  asset, e sem passar pelo `url()` do CSS, que não recebe o basePath do GitHub
+  Pages. Ele entra como MÁSCARA sobre uma camada de `var(--foreground)`, não
+  como imagem, então a cor vem do tema e o mesmo arquivo serve claro, escuro e
+  a inversão da lente, sem uma segunda versão. Dentro do SVG, um padrão de
+  linhas retas passa por um `feDisplacementMap` (é o que ondula) e o MESMO
+  `feTurbulence` volta como alfa num `feColorMatrix` (é o que apaga a trama em
+  manchas, como a densidade irregular de uma gravura de verdade). Uma
+  turbulência só, reaproveitada nos dois papéis: duas custariam o dobro na
+  rasterização. O degradê vertical do `<mask>` abre espaço em cima, onde o
+  nome mora, e fecha embaixo.
+
+  A máscara é `cover`, então a onda cresce junto com a tela em vez de manter
+  espessura fixa em pixel. É de propósito: a hero inteira é medida em `vw` (o
+  nome, o subtítulo, o retrato), e um fundo que não acompanhasse seria a única
+  peça da composição mudando de proporção conforme o monitor. Do notebook ao
+  monitor grande a hero é a mesma imagem, só maior.
+
+  A camada mora dentro do `HeroContent`, e não solta no `<section>`, pelo
+  mesmo motivo do canvas do nome: a cópia espelhada também recebe o fundo,
+  então a lente inverte a gravura junto com o resto (linha clara sobre o disco
+  de tinta) em vez de abrir um buraco nela.
+
+  O fundo é parado de propósito. A hero já tem o grão flutuando, a entrada do
+  nome, a lente, o retrato em flipbook e a roleta do subtítulo: mais uma coisa
+  se mexendo no mesmo retângulo é a lição que a ondulação em WebGL das capas
+  já ensinou (ver `CasesGrid`, abaixo). O que dá vida ao fundo é a lente
+  passando por cima dele.
+
   **O nome é atravessado por uma lente que segue o cursor** (`HeroTitleGL`,
   o único uso de WebGL do site). Onde o ponteiro passa, "ARMANDO CUSTODIO"
   entorta, como se houvesse um vidro convexo pousado em cima dele.
