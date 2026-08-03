@@ -291,7 +291,7 @@ export function Hero({ dict }: { dict: Dictionary }) {
       ref={sectionRef}
       onMouseMove={onMouseMove}
       onMouseLeave={() => radius.set(0)}
-      className="texture-noise texture-noise-animate texture-paper relative flex min-h-[100svh] flex-col overflow-hidden"
+      className="texture-noise texture-noise-animate relative flex min-h-[100svh] flex-col overflow-hidden"
       aria-label={profile.name}
     >
       <div className="relative flex flex-1">
