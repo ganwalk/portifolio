@@ -66,9 +66,9 @@ import type { Dictionary } from "@/i18n/dictionaries";
 //
 // O fundo de cada card é a mídia e nada mais: nenhum shader, nenhum canvas.
 // Uma ondulação em WebGL que seguia o cursor e fundia uma capa na outra morou
-// aqui e saiu; o único WebGL do site hoje é a grade da hero (HeroGridGL), onde
-// o efeito É o desenho, não uma camada por cima de um vídeo que já tem
-// movimento próprio. O que restou de movimento na mídia são dois, os dois
+// aqui e saiu; o único WebGL do site hoje é a lente que deforma o nome na hero
+// (HeroTitleGL), onde o efeito É o desenho, não uma camada por cima de um
+// vídeo que já tem movimento próprio. O que restou de movimento na mídia são dois, os dois
 // discretos: um zoom no hover e o paralaxe de scroll (abaixo). Um
 // selo "ver caso" acompanha o cursor (mola só, sem rastro de partículas),
 // deslocado bem à direita e um pouco abaixo da ponta (cursores grandes do
