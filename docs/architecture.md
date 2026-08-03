@@ -487,6 +487,22 @@ trabalho. A leva atual é toda de cor natural (concreto, telhado, areia, luz
 âmbar de estúdio, nuvem de fim de tarde, papel), que convive com o preto e
 branco em vez de gritar por cima dele. Vale para a mídia final também.
 
+**Imagens próprias** (o retrato da hero, os cursores e a foto do Contato) não
+são placeholder e não passam pelo `MediaView`: são convertidas na bancada por
+um script em `scripts/`, com `sharp` instalado por fora
+(`npm install --no-save sharp`, ele não entra no `package.json` porque é
+ferramenta de quem edita, não dependência do site), e o resultado versionado
+em `public/`.
+
+As três compartilham o mesmo tratamento de gravura, linhas onduladas em meio
+tom, e por isso o mesmo problema: trama fina é ruído de alta frequência, o
+pior caso para qualquer compressor. A mesma foto do Contato sai com 76 KB
+quando é lisa e passa de 400 KB com a trama, na mesma resolução e qualidade.
+A saída é qualidade baixa (28 nos três casos): de 18 a 62 o resultado é
+visualmente indistinguível, porque a trama já é quase binária e não sobra
+gradiente sutil para o compressor estragar, mas o arquivo varia quase o dobro.
+
+
 No Modo Boring nada disso existe: sem lua, sem menu, sem vídeo, só a página
 utilitária.
 
