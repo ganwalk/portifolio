@@ -298,6 +298,57 @@ html[data-boring="true"] .texture-noise::after {
   display: none;
 }
 
+/* Grade da hero (ver HeroGrid.tsx): as colunas do próprio layout, visíveis em
+   fio de um pixel. A opacidade mora aqui, no contêiner, e não em cada linha,
+   porque é uma decisão de intensidade da camada inteira, não de cada fio.
+   Baixa de propósito: a grade é o chão da composição, não um elemento dela;
+   se ela competir com o nome, passou do ponto.
+
+   A máscara dissolve as linhas nas duas pontas: em cima elas nascem depois do
+   cabeçalho, embaixo somem antes da linha de fatos, então a grade não encosta
+   em nenhuma borda dura da tela e não vira moldura (o site não tem moldura em
+   lugar nenhum). */
+.hero-grid {
+  opacity: 0.16;
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    transparent 0%,
+    black 14%,
+    black 76%,
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    to bottom,
+    transparent 0%,
+    black 14%,
+    black 76%,
+    transparent 100%
+  );
+}
+
+/* Fio claro sobre fundo escuro espalha mais que fio escuro sobre claro (o
+   brilho "vaza" pros pixels vizinhos), então a mesma opacidade lê mais forte
+   no tema escuro. Compensado na mão, senão a grade grita num tema e some no
+   outro. */
+.dark .hero-grid {
+  opacity: 0.13;
+}
+
+/* Marcas de registro centradas na coluna. `translate`, e não `transform`: o
+   Framer Motion escreve `transform` no style inline pra animar, e as duas
+   propriedades não se atropelam (translate compõe DEPOIS de transform). */
+.hero-tick {
+  translate: -50% 0;
+}
+
+.hero-tick-end {
+  translate: 50% 0;
+}
+
+html[data-boring="true"] .hero-grid {
+  display: none;
+}
+
 /* Variante animada, só na hera: o mesmo ruído, mas vivo, como grão de filme
    flutuando. steps(), não uma curva suave: grão que desliza suavemente lê
    como neblina, grão que pula de posição em saltos lê como estática, mais

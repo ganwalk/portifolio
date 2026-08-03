@@ -181,6 +181,23 @@ decorativa. O que dá vida é movimento e tipografia, não ornamento.
   filme flutuando, partículas sutis, sem vinheta nem nenhum outro efeito
   por cima.
 
+  O fundo é a própria grade do layout, visível (`HeroGrid`): fios de um
+  pixel nas divisões das colunas (oito no desktop, quatro no mobile, as
+  ímpares somem por CSS puro), alinhados ao `.gutter`, mais marcas de
+  registro nos cruzamentos com três alturas (28%, 50%, 72%). As linhas
+  horizontais em si não são desenhadas, só o cruzamento: a grade inteira
+  viraria papel quadriculado, ou seja, textura, exatamente o caminho que já
+  foi tentado (textura de papel) e revertido. A escolha é estrutura, não
+  superfície: o site é de um design engineer, e deixar a grade aparecer é
+  mostrar o esqueleto da composição em vez de vestir o fundo. As linhas se
+  desenham do topo pra baixo, escalonadas da esquerda pra direita, no mesmo
+  compasso da entrada do nome, e as marcas entram em fade depois delas.
+  Usam `bg-current`, então a lente as inverte de graça junto com o texto
+  (dentro do círculo elas viram claras sobre tinta), sem precisar de uma
+  segunda versão. Uma máscara vertical dissolve as pontas para a grade
+  nunca encostar em borda dura e nunca virar moldura. Some no Modo Boring e
+  na impressão.
+
   No mobile o H1 é um pouco maior (`14.5vw`, contra `13vw` antes) e o bloco
   de título ganha uma folga extra por cima (`mt-6`), descendo um pouco em
   relação ao cabeçalho. No desktop o retrato é posicionado em absoluto, à
@@ -266,11 +283,52 @@ decorativa. O que dá vida é movimento e tipografia, não ornamento.
   (`clip-path: circle()`, lida como fraca demais); o empilhamento com
   profundidade é a terceira tentativa, inspirada no vocabulário de scroll
   storytelling de sites premiados (cartões que se empilham com profundidade
-  em vez de um recorte abrindo e fechando no mesmo lugar). Rolar é a
+  em vez de um recorte abrindo e fechando no mesmo lugar). A fatia coberta
+  também sobe um tanto (`coveredY`, 4%) enquanto encolhe e escurece: sem
+  esse deslocamento ela fica parada como um fundo e a profundidade some;
+  com ele a leitura é de página sendo virada, não de carta caindo em cima
+  de outra. Rolar é a
   navegação inteira: sem seta, sem play/pause, sem índice próprio brigando
   com o scroll de verdade. Primeira e última fatia não têm a metade da
   transição que não existe (a primeira já nasce aberta, sem fase de
   entrada; a última nunca é coberta, fica aberta até o fim da seção).
+
+  **A rolagem é amortecida, a página não.** O progresso bruto do scroll
+  passa por uma mola (`useSpring` em `CasesGrid`) e é o valor amortecido que
+  rege toda transformação da seção. É o mesmo lerp que as bibliotecas de
+  scroll suave da vez (Lenis e companhia, hoje padrão de fato em site
+  premiado) aplicam, com uma diferença que decidiu a escolha aqui: elas
+  sequestram a rolagem da página inteira, trocando o scroll nativo por um
+  contêiner que anda sozinho, e junto vão o comportamento da barra, do
+  teclado, do toque e do "encontrar na página". Aqui a página continua
+  rolando nativamente e a mola vive só do lado da animação, então o
+  amortecimento é da cena, não da rolagem: ninguém perde o controle direto
+  do scroll e mesmo assim a pilha desliza com inércia em vez de saltar a
+  cada tique da roda. Zero dependência nova, também.
+
+  Os números da mola foram medidos, não chutados: superamortecida (nunca
+  passa do ponto e volta, o que no scroll embrulha o estômago) com constante
+  de tempo de ~0,12s, a faixa em que a inércia lê como fluidez e não como
+  atraso. Uma primeira tentativa, mais pesada, levava mais de um segundo
+  para assentar depois de um salto de uma tela: aí a cena parece engasgada.
+  `restDelta` entra explícito (0,0001) porque o valor amortecido é um
+  progresso de 0 a 1 esticado por várias telas, e o padrão do Framer (0,01)
+  seria 1% da seção inteira, folga bastante para a mola parar com a fatia
+  ainda visivelmente fora do lugar.
+
+  O que rege a **lógica** (qual fatia está ativa, portanto clicável e
+  focável) continua sendo o progresso bruto: a mola atrasa uns décimos, e um
+  índice ativo atrasado tornaria clique e foco de teclado imprecisos justo
+  enquanto a cena ainda se acomoda.
+
+  Cada fatia sobe durante os primeiros 45% da própria janela de scroll e
+  depois fica. Esse resto, antes parado, hoje tem paralaxe: a mídia desliza
+  devagar (±6% da altura, com escala base cobrindo o dobro do deslocamento
+  para não revelar a borda preta do painel) enquanto o texto fica ancorado.
+  Rolagem sem nada acontecendo lê como travada, mesmo quando é só uma pausa
+  de composição, e o paralaxe ainda separa capa e texto em profundidade sem
+  sombra nem moldura, que o site não tem em lugar nenhum. Quem pede menos
+  movimento no sistema recebe o progresso bruto, sem mola e sem paralaxe.
   Clicar no projeto em cena expande pra tela cheia com os dados completos
   do case (mesmo FLIP manual descrito abaixo em "Menu overlay" e "Transição
   de modo": o overlay nasce encolhido sobre o retângulo clicado e anima até
