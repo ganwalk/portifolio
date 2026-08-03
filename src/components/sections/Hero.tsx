@@ -6,6 +6,7 @@ import {
   useMotionTemplate,
   useMotionValue,
   useSpring,
+  type MotionValue,
 } from "framer-motion";
 import { HeroGrid } from "@/components/ui/HeroGrid";
 import { SelfPortrait } from "@/components/ui/SelfPortrait";
@@ -31,11 +32,21 @@ function HeroContent({
   dict,
   mirrored,
   ctaRef,
+  pointerX,
+  pointerY,
+  lensRadius,
+  sectionRef,
 }: {
   dict: Dictionary;
   /** Cópia dentro da lente: entra pronta, sem repetir a animação de entrada. */
   mirrored?: boolean;
   ctaRef?: React.RefObject<HTMLAnchorElement | null>;
+  /** As três molas da lente, repassadas à grade de fundo: ela reage ao
+   *  cursor com o mesmo raio que rege a inversão do texto (ver HeroGridGL). */
+  pointerX: MotionValue<number>;
+  pointerY: MotionValue<number>;
+  lensRadius: MotionValue<number>;
+  sectionRef: React.RefObject<HTMLElement | null>;
 }) {
   const reveal = (index: number): object =>
     mirrored
@@ -89,7 +100,13 @@ function HeroContent({
       {/* Dentro do HeroContent, e não solta no <section>: assim a cópia
           espelhada da lente também recebe a grade, e ela inverte junto com
           o texto em vez de sumir atrás do disco de tinta da lente. */}
-      <HeroGrid mirrored={mirrored} />
+      <HeroGrid
+        mirrored={mirrored}
+        pointerX={pointerX}
+        pointerY={pointerY}
+        lensRadius={lensRadius}
+        sectionRef={sectionRef}
+      />
 
       <div className="relative order-1 mt-6 text-center sm:mt-0 sm:text-left">
         <h1 className="type-display type-inktrap text-[14.5vw] leading-[0.84] tracking-[0.015em] sm:text-[8.2vw] lg:text-[11vw] 2xl:text-[10vw]">
@@ -301,7 +318,14 @@ export function Hero({ dict }: { dict: Dictionary }) {
       aria-label={profile.name}
     >
       <div className="relative flex flex-1">
-        <HeroContent dict={dict} ctaRef={ctaRef} />
+        <HeroContent
+          dict={dict}
+          ctaRef={ctaRef}
+          pointerX={x}
+          pointerY={y}
+          lensRadius={r}
+          sectionRef={sectionRef}
+        />
 
         {/* Cópia invertida, revelada pela lente */}
         <motion.div
@@ -309,7 +333,14 @@ export function Hero({ dict }: { dict: Dictionary }) {
           className="lens-invert pointer-events-none absolute inset-0 flex"
           style={{ maskImage: mask, WebkitMaskImage: mask }}
         >
-          <HeroContent dict={dict} mirrored />
+          <HeroContent
+            dict={dict}
+            mirrored
+            pointerX={x}
+            pointerY={y}
+            lensRadius={r}
+            sectionRef={sectionRef}
+          />
         </motion.div>
       </div>
     </section>

@@ -10,6 +10,14 @@ import type { CaseStudy } from "./types";
 // Capas: todas em vídeo (nenhuma foto estática), placeholders do Pexels
 // escolhidos pelo clima de cada case. Para trocar pela mídia real, basta
 // substituir src (e poster) no bloco cover.
+//
+// Critério de cor: colorido sim, saturado não. A primeira leva de
+// placeholders era de gradiente neon e show de clube com luz roxa estourada,
+// e brigava com o site inteiro: aqui a única cor vem justamente da mídia, e
+// se ela chega em magenta e ciano puros, é ela que passa a mandar na página
+// em vez do trabalho. A leva atual é toda de cor natural (concreto, telhado,
+// areia, luz âmbar de estúdio, nuvem de fim de tarde, papel), que convive
+// com o preto e branco em vez de gritar por cima dele.
 
 export const cases: CaseStudy[] = [
   {
@@ -60,14 +68,14 @@ export const cases: CaseStudy[] = [
     // reveal dos componentes do Design System em grid.
     cover: {
       kind: "video",
-      src: "https://videos.pexels.com/video-files/7101965/7101965-uhd_1440_2190_25fps.mp4",
+      src: "https://videos.pexels.com/video-files/7292450/7292450-hd_1920_1080_24fps.mp4",
       poster:
-        "https://images.pexels.com/videos/7101965/abstract-abstract-background-background-gradient-7101965.jpeg?auto=compress&w=1280",
+        "https://images.pexels.com/videos/7292450/pexels-photo-7292450.jpeg?auto=compress&w=1280",
       alt: {
-        pt: "Gradiente abstrato colorido em movimento",
-        en: "Colorful abstract gradient in motion",
-        es: "Degradado abstracto colorido en movimiento",
-        zh: "流动的抽象彩色渐变",
+        pt: "Blocos de concreto modulares em luz de dia",
+        en: "Modular concrete blocks in daylight",
+        es: "Bloques de hormigón modulares con luz de día",
+        zh: "日光下的模块化混凝土块",
       },
     },
     comingSoon: true,
@@ -120,14 +128,14 @@ export const cases: CaseStudy[] = [
     // diferentes, ou zoom out de um dashboard do Clarity/GA com dados reais.
     cover: {
       kind: "video",
-      src: "https://videos.pexels.com/video-files/8333185/8333185-hd_1080_1080_30fps.mp4",
+      src: "https://videos.pexels.com/video-files/18120439/18120439-hd_1920_1080_60fps.mp4",
       poster:
-        "https://images.pexels.com/videos/8333185/abstract-art-artistic-background-8333185.jpeg?auto=compress&w=1280",
+        "https://images.pexels.com/videos/18120439/pexels-photo-18120439.jpeg?auto=compress&w=1280",
       alt: {
-        pt: "Fundo abstrato colorido com gradientes em movimento",
-        en: "Abstract colorful background with moving gradients",
-        es: "Fondo abstracto colorido con degradados en movimiento",
-        zh: "流动渐变构成的抽象彩色背景",
+        pt: "Vista aérea de uma cidade entre o rio e as montanhas",
+        en: "Aerial view of a city between the river and the mountains",
+        es: "Vista aérea de una ciudad entre el río y las montañas",
+        zh: "河流与山脉之间的城市航拍",
       },
     },
     comingSoon: true,
@@ -173,14 +181,14 @@ export const cases: CaseStudy[] = [
     // áudio do artista tocando ao fundo.
     cover: {
       kind: "video",
-      src: "https://videos.pexels.com/video-files/35340079/14973729_1080_1920_60fps.mp4",
+      src: "https://videos.pexels.com/video-files/7586165/7586165-hd_1920_1080_24fps.mp4",
       poster:
-        "https://images.pexels.com/videos/35340079/pexels-photo-35340079.jpeg?auto=compress&w=1280",
+        "https://images.pexels.com/videos/7586165/adult-analogue-art-audio-engineer-7586165.jpeg?auto=compress&w=1280",
       alt: {
-        pt: "Multidão vibrante numa apresentação, luzes de celular acesas",
-        en: "Vibrant crowd at a performance, cellphone lights on",
-        es: "Multitud vibrante en una presentación, luces de celular encendidas",
-        zh: "演出现场人群热烈，手机灯光闪烁",
+        pt: "Estúdio de gravação em luz âmbar, mesa de mixagem em primeiro plano",
+        en: "Recording studio in amber light, mixing desk in the foreground",
+        es: "Estudio de grabación con luz ámbar, mesa de mezclas en primer plano",
+        zh: "琥珀色灯光下的录音棚，前景是调音台",
       },
     },
     comingSoon: true,
@@ -224,14 +232,14 @@ export const cases: CaseStudy[] = [
     // áudio da banda tocando ao fundo.
     cover: {
       kind: "video",
-      src: "https://videos.pexels.com/video-files/9145177/9145177-uhd_2560_1440_30fps.mp4",
+      src: "https://videos.pexels.com/video-files/5442713/5442713-hd_1920_1080_25fps.mp4",
       poster:
-        "https://images.pexels.com/videos/9145177/3d-rendering-abstract-art-backdrop-9145177.jpeg?auto=compress&w=1280",
+        "https://images.pexels.com/videos/5442713/brown-sand-desert-desert-adventure-desert-sand-5442713.jpeg?auto=compress&w=1280",
       alt: {
-        pt: "Curvas de neon abstratas em movimento",
-        en: "Abstract neon curves in motion",
-        es: "Curvas de neón abstractas en movimiento",
-        zh: "流动的抽象霓虹曲线",
+        pt: "Ondulações de areia numa duna sob céu limpo",
+        en: "Sand ripples on a dune under a clear sky",
+        es: "Ondulaciones de arena en una duna bajo un cielo despejado",
+        zh: "晴空下沙丘上的波纹",
       },
     },
     comingSoon: true,
@@ -275,14 +283,14 @@ export const cases: CaseStudy[] = [
     // áudio do artista tocando ao fundo.
     cover: {
       kind: "video",
-      src: "https://videos.pexels.com/video-files/30636173/13112850_1080_1920_30fps.mp4",
+      src: "https://videos.pexels.com/video-files/12137476/12137476-hd_1920_1080_50fps.mp4",
       poster:
-        "https://images.pexels.com/videos/30636173/pexels-photo-30636173.jpeg?auto=compress&w=1280",
+        "https://images.pexels.com/videos/12137476/4k-above-clouds-canon-r6-dramatic-sky-12137476.jpeg?auto=compress&w=1280",
       alt: {
-        pt: "Show energético num clube, luzes dinâmicas e coloridas",
-        en: "Energetic club performance, dynamic colorful lighting",
-        es: "Show enérgico en un club, luces dinámicas y coloridas",
-        zh: "俱乐部现场活力四射，灯光炫彩变幻",
+        pt: "Nuvens rosadas sobre um céu de fim de tarde",
+        en: "Pink clouds against a late afternoon sky",
+        es: "Nubes rosadas sobre un cielo de atardecer",
+        zh: "傍晚天空中的粉色云层",
       },
     },
     comingSoon: true,
@@ -325,14 +333,14 @@ export const cases: CaseStudy[] = [
     // interações editoriais, ou animação da capa da edição 2026.
     cover: {
       kind: "video",
-      src: "https://videos.pexels.com/video-files/4380097/4380097-hd_1920_1080_30fps.mp4",
+      src: "https://videos.pexels.com/video-files/856242/856242-hd_1920_1080_30fps.mp4",
       poster:
-        "https://images.pexels.com/photos/164938/pexels-photo-164938.jpeg?auto=compress&cs=tinysrgb&w=1280",
+        "https://images.pexels.com/videos/856242/free-video-856242.jpg?auto=compress&w=1280",
       alt: {
-        pt: "Disco de vinil girando em uma vitrola",
-        en: "Vinyl record spinning on a turntable",
-        es: "Disco de vinilo girando en un tocadiscos",
-        zh: "黑胶唱片在唱机上转动",
+        pt: "Páginas de um livro sendo viradas",
+        en: "Book pages being turned",
+        es: "Páginas de un libro pasando",
+        zh: "书页被翻动",
       },
     },
     comingSoon: true,

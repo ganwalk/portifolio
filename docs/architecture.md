@@ -182,21 +182,51 @@ decorativa. O que dá vida é movimento e tipografia, não ornamento.
   por cima.
 
   O fundo é a própria grade do layout, visível (`HeroGrid`): fios de um
-  pixel nas divisões das colunas (oito no desktop, quatro no mobile, as
-  ímpares somem por CSS puro), alinhados ao `.gutter`, mais marcas de
-  registro nos cruzamentos com três alturas (28%, 50%, 72%). As linhas
-  horizontais em si não são desenhadas, só o cruzamento: a grade inteira
-  viraria papel quadriculado, ou seja, textura, exatamente o caminho que já
-  foi tentado (textura de papel) e revertido. A escolha é estrutura, não
-  superfície: o site é de um design engineer, e deixar a grade aparecer é
-  mostrar o esqueleto da composição em vez de vestir o fundo. As linhas se
-  desenham do topo pra baixo, escalonadas da esquerda pra direita, no mesmo
-  compasso da entrada do nome, e as marcas entram em fade depois delas.
-  Usam `bg-current`, então a lente as inverte de graça junto com o texto
-  (dentro do círculo elas viram claras sobre tinta), sem precisar de uma
-  segunda versão. Uma máscara vertical dissolve as pontas para a grade
-  nunca encostar em borda dura e nunca virar moldura. Some no Modo Boring e
-  na impressão.
+  pixel nas divisões das colunas (oito no desktop, quatro no mobile),
+  alinhados ao `.gutter`, mais marcas de registro nos cruzamentos com três
+  alturas (28%, 50%, 72%). As linhas horizontais em si não são desenhadas,
+  só o cruzamento: a grade inteira viraria papel quadriculado, ou seja,
+  textura, exatamente o caminho que já foi tentado (textura de papel) e
+  revertido. A escolha é estrutura, não superfície: o site é de um design
+  engineer, e deixar a grade aparecer é mostrar o esqueleto da composição em
+  vez de vestir o fundo. As linhas se desenham do topo pra baixo,
+  escalonadas da esquerda pra direita, no mesmo compasso da entrada do nome,
+  e as marcas entram depois delas. Uma máscara vertical dissolve as pontas
+  para a grade nunca encostar em borda dura e nunca virar moldura.
+
+  **A grade reage ao cursor, em WebGL** (`HeroGridGL`, o único uso de WebGL
+  do site hoje). Perto do ponteiro as colunas são empurradas pra fora, como
+  vidro convexo pousado sobre papel quadriculado, e ganham um pouco mais de
+  presença. O efeito dá razão física à lente que a hero já tinha: ela
+  inverte o texto E entorta a grade atrás, em vez de ser só um círculo que
+  troca as cores. A amplitude e o alcance saem do MESMO raio que rege a
+  lente do texto, então tudo vem de graça: em tela de toque o raio nunca sai
+  de zero (nenhum `mousemove` dispara) e perto do CTA, onde o raio encolhe
+  pra ceder o palco ao clique, a deformação encolhe junto.
+
+  O perfil do empurrão zera exatamente no cursor e tem o pico no meio do
+  caminho até a borda (distância vezes gaussiana), que é como uma lente
+  convexa de verdade se comporta. Uma gaussiana pura, máxima no centro,
+  deslocava todos os pixels em volta do ponteiro pela mesma distância em
+  direções opostas: muitos caíam no mesmo ponto de origem e as linhas se
+  juntavam numa estrela no meio, artefato de amostragem, não de ótica.
+
+  Cor e intensidade não são passadas por prop: saem de `currentColor` e de
+  `--hero-grid-alpha` via `getComputedStyle`. Assim a cópia dentro da lente
+  inverte pela regra `.lens-invert *` que já existia pro texto, e claro e
+  escuro continuam calibrados num lugar só (`globals.css`), junto com a
+  versão sem WebGL. A intensidade mora numa custom property em vez de
+  `opacity` no canvas porque o brilho que a lente concentra em volta do
+  cursor precisa poder passar da intensidade base, e uma opacidade de
+  composição por cima satura antes disso.
+
+  O loop dorme: roda durante a entrada e enquanto o cursor ainda mexe alguma
+  coisa (posição ou raio, as duas molas), e para quando a hero sai da tela
+  (`IntersectionObserver`, ela é a primeira dobra). Cai pra mesma grade em
+  DOM, parada, quando não há WebGL ou o sistema pede menos movimento; a
+  versão em DOM é também o que sai do servidor, então nunca existe um
+  instante de hero sem fundo enquanto o contexto é criado. Some no Modo
+  Boring e na impressão.
 
   No mobile o H1 é um pouco maior (`14.5vw`, contra `13vw` antes) e o bloco
   de título ganha uma folga extra por cima (`mt-6`), descendo um pouco em
@@ -321,6 +351,17 @@ decorativa. O que dá vida é movimento e tipografia, não ornamento.
   índice ativo atrasado tornaria clique e foco de teclado imprecisos justo
   enquanto a cena ainda se acomoda.
 
+  **A primeira fatia recebe menos scroll que as outras** (`slideWindows`,
+  `FIRST_SLIDE_WEIGHT`). Ela é a única sem fase de entrada, já nasce no
+  lugar, porque não existe nada antes dela pra subir de. Com todas as fatias
+  valendo a mesma altura, essa diferença virava uma tela inteira de rolagem
+  sem nada acontecendo antes da primeira transição, contra pouco mais de
+  meia tela de pausa em cada fatia seguinte: a seção parecia travada logo na
+  entrada e a mão de quem rolava aprendia um ritmo que a seção não cumpria
+  depois. Dando à primeira só o peso da pausa (o que sobra depois da subida
+  que ela não tem), a espera entre uma transição e a próxima fica igual do
+  começo ao fim, e a seção encolhe de 4 para 3,55 telas.
+
   Cada fatia sobe durante os primeiros 45% da própria janela de scroll e
   depois fica. Esse resto, antes parado, hoje tem paralaxe: a mídia desliza
   devagar (±6% da altura, com escala base cobrindo o dobro do deslocamento
@@ -372,39 +413,18 @@ decorativa. O que dá vida é movimento e tipografia, não ornamento.
   mídia fica colorida o tempo todo, sem passar por preto e branco na
   transição: a única cor do site já vem dela.
 
-  O fundo de cada card é estático: só a mídia, sem deslocar com o cursor. O
-  movimento que resta nela é um zoom sutil (`scale`, via `animate`), e esse
-  é só no hover, não no scroll, pra não competir com a máscara de texto
-  pela atenção nem parecer que o zoom "pula" cada vez que um projeto novo
-  entra em cena. Só na capa que está de fato em cena (`SceneCoverMedia.tsx`),
-  o hover ganha uma segunda camada por cima do zoom: uma ondulação que
-  segue o cursor, com aberração cromática (cada canal RGB lê a textura com
-  uma amplitude de onda diferente, então a franja de cor cresce e encolhe
-  junto com a força do hover), WebGL cru (sem three.js nem nenhuma
-  biblioteca, um triângulo cheio de tela e um fragment shader), o único uso
-  de WebGL do site de propósito, escopo mínimo: um experimento de "lente"
-  de deslocamento, não uma reescrita do vocabulário de movimento inteiro.
-  A mesma capa também funde da capa anterior (mesma posição de coluna, ver
-  `fromCover` em `CasesGrid.tsx`) pra si conforme a fatia sobe pelo scroll:
-  o shader lê as duas texturas e cruza uma pela outra de baixo pra cima,
-  com ruído na borda pra ficar orgânica, no lugar de simplesmente aparecer
-  por cima. Inspirado numa referência de navegação em WebGL (Awwwards, Vero
-  New York / Rodéo Studio). Só acontece quando existe uma capa anterior na
-  mesma coluna (a primeira fatia da seção e as colunas novas que o trio
-  ganha não têm uma); nesses casos, um aceno de estreia toca sozinho,
-  centralizado, na primeira vez que o projeto entra em cena (sobe e desce
-  em ~1,1s), cumprindo o mesmo papel de descoberta que a fusão cumpre nos
-  outros: sem um dos dois, o efeito inteiro dependia de alguém descobrir
-  que passar o mouse ali fazia diferença. O `<canvas>` fica por cima do
-  `<MediaView>` de sempre (que continua renderizado, é o que aparece
-  quando o WebGL não roda) e só some/aparece via `opacity`; o loop de
-  desenho (`requestAnimationFrame`) só roda enquanto o cursor está de fato
-  em cima, a fusão de scroll ainda está em andamento, ou durante o aceno de
-  estreia, parado o resto do tempo, custo zero fora disso. Não roda no
-  Modo Boring nem quando o sistema pede menos movimento
-  (`prefers-reduced-motion`), e cai pro `<MediaView>` sem nenhuma
-  diferença visível se o navegador não tiver WebGL: a checagem de suporte
-  é só tentar criar o contexto e desistir em silêncio se vier nulo.
+  O fundo de cada card é a mídia e nada mais: nenhum shader, nenhum canvas.
+  Uma ondulação em WebGL que seguia o cursor (com aberração cromática) e
+  fundia uma capa na outra conforme a fatia subia morou aqui e saiu. O
+  único WebGL do site hoje é a grade da hero, onde o efeito É o desenho, e
+  não uma camada por cima de um vídeo que já tem movimento próprio: em
+  cima da capa, o shader disputava atenção com a própria mídia e com a
+  máscara de texto, três movimentos ao mesmo tempo no mesmo retângulo.
+
+  O que restou de movimento na mídia são dois, os dois discretos: um zoom
+  sutil no hover (`scale`, via `animate`, não no scroll, pra não parecer
+  que o zoom "pula" cada vez que um projeto novo entra em cena) e o
+  paralaxe de scroll descrito abaixo.
 
   Um selo "ver caso" acompanha o cursor (mola só, sem rastro de partículas,
   deslocado bem à direita e um pouco abaixo da ponta: cursores grandes
@@ -493,6 +513,14 @@ em loop, com poster e camada de fallback) e `<img>`. As URLs vivem nos dados
 (`cases.ts`, `experiments.ts`), como placeholders do Pexels e Picsum escolhidos
 por afinidade de tema; cada bloco tem um comentário com a sugestão de mídia
 real. Trocar placeholder por mídia final é editar só o bloco `cover`/`media`.
+
+**Critério de cor da mídia: colorida sim, saturada não.** A primeira leva de
+placeholders era de gradiente neon e show de clube com luz roxa estourada, e
+brigava com o site inteiro: aqui a única cor vem justamente da mídia, e se ela
+chega em magenta e ciano puros é ela que passa a mandar na página, no lugar do
+trabalho. A leva atual é toda de cor natural (concreto, telhado, areia, luz
+âmbar de estúdio, nuvem de fim de tarde, papel), que convive com o preto e
+branco em vez de gritar por cima dele. Vale para a mídia final também.
 
 No Modo Boring nada disso existe: sem lua, sem menu, sem vídeo, só a página
 utilitária.
