@@ -568,15 +568,76 @@ basePath), fonte de verdade de todo metadado que precisa de URL absoluta:
   `output: "export"`, mesmo sem nada de dinâmico no arquivo). O sitemap
   inclui o hreflang de cada URL, espelhando o `alternates.languages` da
   página.
-- `opengraph-image.tsx` (home e case, via `next/og`): cartão gerado no build,
-  texto puro em preto e branco (`src/lib/og-card.tsx`), porque ainda não
-  existe um retrato único, só a folha de sprite do retrato animado da hero,
-  feita pra `background-position`, não pra aparecer inteira numa imagem só.
-  O Next reaproveita a mesma imagem pro `twitter:image`, sem precisar de um
-  `twitter-image.tsx` separado.
+- `opengraph-image.tsx` (home e case, via `next/og`): cartão gerado no build
+  (`src/lib/og-card.tsx`), a hero em 1200x630. Papel, a gravura em linha no
+  fundo, o título em caixa alta ocupando o quadro, legendas em mono nos
+  cantos, e o retrato só na home (num case ele roubaria o assunto, que é o
+  trabalho). O Next reaproveita a mesma imagem pro `twitter:image`, sem
+  precisar de um `twitter-image.tsx` separado.
+
+  Fonte não é detalhe aqui. O gerador por baixo do `ImageResponse` é o satori,
+  que cai numa fonte genérica quando não recebe nenhuma, e era isso que o
+  cartão vinha mostrando: o nome em Helvetica, sem relação com o site. Só que
+  satori não decodifica woff2 (falta o brotli, e o pacote nem embarca o
+  decodificador), e todo pacote de fonte do site é woff2. A saída é levar
+  woff, que ele lê e que o Fontsource já publica ao lado: Bricolage Grotesque
+  800 (a display do `.type-display`) e IBM Plex Mono, copiadas para
+  `src/fonts/og/` por `scripts/build-og-assets.mjs`. As duas são OFL, então a
+  cópia é uso previsto pela licença. A Whyte Inktrap do nome na hero fica de
+  fora: é licenciada, e levar a fonte inteira para dentro do build por causa
+  de um cartão não se justifica.
+
+  As duas fontes são subconjunto latino, então título em chinês não é coberto
+  por nenhuma e cai no mecanismo de reserva do próprio `ImageResponse`, que
+  era quem já resolvia isso antes delas existirem. O `zh` continua saindo
+  certo, com o latim em Plex Mono e o chinês na reserva.
+
+  O retrato é o primeiro quadro da folha de sprite da hero (o de repouso),
+  recortado pelo mesmo script para `src/lib/og/retrato.png`. Os três arquivos
+  são lidos do disco no build e nunca chegam ao navegador.
+
+  A gravura do fundo entra como `<img>`, e não como `background-image`: satori
+  resolve background com um raster próprio que ignora filtro de SVG, e é
+  filtro que faz a onda. O desenho vem de `src/lib/engraving.ts`, uma segunda
+  cópia da forma que `.hero-engraving` tem em `globals.css`, porque os dois
+  usos são incompatíveis (lá é máscara e a cor vem do tema, aqui é imagem
+  chapada e um PNG não tem tema). Mexeu na forma num lugar, tem que mexer no
+  outro.
 - `PersonJsonLd` (`src/components/seo/PersonJsonLd.tsx`), renderizado no
   layout: schema.org `Person` com nome, cargo, URL, redes (`sameAs`) e
-  `worksFor`. Sem `image`, pelo mesmo motivo do cartão OG.
+  `worksFor`. Ainda sem `image`: agora existe um retrato parado
+  (`src/lib/og/retrato.png`), mas ele mora fora de `public/`, então não tem
+  URL pública pra apontar. Publicar o recorte é o que falta.
+
+## Favicon
+
+Três arquivos em `src/app/`, gerados por `scripts/build-favicon.mjs`, cada um
+respondendo a um navegador diferente. O desenho é o mesmo dos outros
+destaques: a assinatura em Whyte Inktrap e a inversão tinta/papel da lente,
+num quadrado de tinta com o "A" vazado em papel. Nada além disso: a 16px, que
+é o tamanho que importa numa aba, qualquer segundo elemento (a gravura, o
+retrato) vira mancha. O que sobra do desenho da fonte nesse tamanho são os ink
+traps do "A", que é justamente o detalhe que dá nome à família.
+
+- `icon.svg`: o que Chrome e Firefox preferem, e o único que inverte sozinho
+  conforme o tema do sistema, por uma media query DENTRO do arquivo (favicon
+  em SVG honra `prefers-color-scheme` nesses dois).
+- `favicon.ico`: Safari e navegador antigo, que não leem SVG. Não tem como
+  inverter, então fica na versão clara, a padrão do site. Numa barra de abas
+  escura o quadrado se funde ao fundo e sobra o "A" branco, que continua
+  legível: num desenho vazado, um dos dois elementos sempre contrasta com o
+  que está em volta. Os quadros (16, 32 e 48) vão como PNG dentro do
+  contêiner ICO, que é o que todo navegador atual lê, e o script monta o
+  contêiner na mão, sem dependência.
+- `apple-icon.png`: tela de início do iOS, que ignora transparência e
+  arredonda por conta própria, então precisa de um PNG chapado, sangrado até
+  a borda.
+
+O glifo entra como PATH, não como fonte. A Whyte é licenciada (ABC Dinamo), e
+contornar uma letra para virar marca é o uso normal de um logotipo, diferente
+de redistribuir a fonte inteira num formato instalável. O contorno é extraído
+na bancada e escrito direto nos arquivos gerados, então nem o woff2 nem um ttf
+convertido precisam ser lidos no build do site.
 
 Tudo isso assume `siteUrl` correto. O fallback embutido em `site.ts` já bate
 com o GitHub Pages atual (`https://ganwalk.github.io/portifolio`); com
