@@ -456,7 +456,7 @@ decorativa. O que dá vida é movimento e tipografia, não ornamento.
   tamanho e caixa alta) e preview de imagem no hover de cada link. Renderiza
   num portal para o body, porque o `backdrop-blur` do cabeçalho criaria um
   containing block e prenderia o overlay dentro da barra. No mobile a mesa de
-  controle mora aqui.
+  controle inteira mora aqui, Modo Boring incluído.
 - **Cabeçalho**: uma só ordem de DOM (menu, assinatura, lua) em dois arranjos.
   No mobile é grid de três colunas, com a assinatura centralizada; no desktop
   vira flex e a assinatura vai para a frente da fila (`lg:order-first`), com a
@@ -474,9 +474,20 @@ decorativa. O que dá vida é movimento e tipografia, não ornamento.
   precisa estar sempre à mão, sem depender de a pessoa rolar a página até
   achá-lo.
 
+  No mobile o Modo Boring tem uma segunda linha só dele, abaixo da primeira, e
+  as duas se revezam no mesmo ponto de scroll (`boringRowVisible`, em
+  `SiteFrame`): enquanto a hero está na tela aparece só o botão do Modo
+  Boring, a oferta de saída feita de cara; passada a primeira dobra, a linha
+  fecha junto com a abertura da primeira, e o botão passa a viver dentro do
+  menu, com tema e idioma. Fora da home, onde não há hero, a segunda linha nem
+  chega a aparecer. A exceção é o próprio Modo Boring: lá a linha fica sempre,
+  porque o menu não existe e sem ela não sobraria volta para o Modo Criativo.
+  No desktop a segunda linha não existe, o botão cabe na primeira.
+
   Assim que o cabeçalho aparece, um tooltip aponta para o botão do Modo Boring
-  com a frase da pessoa que odeia animação, e some sozinho depois de alguns
-  segundos ou ao clicar (`ControlBar`, prop `tooltipArmed`). O texto do
+  com a frase da pessoa que odeia animação, e some ao clicar ou quando o scroll
+  passa da primeira dobra (`BoringToggle`, props `showTooltip` e
+  `dismissTooltip`). Só a cópia do desktop mostra tooltip. O texto do
   tooltip não usa `.type-mono`: aquela classe força `text-transform: uppercase`,
   que apagaria o contraste entre "eu" minúsculo e "ODEIO" maiúsculo, a graça
   da frase.
