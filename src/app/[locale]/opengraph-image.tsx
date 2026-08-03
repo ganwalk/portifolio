@@ -1,5 +1,5 @@
 import { ImageResponse } from "next/og";
-import { OgCard, ogSize, ogContentType } from "@/lib/og-card";
+import { OgCard, ogSize, ogContentType, loadOgAssets } from "@/lib/og-card";
 import { locales, isLocale, defaultLocale, type Locale } from "@/i18n/config";
 import { getDictionary } from "@/i18n/dictionaries";
 import { profile } from "@/data/profile";
@@ -25,6 +25,7 @@ export default async function Image({
   const { locale: raw } = await params;
   const locale: Locale = isLocale(raw) ? raw : defaultLocale;
   const dict = getDictionary(locale);
+  const { fonts, portrait } = await loadOgAssets();
 
   return new ImageResponse(
     (
@@ -32,8 +33,9 @@ export default async function Image({
         eyebrow={profile.role}
         title={profile.name}
         footer={dict.hero.facts[0]}
+        portrait={portrait}
       />
     ),
-    { ...ogSize },
+    { ...ogSize, fonts },
   );
 }

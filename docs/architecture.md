@@ -194,6 +194,49 @@ decorativa. O que dá vida é movimento e tipografia, não ornamento.
   filme flutuando, partículas sutis, sem vinheta nem nenhum outro efeito
   por cima.
 
+  **O fundo é a mesma gravura do retrato, ampliada** (`.hero-engraving` em
+  `globals.css`). O retrato da hero, os cursores e a foto do Contato
+  compartilham um tratamento de linhas onduladas em meio tom, e é essa trama
+  que vira o fundo, numa escala muito maior: na escala original ela brigaria
+  com o retrato logo em cima e ainda criaria moiré. Ampliada, lê como a chapa
+  em que o retrato foi impresso, e não como uma segunda textura disputando
+  atenção com a primeira.
+
+  Linha, e não grade. A grade de colunas em fio de um pixel que morou aqui
+  antes (ver a lente do nome, abaixo) acabou lida como papel quadriculado, o
+  mesmo destino da textura de papel que já tinha sido revertida antes dela:
+  malha regular sempre volta a ser lida assim. Onda não tem repetição visível
+  para virar padrão.
+
+  O desenho é um SVG inline, pelo mesmo motivo do ruído: sem requisição, sem
+  asset, e sem passar pelo `url()` do CSS, que não recebe o basePath do GitHub
+  Pages. Ele entra como MÁSCARA sobre uma camada de `var(--foreground)`, não
+  como imagem, então a cor vem do tema e o mesmo arquivo serve claro, escuro e
+  a inversão da lente, sem uma segunda versão. Dentro do SVG, um padrão de
+  linhas retas passa por um `feDisplacementMap` (é o que ondula) e o MESMO
+  `feTurbulence` volta como alfa num `feColorMatrix` (é o que apaga a trama em
+  manchas, como a densidade irregular de uma gravura de verdade). Uma
+  turbulência só, reaproveitada nos dois papéis: duas custariam o dobro na
+  rasterização. O degradê vertical do `<mask>` abre espaço em cima, onde o
+  nome mora, e fecha embaixo.
+
+  A máscara é `cover`, então a onda cresce junto com a tela em vez de manter
+  espessura fixa em pixel. É de propósito: a hero inteira é medida em `vw` (o
+  nome, o subtítulo, o retrato), e um fundo que não acompanhasse seria a única
+  peça da composição mudando de proporção conforme o monitor. Do notebook ao
+  monitor grande a hero é a mesma imagem, só maior.
+
+  A camada mora dentro do `HeroContent`, e não solta no `<section>`, pelo
+  mesmo motivo do canvas do nome: a cópia espelhada também recebe o fundo,
+  então a lente inverte a gravura junto com o resto (linha clara sobre o disco
+  de tinta) em vez de abrir um buraco nela.
+
+  O fundo é parado de propósito. A hero já tem o grão flutuando, a entrada do
+  nome, a lente, o retrato em flipbook e a roleta do subtítulo: mais uma coisa
+  se mexendo no mesmo retângulo é a lição que a ondulação em WebGL das capas
+  já ensinou (ver `CasesGrid`, abaixo). O que dá vida ao fundo é a lente
+  passando por cima dele.
+
   **O nome é atravessado por uma lente que segue o cursor** (`HeroTitleGL`,
   o único uso de WebGL do site). Onde o ponteiro passa, "ARMANDO CUSTODIO"
   entorta, como se houvesse um vidro convexo pousado em cima dele.
@@ -525,15 +568,76 @@ basePath), fonte de verdade de todo metadado que precisa de URL absoluta:
   `output: "export"`, mesmo sem nada de dinâmico no arquivo). O sitemap
   inclui o hreflang de cada URL, espelhando o `alternates.languages` da
   página.
-- `opengraph-image.tsx` (home e case, via `next/og`): cartão gerado no build,
-  texto puro em preto e branco (`src/lib/og-card.tsx`), porque ainda não
-  existe um retrato único, só a folha de sprite do retrato animado da hero,
-  feita pra `background-position`, não pra aparecer inteira numa imagem só.
-  O Next reaproveita a mesma imagem pro `twitter:image`, sem precisar de um
-  `twitter-image.tsx` separado.
+- `opengraph-image.tsx` (home e case, via `next/og`): cartão gerado no build
+  (`src/lib/og-card.tsx`), a hero em 1200x630. Papel, a gravura em linha no
+  fundo, o título em caixa alta ocupando o quadro, legendas em mono nos
+  cantos, e o retrato só na home (num case ele roubaria o assunto, que é o
+  trabalho). O Next reaproveita a mesma imagem pro `twitter:image`, sem
+  precisar de um `twitter-image.tsx` separado.
+
+  Fonte não é detalhe aqui. O gerador por baixo do `ImageResponse` é o satori,
+  que cai numa fonte genérica quando não recebe nenhuma, e era isso que o
+  cartão vinha mostrando: o nome em Helvetica, sem relação com o site. Só que
+  satori não decodifica woff2 (falta o brotli, e o pacote nem embarca o
+  decodificador), e todo pacote de fonte do site é woff2. A saída é levar
+  woff, que ele lê e que o Fontsource já publica ao lado: Bricolage Grotesque
+  800 (a display do `.type-display`) e IBM Plex Mono, copiadas para
+  `src/fonts/og/` por `scripts/build-og-assets.mjs`. As duas são OFL, então a
+  cópia é uso previsto pela licença. A Whyte Inktrap do nome na hero fica de
+  fora: é licenciada, e levar a fonte inteira para dentro do build por causa
+  de um cartão não se justifica.
+
+  As duas fontes são subconjunto latino, então título em chinês não é coberto
+  por nenhuma e cai no mecanismo de reserva do próprio `ImageResponse`, que
+  era quem já resolvia isso antes delas existirem. O `zh` continua saindo
+  certo, com o latim em Plex Mono e o chinês na reserva.
+
+  O retrato é o primeiro quadro da folha de sprite da hero (o de repouso),
+  recortado pelo mesmo script para `src/lib/og/retrato.png`. Os três arquivos
+  são lidos do disco no build e nunca chegam ao navegador.
+
+  A gravura do fundo entra como `<img>`, e não como `background-image`: satori
+  resolve background com um raster próprio que ignora filtro de SVG, e é
+  filtro que faz a onda. O desenho vem de `src/lib/engraving.ts`, uma segunda
+  cópia da forma que `.hero-engraving` tem em `globals.css`, porque os dois
+  usos são incompatíveis (lá é máscara e a cor vem do tema, aqui é imagem
+  chapada e um PNG não tem tema). Mexeu na forma num lugar, tem que mexer no
+  outro.
 - `PersonJsonLd` (`src/components/seo/PersonJsonLd.tsx`), renderizado no
   layout: schema.org `Person` com nome, cargo, URL, redes (`sameAs`) e
-  `worksFor`. Sem `image`, pelo mesmo motivo do cartão OG.
+  `worksFor`. Ainda sem `image`: agora existe um retrato parado
+  (`src/lib/og/retrato.png`), mas ele mora fora de `public/`, então não tem
+  URL pública pra apontar. Publicar o recorte é o que falta.
+
+## Favicon
+
+Três arquivos em `src/app/`, gerados por `scripts/build-favicon.mjs`, cada um
+respondendo a um navegador diferente. O desenho é o mesmo dos outros
+destaques: a assinatura em Whyte Inktrap e a inversão tinta/papel da lente,
+num quadrado de tinta com o "A" vazado em papel. Nada além disso: a 16px, que
+é o tamanho que importa numa aba, qualquer segundo elemento (a gravura, o
+retrato) vira mancha. O que sobra do desenho da fonte nesse tamanho são os ink
+traps do "A", que é justamente o detalhe que dá nome à família.
+
+- `icon.svg`: o que Chrome e Firefox preferem, e o único que inverte sozinho
+  conforme o tema do sistema, por uma media query DENTRO do arquivo (favicon
+  em SVG honra `prefers-color-scheme` nesses dois).
+- `favicon.ico`: Safari e navegador antigo, que não leem SVG. Não tem como
+  inverter, então fica na versão clara, a padrão do site. Numa barra de abas
+  escura o quadrado se funde ao fundo e sobra o "A" branco, que continua
+  legível: num desenho vazado, um dos dois elementos sempre contrasta com o
+  que está em volta. Os quadros (16, 32 e 48) vão como PNG dentro do
+  contêiner ICO, que é o que todo navegador atual lê, e o script monta o
+  contêiner na mão, sem dependência.
+- `apple-icon.png`: tela de início do iOS, que ignora transparência e
+  arredonda por conta própria, então precisa de um PNG chapado, sangrado até
+  a borda.
+
+O glifo entra como PATH, não como fonte. A Whyte é licenciada (ABC Dinamo), e
+contornar uma letra para virar marca é o uso normal de um logotipo, diferente
+de redistribuir a fonte inteira num formato instalável. O contorno é extraído
+na bancada e escrito direto nos arquivos gerados, então nem o woff2 nem um ttf
+convertido precisam ser lidos no build do site.
 
 Tudo isso assume `siteUrl` correto. O fallback embutido em `site.ts` já bate
 com o GitHub Pages atual (`https://ganwalk.github.io/portifolio`); com
