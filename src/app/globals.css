@@ -338,6 +338,10 @@ html[data-boring="true"] .hero-engraving {
    (SVG inline: gratuito, sem asset externo; substituível por textura real depois.) */
 .texture-noise {
   position: relative;
+  /* Por variável, e não direto no ::after, porque a hero pede um grão mais
+     forte que o resto (ver .texture-noise-animate abaixo) e pseudo-elemento
+     herda custom property do próprio elemento. */
+  --noise-opacity: 0.05;
 }
 
 .texture-noise::after {
@@ -345,7 +349,7 @@ html[data-boring="true"] .hero-engraving {
   position: absolute;
   inset: 0;
   pointer-events: none;
-  opacity: 0.05;
+  opacity: var(--noise-opacity);
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
@@ -359,7 +363,17 @@ html[data-boring="true"] .texture-noise::after {
    perto do efeito analógico que o resto do site já persegue (ver
    .lens-invert, o retrato em flipbook). Só a posição do tile se move, a
    textura em si (o SVG) não é regerada a cada quadro, então o custo é o de
-   uma animação de CSS comum. */
+   uma animação de CSS comum.
+
+   O dobro da opacidade dos outros lugares. Nos cases o ruído pousa em cima
+   de imagem, que já tem textura própria, e ali o grão é só um véu por cima.
+   Na hero ele pousa em papel liso, e a 0.05 simplesmente não existe: o grão
+   de filme é o efeito, não um acabamento. 0.10 é o ponto em que ele aparece
+   sem começar a acinzentar o branco. */
+.texture-noise-animate {
+  --noise-opacity: 0.1;
+}
+
 .texture-noise-animate::after {
   animation: texture-drift 9s steps(7) infinite;
 }

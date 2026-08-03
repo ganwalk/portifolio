@@ -191,8 +191,14 @@ decorativa. O que dá vida é movimento e tipografia, não ornamento.
   A hero desconta a altura da
   barra (`100svh` menos `3.5rem`) porque o cabeçalho é sticky e ocupa espaço
   no fluxo. `.texture-noise-animate` sobre a hero inteira dá o grão de
-  filme flutuando, partículas sutis, sem vinheta nem nenhum outro efeito
-  por cima.
+  filme flutuando, sem vinheta nem nenhum outro efeito por cima.
+
+  A opacidade do grão sai por `--noise-opacity`, e na hero ela é o dobro do
+  resto do site (0.10 contra 0.05). Nos cases o ruído pousa em cima de imagem,
+  que já tem textura própria, e ali ele é só um véu. Na hero pousa em papel
+  liso, e a 0.05 simplesmente não existia: o grão de filme é o efeito, não um
+  acabamento. 0.10 é o ponto em que ele aparece sem começar a acinzentar o
+  branco.
 
   **O fundo é a mesma gravura do retrato, ampliada** (`.hero-engraving` em
   `globals.css`). O retrato da hero, os cursores e a foto do Contato
