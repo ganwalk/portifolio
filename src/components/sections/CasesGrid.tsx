@@ -7,6 +7,7 @@ import {
   motion,
   useMotionValue,
   useMotionValueEvent,
+  useReducedMotion,
   useScroll,
   useSpring,
   useTransform,
@@ -80,6 +81,31 @@ import type { Dictionary } from "@/i18n/dictionaries";
 // onPointerMove: em toque o evento não dispara, então nada disso ativa lá,
 // mesmo princípio que já mantém a lente da hero parada no mobile.
 //
+// A rolagem é amortecida, não literal: o progresso bruto do scroll passa por
+// uma mola (`useSpring` em `CasesGrid`) e é o valor amortecido que rege TODA
+// transformação da seção. É o mesmo lerp que bibliotecas de scroll suave
+// (Lenis e companhia) aplicam, com uma diferença que importa aqui: elas
+// sequestram a rolagem da página inteira, trocando o scroll nativo por um
+// contêiner que anda sozinho, e junto com ele vão o comportamento da barra,
+// do teclado, do toque e do "encontrar na página". Aqui a página continua
+// rolando nativamente e a mola vive só do lado da animação, então o
+// amortecimento é da CENA, não da rolagem: quem usa o site nunca perde o
+// controle direto do scroll, e mesmo assim a pilha desliza com inércia em
+// vez de saltar a cada tique da roda. Superamortecida de propósito (sem
+// overshoot): pilha que passa do ponto e volta enjoa. Quem pede menos
+// movimento no sistema recebe o progresso bruto, sem mola.
+//
+// O que rege a LÓGICA (qual fatia está ativa) continua sendo o progresso
+// bruto: a mola atrasa uns décimos, e um índice ativo atrasado tornaria o
+// clique e o foco de teclado imprecisos justo enquanto a cena ainda se
+// acomoda.
+//
+// Cada fatia sobe durante os primeiros 45% da própria janela de scroll e
+// depois fica. Esse resto, antes parado, hoje tem paralaxe: a mídia da fatia
+// em cena desliza devagar em contrassenso enquanto o texto fica ancorado.
+// Rolagem sem nada acontecendo lê como travada, mesmo quando é só uma pausa
+// de composição.
+//
 // Clicar no projeto em cena ainda expande pra tela cheia com os dados
 // completos do case, igual antes; só a navegação ENTRE projetos mudou.
 
@@ -100,7 +126,7 @@ function enterRange(index: number, count: number) {
   if (index === 0) return { input: [0, 1] as [number, number], output: [1, 1] as [number, number] };
   const span = 1 / count;
   const start = index * span;
-  const enterEnd = start + span * 0.4;
+  const enterEnd = start + span * 0.45;
   return { input: [start, enterEnd] as [number, number], output: [0, 1] as [number, number] };
 }
 
@@ -144,7 +170,8 @@ function SlidePanel({
   dict,
   index,
   count,
-  scrollYProgress,
+  progress,
+  parallax,
   isActive,
   isNearActive,
   hoveredSlug,
@@ -162,7 +189,12 @@ function SlidePanel({
   dict: Dictionary;
   index: number;
   count: number;
-  scrollYProgress: ReturnType<typeof useScroll>["scrollYProgress"];
+  /** Progresso da seção já amortecido pela mola (ver CasesGrid): é ele, e
+   *  não o scroll cru, que rege toda transformação daqui pra baixo. */
+  progress: MotionValue<number>;
+  /** Amplitude do paralaxe da mídia, em porcentagem da altura. Zero quando o
+   *  sistema pede menos movimento. */
+  parallax: number;
   isActive: boolean;
   isNearActive: boolean;
   hoveredSlug: string | null;
@@ -176,15 +208,31 @@ function SlidePanel({
   // empilhamento acompanha a ordem de rolagem, então a fatia N+1 sempre
   // cobre a N ao chegar, nunca o contrário.
   const { input: enterInput, output: enterOutput } = enterRange(index, count);
-  const enterT = useTransform(scrollYProgress, enterInput, enterOutput);
+  const enterT = useTransform(progress, enterInput, enterOutput);
   const slideY = useTransform(enterT, [0, 1], ["100%", "0%"]);
 
+  // Janela inteira desta fatia em cena, da hora em que ela começa a subir
+  // até a próxima terminar de cobri-la. É o relógio do paralaxe da mídia:
+  // ao contrário de `enterT`, que trava em 1 assim que a fatia assenta, este
+  // continua andando durante a pausa, que é justamente onde a rolagem
+  // precisava de vida.
+  const span = 1 / count;
+  const stayT = useTransform(
+    progress,
+    [index * span, (index + 1) * span],
+    [0, 1],
+  );
+
   // A fatia que vem depois cobrindo esta: enquanto ela sobe por cima,
-  // ESTA aqui encolhe um pouco e escurece, o cartão de baixo recuando na
-  // pilha. A última fatia nunca é coberta (nada depois dela).
+  // ESTA aqui encolhe um pouco, sobe um tanto e escurece, o cartão de baixo
+  // recuando na pilha. A subida é o que separa "carta caindo em cima de
+  // outra" de "página sendo virada": sem ela, a fatia de baixo fica parada
+  // como um fundo, e a profundidade some. A última fatia nunca é coberta
+  // (nada depois dela).
   const nextEnter = index < count - 1 ? enterRange(index + 1, count) : { input: [0, 1] as [number, number], output: [0, 0] as [number, number] };
-  const coveringT = useTransform(scrollYProgress, nextEnter.input, nextEnter.output);
+  const coveringT = useTransform(progress, nextEnter.input, nextEnter.output);
   const coveredScale = useTransform(coveringT, [0, 1], [1, 0.94]);
+  const coveredY = useTransform(coveringT, [0, 1], ["0%", "-4%"]);
   const coveredDim = useTransform(coveringT, [0, 1], [0, 0.45]);
 
   return (
@@ -196,7 +244,10 @@ function SlidePanel({
         zIndex: index,
       }}
     >
-      <motion.div style={{ scale: coveredScale }} className="flex h-full w-full">
+      <motion.div
+        style={{ scale: coveredScale, y: coveredY }}
+        className="flex h-full w-full"
+      >
         <motion.div
           aria-hidden
           style={{ opacity: coveredDim }}
@@ -229,6 +280,8 @@ function SlidePanel({
               locale={locale}
               dict={dict}
               enterT={enterT}
+              stayT={stayT}
+              parallax={parallax}
               isActive={isActive}
               isNearActive={isNearActive}
               isHovered={hoveredSlug === caseStudy.slug}
@@ -251,6 +304,8 @@ function CaseColumn({
   locale,
   dict,
   enterT,
+  stayT,
+  parallax,
   isActive,
   isNearActive,
   isHovered,
@@ -269,6 +324,11 @@ function CaseColumn({
   locale: Locale;
   dict: Dictionary;
   enterT: MotionValue<number>;
+  /** Progresso da fatia inteira em cena, incluindo a pausa depois de
+   *  assentada (ver SlidePanel): só a mídia usa, pro paralaxe. */
+  stayT: MotionValue<number>;
+  /** Amplitude do paralaxe da mídia, em porcentagem da altura (0 = desligado). */
+  parallax: number;
   isActive: boolean;
   isNearActive: boolean;
   /** Se ESTE case é o alvo do cursor agora, decidido uma vez só lá em cima
@@ -302,6 +362,19 @@ function CaseColumn({
   const tagsY = useTransform(enterT, [0.32, 0.62], ["100%", "0%"]);
   const ctaY = useTransform(enterT, [0.42, 0.7], ["100%", "0%"]);
 
+  // Paralaxe da mídia: ela desce de +parallax% a -parallax% ao longo de toda
+  // a permanência da fatia, enquanto o texto fica ancorado. É o que mantém a
+  // rolagem viva durante a pausa depois que a fatia assenta, e é o que
+  // separa a capa do texto em profundidade, sem sombra nem moldura (o site
+  // não tem nenhuma das duas). A escala base cobre exatamente o dobro do
+  // deslocamento: sem ela, o movimento revelaria a borda preta do painel.
+  const mediaY = useTransform(
+    stayT,
+    [0, 1],
+    [`${parallax}%`, `${-parallax}%`],
+  );
+  const mediaScale = parallax ? 1 + (parallax * 2) / 100 + 0.02 : 1;
+
   return (
     <motion.button
       type="button"
@@ -320,6 +393,14 @@ function CaseColumn({
           aqui dentro; o selo que segue o cursor não mora mais aqui (ver
           CasesGrid: um selo só, no nível da seção, não um por coluna). */}
       <div className="absolute inset-0 overflow-hidden">
+        {/* Duas camadas de transform aninhadas, de propósito: o paralaxe é
+            regido pelo scroll (MotionValue) e o zoom pelo hover (animate).
+            Numa camada só, um dos dois teria que ser recalculado a cada
+            quadro em função do outro. */}
+        <motion.div
+          style={{ y: mediaY, scale: mediaScale }}
+          className="absolute inset-0"
+        >
         <motion.div
           animate={{ scale: isHovered ? 1.06 : 1 }}
           transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
@@ -349,6 +430,7 @@ function CaseColumn({
           ) : (
             <div className="h-full w-full bg-surface" />
           )}
+        </motion.div>
         </motion.div>
         <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/10 to-black/45" />
 
@@ -595,6 +677,32 @@ export function CasesGrid({
     offset: ["start start", "end end"],
   });
 
+  // Amortecimento da cena, não da rolagem (ver o comentário no topo do
+  // arquivo). Os números foram medidos, não chutados: superamortecida o
+  // suficiente pra nunca passar do ponto e voltar (passar do ponto no scroll
+  // embrulha o estômago), com constante de tempo de ~0,12s, a mesma faixa do
+  // lerp que as bibliotecas de scroll suave usam. Uma primeira tentativa,
+  // bem mais pesada, levava mais de um segundo pra assentar depois de um
+  // salto de uma tela: aí já não é inércia, é atraso, e a cena parece
+  // engasgada em vez de fluida.
+  //
+  // restDelta explícito porque o valor amortecido aqui é um progresso de 0 a
+  // 1 esticado por várias telas: o padrão do Framer (0.01) seria 1% da seção
+  // INTEIRA, folga grande o bastante pra parar a mola com a fatia ainda
+  // visivelmente fora do lugar.
+  const reduceMotion = useReducedMotion();
+  const smoothProgress = useSpring(scrollYProgress, {
+    stiffness: 85,
+    damping: 13,
+    mass: 0.35,
+    restDelta: 0.0001,
+  });
+  const progress = reduceMotion ? scrollYProgress : smoothProgress;
+  // Sem paralaxe pra quem pediu menos movimento no sistema.
+  const parallax = reduceMotion ? 0 : 6;
+
+  // A LÓGICA continua no scroll cru: qual fatia é clicável e recebe foco de
+  // teclado não pode chegar uns décimos atrasada da mão de quem rola.
   useMotionValueEvent(scrollYProgress, "change", (v) => {
     const next = Math.min(count - 1, Math.max(0, Math.floor(v * count)));
     setActiveIndex(next);
@@ -674,7 +782,8 @@ export function CasesGrid({
               dict={dict}
               index={index}
               count={count}
-              scrollYProgress={scrollYProgress}
+              progress={progress}
+              parallax={parallax}
               isActive={index === activeIndex}
               isNearActive={Math.abs(index - activeIndex) <= 1}
               hoveredSlug={hoveredSlug}

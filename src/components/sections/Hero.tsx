@@ -7,6 +7,7 @@ import {
   useMotionValue,
   useSpring,
 } from "framer-motion";
+import { HeroGrid } from "@/components/ui/HeroGrid";
 import { SelfPortrait } from "@/components/ui/SelfPortrait";
 import { SubtitleRoulette } from "@/components/ui/SubtitleRoulette";
 import { profile } from "@/data/profile";
@@ -85,7 +86,12 @@ function HeroContent({
   // nasce atrás da tarja.
   return (
     <div className="gutter relative flex flex-1 flex-col items-center justify-between pb-14 pt-16 sm:items-stretch sm:pt-32">
-      <div className="order-1 mt-6 text-center sm:mt-0 sm:text-left">
+      {/* Dentro do HeroContent, e não solta no <section>: assim a cópia
+          espelhada da lente também recebe a grade, e ela inverte junto com
+          o texto em vez de sumir atrás do disco de tinta da lente. */}
+      <HeroGrid mirrored={mirrored} />
+
+      <div className="relative order-1 mt-6 text-center sm:mt-0 sm:text-left">
         <h1 className="type-display type-inktrap text-[14.5vw] leading-[0.84] tracking-[0.015em] sm:text-[8.2vw] lg:text-[11vw] 2xl:text-[10vw]">
           {/* leading-[0.84] é mais apertado que a altura real da fonte: sem
               esse respiro, o overflow-hidden usado pra animação de entrada
@@ -170,7 +176,7 @@ function HeroContent({
         className="pointer-events-none relative order-2 w-[52vw] max-w-64 sm:absolute sm:right-[5vw] sm:top-[6%] sm:order-none sm:w-[36vw] sm:max-w-[520px] lg:top-[17%] lg:w-[30vw] lg:max-w-[340px] 2xl:top-[14%] 2xl:w-[36vw] 2xl:max-w-[520px]"
       />
 
-      <div className="order-3 flex flex-col items-center gap-8 sm:items-start sm:gap-10 sm:mt-16">
+      <div className="relative order-3 flex flex-col items-center gap-8 sm:items-start sm:gap-10 sm:mt-16">
         <motion.div {...reveal(2)}>
           <a
             ref={ctaRef}
