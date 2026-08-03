@@ -181,114 +181,59 @@ decorativa. O que dá vida é movimento e tipografia, não ornamento.
   filme flutuando, partículas sutis, sem vinheta nem nenhum outro efeito
   por cima.
 
-  O fundo é a própria grade do layout, visível (`HeroGrid`): fios de um
-  pixel nas divisões das colunas (oito no desktop, quatro no mobile),
-  alinhados ao `.gutter`, mais marcas de registro nos cruzamentos com três
-  alturas (28%, 50%, 72%). As linhas horizontais em si não são desenhadas,
-  só o cruzamento: a grade inteira viraria papel quadriculado, ou seja,
-  textura, exatamente o caminho que já foi tentado (textura de papel) e
-  revertido. A escolha é estrutura, não superfície: o site é de um design
-  engineer, e deixar a grade aparecer é mostrar o esqueleto da composição em
-  vez de vestir o fundo. As linhas se desenham do topo pra baixo,
-  escalonadas da esquerda pra direita, no mesmo compasso da entrada do nome,
-  e as marcas entram depois delas. Uma máscara vertical dissolve as pontas
-  para a grade nunca encostar em borda dura e nunca virar moldura.
+  **O nome é atravessado por uma lente que segue o cursor** (`HeroTitleGL`,
+  o único uso de WebGL do site). Onde o ponteiro passa, "ARMANDO CUSTODIO"
+  entorta, como se houvesse um vidro convexo pousado em cima dele.
 
-  **A grade reage ao cursor, em WebGL** (`HeroGridGL`, o único uso de WebGL
-  do site hoje). Perto do ponteiro as colunas são empurradas pra fora, como
-  vidro convexo pousado sobre papel quadriculado, e ganham um pouco mais de
-  presença. O efeito dá razão física à lente que a hero já tinha: ela
-  inverte o texto E entorta a grade atrás, em vez de ser só um círculo que
-  troca as cores. A amplitude e o alcance saem do MESMO raio que rege a
-  lente do texto, então tudo vem de graça: em tela de toque o raio nunca sai
-  de zero (nenhum `mousemove` dispara) e perto do CTA, onde o raio encolhe
-  pra ceder o palco ao clique, a deformação encolhe junto.
+  A deformação já morou no fundo, numa grade de colunas do próprio layout
+  desenhada em fio de um pixel. O efeito era bom e o suporte era o errado:
+  fio a 14% de opacidade não tem massa suficiente pra uma lente valer a
+  pena, e a grade acabou lida como papel quadriculado, ou seja, textura, o
+  mesmo caminho que a textura de papel já tinha tomado antes de ser
+  revertida. Aqui a lente tem o que deformar: a manchete é o maior objeto da
+  página e a coisa mais preta dela.
+
+  A amplitude e o alcance saem do MESMO raio que rege a lente de inversão,
+  então tudo vem de graça: em tela de toque o raio nunca sai de zero (nenhum
+  `mousemove` dispara) e perto do CTA, onde o raio encolhe pra ceder o palco
+  ao clique, a deformação encolhe junto. A amplitude é contida de propósito,
+  bem menor do que era na grade: aqui o alvo é a única coisa que a página
+  precisa que se leia, e a régua foi que a letra sob o cursor entorte o
+  suficiente pra ficar claro que tem um vidro ali, e continue sendo aquela
+  letra.
 
   O perfil do empurrão zera exatamente no cursor e tem o pico no meio do
   caminho até a borda (distância vezes gaussiana), que é como uma lente
   convexa de verdade se comporta. Uma gaussiana pura, máxima no centro,
   deslocava todos os pixels em volta do ponteiro pela mesma distância em
-  direções opostas: muitos caíam no mesmo ponto de origem e as linhas se
-  juntavam numa estrela no meio, artefato de amostragem, não de ótica.
+  direções opostas: muitos liam o mesmo ponto e o desenho colapsava numa
+  estrela no meio, artefato de amostragem, não de ótica.
 
-  Cor e intensidade não são passadas por prop: saem de `currentColor` e de
-  `--hero-grid-alpha` via `getComputedStyle`. Assim a cópia dentro da lente
-  inverte pela regra `.lens-invert *` que já existia pro texto, e claro e
-  escuro continuam calibrados num lugar só (`globals.css`), junto com a
-  versão sem WebGL. A intensidade mora numa custom property em vez de
-  `opacity` no canvas porque o brilho que a lente concentra em volta do
-  cursor precisa poder passar da intensidade base, e uma opacidade de
-  composição por cima satura antes disso.
+  O texto não é redesenhado a cada quadro: vai uma vez pra uma textura
+  (canvas 2D) e o shader só reamostra deslocando coordenadas. Fonte,
+  tamanho, peso, tracking, alinhamento, `text-transform` e posição de cada
+  linha são LIDOS do `<h1>` de verdade, nunca repetidos no componente, então
+  a cópia não sai do lugar quando o CSS do título mudar. A medida sai do
+  `<span>` externo, o que não anima: o interno é o que o Framer move na
+  entrada, e o retângulo dele durante a animação é posição de passagem, não
+  final. Repintar só acontece em resize, troca de tema ou quando a fonte
+  termina de carregar (a Whyte Inktrap é local, e desenhar antes de
+  `document.fonts.ready` gravaria a fonte de fallback na textura).
 
-  O loop dorme: roda durante a entrada e enquanto o cursor ainda mexe alguma
-  coisa (posição ou raio, as duas molas), e para quando a hero sai da tela
-  (`IntersectionObserver`, ela é a primeira dobra). Cai pra mesma grade em
-  DOM, parada, quando não há WebGL ou o sistema pede menos movimento; a
-  versão em DOM é também o que sai do servidor, então nunca existe um
-  instante de hero sem fundo enquanto o contexto é criado. Some no Modo
-  Boring e na impressão.
+  O `<h1>` continua no DOM sempre: é ele que o leitor de tela lê, que o
+  buscador indexa, que anima na entrada e de onde saem as medidas. Fica
+  transparente, e não escondido, e só depois que o canvas confirma que
+  desenhou. Nada disso é montado quando não há cursor de verdade
+  (`hover: hover` e `pointer: fine`), quando o sistema pede menos movimento,
+  ou quando o WebGL não sobe: nesses casos o título é só o `<h1>`, com o
+  texto selecionável de sempre.
 
-  No mobile o H1 é um pouco maior (`14.5vw`, contra `13vw` antes) e o bloco
-  de título ganha uma folga extra por cima (`mt-6`), descendo um pouco em
-  relação ao cabeçalho. No desktop o retrato é posicionado em absoluto, à
-  direita, alinhado ao topo do nome, e o resto (nome, subtítulo, CTA, fatos)
-  fica alinhado à esquerda. No mobile o retrato deixa de ser absoluto e
-  passa a ser um terceiro item do flex (via `order`), entre o bloco de
-  título e o de CTA: o `justify-between` do contêiner reparte o espaço entre
-  os três, então o retrato nunca sobrepõe o botão nem o subtítulo, porque
-  participa da mesma conta de altura, e tudo (título, subtítulo, retrato,
-  CTA, fatos) fica centralizado. O subtítulo ("Designer de [roleta]") usa
-  peso 400, mais leve que o padrão (700) de `.type-serif-display`: peso
-  cheio competia demais com o nome acima.
-
-  A frase de disponibilidade ("Baseado no Brasil · Disponível para projetos
-  no mundo todo") quebra no mobile nas duas orações que o "·" já separa (um
-  `<br>` visível só abaixo de `sm`), e o "·" some da quebra: como marcador
-  de separação ele faz sentido numa linha só, não como bullet solto no fim
-  ou começo de uma linha empilhada. No desktop (`sm:inline`) ele volta,
-  porque ali as duas orações continuam na mesma linha.
-- **Retrato animado** (`SelfPortrait`): flipbook ao lado do nome. A volta tem
-  quatro ciclos: os quadros 1 a 12 sempre iguais e o último mudando entre 13,
-  14, 15 e 16, as quatro expressões, que seguram mais tempo no ar (700ms contra
-  85ms) senão a expressão passa batido.
-
-  Os quadros vivem numa folha de sprite 4x4 em `public/frames`, gerada por
-  `scripts/build-frames.mjs` a partir de `frames eu/`. Uma folha em vez de
-  dezesseis arquivos dá uma requisição só, elimina flicker na primeira volta e,
-  porque a URL é a mesma, o bitmap decodificado é compartilhado entre a cópia
-  normal e a cópia invertida que aparece dentro da lente. A animação troca de
-  quadro mexendo apenas em `background-position`, sem tocar no DOM.
-
-  O relógio mora em `src/lib/portrait-frames.ts`, fora do React: a hero
-  renderiza o retrato duas vezes, e dois temporizadores independentes sairiam de
-  sincronia, deixando a lente mostrar um quadro diferente do que está atrás
-  dela. Com um relógio só as duas andam juntas.
-
-  Peso: os PNGs originais somam 16,6 MB. As folhas somam 744 KB no desktop e
-  169 KB no mobile, escolhidas na mão porque o meio tom do desenho é caro de
-  comprimir e a qualidade só derruba o arquivo até certo ponto. `--accent`
-  apontado para a tinta não ajuda aqui: o desenho é cinza dentro de uma
-  silhueta de alfa binário, não uma máscara de uma cor.
-
-- **Roleta do subtítulo** (`SubtitleRoulette`): a última palavra do subtítulo
-  ("produtos") gira por uma lista que alude à atuação (experiências,
-  aplicativos, interfaces, sistemas, músicas, sonhos) e descansa de novo na
-  primeira ao voltar ao início. A troca é disparada pelo mesmo relógio do
-  retrato: `subscribeRouletteTick`, em `portrait-frames.ts`, soma um a cada vez
-  que o relógio entra num quadro final (13 a 16), no mesmo instante em que a
-  expressão muda. Rosto e palavra giram juntos porque saem do mesmo pulso, sem
-  precisar de um segundo temporizador nem de código de coordenação entre os
-  dois componentes.
-
-  A ordem da frase muda por idioma ("Designer de produtos" em PT, "Designer of
-  products" em EN), por isso o dicionário guarda `subtitlePrefix` e
-  `subtitleWords` separados, e cada idioma tem sua própria lista, coerente com
-  a posição da palavra na frase.
-
-  A troca de palavra desliza na vertical com desfoque, para lembrar as fitas
-  de uma roleta física, não um crossfade comum. Uma cópia invisível da palavra
-  mais longa da lista fica empilhada por baixo via grid, só para reservar a
-  largura: sem ela, a rotação empurraria o texto ao lado a cada troca.
+  O contexto WebGL **não** é encerrado com `WEBGL_lose_context` na limpeza.
+  Perder o contexto é permanente para aquele `<canvas>`, e este é gerenciado
+  pelo React: numa remontagem (o StrictMode do dev faz isso sempre, e o
+  componente também monta tarde, quando a checagem de ponteiro resolve) o
+  mesmo elemento volta, `getContext` devolve o contexto já morto e a partir
+  dali nenhum shader compila, silenciosamente. Soltar as alocações basta.
 
 - **Projetos em destaque presos ao scroll** (`CasesGrid`): depois de passar
   por um baralho preso ao scroll e depois por uma grade bento, a seção
@@ -416,8 +361,9 @@ decorativa. O que dá vida é movimento e tipografia, não ornamento.
   O fundo de cada card é a mídia e nada mais: nenhum shader, nenhum canvas.
   Uma ondulação em WebGL que seguia o cursor (com aberração cromática) e
   fundia uma capa na outra conforme a fatia subia morou aqui e saiu. O
-  único WebGL do site hoje é a grade da hero, onde o efeito É o desenho, e
-  não uma camada por cima de um vídeo que já tem movimento próprio: em
+  único WebGL do site hoje é a lente que deforma o nome na hero, onde o
+  efeito É o desenho, e não uma camada por cima de um vídeo que já tem
+  movimento próprio: em
   cima da capa, o shader disputava atenção com a própria mídia e com a
   máscara de texto, três movimentos ao mesmo tempo no mesmo retângulo.
 

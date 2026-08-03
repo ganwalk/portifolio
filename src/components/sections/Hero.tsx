@@ -1,14 +1,15 @@
 "use client";
 
-import { useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   motion,
   useMotionTemplate,
   useMotionValue,
+  useReducedMotion,
   useSpring,
   type MotionValue,
 } from "framer-motion";
-import { HeroGrid } from "@/components/ui/HeroGrid";
+import { HeroTitleGL } from "@/components/ui/HeroTitleGL";
 import { SelfPortrait } from "@/components/ui/SelfPortrait";
 import { SubtitleRoulette } from "@/components/ui/SubtitleRoulette";
 import { profile } from "@/data/profile";
@@ -36,17 +37,30 @@ function HeroContent({
   pointerY,
   lensRadius,
   sectionRef,
+  titleRef,
+  titleLens,
+  titleOnCanvas,
+  onTitleDrawing,
+  onTitleUnsupported,
 }: {
   dict: Dictionary;
   /** Cópia dentro da lente: entra pronta, sem repetir a animação de entrada. */
   mirrored?: boolean;
   ctaRef?: React.RefObject<HTMLAnchorElement | null>;
-  /** As três molas da lente, repassadas à grade de fundo: ela reage ao
-   *  cursor com o mesmo raio que rege a inversão do texto (ver HeroGridGL). */
+  /** As três molas da lente, repassadas à lente do nome: ela deforma o <h1>
+   *  com o mesmo raio que rege a inversão do texto (ver HeroTitleGL). */
   pointerX: MotionValue<number>;
   pointerY: MotionValue<number>;
   lensRadius: MotionValue<number>;
   sectionRef: React.RefObject<HTMLElement | null>;
+  titleRef: React.RefObject<HTMLHeadingElement | null>;
+  /** Se a lente do nome roda: falso sem WebGL ou com menos movimento pedido
+   *  no sistema, e aí o canvas nem é montado. */
+  titleLens: boolean;
+  /** O canvas assumiu o desenho do nome: o <h1> fica transparente. */
+  titleOnCanvas: boolean;
+  onTitleDrawing: () => void;
+  onTitleUnsupported: () => void;
 }) {
   const reveal = (index: number): object =>
     mirrored
@@ -97,19 +111,33 @@ function HeroContent({
   // nasce atrás da tarja.
   return (
     <div className="gutter relative flex flex-1 flex-col items-center justify-between pb-14 pt-16 sm:items-stretch sm:pt-32">
-      {/* Dentro do HeroContent, e não solta no <section>: assim a cópia
-          espelhada da lente também recebe a grade, e ela inverte junto com
-          o texto em vez de sumir atrás do disco de tinta da lente. */}
-      <HeroGrid
-        mirrored={mirrored}
-        pointerX={pointerX}
-        pointerY={pointerY}
-        lensRadius={lensRadius}
-        sectionRef={sectionRef}
-      />
+      {/* Dentro do HeroContent, e não solto no <section>: assim a cópia
+          espelhada também recebe o canvas, e o nome deformado inverte junto
+          com o resto em vez de sumir atrás do disco de tinta da lente. */}
+      {titleLens && (
+        <HeroTitleGL
+          mirrored={mirrored}
+          pointerX={pointerX}
+          pointerY={pointerY}
+          lensRadius={lensRadius}
+          sectionRef={sectionRef}
+          titleRef={titleRef}
+          onDrawing={onTitleDrawing}
+          onUnsupported={onTitleUnsupported}
+        />
+      )}
 
       <div className="relative order-1 mt-6 text-center sm:mt-0 sm:text-left">
-        <h1 className="type-display type-inktrap text-[14.5vw] leading-[0.84] tracking-[0.015em] sm:text-[8.2vw] lg:text-[11vw] 2xl:text-[10vw]">
+        {/* Transparente, não escondido, quando o canvas assume o desenho: o
+            <h1> continua sendo o que o leitor de tela lê e o que o buscador
+            indexa, e continua ocupando o mesmo espaço, que é justamente de
+            onde saem as medidas que o canvas usa pra desenhar. */}
+        <h1
+          ref={titleRef}
+          className={`type-display type-inktrap text-[14.5vw] leading-[0.84] tracking-[0.015em] sm:text-[8.2vw] lg:text-[11vw] 2xl:text-[10vw] ${
+            titleOnCanvas ? "opacity-0" : ""
+          }`}
+        >
           {/* leading-[0.84] é mais apertado que a altura real da fonte: sem
               esse respiro, o overflow-hidden usado pra animação de entrada
               corta o topo do "A" e de outras letras (fica achatado em vez de
@@ -122,6 +150,7 @@ function HeroContent({
           {words.map((word, index) => (
             <span
               key={word}
+              data-title-line
               className={
                 index === 0
                   ? "block overflow-hidden pt-[0.16em]"
@@ -273,6 +302,36 @@ function HeroContent({
 export function Hero({ dict }: { dict: Dictionary }) {
   const sectionRef = useRef<HTMLElement>(null);
   const ctaRef = useRef<HTMLAnchorElement>(null);
+  const titleRef = useRef<HTMLHeadingElement>(null);
+  const mirroredTitleRef = useRef<HTMLHeadingElement>(null);
+
+  // O nome deformado pela lente roda em WebGL sobre uma cópia do <h1> (ver
+  // HeroTitleGL). Enquanto o canvas não confirma que desenhou, e nos casos em
+  // que ele nunca vai desenhar (sem WebGL, sem fonte, ou com menos movimento
+  // pedido no sistema), o <h1> continua visível e a hero é a de sempre.
+  const reduceMotion = useReducedMotion();
+  const [titleOnCanvas, setTitleOnCanvas] = useState(false);
+  // Sem cursor de verdade não existe lente: em toque o raio nunca sai de zero
+  // (nenhum mousemove dispara), então o canvas desenharia uma cópia do <h1>
+  // que nunca se deforma, trocando texto selecionável por pixels à toa.
+  // Começa desligado, e não com a medida já lida, porque no HTML do servidor
+  // não existe ponteiro pra consultar: o canvas é melhoria progressiva.
+  const [hasPointer, setHasPointer] = useState(false);
+  const [titleUnsupported, setTitleUnsupported] = useState(false);
+  const onTitleDrawing = useCallback(() => setTitleOnCanvas(true), []);
+  const onTitleUnsupported = useCallback(() => {
+    setTitleUnsupported(true);
+    setTitleOnCanvas(false);
+  }, []);
+  useEffect(() => {
+    const query = window.matchMedia("(hover: hover) and (pointer: fine)");
+    const sync = () => setHasPointer(query.matches);
+    sync();
+    query.addEventListener("change", sync);
+    return () => query.removeEventListener("change", sync);
+  }, []);
+
+  const titleLens = hasPointer && !reduceMotion && !titleUnsupported;
 
   const mouseX = useMotionValue(-600);
   const mouseY = useMotionValue(-600);
@@ -325,6 +384,11 @@ export function Hero({ dict }: { dict: Dictionary }) {
           pointerY={y}
           lensRadius={r}
           sectionRef={sectionRef}
+          titleRef={titleRef}
+          titleLens={titleLens}
+          titleOnCanvas={titleLens && titleOnCanvas}
+          onTitleDrawing={onTitleDrawing}
+          onTitleUnsupported={onTitleUnsupported}
         />
 
         {/* Cópia invertida, revelada pela lente */}
@@ -340,6 +404,11 @@ export function Hero({ dict }: { dict: Dictionary }) {
             pointerY={y}
             lensRadius={r}
             sectionRef={sectionRef}
+            titleRef={mirroredTitleRef}
+            titleLens={titleLens}
+            titleOnCanvas={titleLens && titleOnCanvas}
+            onTitleDrawing={onTitleDrawing}
+            onTitleUnsupported={onTitleUnsupported}
           />
         </motion.div>
       </div>
