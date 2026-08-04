@@ -11,9 +11,9 @@ const ROTATE_MS = 3200;
 // O interruptor do Modo Boring, isolado do resto da mesa de controle porque
 // mora do outro lado do cabeçalho: no desktop fica à esquerda, junto do menu,
 // enquanto tema, som e idioma (ControlBar) vivem à direita, junto da lua. No
-// mobile ganha uma segunda linha só dele no cabeçalho (veja SiteFrame), em
-// vez de ficar escondido dentro do menu hamburguer ou flutuando solto num
-// canto da tela (as duas versões já tentadas antes desta).
+// mobile aparece em dois lugares, nunca ao mesmo tempo: numa segunda linha
+// só dele no cabeçalho enquanto a hero está na tela (veja SiteFrame) e,
+// depois disso, dentro do menu, ao lado de tema e idioma (veja SiteMenu).
 //
 // É o único controle com caixa própria, quadrada (sem arredondar, como o
 // resto do site): é a porta de saída da experiência inteira para quem não
@@ -34,12 +34,21 @@ interface BoringToggleProps {
    * vez de sumir num tempo fixo que pode não bater com o ritmo de leitura.
    */
   dismissTooltip?: boolean;
+  /**
+   * Chamado logo depois de alternar o modo. Existe para a cópia que mora
+   * dentro do menu (SiteMenu), que precisa fechar o overlay no mesmo clique:
+   * entrar em Modo Boring faz o menu inteiro parar de renderizar, mas parar
+   * de renderizar não desmonta o componente, então a limpeza que devolve a
+   * rolagem ao documento só acontece se o menu for fechado de propósito.
+   */
+  onToggle?: () => void;
 }
 
 export function BoringToggle({
   dict,
   showTooltip = false,
   dismissTooltip = false,
+  onToggle,
 }: BoringToggleProps) {
   const { isBoringMode, toggleBoringMode } = useBoringMode();
   const mounted = useHydrated();
@@ -79,6 +88,7 @@ export function BoringToggle({
         onClick={() => {
           setTooltipDismissed(true);
           toggleBoringMode();
+          onToggle?.();
         }}
       >
         {/* Todo rótulo possível empilhado, invisível, na mesma célula do

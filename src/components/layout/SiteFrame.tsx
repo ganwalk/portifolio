@@ -24,24 +24,34 @@ import type { Dictionary } from "@/i18n/dictionaries";
 // Some por completo na impressão.
 //
 // O Modo Boring é o único controle com uma segunda linha própria no mobile,
-// em QUALQUER página (Boring incluso): depois de passar por dentro do menu
-// hamburguer (visível demais escondido) e por um botão flutuante solto num
-// canto (achado estranho), a linha extra ficou sendo o meio termo, sempre
-// visível sem competir por espaço com menu, assinatura e lua na primeira
-// linha. No desktop essa segunda linha não existe, o botão já cabe folgado
-// na primeira, junto do menu.
+// e ela dura só o tempo da hero: é a oferta de saída feita de cara, na
+// primeira dobra da home, quando a pessoa ainda está decidindo se quer a
+// experiência lúdica ou o currículo direto. Passada a hero, quem ficou já
+// escolheu ficar, e a linha extra viraria uma tarja permanente roubando
+// altura de tela estreita a cada rolagem. A partir daí o botão mora dentro
+// do menu, junto de tema e idioma (veja SiteMenu), que no mobile já é a
+// gaveta de todos os controles. Fora da home, onde não existe hero, a
+// segunda linha nem chega a aparecer: o botão nasce direto no menu. No
+// desktop ela também não existe, lá o botão cabe folgado na primeira linha,
+// junto do menu.
 //
-// No mobile, na home em Modo Criativo, o cabeçalho começa "reduzido": só a
-// segunda linha (o botão do Modo Boring, sem tooltip) fica visível, a
-// primeira linha (menu, assinatura, lua) some até o scroll passar da altura
-// da tela, e a hero fica livre pra ocupar a primeira dobra quase sozinha. A
-// segunda linha nunca fica totalmente ausente: sem ela, sair do Modo
-// Criativo exigiria abrir o menu primeiro, e essa é a única porta de saída
-// de quem não quer ver nem uma animação. No desktop a primeira linha é
-// sempre visível, em qualquer página e desde o primeiro pixel: lá o espaço
-// sobra, esconder a barra só tira acesso sem ganhar nada em troca. Em Modo
-// Boring fora da home, a primeira linha também é sempre visível, em qualquer
-// largura: sem hero para esconder atrás.
+// A troca das duas linhas é sincronizada no mesmo ponto de scroll: no mobile,
+// na home em Modo Criativo, o cabeçalho começa "reduzido" (só a linha do
+// Modo Boring, sem tooltip) e a primeira linha (menu, assinatura, lua) fica
+// recolhida, deixando a hero ocupar a primeira dobra quase sozinha. Passada
+// a altura da tela, elas se revezam: a primeira linha abre e a segunda
+// fecha, então o cabeçalho nunca mostra as duas ao mesmo tempo, e a saída
+// para o Modo Boring nunca fica órfã (ela some junto com o aparecimento do
+// menu que passa a guardá-la). No desktop a primeira linha é sempre visível,
+// em qualquer página e desde o primeiro pixel: lá o espaço sobra, esconder a
+// barra só tira acesso sem ganhar nada em troca. Em Modo Boring fora da
+// home, a primeira linha também é sempre visível, em qualquer largura: sem
+// hero para esconder atrás.
+//
+// Em Modo Boring a segunda linha é a exceção que continua sempre presente,
+// em qualquer página e qualquer scroll: lá o menu não existe (a página
+// utilitária é uma coluna só, veja SiteMenu), então sem essa linha não
+// sobraria porta nenhuma de volta para o Modo Criativo.
 //
 // No mobile, na home em Modo Boring, a primeira linha some pelo mesmo
 // motivo oposto: a própria BoringView já abre com o nome como H1 do próprio
@@ -97,6 +107,10 @@ export function SiteFrame({
   }, [isBoringHome]);
 
   const headerVisible = isBoringHome ? pastAbout : !isHomeHero || pastFirstFold;
+  // Linha do Modo Boring no mobile: só enquanto a hero está na tela (home em
+  // Modo Criativo, antes da primeira dobra passar). Em Modo Boring fica
+  // sempre, é a única volta possível sem menu.
+  const boringRowVisible = isBoringMode || (isHomeHero && !pastFirstFold);
 
   return (
     <div className="flex min-h-svh flex-col">
@@ -157,13 +171,26 @@ export function SiteFrame({
           </div>
         </div>
 
-        {/* Segunda linha: só o Modo Boring, sempre presente no mobile (em
-            qualquer página, em qualquer modo), sumindo no desktop porque lá
-            já cabe na primeira linha. Nunca mostra tooltip: é uma tarja
-            estreita, sem espaço sobrando pra bolha, e é o único controle
-            visível na tela reduzida pré rolagem, já autoexplicativo. */}
-        <div className="flex justify-center border-t border-line px-6 py-2 lg:hidden">
-          <BoringToggle dict={dict} />
+        {/* Segunda linha: só o Modo Boring, só no mobile (no desktop já cabe
+            na primeira linha), e só enquanto a hero está na tela, exceto em
+            Modo Boring, onde fica sempre por falta de menu que a guarde.
+            Mesmo mecanismo de recolhimento da primeira linha (max-height, e
+            não translate/opacity, que não devolvem o espaço reservado no
+            fluxo), inclusive a borda, que sai junto: uma borda de 1px sozinha
+            sobre a borda inferior do cabeçalho leria como um risco duplo.
+            Nunca mostra tooltip: é uma tarja estreita, sem espaço sobrando
+            pra bolha, e enquanto ela existe é o único controle na tela, já
+            autoexplicativo. */}
+        <div
+          className={`overflow-hidden transition-all duration-300 lg:hidden ${
+            boringRowVisible
+              ? "max-h-16 border-t border-line py-2 opacity-100"
+              : "pointer-events-none max-h-0 py-0 opacity-0"
+          }`}
+        >
+          <div className="flex justify-center px-6">
+            <BoringToggle dict={dict} />
+          </div>
         </div>
       </header>
 

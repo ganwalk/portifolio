@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { AnimatePresence, motion } from "framer-motion";
+import { BoringToggle } from "@/components/controls/BoringToggle";
 import { ControlBar } from "@/components/controls/ControlBar";
 import { useBoringMode } from "@/contexts/BoringModeContext";
 import { useHydrated } from "@/lib/use-hydrated";
@@ -15,8 +16,9 @@ import type { Dictionary } from "@/i18n/dictionaries";
 // pré-visualização dentro das próprias letras (a imagem preenche o texto via
 // background-clip: text, não flutua ao lado): duas cópias do mesmo rótulo
 // empilhadas, a de baixo sempre visível, a de cima com a imagem recortada
-// pela forma do texto, ganhando opacidade no hover. No Modo Boring o menu
-// não existe: a página utilitária é uma coluna só.
+// pela forma do texto, ganhando opacidade no hover. Os rótulos vão na Whyte
+// Inktrap (.type-inktrap), a mesma dos outros destaques do site. No Modo
+// Boring o menu não existe: a página utilitária é uma coluna só.
 
 // Previews placeholder por seção. Sugestão de mídia real: um recorte de cada
 // destino (colagem dos cases, foto do Armando no Sobre, textura de papel no
@@ -138,7 +140,13 @@ export function SiteMenu({
                             (background-clip: text), invisível em repouso e
                             revelada no hover. A imagem "mora dentro" do
                             texto em vez de flutuar ao lado dele. */}
-                        <span className="type-display relative inline-block text-[13vw] leading-none sm:text-[7vw]">
+                        {/* 11vw no mobile, e não os 13vw do desenho antigo: a
+                            Whyte Black é cerca de 10% mais larga que a fonte
+                            de manchete que estava aqui, e o rótulo mais longo
+                            ("Fora do expediente" em português) passava da
+                            borda direita numa tela estreita. Do sm pra cima
+                            sobra espaço de sobra e o corpo continua o mesmo. */}
+                        <span className="type-display type-inktrap relative inline-block text-[11vw] leading-none sm:text-[7vw]">
                           <span className="transition-opacity duration-500 ease-out group-hover:opacity-10">
                             {item.label}
                           </span>
@@ -156,12 +164,22 @@ export function SiteMenu({
                 ))}
               </motion.nav>
 
-              {/* No mobile, tema/som/idioma moram aqui dentro: a barra do
-                  topo fica só com menu, assinatura e lua. O Modo Boring não
-                  precisa de cópia aqui, já tem um botão flutuante sempre
-                  visível (veja SiteFrame). No desktop tudo já vive na
-                  própria barra, então some daqui para não duplicar. */}
+              {/* No mobile, a mesa de controle inteira mora aqui dentro: a
+                  barra do topo fica só com menu, assinatura e lua. O Modo
+                  Boring vem junto porque a linha própria dele no cabeçalho
+                  dura só o tempo da hero (veja SiteFrame): passada a primeira
+                  dobra, este é o único lugar onde ele existe no mobile, e por
+                  isso abre o grupo, à frente de tema e idioma. Fecha o menu
+                  no mesmo clique (onToggle): sem isso o overlay some da tela
+                  (o componente inteiro para de renderizar em Modo Boring,
+                  logo acima) mas o estado continua "aberto", a limpeza que
+                  devolve a rolagem ao <html> nunca roda e a página do Modo
+                  Boring abre travada, sem scroll. Não há animação de saída:
+                  a cortina de troca de modo cobre a tela em seguida e o corte
+                  não aparece. No desktop tudo já vive na própria barra, então
+                  some daqui para não duplicar. */}
               <div className="flex flex-wrap items-center gap-4 pb-6 lg:hidden">
+                <BoringToggle dict={dict} onToggle={() => toggle(false)} />
                 <ControlBar locale={locale} dict={dict} />
               </div>
             </div>
