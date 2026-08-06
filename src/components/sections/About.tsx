@@ -60,6 +60,43 @@ export function About({ locale, dict }: { locale: Locale; dict: Dictionary }) {
           </div>
         </Reveal>
       </div>
+
+      {/* Experiência: mesma caixa com linha fina que o menu overlay já usa
+          (border-y na primeira, border-b nas demais), não uma abstração
+          nova. As últimas entradas são fictícias (profile.ts, mock: true),
+          só pra desenhar a timeline: o asterisco e o rodapé somem junto
+          quando virarem histórico real. */}
+      <Reveal delay={0.1} className="mt-16">
+        <h3 className="type-mono mb-4 text-muted">
+          {dict.boring.experienceTitle}
+        </h3>
+        <ul>
+          {profile.experience.map((job, index) => (
+            <li
+              key={job.company}
+              className={`flex flex-col gap-1 border-line py-6 sm:flex-row sm:items-baseline sm:gap-10 ${
+                index === 0 ? "border-y" : "border-b"
+              }`}
+            >
+              <span className="type-mono w-28 shrink-0 text-muted">
+                {job.period[locale]}
+              </span>
+              <div>
+                <p className="type-serif-display text-2xl sm:text-3xl">
+                  {job.title}
+                  {job.mock && <span aria-hidden> *</span>}
+                </p>
+                <p className="type-mono mt-1 text-muted">{job.company}</p>
+              </div>
+            </li>
+          ))}
+        </ul>
+        {profile.experience.some((job) => job.mock) && (
+          <p className="type-mono mt-6 text-muted">
+            * {dict.about.experienceMockDisclaimer}
+          </p>
+        )}
+      </Reveal>
     </section>
   );
 }

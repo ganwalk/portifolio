@@ -73,6 +73,13 @@ export const en: Dictionary = {
     ],
     skillsTitle: "Tools & skills",
     languagesTitle: "Languages",
+    experienceMockDisclaimer:
+      "Entries marked with * are fictional, just to sketch the timeline. Real history coming soon.",
+  },
+  testimonials: {
+    title: "What people say",
+    disclaimer:
+      "Illustrative testimonials, just to design the block. Real ones coming soon.",
   },
   contact: {
     title: "Let's talk?",

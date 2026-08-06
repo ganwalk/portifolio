@@ -74,6 +74,13 @@ export const es: Dictionary = {
     ],
     skillsTitle: "Herramientas y habilidades",
     languagesTitle: "Idiomas",
+    experienceMockDisclaimer:
+      "Las marcadas con * son ficticias, solo para diseñar la timeline. Historial real en camino.",
+  },
+  testimonials: {
+    title: "Lo que dicen",
+    disclaimer:
+      "Testimonios ilustrativos, solo para diseñar el bloque. Versión real en camino.",
   },
   contact: {
     title: "¿Hablamos?",

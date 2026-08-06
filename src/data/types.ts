@@ -55,3 +55,14 @@ export interface Experiment {
   medium: Localized;
   media: Media;
 }
+
+export interface Testimonial {
+  id: string;
+  quote: Localized;
+  name: string;
+  /** Cargo e contexto, ex. "Product Manager, Estúdio Alameda". */
+  role: Localized;
+  /** true enquanto pessoa e depoimento forem fictícios, mesmo critério de
+   *  CaseMetric.illustrative: mostra o disclaimer no bloco (Testimonials.tsx). */
+  mock: boolean;
+}

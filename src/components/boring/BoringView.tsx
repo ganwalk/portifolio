@@ -53,8 +53,10 @@ export function BoringView({
         {profile.experience.map((job) => (
           <div key={job.company} className="text-sm">
             <p className="font-bold">
-              {job.company}{" "}
-              <span className="font-normal text-muted">({job.period})</span>
+              {job.title} · {job.company}{" "}
+              <span className="font-normal text-muted">
+                ({job.period[locale]})
+              </span>
             </p>
             <p>{job.role[locale]}</p>
           </div>

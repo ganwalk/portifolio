@@ -85,6 +85,17 @@ export const pt = {
     ],
     skillsTitle: "Ferramentas e habilidades",
     languagesTitle: "Idiomas",
+    // Some junto com as últimas entradas fictícias da experiência (ver
+    // profile.ts) assim que virarem histórico real.
+    experienceMockDisclaimer:
+      "Marcadas com * são fictícias, só pra desenhar a timeline. Histórico real em breve.",
+  },
+  testimonials: {
+    title: "O que dizem",
+    // Mesmo critério de metricsDisclaimer acima: some quando os depoimentos
+    // ficticios de src/data/testimonials.ts virarem reais e autorizados.
+    disclaimer:
+      "Depoimentos ilustrativos, pra desenhar o bloco. Versão real em fase de coleta.",
   },
   contact: {
     title: "Vamos conversar?",

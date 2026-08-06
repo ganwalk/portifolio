@@ -74,6 +74,11 @@ export const zh: Dictionary = {
     ],
     skillsTitle: "工具与技能",
     languagesTitle: "语言",
+    experienceMockDisclaimer: "带 * 的经历是虚构的，仅用于设计时间线。真实经历即将补充。",
+  },
+  testimonials: {
+    title: "他们怎么说",
+    disclaimer: "示意性推荐语，仅用于设计版块。真实内容征集中。",
   },
   contact: {
     title: "一起聊聊？",
