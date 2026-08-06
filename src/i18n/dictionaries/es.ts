@@ -13,6 +13,12 @@ export const es: Dictionary = {
     menu: "Menú",
     close: "Cerrar",
     skipToContent: "Saltar al contenido",
+    menuDescriptions: {
+      work: "Los proyectos que hice, del banking a la música.",
+      playground: "Ilustración, animación y producción musical en el tiempo libre.",
+      about: "Un poco de todo: diseño, tipografía, collage y curiosidad.",
+      contact: "Abierto a proyectos, colaboraciones y buenas ideas.",
+    },
   },
   controls: {
     boringOn: ["Ve al grano", "Mira mi currículum"],

@@ -454,10 +454,26 @@ decorativa. O que dá vida é movimento e tipografia, não ornamento.
   fases da lua conforme o scroll, três lunações por página.
 - **Menu overlay** (`SiteMenu`): navegação de tela cheia com tipografia gigante
   (Whyte Inktrap, via `.type-inktrap` somada ao `.type-display` que já dava
-  tamanho e caixa alta) e preview de imagem no hover de cada link. Renderiza
-  num portal para o body, porque o `backdrop-blur` do cabeçalho criaria um
-  containing block e prenderia o overlay dentro da barra. No mobile a mesa de
-  controle inteira mora aqui, Modo Boring incluído.
+  tamanho e caixa alta), um link por caixa, separadas por linhas finas
+  (`border-line`, o mesmo fio de 1px do resto do site: borda em cima só na
+  primeira caixa, embaixo em todas, então a borda de baixo de uma já serve de
+  cima da próxima, sem linha dobrada onde se tocam). Passar o mouse numa caixa
+  inverte o tema só ali dentro (fundo vira `--foreground`, rótulo e a
+  descrição curta da seção viram `--background`, mesmo par que `BoringToggle`
+  já usa no próprio hover): nenhuma cor entra na conta, o destaque é preto e
+  branco trocando de lugar. O fundo entra como um wipe (`scaleX` a partir da
+  esquerda, não um fade), e a descrição segue um instante depois
+  (`delay-100`), então a caixa sempre atravessa "fundo sem descrição" antes de
+  "fundo com descrição". `group-focus-within`, e não só `group-hover`, repete
+  a revelação pra quem navega por teclado. Descrições vêm de
+  `dict.nav.menuDescriptions`, uma frase por seção, e a descrição some abaixo
+  de `lg:` (nem sobra largura ao lado do rótulo gigante empilhado, nem existe
+  hover de verdade em toque). Um preview de imagem recortada pela forma das
+  próprias letras (`background-clip: text`) morou aqui antes e saiu: competia
+  pela mesma área que o fundo invertido agora ocupa. Renderiza num portal para
+  o body, porque o `backdrop-blur` do cabeçalho criaria um containing block e
+  prenderia o overlay dentro da barra. No mobile a mesa de controle inteira
+  mora aqui, Modo Boring incluído.
 - **Cabeçalho**: uma só ordem de DOM (menu, assinatura, lua) em dois arranjos.
   No mobile é grid de três colunas, com a assinatura centralizada; no desktop
   vira flex e a assinatura vai para a frente da fila (`lg:order-first`), com a

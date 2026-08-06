@@ -15,6 +15,14 @@ export const pt = {
     menu: "Menu",
     close: "Fechar",
     skipToContent: "Pular para o conteúdo",
+    // Uma frase curta por item do menu overlay: aparece só no hover, junto
+    // com o fundo que invade a caixa (ver SiteMenu.tsx).
+    menuDescriptions: {
+      work: "Os projetos que fiz, do banking à música.",
+      playground: "Ilustração, animação e produção musical nas horas vagas.",
+      about: "Um pouco de tudo: design, tipografia, colagem e curiosidade.",
+      contact: "Aberto a projetos, colaborações e boas ideias.",
+    },
   },
   controls: {
     // Duas maneiras de descrever a mesma ação (o Modo Boring também é o

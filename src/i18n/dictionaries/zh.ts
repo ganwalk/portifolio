@@ -12,6 +12,12 @@ export const zh: Dictionary = {
     menu: "菜单",
     close: "关闭",
     skipToContent: "跳到主要内容",
+    menuDescriptions: {
+      work: "从银行到音乐，我做过的项目。",
+      playground: "插画、动画与音乐制作，工作之余的实验。",
+      about: "设计、字体、拼贴与好奇心，一点点全都要。",
+      contact: "欢迎项目合作与新想法。",
+    },
   },
   controls: {
     boringOn: ["直奔主题", "查看我的简历"],

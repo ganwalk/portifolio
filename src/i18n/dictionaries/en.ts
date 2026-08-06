@@ -13,6 +13,12 @@ export const en: Dictionary = {
     menu: "Menu",
     close: "Close",
     skipToContent: "Skip to content",
+    menuDescriptions: {
+      work: "The projects I've built, from banking to music.",
+      playground: "Illustration, animation and music production on the side.",
+      about: "A bit of everything: design, typography, collage and curiosity.",
+      contact: "Open to projects, collaborations and good ideas.",
+    },
   },
   controls: {
     boringOn: ["Get straight to the point", "See my résumé"],

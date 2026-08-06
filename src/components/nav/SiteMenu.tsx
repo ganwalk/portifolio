@@ -12,24 +12,24 @@ import type { Locale } from "@/i18n/config";
 import type { Dictionary } from "@/i18n/dictionaries";
 
 // Navegação lúdica: botão no cabeçalho abre um overlay de tela cheia com os
-// links em tipografia gigante. Passar o mouse em cada link revela uma
-// pré-visualização dentro das próprias letras (a imagem preenche o texto via
-// background-clip: text, não flutua ao lado): duas cópias do mesmo rótulo
-// empilhadas, a de baixo sempre visível, a de cima com a imagem recortada
-// pela forma do texto, ganhando opacidade no hover. Os rótulos vão na Whyte
-// Inktrap (.type-inktrap), a mesma dos outros destaques do site. No Modo
-// Boring o menu não existe: a página utilitária é uma coluna só.
-
-// Previews placeholder por seção. Sugestão de mídia real: um recorte de cada
-// destino (colagem dos cases, foto do Armando no Sobre, textura de papel no
-// Contato). Trocar é só apontar preview para a imagem final.
-const PREVIEWS: Record<string, string> = {
-  work: "https://images.pexels.com/videos/3129671/free-video-3129671.jpg?auto=compress&w=900",
-  playground:
-    "https://images.pexels.com/photos/164938/pexels-photo-164938.jpeg?auto=compress&cs=tinysrgb&w=900",
-  about: "https://picsum.photos/seed/sobre-armando/900/675",
-  contact: "https://picsum.photos/seed/contato-armando/900/675",
-};
+// links em tipografia gigante, um por caixa, separadas por linhas finas
+// (border-line, o mesmo fio de 1px do resto do site). Passar o mouse numa
+// caixa inverte o tema só ali dentro: fundo vira tinta (--foreground), rótulo
+// e a descrição da seção viram papel (--background), a mesma troca de lugar
+// que a lente da Hero já faz (ver .lens-invert em globals.css), só que
+// sólida, sem borda difusa nem desfoque, porque aqui é a caixa inteira que
+// vira o disco, não um círculo recortado. Nenhuma cor entra na conta: o
+// "destaque" é preto e branco trocando de posição, mesma regra do resto do
+// site (ver Cores em docs/architecture.md).
+//
+// O fundo entra como um wipe (scaleX, ancorado à esquerda) atrás do texto,
+// não um fade: dá direção ao gesto, como se a caixa fosse "pintada" da
+// esquerda pra direita. A descrição segue um instante depois (delay-100),
+// então a caixa nunca pula direto pro estado final, sempre atravessa fundo
+// sem descrição antes de fundo com descrição, do jeito que foi pedido. Os
+// rótulos vão na Whyte Inktrap (.type-inktrap), a mesma dos outros destaques
+// do site. No Modo Boring o menu não existe: a página utilitária é uma
+// coluna só.
 
 const listVariants = {
   open: { transition: { staggerChildren: 0.07, delayChildren: 0.15 } },
@@ -72,10 +72,14 @@ export function SiteMenu({
   if (isBoringMode) return null;
 
   const items = [
-    { id: "work", label: dict.nav.work },
-    { id: "playground", label: dict.playground.title },
-    { id: "about", label: dict.nav.about },
-    { id: "contact", label: dict.nav.contact },
+    { id: "work", label: dict.nav.work, description: dict.nav.menuDescriptions.work },
+    {
+      id: "playground",
+      label: dict.playground.title,
+      description: dict.nav.menuDescriptions.playground,
+    },
+    { id: "about", label: dict.nav.about, description: dict.nav.menuDescriptions.about },
+    { id: "contact", label: dict.nav.contact, description: dict.nav.menuDescriptions.contact },
   ];
 
   const toggle = (next: boolean) => setOpen(next);
@@ -126,39 +130,60 @@ export function SiteMenu({
                 {items.map((item, index) => (
                   <div key={item.id} className="overflow-hidden">
                     <motion.div variants={itemVariants}>
-                      <Link
-                        href={`/${locale}/#${item.id}`}
-                        className="group flex items-baseline gap-4 py-1"
-                        onClick={() => toggle(false)}
+                      {/* A caixa: group aqui, não no Link, porque é ela quem
+                          define a área de hover e quem corta o wipe do fundo
+                          (overflow-hidden). border-y só na primeira, border-b
+                          nas demais: a borda de baixo de uma caixa já serve de
+                          borda de cima da próxima, sem linha dobrada onde elas
+                          se tocam. */}
+                      <div
+                        className={`group relative overflow-hidden border-line ${
+                          index === 0 ? "border-y" : "border-b"
+                        }`}
                       >
-                        <span className="type-mono text-muted">
-                          0{index + 1}
-                        </span>
-                        {/* Duas cópias do rótulo empilhadas: a de baixo é o
-                            texto normal, a de cima tem a preview da seção
-                            recortada pela forma das próprias letras
-                            (background-clip: text), invisível em repouso e
-                            revelada no hover. A imagem "mora dentro" do
-                            texto em vez de flutuar ao lado dele. */}
-                        {/* 11vw no mobile, e não os 13vw do desenho antigo: a
-                            Whyte Black é cerca de 10% mais larga que a fonte
-                            de manchete que estava aqui, e o rótulo mais longo
-                            ("Fora do expediente" em português) passava da
-                            borda direita numa tela estreita. Do sm pra cima
-                            sobra espaço de sobra e o corpo continua o mesmo. */}
-                        <span className="type-display type-inktrap relative inline-block text-[11vw] leading-none sm:text-[7vw]">
-                          <span className="transition-opacity duration-500 ease-out group-hover:opacity-10">
+                        {/* Fundo do hover: entra como um wipe (scaleX a partir
+                            da esquerda), não um fade, então o gesto tem
+                            direção, como se a caixa fosse pintada da esquerda
+                            pra direita. Tinta e papel trocando de lugar, a
+                            mesma inversão da lente da Hero, aqui sólida e sem
+                            desfoque: nenhuma cor entra na conta, só o tema
+                            virando do avesso dentro da caixa. */}
+                        <span
+                          aria-hidden
+                          className="pointer-events-none absolute inset-0 origin-left scale-x-0 bg-foreground transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-x-100 group-focus-within:scale-x-100"
+                        />
+                        <Link
+                          href={`/${locale}/#${item.id}`}
+                          className="relative z-10 flex items-baseline gap-4 py-1"
+                          onClick={() => toggle(false)}
+                        >
+                          <span className="type-mono text-muted transition-colors duration-500 group-hover:text-background group-focus-within:text-background">
+                            0{index + 1}
+                          </span>
+                          {/* 11vw no mobile, e não os 13vw do desenho antigo: a
+                              Whyte Black é cerca de 10% mais larga que a fonte
+                              de manchete que estava aqui, e o rótulo mais longo
+                              ("Fora do expediente" em português) passava da
+                              borda direita numa tela estreita. Do sm pra cima
+                              sobra espaço de sobra e o corpo continua o mesmo. */}
+                          <span className="type-display type-inktrap text-[11vw] leading-none text-foreground transition-colors duration-500 group-hover:text-background group-focus-within:text-background sm:text-[7vw]">
                             {item.label}
                           </span>
-                          <span
-                            aria-hidden
-                            className="pointer-events-none absolute inset-0 bg-cover bg-center bg-clip-text text-transparent opacity-0 transition-opacity duration-500 ease-out group-hover:opacity-100"
-                            style={{ backgroundImage: `url(${PREVIEWS[item.id]})` }}
-                          >
-                            {item.label}
+                          {/* Descrição: some no mobile (não existe hover de
+                              verdade em toque, e não sobra largura ao lado do
+                              rótulo gigante empilhado). Entra um instante
+                              depois do fundo (delay-100), então a caixa
+                              sempre atravessa "fundo sem descrição" antes de
+                              "fundo com descrição", nunca pula direto pro
+                              estado final. group-focus-within, e não só
+                              group-hover: quem navega por teclado (Tab) põe
+                              foco no Link, não passa o mouse, e precisa da
+                              mesma revelação. */}
+                          <span className="type-mono ml-auto hidden max-w-[16rem] translate-x-3 text-right text-background opacity-0 transition-all duration-500 delay-100 ease-out group-hover:translate-x-0 group-hover:opacity-100 group-focus-within:translate-x-0 group-focus-within:opacity-100 lg:block">
+                            {item.description}
                           </span>
-                        </span>
-                      </Link>
+                        </Link>
+                      </div>
                     </motion.div>
                   </div>
                 ))}
