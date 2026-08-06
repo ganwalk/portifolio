@@ -562,12 +562,22 @@ O toque fica de fora do amortecimento de propósito (`syncTouch: false`, o
 padrão da biblioteca): o momentum do próprio sistema em touch já é bom, e
 sincronizar com ele é o ponto mais instável da biblioteca em iOS mais antigo.
 
-Elemento com scroll próprio (o overlay de case em tela cheia de `CasesGrid`)
-marca `data-lenis-prevent`, que Lenis já reconhece sozinho, sem precisar de
-lista de seletores nem busca manual por ancestral rolável. Desliga por
-completo (a instância nem chega a existir) em Modo Boring e para quem pede
-menos movimento no sistema, voltando ao scroll cru do navegador nos dois
-casos.
+**Elemento com scroll próprio não fica de fora, ganha a própria instância.**
+O overlay de case em tela cheia de `CasesGrid` (`ExpandedCase`) trava o
+scroll da página (`document.documentElement.style.overflow = "hidden"`)
+enquanto está aberto, mas continua pensado como parte do MESMO scroll da
+página: em vez de um `data-lenis-prevent` excluindo-o e deixando-o cair pro
+scroll nativo, ele sobe sua PRÓPRIA instância de Lenis, presa nele
+(`wrapper`/`content` apontando pro próprio elemento) em vez de na janela. As
+duas cooperam sozinhas, sem configuração extra: Lenis já resolve isso
+internamente (o wheel que a instância do overlay consome sinaliza o próprio
+evento, e a instância da página, ao receber o mesmo evento borbulhado,
+reconhece o sinal e não processa de novo), então o overlay rola com o mesmo
+amortecimento do resto do site, não com um scroll nativo destoante.
+
+Desliga por completo (a instância nem chega a existir) em Modo Boring e para
+quem pede menos movimento no sistema, voltando ao scroll cru do navegador
+nos dois casos, em ambas as instâncias (página e overlay).
 
 **A pilha de `CasesGrid` reage à velocidade da rolagem, não só à posição.**
 Uma leve inclinação (`skewY`, ver `stackSkew`) cresce com a rapidez do gesto

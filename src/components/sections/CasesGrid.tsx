@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Lenis from "lenis";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   AnimatePresence,
@@ -588,8 +589,39 @@ function ExpandedCase({
     };
   }, [onClose]);
 
+  // O overlay tem scroll próprio (a página de verdade fica travada acima),
+  // mas continua pensado como parte do MESMO scroll da página, não como uma
+  // ilha isolada dele: em vez de um data-lenis-prevent tirando este
+  // contêiner de cena, ele ganha a própria instância de Lenis, presa nele em
+  // vez de na janela. As duas cooperam sozinhas (Lenis já resolve isso: o
+  // wheel que a instância daqui consome não chega à instância da página,
+  // ver SmoothScroll.tsx), então o overlay rola com o mesmo amortecimento do
+  // resto do site, em vez de cair pro scroll nativo só porque mora num
+  // contêiner à parte.
+  const scrollerRef = useRef<HTMLDivElement>(null);
+  const reduceMotionScroller = useReducedMotion();
+
+  useEffect(() => {
+    const el = scrollerRef.current;
+    if (!el || reduceMotionScroller) return;
+
+    const lenis = new Lenis({ wrapper: el, content: el, lerp: 0.11, syncTouch: false });
+    let rafId: number;
+    const raf = (time: number) => {
+      lenis.raf(time);
+      rafId = requestAnimationFrame(raf);
+    };
+    rafId = requestAnimationFrame(raf);
+
+    return () => {
+      cancelAnimationFrame(rafId);
+      lenis.destroy();
+    };
+  }, [reduceMotionScroller]);
+
   return (
     <motion.div
+      ref={scrollerRef}
       initial={{
         x: origin.x,
         y: origin.y,
@@ -606,7 +638,6 @@ function ExpandedCase({
         opacity: 0,
       }}
       transition={{ type: "spring", stiffness: 210, damping: 28 }}
-      data-lenis-prevent
       className="fixed inset-0 z-50 overflow-y-auto bg-background"
     >
       <div className="relative h-svh w-full overflow-hidden bg-black">

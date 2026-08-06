@@ -28,10 +28,15 @@ import { useBoringMode } from "@/contexts/BoringModeContext";
 // da biblioteca em iOS mais antigo. Só a roda do mouse recebe o
 // amortecimento extra, mesmo critério do arquivo anterior.
 //
-// Elementos com scroll próprio (o overlay de case em tela cheia de
-// CasesGrid) marcam `data-lenis-prevent`, que Lenis já reconhece sozinho:
-// não existe mais a busca manual por ancestral rolável que este arquivo
-// tinha antes.
+// Elemento com scroll próprio (o overlay de case em tela cheia de
+// CasesGrid) não fica de fora deste amortecimento: em vez de um
+// data-lenis-prevent excluindo-o, ele ganha a PRÓPRIA instância de Lenis,
+// presa nele em vez de na janela (ver ExpandedCase em CasesGrid.tsx). As
+// duas cooperam sozinhas, sem configuração extra: Lenis já resolve isso
+// internamente (o wheel que a instância do overlay consome não chega à
+// instância da página, via um sinalizador no próprio evento), então o
+// overlay rola com o mesmo amortecimento do resto do site, em vez de cair
+// pro scroll nativo só por morar num contêiner à parte.
 //
 // Desliga por completo (nem a instância chega a existir) em Modo Boring e
 // para quem pede menos movimento no sistema, voltando ao scroll cru do
