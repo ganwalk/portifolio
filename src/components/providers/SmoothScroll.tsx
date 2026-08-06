@@ -1,37 +1,49 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
+import Lenis from "lenis";
+import "lenis/dist/lenis.css";
 import { useBoringMode } from "@/contexts/BoringModeContext";
 
-// Ease-in sutil na rolagem da roda do mouse, para uma navegação mais premium.
+// Rolagem suave da página inteira, via Lenis.
 //
-// Intercepta o wheel e desloca o scroll de verdade (window.scrollTo) por
-// amortecimento com constante de tempo, o mesmo raciocínio da mola de
-// CasesGrid, só que aplicado à rolagem em si, não a uma animação por cima
-// dela. Continua sendo window.scrollY quem muda: useScroll (CasesGrid,
-// MoonPhase), o scroll do teclado, da barra e do toque continuam nativos e
-// sem mudança nenhuma, porque nenhum contêiner novo entra no lugar do
-// documento.
+// Roda de mouse, toque (deixado nativo, ver syncTouch abaixo) e barra de
+// rolagem convivem com o mesmo amortecimento por trás de um único motor,
+// testado em produção, em vez do rAF escrito à mão que cuidava só da roda.
+// A ideia continua a mesma que já regia CasesGrid e a versão anterior deste
+// arquivo: damping exponencial por constante de tempo (aqui, `lerp`), não
+// duração fixa nem overshoot.
 //
-// Ctrl/Cmd+wheel (zoom), gesto predominantemente horizontal e qualquer alvo
-// com scroll próprio (o overlay de case em CasesGrid, por exemplo) passam
-// direto, sem interceptação.
-const TIME_CONSTANT = 0.09;
-
-function isVerticallyScrollable(el: Element): boolean {
-  const style = getComputedStyle(el);
-  const scrolls = style.overflowY === "auto" || style.overflowY === "scroll";
-  return scrolls && el.scrollHeight > el.clientHeight;
-}
-
-function hasScrollableAncestor(node: EventTarget | null): boolean {
-  let el = node instanceof Element ? node : null;
-  while (el && el !== document.body) {
-    if (isVerticallyScrollable(el)) return true;
-    el = el.parentElement;
-  }
-  return false;
-}
+// Lenis roda POR CIMA do scroll de verdade (window.scrollTo, comportamento
+// "instant" por baixo, para não brigar com o scroll-behavior: smooth do
+// CSS), não troca o documento por um contêiner próprio: position sticky,
+// teclado, barra, leitor de tela e o "encontrar na página" continuam
+// exatamente como sempre foram. useScroll do Framer Motion (CasesGrid,
+// MoonPhase) e o listener nativo de scroll (SiteFrame, ModeTransitionOverlay)
+// não precisam saber que Lenis existe: todos leem window.scrollY, que
+// continua sendo a fonte de verdade.
+//
+// syncTouch fica desligado (padrão da biblioteca): o momentum nativo do
+// sistema em touch já é bom, e sincronizar com ele é o ponto mais instável
+// da biblioteca em iOS mais antigo. Só a roda do mouse recebe o
+// amortecimento extra, mesmo critério do arquivo anterior.
+//
+// Elemento com scroll próprio (o overlay de case em tela cheia de
+// CasesGrid) não fica de fora deste amortecimento: em vez de um
+// data-lenis-prevent excluindo-o, ele ganha a PRÓPRIA instância de Lenis,
+// presa nele em vez de na janela (ver ExpandedCase em CasesGrid.tsx). As
+// duas cooperam sozinhas, sem configuração extra: Lenis já resolve isso
+// internamente (o wheel que a instância do overlay consome não chega à
+// instância da página, via um sinalizador no próprio evento), então o
+// overlay rola com o mesmo amortecimento do resto do site, em vez de cair
+// pro scroll nativo só por morar num contêiner à parte.
+//
+// Desliga por completo (nem a instância chega a existir) em Modo Boring e
+// para quem pede menos movimento no sistema, voltando ao scroll cru do
+// navegador nos dois casos: Lenis também respeita prefers-reduced-motion
+// sozinho, mas aqui o corte é total, coerente com o resto do Modo Boring,
+// que mata toda interceptação, não só a suaviza.
+const LERP = 0.11;
 
 export function SmoothScroll() {
   const { isBoringMode } = useBoringMode();
@@ -47,69 +59,21 @@ export function SmoothScroll() {
 
   const disabled = isBoringMode || prefersReduced;
 
-  const targetRef = useRef(0);
-  const animatingRef = useRef(false);
-  const rafRef = useRef<number | null>(null);
-
   useEffect(() => {
     if (disabled) return;
 
-    // behavior: "instant" é obrigatório aqui: o html tem scroll-behavior:
-    // smooth (globals.css), que faria cada chamada abaixo abrir a própria
-    // animação suave do navegador, competindo com esta interpolação a cada
-    // quadro e produzindo uma posição instável, em vez de um salto exato.
-    let lastTime = performance.now();
+    const lenis = new Lenis({ lerp: LERP, syncTouch: false });
 
-    const step = () => {
-      const now = performance.now();
-      const dt = Math.min((now - lastTime) / 1000, 0.1);
-      lastTime = now;
-
-      const current = window.scrollY;
-      const diff = targetRef.current - current;
-      if (Math.abs(diff) < 0.5) {
-        window.scrollTo({ top: targetRef.current, behavior: "instant" });
-        animatingRef.current = false;
-        return;
-      }
-
-      const factor = 1 - Math.exp(-dt / TIME_CONSTANT);
-      window.scrollTo({ top: current + diff * factor, behavior: "instant" });
-      rafRef.current = requestAnimationFrame(step);
+    let rafId: number;
+    const raf = (time: number) => {
+      lenis.raf(time);
+      rafId = requestAnimationFrame(raf);
     };
+    rafId = requestAnimationFrame(raf);
 
-    const onWheel = (event: WheelEvent) => {
-      if (event.ctrlKey || Math.abs(event.deltaX) > Math.abs(event.deltaY)) return;
-      if (hasScrollableAncestor(event.target)) return;
-      if (getComputedStyle(document.documentElement).overflowY === "hidden") return;
-
-      const max = document.documentElement.scrollHeight - window.innerHeight;
-      if (max <= 0) return;
-
-      const lineHeight = 16;
-      const delta =
-        event.deltaMode === 1
-          ? event.deltaY * lineHeight
-          : event.deltaMode === 2
-            ? event.deltaY * window.innerHeight
-            : event.deltaY;
-
-      if (!animatingRef.current) targetRef.current = window.scrollY;
-      targetRef.current = Math.min(Math.max(targetRef.current + delta, 0), max);
-      event.preventDefault();
-
-      if (!animatingRef.current) {
-        animatingRef.current = true;
-        lastTime = performance.now();
-        rafRef.current = requestAnimationFrame(step);
-      }
-    };
-
-    window.addEventListener("wheel", onWheel, { passive: false });
     return () => {
-      window.removeEventListener("wheel", onWheel);
-      if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
-      animatingRef.current = false;
+      cancelAnimationFrame(rafId);
+      lenis.destroy();
     };
   }, [disabled]);
 

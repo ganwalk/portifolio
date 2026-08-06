@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Lenis from "lenis";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   AnimatePresence,
@@ -11,6 +12,7 @@ import {
   useScroll,
   useSpring,
   useTransform,
+  useVelocity,
   type MotionValue,
 } from "framer-motion";
 import { CaseMetrics } from "@/components/ui/CaseMetrics";
@@ -88,17 +90,20 @@ import type { Dictionary } from "@/i18n/dictionaries";
 //
 // A rolagem é amortecida, não literal: o progresso bruto do scroll passa por
 // uma mola (`useSpring` em `CasesGrid`) e é o valor amortecido que rege TODA
-// transformação da seção. É o mesmo lerp que bibliotecas de scroll suave
-// (Lenis e companhia) aplicam, com uma diferença que importa aqui: elas
-// sequestram a rolagem da página inteira, trocando o scroll nativo por um
-// contêiner que anda sozinho, e junto com ele vão o comportamento da barra,
-// do teclado, do toque e do "encontrar na página". Aqui a página continua
-// rolando nativamente e a mola vive só do lado da animação, então o
-// amortecimento é da CENA, não da rolagem: quem usa o site nunca perde o
-// controle direto do scroll, e mesmo assim a pilha desliza com inércia em
-// vez de saltar a cada tique da roda. Superamortecida de propósito (sem
-// overshoot): pilha que passa do ponto e volta enjoa. Quem pede menos
-// movimento no sistema recebe o progresso bruto, sem mola.
+// transformação da seção, o mesmo raciocínio de lerp que Lenis (ver
+// SmoothScroll.tsx) já aplica à rolagem em si, mas aqui do lado da CENA: a
+// mola vive na animação, não na posição do scroll, então o amortecimento da
+// pilha soma ao de Lenis em vez de competir com ele. Superamortecida de
+// propósito (sem overshoot): pilha que passa do ponto e volta enjoa. Quem
+// pede menos movimento no sistema recebe o progresso bruto, sem mola.
+//
+// A pilha também reage à VELOCIDADE da rolagem, não só à posição: uma leve
+// inclinação (`skewY`, ver `stackSkew` em `CasesGrid`) cresce com a rapidez
+// do gesto e volta a zero assim que ele desacelera, o peso físico de um
+// baralho reagindo à mão. Contida a menos de 1,5 grau, de propósito: é
+// textura de movimento, não ornamento, e fica de fora dos elementos regidos
+// pelo cursor (selo, pontos de posição), cuja matemática usa a posição bruta
+// do mouse e descasaria do cursor de verdade se herdasse a inclinação.
 //
 // O que rege a LÓGICA (qual fatia está ativa) continua sendo o progresso
 // bruto: a mola atrasa uns décimos, e um índice ativo atrasado tornaria o
@@ -584,8 +589,39 @@ function ExpandedCase({
     };
   }, [onClose]);
 
+  // O overlay tem scroll próprio (a página de verdade fica travada acima),
+  // mas continua pensado como parte do MESMO scroll da página, não como uma
+  // ilha isolada dele: em vez de um data-lenis-prevent tirando este
+  // contêiner de cena, ele ganha a própria instância de Lenis, presa nele em
+  // vez de na janela. As duas cooperam sozinhas (Lenis já resolve isso: o
+  // wheel que a instância daqui consome não chega à instância da página,
+  // ver SmoothScroll.tsx), então o overlay rola com o mesmo amortecimento do
+  // resto do site, em vez de cair pro scroll nativo só porque mora num
+  // contêiner à parte.
+  const scrollerRef = useRef<HTMLDivElement>(null);
+  const reduceMotionScroller = useReducedMotion();
+
+  useEffect(() => {
+    const el = scrollerRef.current;
+    if (!el || reduceMotionScroller) return;
+
+    const lenis = new Lenis({ wrapper: el, content: el, lerp: 0.11, syncTouch: false });
+    let rafId: number;
+    const raf = (time: number) => {
+      lenis.raf(time);
+      rafId = requestAnimationFrame(raf);
+    };
+    rafId = requestAnimationFrame(raf);
+
+    return () => {
+      cancelAnimationFrame(rafId);
+      lenis.destroy();
+    };
+  }, [reduceMotionScroller]);
+
   return (
     <motion.div
+      ref={scrollerRef}
       initial={{
         x: origin.x,
         y: origin.y,
@@ -729,6 +765,27 @@ export function CasesGrid({
   // Sem paralaxe pra quem pediu menos movimento no sistema.
   const parallax = reduceMotion ? 0 : 6;
 
+  // Leve inclinação da pilha durante rolagem rápida, o "peso" físico de um
+  // baralho reagindo à velocidade da mão, não só à posição do scroll. Some
+  // assim que a rolagem desacelera (a mesma mola volta o valor a zero) e não
+  // existe pra quem pediu menos movimento no sistema. A amplitude é contida
+  // de propósito: menos de 1,5 grau, o suficiente pra sentir sem virar
+  // ornamento, e só a pilha inclina, não os elementos regidos pelo cursor
+  // (selo e pontos de posição, logo abaixo), que ficam de fora de propósito:
+  // a matemática deles usa a posição bruta do mouse, e inclinar o ancestral
+  // deles abriria um descompasso visível entre o selo e o cursor de verdade.
+  const rawScrollY = useScroll().scrollY;
+  const scrollVelocity = useVelocity(rawScrollY);
+  const smoothVelocity = useSpring(scrollVelocity, {
+    stiffness: 300,
+    damping: 40,
+    mass: 0.4,
+  });
+  const stackSkew = useTransform(smoothVelocity, [-2200, 0, 2200], [1.4, 0, -1.4], {
+    clamp: true,
+  });
+  const skewY = reduceMotion ? 0 : stackSkew;
+
   // A LÓGICA continua no scroll cru: qual fatia é clicável e recebe foco de
   // teclado não pode chegar uns décimos atrasada da mão de quem rola.
   useMotionValueEvent(scrollYProgress, "change", (v) => {
@@ -799,23 +856,25 @@ export function CasesGrid({
           onMouseMove={handleStickyMouseMove}
           onMouseLeave={handleStickyMouseLeave}
         >
-          {slides.map((slide, index) => (
-            <SlidePanel
-              key={slide.map(({ caseStudy }) => caseStudy.slug).join("+")}
-              slide={slide}
-              totalCases={cases.length}
-              locale={locale}
-              dict={dict}
-              index={index}
-              windows={windows}
-              progress={progress}
-              parallax={parallax}
-              isActive={index === activeIndex}
-              isNearActive={Math.abs(index - activeIndex) <= 1}
-              hoveredSlug={hoveredSlug}
-              onExpand={(caseStudy, rect) => setExpanding({ caseStudy, rect })}
-            />
-          ))}
+          <motion.div style={{ skewY }} className="absolute inset-0">
+            {slides.map((slide, index) => (
+              <SlidePanel
+                key={slide.map(({ caseStudy }) => caseStudy.slug).join("+")}
+                slide={slide}
+                totalCases={cases.length}
+                locale={locale}
+                dict={dict}
+                index={index}
+                windows={windows}
+                progress={progress}
+                parallax={parallax}
+                isActive={index === activeIndex}
+                isNearActive={Math.abs(index - activeIndex) <= 1}
+                hoveredSlug={hoveredSlug}
+                onExpand={(caseStudy, rect) => setExpanding({ caseStudy, rect })}
+              />
+            ))}
+          </motion.div>
 
           {/* A contagem já mora em cada card ("03 / 06", o índice do case na
               lista inteira), então o rodapé não repete outra em nível de

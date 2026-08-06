@@ -32,6 +32,7 @@ que também serve de currículo imprimível.
 - **TypeScript** em tudo, conteúdo incluído.
 - **Tailwind CSS 4** com tokens declarados em `@theme inline` sobre variáveis CSS.
 - **Framer Motion** para animação, sempre atrás do interruptor do Modo Boring.
+- **Lenis** para a rolagem suave da página inteira (ver Rolagem, abaixo).
 - **next themes** para claro e escuro.
 - **Fontsource** para as fontes, servidas do próprio domínio (sem Google Fonts,
   sem requisição a terceiro, melhor privacidade e melhor tempo de carregamento).
@@ -541,27 +542,61 @@ utilitária.
 
 ## Rolagem
 
-`SmoothScroll` (`src/components/providers/SmoothScroll.tsx`) intercepta a roda
-do mouse e desloca o scroll de verdade com amortecimento por constante de
-tempo (~0,09s), o mesmo raciocínio da mola de `CasesGrid` (acima), agora
-aplicado à rolagem em si, para dar um ease-in sutil à navegação inteira.
+`SmoothScroll` (`src/components/providers/SmoothScroll.tsx`) usa
+[Lenis](https://github.com/darkroomengineering/lenis) para amortecer a
+rolagem da página inteira (`lerp: 0.11`, o mesmo raciocínio de constante de
+tempo que já regia a versão anterior, escrita à mão, e que a mola de
+`CasesGrid`, acima, aplica à cena). Substituiu um `requestAnimationFrame`
+manual que cuidava só da roda do mouse: mesma ideia de amortecimento
+exponencial, agora numa biblioteca dedicada, testada em produção, com
+suporte nativo a elemento com scroll próprio e a `prefers-reduced-motion`.
 
-Isto revisita, só para a roda do mouse, a escolha registrada ali contra
-bibliotecas de scroll suave: aqui não existe contêiner novo nem sequestro da
-rolagem. `window.scrollTo` continua sendo quem move `window.scrollY`, então
-tudo que já lia a rolagem nativa (o `useScroll` do `CasesGrid` e do
-`MoonPhase`, o scroll do teclado, da barra e do toque) continua funcionando
-sem mudança nenhuma: só o gesto de roda do mouse passa pelo amortecimento
-antes de chegar lá.
+Lenis roda por cima do scroll de verdade, não troca o documento por um
+contêiner que anda sozinho: `window.scrollTo` (com `behavior: "instant"` por
+baixo, para não brigar com o `scroll-behavior: smooth` do CSS) continua
+sendo quem move `window.scrollY`. Tudo que já lia a rolagem nativa (`useScroll`
+do `CasesGrid` e do `MoonPhase`, o listener de scroll do `SiteFrame`, o
+`ModeTransitionOverlay`) segue funcionando sem mudança nenhuma: sticky, âncoras,
+teclado, barra e o "encontrar na página" continuam do jeito que sempre foram.
+O toque fica de fora do amortecimento de propósito (`syncTouch: false`, o
+padrão da biblioteca): o momentum do próprio sistema em touch já é bom, e
+sincronizar com ele é o ponto mais instável da biblioteca em iOS mais antigo.
 
-Ctrl/Cmd mais roda (zoom do navegador), gesto predominantemente horizontal e
-qualquer alvo com scroll próprio (o overlay de case em tela cheia da
-`CasesGrid`, por exemplo, ou qualquer contêiner futuro com `overflow-y`)
-passam direto, sem interceptação: a busca por um ancestral rolável entre o
-alvo do evento e o body decide isso em tempo real, sem lista de seletores
-para manter. Desliga por completo em Modo Boring e para quem pede menos
-movimento no sistema (`prefers-reduced-motion: reduce`), voltando ao scroll
-cru do navegador nos dois casos.
+**Elemento com scroll próprio não fica de fora, ganha a própria instância.**
+O overlay de case em tela cheia de `CasesGrid` (`ExpandedCase`) trava o
+scroll da página (`document.documentElement.style.overflow = "hidden"`)
+enquanto está aberto, mas continua pensado como parte do MESMO scroll da
+página: em vez de um `data-lenis-prevent` excluindo-o e deixando-o cair pro
+scroll nativo, ele sobe sua PRÓPRIA instância de Lenis, presa nele
+(`wrapper`/`content` apontando pro próprio elemento) em vez de na janela. As
+duas cooperam sozinhas, sem configuração extra: Lenis já resolve isso
+internamente (o wheel que a instância do overlay consome sinaliza o próprio
+evento, e a instância da página, ao receber o mesmo evento borbulhado,
+reconhece o sinal e não processa de novo), então o overlay rola com o mesmo
+amortecimento do resto do site, não com um scroll nativo destoante.
+
+Desliga por completo (a instância nem chega a existir) em Modo Boring e para
+quem pede menos movimento no sistema, voltando ao scroll cru do navegador
+nos dois casos, em ambas as instâncias (página e overlay).
+
+**A pilha de `CasesGrid` reage à velocidade da rolagem, não só à posição.**
+Uma leve inclinação (`skewY`, ver `stackSkew`) cresce com a rapidez do gesto
+e volta a zero assim que ele desacelera (`useVelocity` sobre o scroll bruto,
+amortecido por outra mola), o peso físico de um baralho reagindo à mão em vez
+de deslizar rígido. Contida a menos de 1,5 grau, de propósito: é textura de
+movimento, não ornamento, e fica de fora dos elementos regidos pelo cursor
+dentro da mesma seção (o selo "ver caso", os pontos de posição), cuja
+matemática usa a posição bruta do mouse e descasaria do cursor de verdade se
+herdasse a inclinação do ancestral. Some para quem pede menos movimento no
+sistema.
+
+**`ScrollProgress`** (`src/components/ui/ScrollProgress.tsx`) é uma régua de
+2px presa ao topo da viewport, acima do cabeçalho, com a largura ligada ao
+progresso de rolagem da página inteira (`useScroll` sem `target`, mais uma
+mola leve só pra tirar o serrilhado de um salto rápido, nunca pra atrasar a
+leitura). Reforça, em qualquer página, a mesma lógica de "rolar é a
+navegação" que o rodapé de `CasesGrid` já escreve por extenso. Some no Modo
+Boring e na impressão, mesmo critério do resto do cabeçalho.
 
 ## SEO
 
