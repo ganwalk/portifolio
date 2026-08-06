@@ -539,6 +539,30 @@ gradiente sutil para o compressor estragar, mas o arquivo varia quase o dobro.
 No Modo Boring nada disso existe: sem lua, sem menu, sem vídeo, só a página
 utilitária.
 
+## Rolagem
+
+`SmoothScroll` (`src/components/providers/SmoothScroll.tsx`) intercepta a roda
+do mouse e desloca o scroll de verdade com amortecimento por constante de
+tempo (~0,09s), o mesmo raciocínio da mola de `CasesGrid` (acima), agora
+aplicado à rolagem em si, para dar um ease-in sutil à navegação inteira.
+
+Isto revisita, só para a roda do mouse, a escolha registrada ali contra
+bibliotecas de scroll suave: aqui não existe contêiner novo nem sequestro da
+rolagem. `window.scrollTo` continua sendo quem move `window.scrollY`, então
+tudo que já lia a rolagem nativa (o `useScroll` do `CasesGrid` e do
+`MoonPhase`, o scroll do teclado, da barra e do toque) continua funcionando
+sem mudança nenhuma: só o gesto de roda do mouse passa pelo amortecimento
+antes de chegar lá.
+
+Ctrl/Cmd mais roda (zoom do navegador), gesto predominantemente horizontal e
+qualquer alvo com scroll próprio (o overlay de case em tela cheia da
+`CasesGrid`, por exemplo, ou qualquer contêiner futuro com `overflow-y`)
+passam direto, sem interceptação: a busca por um ancestral rolável entre o
+alvo do evento e o body decide isso em tempo real, sem lista de seletores
+para manter. Desliga por completo em Modo Boring e para quem pede menos
+movimento no sistema (`prefers-reduced-motion: reduce`), voltando ao scroll
+cru do navegador nos dois casos.
+
 ## SEO
 
 `src/lib/site.ts` exporta `siteUrl`, a URL pública completa (domínio +
