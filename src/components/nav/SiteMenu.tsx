@@ -12,24 +12,15 @@ import type { Locale } from "@/i18n/config";
 import type { Dictionary } from "@/i18n/dictionaries";
 
 // Navegação lúdica: botão no cabeçalho abre um overlay de tela cheia com os
-// links em tipografia gigante. Passar o mouse em cada link revela uma
-// pré-visualização dentro das próprias letras (a imagem preenche o texto via
-// background-clip: text, não flutua ao lado): duas cópias do mesmo rótulo
-// empilhadas, a de baixo sempre visível, a de cima com a imagem recortada
-// pela forma do texto, ganhando opacidade no hover. Os rótulos vão na Whyte
+// links em tipografia gigante. Passar o mouse em cada link varre uma barra
+// sólida por trás da linha inteira (bg-foreground, o mesmo preto/branco do
+// resto do site, sem cor nova), invertendo rótulo e índice para a cor do
+// fundo por cima dela (mesma lógica de hover já usada no Modo Boring, ver
+// BoringToggle: bg-foreground + text-background), e revela ao lado uma frase
+// curta contando do que aquela seção trata (dict.nav.menuDescriptions, só no
+// lg: onde sobra largura ao lado do rótulo gigante). Os rótulos vão na Whyte
 // Inktrap (.type-inktrap), a mesma dos outros destaques do site. No Modo
 // Boring o menu não existe: a página utilitária é uma coluna só.
-
-// Previews placeholder por seção. Sugestão de mídia real: um recorte de cada
-// destino (colagem dos cases, foto do Armando no Sobre, textura de papel no
-// Contato). Trocar é só apontar preview para a imagem final.
-const PREVIEWS: Record<string, string> = {
-  work: "https://images.pexels.com/videos/3129671/free-video-3129671.jpg?auto=compress&w=900",
-  playground:
-    "https://images.pexels.com/photos/164938/pexels-photo-164938.jpeg?auto=compress&cs=tinysrgb&w=900",
-  about: "https://picsum.photos/seed/sobre-armando/900/675",
-  contact: "https://picsum.photos/seed/contato-armando/900/675",
-};
 
 const listVariants = {
   open: { transition: { staggerChildren: 0.07, delayChildren: 0.15 } },
@@ -71,10 +62,11 @@ export function SiteMenu({
 
   if (isBoringMode) return null;
 
-  const items = [
+  type MenuItemId = keyof Dictionary["nav"]["menuDescriptions"];
+  const items: { id: MenuItemId; label: string }[] = [
     { id: "work", label: dict.nav.work },
-    { id: "playground", label: dict.playground.title },
     { id: "about", label: dict.nav.about },
+    { id: "playground", label: dict.playground.title },
     { id: "contact", label: dict.nav.contact },
   ];
 
@@ -128,35 +120,40 @@ export function SiteMenu({
                     <motion.div variants={itemVariants}>
                       <Link
                         href={`/${locale}/#${item.id}`}
-                        className="group flex items-baseline gap-4 py-1"
+                        className="group relative flex items-center gap-4 py-1"
                         onClick={() => toggle(false)}
                       >
-                        <span className="type-mono text-muted">
+                        {/* Barra sólida atrás da linha inteira, escondida
+                            (scale-x-0) em repouso e varrendo da esquerda pra
+                            direita no hover: bg-foreground, o mesmo
+                            preto/branco do resto do site, nenhuma cor nova. */}
+                        <span
+                          aria-hidden
+                          className="absolute inset-0 origin-left scale-x-0 bg-foreground transition-transform duration-500 ease-out group-hover:scale-x-100"
+                        />
+                        <span className="type-mono relative z-10 text-muted transition-colors duration-500 ease-out group-hover:text-background">
                           0{index + 1}
                         </span>
-                        {/* Duas cópias do rótulo empilhadas: a de baixo é o
-                            texto normal, a de cima tem a preview da seção
-                            recortada pela forma das próprias letras
-                            (background-clip: text), invisível em repouso e
-                            revelada no hover. A imagem "mora dentro" do
-                            texto em vez de flutuar ao lado dele. */}
                         {/* 11vw no mobile, e não os 13vw do desenho antigo: a
                             Whyte Black é cerca de 10% mais larga que a fonte
                             de manchete que estava aqui, e o rótulo mais longo
-                            ("Fora do expediente" em português) passava da
-                            borda direita numa tela estreita. Do sm pra cima
-                            sobra espaço de sobra e o corpo continua o mesmo. */}
-                        <span className="type-display type-inktrap relative inline-block text-[11vw] leading-none sm:text-[7vw]">
-                          <span className="transition-opacity duration-500 ease-out group-hover:opacity-10">
-                            {item.label}
-                          </span>
-                          <span
-                            aria-hidden
-                            className="pointer-events-none absolute inset-0 bg-cover bg-center bg-clip-text text-transparent opacity-0 transition-opacity duration-500 ease-out group-hover:opacity-100"
-                            style={{ backgroundImage: `url(${PREVIEWS[item.id]})` }}
-                          >
-                            {item.label}
-                          </span>
+                            de então passava da borda direita numa tela
+                            estreita. Do sm pra cima sobra espaço de sobra e o
+                            corpo continua o mesmo. */}
+                        <span className="type-display type-inktrap relative z-10 text-[11vw] leading-none text-foreground transition-colors duration-500 ease-out group-hover:text-background sm:text-[7vw]">
+                          {item.label}
+                        </span>
+                        {/* Frase curta contando do que a seção trata, revelada
+                            junto da barra, na cor do fundo por cima dela.
+                            Só no lg:, onde sobra largura ao lado do rótulo
+                            gigante; em telas estreitas o rótulo já ocupa a
+                            linha inteira. Sem .type-mono aqui de propósito
+                            (mesmo critério do tooltip em BoringToggle): a
+                            classe força caixa alta, e uma frase inteira em
+                            versal lê pior que em caixa normal. Fonte mono só
+                            no family. */}
+                        <span className="relative z-10 ml-auto hidden max-w-xs self-center text-right font-mono text-xs tracking-wide text-background opacity-0 transition-opacity duration-500 ease-out group-hover:opacity-100 lg:block">
+                          {dict.nav.menuDescriptions[item.id]}
                         </span>
                       </Link>
                     </motion.div>

@@ -12,6 +12,12 @@ export const zh: Dictionary = {
     menu: "菜单",
     close: "关闭",
     skipToContent: "跳到主要内容",
+    menuDescriptions: {
+      work: "解决真实问题的界面设计，从银行业到音乐产业。",
+      playground: "插画、动画和音乐制作，滋养创作的实验场。",
+      about: "音乐、字体排印、拼贴和技术，样样都沾一点，随时随地。",
+      contact: "欢迎聊项目、合作或任何好点子。",
+    },
   },
   controls: {
     boringOn: ["直奔主题", "查看我的简历"],
@@ -56,7 +62,7 @@ export const zh: Dictionary = {
     fullCase: "查看完整页面",
   },
   playground: {
-    title: "业余时间",
+    title: "花絮",
     subtitle: "插画、动画和音乐制作，滋养着我的创作的实验。",
   },
   about: {
