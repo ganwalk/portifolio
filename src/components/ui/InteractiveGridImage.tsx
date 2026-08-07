@@ -22,12 +22,16 @@ const EASE = 0.1; // suavização por quadro
 interface InteractiveGridImageProps {
   src: string;
   alt: string;
+  /** Escrita em cima de cada quadro, uma palavra por linha, alinhada à
+   *  direita (mesmo alinhamento que a numeração tinha antes dela). */
+  words: readonly string[];
   className?: string;
 }
 
 export function InteractiveGridImage({
   src,
   alt,
+  words,
   className = "",
 }: InteractiveGridImageProps) {
   const { isBoringMode } = useBoringMode();
@@ -145,7 +149,6 @@ export function InteractiveGridImage({
       const srcW = cropW / COLS;
       const srcH = cropH / ROWS;
 
-      let n = 1;
       for (let r = 0; r < ROWS; r++) {
         for (let c = 0; c < COLS; c++) {
           const dx = cx[c] + GAP / 2;
@@ -165,17 +168,30 @@ export function InteractiveGridImage({
             dh,
           );
 
+          // A mesma frase (`words`) escrita em todo quadro, uma palavra por
+          // linha, alinhada à direita: cada quadro é um carimbo repetido do
+          // convite, não uma numeração distinta. O ajuste ao tamanho segue o
+          // mesmo raciocínio de antes (fonte proporcional ao lado menor do
+          // quadro), mas agora medindo a largura de verdade de cada palavra
+          // (measureText), já que "comigo!" é bem mais largo que um número
+          // de um ou dois dígitos, e a altura precisa caber TODAS as linhas,
+          // não uma só.
           const fs = Math.max(8, Math.min(dw, dh) * 0.16);
-          const label = String(n);
           const pad = fs * 0.4;
-          if (fs * 1.6 < dw - pad * 2 && fs * 1.6 < dh - pad * 2) {
+          const lineHeight = fs * 1.15;
+          ctx!.font = `600 ${fs}px "Helvetica Neue", Arial, sans-serif`;
+          const widestWord = Math.max(
+            ...words.map((word) => ctx!.measureText(word).width),
+          );
+          const blockHeight = lineHeight * words.length;
+          if (widestWord < dw - pad * 2 && blockHeight < dh - pad * 2) {
             ctx!.fillStyle = "#ffffff";
             ctx!.textAlign = "right";
             ctx!.textBaseline = "top";
-            ctx!.font = `600 ${fs}px "Helvetica Neue", Arial, sans-serif`;
-            ctx!.fillText(label, dx + dw - pad, dy + pad);
+            words.forEach((word, i) => {
+              ctx!.fillText(word, dx + dw - pad, dy + pad + i * lineHeight);
+            });
           }
-          n++;
         }
       }
     }
@@ -222,7 +238,7 @@ export function InteractiveGridImage({
       canvas.removeEventListener("pointerleave", clearPointer);
       canvas.removeEventListener("pointercancel", clearPointer);
     };
-  }, [src, isBoringMode]);
+  }, [src, words, isBoringMode]);
 
   if (isBoringMode) return null;
 
