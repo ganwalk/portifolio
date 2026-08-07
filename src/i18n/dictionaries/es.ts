@@ -83,6 +83,7 @@ export const es: Dictionary = {
     emailLabel: "Correo",
     copied: "¡Copiado!",
     imageAlt: "Imagen interactiva, en cuadrícula, que reacciona al movimiento del mouse",
+    gridWords: ["¡Habla", "conmigo!"],
   },
   boring: {
     experienceTitle: "Experiencia",

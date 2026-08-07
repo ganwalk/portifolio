@@ -88,6 +88,7 @@ export function Contact({ dict }: { dict: Dictionary }) {
         <InteractiveGridImage
           src={CONTACT_IMAGE}
           alt={dict.contact.imageAlt}
+          words={dict.contact.gridWords}
           className="h-full w-full border-t border-line sm:border-t-0 sm:border-l"
         />
       </Reveal>

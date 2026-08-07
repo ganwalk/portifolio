@@ -94,6 +94,10 @@ export const pt = {
     emailLabel: "Email",
     copied: "Copiado!",
     imageAlt: "Imagem interativa, em grade, que reage ao movimento do mouse",
+    // Escrita em cada quadro da grade interativa, uma palavra por linha,
+    // alinhada à direita (ver InteractiveGridImage). Mesmo padrão de
+    // hero.subtitleWords: array pronto, cada idioma decide a própria quebra.
+    gridWords: ["Fale", "comigo!"],
   },
   boring: {
     experienceTitle: "Experiência",

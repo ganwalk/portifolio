@@ -82,6 +82,7 @@ export const en: Dictionary = {
     emailLabel: "Email",
     copied: "Copied!",
     imageAlt: "Interactive grid image that reacts to mouse movement",
+    gridWords: ["Talk", "to me!"],
   },
   boring: {
     experienceTitle: "Experience",
