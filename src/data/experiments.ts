@@ -1,6 +1,6 @@
 import type { Experiment } from "./types";
 
-// Bloco compacto "Fora do expediente" na home, 3 a 4 experimentos selecionados.
+// Bloco compacto "Extras" na home, 3 a 4 experimentos selecionados.
 // Mídias placeholder (Pexels e Picsum) até as reais chegarem: colagens
 // digitalizadas, gravações de tela dos estudos de movimento e trechos de
 // produção no DAW. A troca é substituir o bloco media de cada item.

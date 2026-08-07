@@ -52,7 +52,7 @@ src/
     controls/ControlBar.tsx  Modo Boring, tema e idioma
     layout/SiteFrame.tsx     cabeçalho fixo, rodapé, atalho de acessibilidade
     providers/Providers.tsx  ordem dos contextos
-    sections/                Hero, CasesGrid, Playground, About, Contact
+    sections/                Hero, CasesGrid, About, Playground, Contact
     ui/Marquee.tsx           letreiro contínuo
     views/HomeView.tsx       o interruptor entre as duas experiências
   contexts/
@@ -60,7 +60,7 @@ src/
   data/
     cases.ts                 cases com métricas e textos nos três idiomas
     profile.ts               dados de contato, habilidades, experiência
-    experiments.ts           bloco Fora do expediente
+    experiments.ts           bloco Extras
     types.ts                 contratos de conteúdo
   fonts/
     whyte-inktrap/            fonte licenciada, peso Black, destaques do site

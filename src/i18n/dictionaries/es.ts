@@ -13,6 +13,14 @@ export const es: Dictionary = {
     menu: "Menú",
     close: "Cerrar",
     skipToContent: "Saltar al contenido",
+    menuDescriptions: {
+      work: "Interfaces que resuelven problemas reales, del banking a la música.",
+      playground:
+        "Ilustración, animación y producción musical, los experimentos que alimentan el trabajo.",
+      about:
+        "Música, tipografía, collage y tecnología, un poco de todo, todo el tiempo.",
+      contact: "Abierto a proyectos, colaboraciones y buenas ideas.",
+    },
   },
   controls: {
     boringOn: ["Ve al grano", "Mira mi currículum"],
@@ -55,7 +63,7 @@ export const es: Dictionary = {
     fullCase: "Ver página completa",
   },
   playground: {
-    title: "Fuera de horario",
+    title: "Extras",
     subtitle:
       "Ilustración, animación y producción musical, los experimentos que alimentan el trabajo.",
   },

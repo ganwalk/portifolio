@@ -15,6 +15,16 @@ export const pt = {
     menu: "Menu",
     close: "Fechar",
     skipToContent: "Pular para o conteúdo",
+    // Uma frase curta por item do menu, revelada ao lado do rótulo em
+    // destaque (ver SiteMenu.tsx). Chaves batem com os `id` de cada item.
+    menuDescriptions: {
+      work: "Interfaces que resolvem problema de verdade, do banking à música.",
+      playground:
+        "Ilustração, animação e produção musical, os experimentos que alimentam o trabalho.",
+      about:
+        "Música, tipografia, colagem e tecnologia, um pouco de tudo, o tempo todo.",
+      contact: "Aberto a projetos, colaborações e boas ideias.",
+    },
   },
   controls: {
     // Duas maneiras de descrever a mesma ação (o Modo Boring também é o
@@ -64,7 +74,7 @@ export const pt = {
     fullCase: "Ver página completa",
   },
   playground: {
-    title: "Fora do expediente",
+    title: "Extras",
     subtitle:
       "Ilustração, animação e produção musical, os experimentos que alimentam o trabalho.",
   },

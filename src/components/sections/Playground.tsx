@@ -4,7 +4,7 @@ import { experiments } from "@/data/experiments";
 import type { Locale } from "@/i18n/config";
 import type { Dictionary } from "@/i18n/dictionaries";
 
-// Bloco "Fora do expediente": vitrines visuais das habilidades paralelas
+// Bloco "Extras": vitrines visuais das habilidades paralelas
 // (colagem, animação, produção musical). A mídia carrega a seção; o texto é
 // só a legenda de galeria. Cartões com peso de papel que sobem em cascata.
 
