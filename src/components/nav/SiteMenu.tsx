@@ -116,53 +116,64 @@ export function SiteMenu({
                 variants={listVariants}
               >
                 {items.map((item, index) => (
-                  <div key={item.id} className="overflow-hidden">
-                    <motion.div variants={itemVariants}>
-                      <Link
-                        href={`/${locale}/#${item.id}`}
-                        className="group relative flex items-center gap-4 py-1"
-                        onClick={() => toggle(false)}
-                      >
-                        {/* Barra sólida atrás da linha inteira, escondida
-                            (scale-x-0) em repouso e varrendo da esquerda pra
-                            direita no hover: bg-foreground, o mesmo
-                            preto/branco do resto do site, nenhuma cor nova.
-                            Sangra até a borda real da página (-left/-right
-                            no exato valor do padding-inline de .gutter em
-                            cada faixa, ver globals.css), não só até a borda
-                            do conteúdo: o rótulo já mora dentro do gutter, e
-                            inset-0 sozinho pararia a barra na mesma margem
-                            lateral do texto, não na borda da tela. */}
-                        <span
-                          aria-hidden
-                          className="absolute -left-6 -right-6 inset-y-0 origin-left scale-x-0 bg-foreground transition-transform duration-500 ease-out group-hover:scale-x-100 sm:-left-12 sm:-right-12 xl:-left-20 xl:-right-20"
-                        />
-                        <span className="type-mono relative z-10 text-muted transition-colors duration-500 ease-out group-hover:text-background">
-                          0{index + 1}
-                        </span>
-                        {/* 11vw no mobile, e não os 13vw do desenho antigo: a
-                            Whyte Black é cerca de 10% mais larga que a fonte
-                            de manchete que estava aqui, e o rótulo mais longo
-                            de então passava da borda direita numa tela
-                            estreita. Do sm pra cima sobra espaço de sobra e o
-                            corpo continua o mesmo. */}
-                        <span className="type-display type-inktrap relative z-10 text-[11vw] leading-none text-foreground transition-colors duration-500 ease-out group-hover:text-background sm:text-[7vw]">
-                          {item.label}
-                        </span>
-                        {/* Frase curta contando do que a seção trata, revelada
-                            junto da barra, na cor do fundo por cima dela.
-                            Só no lg:, onde sobra largura ao lado do rótulo
-                            gigante; em telas estreitas o rótulo já ocupa a
-                            linha inteira. Sem .type-mono aqui de propósito
-                            (mesmo critério do tooltip em BoringToggle): a
-                            classe força caixa alta, e uma frase inteira em
-                            versal lê pior que em caixa normal. Fonte mono só
-                            no family. */}
-                        <span className="relative z-10 ml-auto hidden max-w-xs self-center text-right font-mono text-xs tracking-wide text-background opacity-0 transition-opacity duration-500 ease-out group-hover:opacity-100 lg:block">
-                          {dict.nav.menuDescriptions[item.id]}
-                        </span>
-                      </Link>
-                    </motion.div>
+                  // O recorte vertical (overflow-hidden) que mascara a
+                  // entrada do item (itemVariants, y: "60%" → 0) precisa
+                  // ficar só ao redor do TEXTO: cortar os dois eixos também
+                  // prendia a barra de hover na largura do conteúdo, e não
+                  // dá pra cortar só um eixo com overflow-x/overflow-y
+                  // separados (por especificação, quando um eixo vira algo
+                  // diferente de visible, o outro é recomputado pra auto,
+                  // que ainda corta). Por isso a barra sai do overflow-hidden
+                  // por completo: vira irmã dele, e o próprio .group sobe pra
+                  // este div de fora, sem afetar o hover (o navegador conta
+                  // como "sobre .group" qualquer descendente, inclusive o
+                  // link dentro do recorte).
+                  <div key={item.id} className="group relative">
+                    {/* Barra sólida atrás da linha inteira, escondida
+                        (scale-x-0) em repouso e varrendo da esquerda pra
+                        direita no hover: bg-foreground, o mesmo preto/branco
+                        do resto do site, nenhuma cor nova. Sangra até a
+                        borda real da página (-left/-right no exato valor do
+                        padding-inline de .gutter em cada faixa, ver
+                        globals.css), não só até a borda do conteúdo. */}
+                    <span
+                      aria-hidden
+                      className="absolute -left-6 -right-6 inset-y-0 origin-left scale-x-0 bg-foreground transition-transform duration-500 ease-out group-hover:scale-x-100 sm:-left-12 sm:-right-12 xl:-left-20 xl:-right-20"
+                    />
+                    <div className="overflow-hidden">
+                      <motion.div variants={itemVariants}>
+                        <Link
+                          href={`/${locale}/#${item.id}`}
+                          className="relative flex items-center gap-4 py-1"
+                          onClick={() => toggle(false)}
+                        >
+                          <span className="type-mono relative z-10 text-muted transition-colors duration-500 ease-out group-hover:text-background">
+                            0{index + 1}
+                          </span>
+                          {/* 11vw no mobile, e não os 13vw do desenho antigo:
+                              a Whyte Black é cerca de 10% mais larga que a
+                              fonte de manchete que estava aqui, e o rótulo
+                              mais longo de então passava da borda direita
+                              numa tela estreita. Do sm pra cima sobra espaço
+                              de sobra e o corpo continua o mesmo. */}
+                          <span className="type-display type-inktrap relative z-10 text-[11vw] leading-none text-foreground transition-colors duration-500 ease-out group-hover:text-background sm:text-[7vw]">
+                            {item.label}
+                          </span>
+                          {/* Frase curta contando do que a seção trata,
+                              revelada junto da barra, na cor do fundo por
+                              cima dela. Só no lg:, onde sobra largura ao lado
+                              do rótulo gigante; em telas estreitas o rótulo
+                              já ocupa a linha inteira. Sem .type-mono aqui de
+                              propósito (mesmo critério do tooltip em
+                              BoringToggle): a classe força caixa alta, e uma
+                              frase inteira em versal lê pior que em caixa
+                              normal. Fonte mono só no family. */}
+                          <span className="relative z-10 ml-auto hidden max-w-xs self-center text-right font-mono text-xs tracking-wide text-background opacity-0 transition-opacity duration-500 ease-out group-hover:opacity-100 lg:block">
+                            {dict.nav.menuDescriptions[item.id]}
+                          </span>
+                        </Link>
+                      </motion.div>
+                    </div>
                   </div>
                 ))}
               </motion.nav>

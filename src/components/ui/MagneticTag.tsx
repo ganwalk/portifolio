@@ -9,6 +9,13 @@ import type { ReactNode } from "react";
 // raciocínio de mola cursor→posição já usado na lente da hero (Hero.tsx), só
 // que aqui o alvo é a própria tag, não um círculo flutuante.
 //
+// Sem cursor-default aqui: o cursor customizado do site (a mãozinha, ver
+// globals.css) só troca de pose em `a`, `button` e `[role="button"]`, e cai
+// pro cursor padrão de repouso (herdado do <html>) em qualquer outro
+// elemento. Forçar `cursor-default` na tag cortava essa herança e trocava o
+// cursor pro ponteiro nativo do sistema no meio do hover, um salto visual
+// feio bem no elemento que devia parecer mais vivo, não menos.
+//
 // onMouseMove só dispara com o cursor de verdade sobre o próprio elemento
 // (não com toque), então em tela de toque a tag nunca se move, mesmo sem
 // checagem explícita de ponteiro: mesmo princípio que já mantém a lente da
@@ -45,7 +52,7 @@ export function MagneticTag({
       onMouseMove={onMouseMove}
       onMouseLeave={reset}
       style={{ x: springX, y: springY }}
-      className={`type-mono inline-block cursor-default border border-line px-3 py-1.5 transition-colors duration-300 hover:bg-foreground hover:text-background ${className}`}
+      className={`type-mono inline-block border border-line px-3 py-1.5 transition-colors duration-300 hover:bg-foreground hover:text-background ${className}`}
     >
       {children}
     </motion.span>
