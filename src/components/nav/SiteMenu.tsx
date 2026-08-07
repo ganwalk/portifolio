@@ -126,10 +126,16 @@ export function SiteMenu({
                         {/* Barra sólida atrás da linha inteira, escondida
                             (scale-x-0) em repouso e varrendo da esquerda pra
                             direita no hover: bg-foreground, o mesmo
-                            preto/branco do resto do site, nenhuma cor nova. */}
+                            preto/branco do resto do site, nenhuma cor nova.
+                            Sangra até a borda real da página (-left/-right
+                            no exato valor do padding-inline de .gutter em
+                            cada faixa, ver globals.css), não só até a borda
+                            do conteúdo: o rótulo já mora dentro do gutter, e
+                            inset-0 sozinho pararia a barra na mesma margem
+                            lateral do texto, não na borda da tela. */}
                         <span
                           aria-hidden
-                          className="absolute inset-0 origin-left scale-x-0 bg-foreground transition-transform duration-500 ease-out group-hover:scale-x-100"
+                          className="absolute -left-6 -right-6 inset-y-0 origin-left scale-x-0 bg-foreground transition-transform duration-500 ease-out group-hover:scale-x-100 sm:-left-12 sm:-right-12 xl:-left-20 xl:-right-20"
                         />
                         <span className="type-mono relative z-10 text-muted transition-colors duration-500 ease-out group-hover:text-background">
                           0{index + 1}
