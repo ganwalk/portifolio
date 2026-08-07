@@ -8,7 +8,6 @@ import { ControlBar } from "@/components/controls/ControlBar";
 import { LocaleSwitcher } from "@/components/controls/LocaleSwitcher";
 import { SiteMenu } from "@/components/nav/SiteMenu";
 import { MoonPhase } from "@/components/ui/MoonPhase";
-import { ScrollProgress } from "@/components/ui/ScrollProgress";
 import { useBoringMode } from "@/contexts/BoringModeContext";
 import { profile } from "@/data/profile";
 import type { Locale } from "@/i18n/config";
@@ -117,8 +116,6 @@ export function SiteFrame({
 
   return (
     <div className="flex min-h-svh flex-col">
-      <ScrollProgress />
-
       <a
         href="#main"
         className="type-mono no-print sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:bg-foreground focus:px-3 focus:py-2 focus:text-background"
@@ -172,7 +169,7 @@ export function SiteFrame({
             <div className="hidden lg:flex">
               <ControlBar locale={locale} dict={dict} />
             </div>
-            <MoonPhase className="h-5 w-5" />
+            <MoonPhase className="h-5 w-5" delayUntilSecondFold={isHomeHero} />
           </div>
         </div>
 

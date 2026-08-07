@@ -579,13 +579,10 @@ Desliga por completo (a instância nem chega a existir) em Modo Boring e para
 quem pede menos movimento no sistema, voltando ao scroll cru do navegador
 nos dois casos, em ambas as instâncias (página e overlay).
 
-**`ScrollProgress`** (`src/components/ui/ScrollProgress.tsx`) é uma régua de
-2px presa ao topo da viewport, acima do cabeçalho, com a largura ligada ao
-progresso de rolagem da página inteira (`useScroll` sem `target`, mais uma
-mola leve só pra tirar o serrilhado de um salto rápido, nunca pra atrasar a
-leitura). Reforça, em qualquer página, a mesma lógica de "rolar é a
-navegação" que o rodapé de `CasesGrid` já escreve por extenso. Some no Modo
-Boring e na impressão, mesmo critério do resto do cabeçalho.
+A leitura de "quanto falta" na rolagem é só a lua do cabeçalho
+(`MoonPhase`), que já atravessa as fases conforme o scroll: uma régua de
+progresso à parte, presa ao topo da viewport, existiu e foi removida por
+redundância com ela.
 
 ## SEO
 

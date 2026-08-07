@@ -20,6 +20,20 @@ const TOTAL_TURNS = LOOPS + 0.5;
 const R = 9;
 const CENTER = 10;
 
+// Na home em Modo Criativo, no mobile, a lua só entra no cabeçalho depois da
+// primeira dobra (ver SiteFrame, headerVisible: some atrás de max-h-0 até
+// pastFirstFold): contar o progresso desde o topo da página faria ela
+// "pular" direto pra várias fases adiante no instante em que aparece. Por
+// isso, só nesse cenário (prop `delayUntilSecondFold`, que SiteFrame acende
+// com o mesmo `isHomeHero` que já rege a visibilidade do cabeçalho ali), o
+// percurso só começa a contar a partir da SEGUNDA dobra (2 telas de
+// rolagem), com folga sobre o ponto em que ela aparece. Em qualquer outra
+// página, ou já em Modo Boring, o cabeçalho (e a lua) é sempre visível desde
+// o primeiro pixel, mesmo no mobile, então o percurso conta desde o início,
+// sem deslocamento, mesmo critério do desktop.
+const LG_BREAKPOINT = 1024;
+const MOBILE_FOLD_OFFSET = 2;
+
 // f em [0,1): 0 é lua nova, 0.5 cheia, 1 nova de novo. A parte iluminada é a
 // interseção entre o semicírculo do lado aceso e a elipse do terminador.
 function moonPath(f: number): string {
@@ -38,12 +52,32 @@ function moonPath(f: number): string {
   ].join(" ");
 }
 
-export function MoonPhase({ className = "" }: { className?: string }) {
+export function MoonPhase({
+  className = "",
+  delayUntilSecondFold = false,
+}: {
+  className?: string;
+  /** Só a home em Modo Criativo passa true: é o único caso em que o
+   *  cabeçalho (e a lua dentro dele) começa escondido no mobile. */
+  delayUntilSecondFold?: boolean;
+}) {
   const { isBoringMode } = useBoringMode();
   const pathRef = useRef<SVGPathElement>(null);
-  const { scrollYProgress } = useScroll();
+  const { scrollY } = useScroll();
 
-  useMotionValueEvent(scrollYProgress, "change", (progress) => {
+  useMotionValueEvent(scrollY, "change", (y) => {
+    const viewport = window.innerHeight;
+    const isDesktop = window.innerWidth >= LG_BREAKPOINT;
+    const foldOffset =
+      isDesktop || !delayUntilSecondFold ? 0 : viewport * MOBILE_FOLD_OFFSET;
+    const maxScroll = Math.max(
+      document.documentElement.scrollHeight - viewport,
+      foldOffset + 1,
+    );
+    const progress = Math.min(
+      Math.max((y - foldOffset) / (maxScroll - foldOffset), 0),
+      1,
+    );
     pathRef.current?.setAttribute(
       "d",
       moonPath((START_PHASE + progress * TOTAL_TURNS) % 1),
