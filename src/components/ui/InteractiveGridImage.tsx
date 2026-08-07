@@ -176,10 +176,10 @@ export function InteractiveGridImage({
           // (measureText), já que "comigo!" é bem mais largo que um número
           // de um ou dois dígitos, e a altura precisa caber TODAS as linhas,
           // não uma só.
-          const fs = Math.max(8, Math.min(dw, dh) * 0.16);
+          const fs = Math.max(7, Math.min(dw, dh) * 0.1);
           const pad = fs * 0.4;
           const lineHeight = fs * 1.15;
-          ctx!.font = `600 ${fs}px "Helvetica Neue", Arial, sans-serif`;
+          ctx!.font = `400 ${fs}px "Helvetica Neue", Arial, sans-serif`;
           const widestWord = Math.max(
             ...words.map((word) => ctx!.measureText(word).width),
           );
