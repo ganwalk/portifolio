@@ -81,6 +81,7 @@ export const zh: Dictionary = {
     emailLabel: "邮箱",
     copied: "已复制！",
     imageAlt: "跟随鼠标移动而变形的互动网格图片",
+    gridWords: ["跟我", "聊聊！"],
   },
   boring: {
     experienceTitle: "工作经历",
