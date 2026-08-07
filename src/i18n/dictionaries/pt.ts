@@ -15,6 +15,14 @@ export const pt = {
     menu: "Menu",
     close: "Fechar",
     skipToContent: "Pular para o conteúdo",
+    // Uma frase curta por item do menu overlay: aparece só no hover, junto
+    // com o fundo que invade a caixa (ver SiteMenu.tsx).
+    menuDescriptions: {
+      work: "Os projetos que fiz, do banking à música.",
+      playground: "Ilustração, animação e produção musical nas horas vagas.",
+      about: "Um pouco de tudo: design, tipografia, colagem e curiosidade.",
+      contact: "Aberto a projetos, colaborações e boas ideias.",
+    },
   },
   controls: {
     // Duas maneiras de descrever a mesma ação (o Modo Boring também é o
@@ -77,6 +85,17 @@ export const pt = {
     ],
     skillsTitle: "Ferramentas e habilidades",
     languagesTitle: "Idiomas",
+    // Some junto com as últimas entradas fictícias da experiência (ver
+    // profile.ts) assim que virarem histórico real.
+    experienceMockDisclaimer:
+      "Marcadas com * são fictícias, só pra desenhar a timeline. Histórico real em breve.",
+  },
+  testimonials: {
+    title: "O que dizem",
+    // Mesmo critério de metricsDisclaimer acima: some quando os depoimentos
+    // ficticios de src/data/testimonials.ts virarem reais e autorizados.
+    disclaimer:
+      "Depoimentos ilustrativos, pra desenhar o bloco. Versão real em fase de coleta.",
   },
   contact: {
     title: "Vamos conversar?",

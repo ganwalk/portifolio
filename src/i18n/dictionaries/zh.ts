@@ -12,6 +12,12 @@ export const zh: Dictionary = {
     menu: "菜单",
     close: "关闭",
     skipToContent: "跳到主要内容",
+    menuDescriptions: {
+      work: "从银行到音乐，我做过的项目。",
+      playground: "插画、动画与音乐制作，工作之余的实验。",
+      about: "设计、字体、拼贴与好奇心，一点点全都要。",
+      contact: "欢迎项目合作与新想法。",
+    },
   },
   controls: {
     boringOn: ["直奔主题", "查看我的简历"],
@@ -68,6 +74,11 @@ export const zh: Dictionary = {
     ],
     skillsTitle: "工具与技能",
     languagesTitle: "语言",
+    experienceMockDisclaimer: "带 * 的经历是虚构的，仅用于设计时间线。真实经历即将补充。",
+  },
+  testimonials: {
+    title: "他们怎么说",
+    disclaimer: "示意性推荐语，仅用于设计版块。真实内容征集中。",
   },
   contact: {
     title: "一起聊聊？",

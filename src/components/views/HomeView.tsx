@@ -6,6 +6,7 @@ import { Hero } from "@/components/sections/Hero";
 import { CasesGrid } from "@/components/sections/CasesGrid";
 import { Playground } from "@/components/sections/Playground";
 import { About } from "@/components/sections/About";
+import { Testimonials } from "@/components/sections/Testimonials";
 import { Contact } from "@/components/sections/Contact";
 import type { Locale } from "@/i18n/config";
 import type { Dictionary } from "@/i18n/dictionaries";
@@ -32,6 +33,7 @@ export function HomeView({
       <CasesGrid locale={locale} dict={dict} />
       <Playground locale={locale} dict={dict} />
       <About locale={locale} dict={dict} />
+      <Testimonials locale={locale} dict={dict} />
       <Contact dict={dict} />
     </>
   );

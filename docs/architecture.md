@@ -52,7 +52,7 @@ src/
     controls/ControlBar.tsx  Modo Boring, tema e idioma
     layout/SiteFrame.tsx     cabeçalho fixo, rodapé, atalho de acessibilidade
     providers/Providers.tsx  ordem dos contextos
-    sections/                Hero, CasesGrid, Playground, About, Contact
+    sections/                Hero, CasesGrid, Playground, About, Testimonials, Contact
     ui/Marquee.tsx           letreiro contínuo
     views/HomeView.tsx       o interruptor entre as duas experiências
   contexts/
@@ -61,6 +61,7 @@ src/
     cases.ts                 cases com métricas e textos nos três idiomas
     profile.ts               dados de contato, habilidades, experiência
     experiments.ts           bloco Fora do expediente
+    testimonials.ts          depoimentos, hoje fictícios (ver Depoimentos, abaixo)
     types.ts                 contratos de conteúdo
   fonts/
     whyte-inktrap/            fonte licenciada, peso Black, destaques do site
@@ -454,10 +455,43 @@ decorativa. O que dá vida é movimento e tipografia, não ornamento.
   fases da lua conforme o scroll, três lunações por página.
 - **Menu overlay** (`SiteMenu`): navegação de tela cheia com tipografia gigante
   (Whyte Inktrap, via `.type-inktrap` somada ao `.type-display` que já dava
-  tamanho e caixa alta) e preview de imagem no hover de cada link. Renderiza
-  num portal para o body, porque o `backdrop-blur` do cabeçalho criaria um
-  containing block e prenderia o overlay dentro da barra. No mobile a mesa de
-  controle inteira mora aqui, Modo Boring incluído.
+  tamanho e caixa alta), um link por caixa, separadas por linhas finas
+  (`border-line`, o mesmo fio de 1px do resto do site: borda em cima só na
+  primeira caixa, embaixo em todas, então a borda de baixo de uma já serve de
+  cima da próxima, sem linha dobrada onde se tocam). Passar o mouse numa caixa
+  inverte o tema só ali dentro (fundo vira `--foreground`, rótulo e a
+  descrição curta da seção viram `--background`, mesmo par que `BoringToggle`
+  já usa no próprio hover): nenhuma cor entra na conta, o destaque é preto e
+  branco trocando de lugar. O fundo entra como um wipe (`scaleX` a partir da
+  esquerda, não um fade), e a descrição segue um instante depois
+  (`delay-100`), então a caixa sempre atravessa "fundo sem descrição" antes de
+  "fundo com descrição". `group-focus-within`, e não só `group-hover`, repete
+  a revelação pra quem navega por teclado. Descrições vêm de
+  `dict.nav.menuDescriptions`, uma frase por seção, e a descrição some abaixo
+  de `lg:` (nem sobra largura ao lado do rótulo gigante empilhado, nem existe
+  hover de verdade em toque). Um preview de imagem recortada pela forma das
+  próprias letras (`background-clip: text`) morou aqui antes e saiu: competia
+  pela mesma área que o fundo invertido agora ocupa. Renderiza num portal para
+  o body, porque o `backdrop-blur` do cabeçalho criaria um containing block e
+  prenderia o overlay dentro da barra. No mobile a mesa de controle inteira
+  mora aqui, Modo Boring incluído.
+- **Experiência** (dentro de `About`): timeline vertical, mesma caixa com
+  linha fina que o menu overlay já usa (`border-y` na primeira entrada,
+  `border-b` nas demais). `profile.experience` tem hoje uma entrada real
+  (AUVP) e duas fictícias (`mock: true`), só pra desenhar a timeline: o
+  asterisco no título e o rodapé de aviso (`about.experienceMockDisclaimer`)
+  somem junto quando virarem histórico real, mesmo critério das métricas
+  ilustrativas dos cases.
+- **Depoimentos** (`Testimonials`): três cartões com citação, nome e cargo,
+  hoje todos fictícios (`src/data/testimonials.ts`), inclusive as duas
+  "empresas" (Traço Coletivo, Estúdio Alameda, as mesmas da experiência
+  mock acima). Sem foto: uma iniciais tipográfica quadrada faz o papel do
+  retrato, porque nenhuma das pessoas existe, e uma foto de banco de imagens
+  ao lado de um nome inventado seria mais enganoso que uma iniciais. O
+  disclaimer no rodapé segue um `mock` por depoimento, mesmo critério de
+  `CaseMetric.illustrative`: aparece enquanto QUALQUER depoimento for
+  fictício (hoje, todos) e some sozinho assim que todos virarem reais e
+  autorizados.
 - **Cabeçalho**: uma só ordem de DOM (menu, assinatura, lua) em dois arranjos.
   No mobile é grid de três colunas, com a assinatura centralizada; no desktop
   vira flex e a assinatura vai para a frente da fila (`lg:order-first`), com a
@@ -714,3 +748,7 @@ ou na Vercel, basta não definir `NEXT_PUBLIC_BASE_PATH` e trocar
 6. Recortes de colagem em volta do nome no hero, quando chegarem.
 7. Registrar domínio próprio e verificar a propriedade no Google Search
    Console e no Bing Webmaster Tools, depois de trocar `NEXT_PUBLIC_SITE_URL`.
+8. Trocar as duas entradas fictícias de `profile.experience` (`mock: true`)
+   por histórico real, e os três depoimentos de `src/data/testimonials.ts`
+   por citações reais e autorizadas. Os dois avisos (`about.experienceMockDisclaimer`
+   e `testimonials.disclaimer`) somem sozinhos quando isso acontecer.

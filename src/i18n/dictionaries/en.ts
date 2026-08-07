@@ -13,6 +13,12 @@ export const en: Dictionary = {
     menu: "Menu",
     close: "Close",
     skipToContent: "Skip to content",
+    menuDescriptions: {
+      work: "The projects I've built, from banking to music.",
+      playground: "Illustration, animation and music production on the side.",
+      about: "A bit of everything: design, typography, collage and curiosity.",
+      contact: "Open to projects, collaborations and good ideas.",
+    },
   },
   controls: {
     boringOn: ["Get straight to the point", "See my résumé"],
@@ -67,6 +73,13 @@ export const en: Dictionary = {
     ],
     skillsTitle: "Tools & skills",
     languagesTitle: "Languages",
+    experienceMockDisclaimer:
+      "Entries marked with * are fictional, just to sketch the timeline. Real history coming soon.",
+  },
+  testimonials: {
+    title: "What people say",
+    disclaimer:
+      "Illustrative testimonials, just to design the block. Real ones coming soon.",
   },
   contact: {
     title: "Let's talk?",
