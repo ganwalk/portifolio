@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState, type ReactNode } from "react";
 import { BoringToggle } from "@/components/controls/BoringToggle";
 import { ControlBar } from "@/components/controls/ControlBar";
+import { LocaleSwitcher } from "@/components/controls/LocaleSwitcher";
 import { SiteMenu } from "@/components/nav/SiteMenu";
 import { MoonPhase } from "@/components/ui/MoonPhase";
 import { ScrollProgress } from "@/components/ui/ScrollProgress";
@@ -24,17 +25,18 @@ import type { Dictionary } from "@/i18n/dictionaries";
 // rolar, a barra encorpa (fundo mais sólido) para não sumir sobre as mídias.
 // Some por completo na impressão.
 //
-// O Modo Boring é o único controle com uma segunda linha própria no mobile,
-// e ela dura só o tempo da hero: é a oferta de saída feita de cara, na
-// primeira dobra da home, quando a pessoa ainda está decidindo se quer a
-// experiência lúdica ou o currículo direto. Passada a hero, quem ficou já
-// escolheu ficar, e a linha extra viraria uma tarja permanente roubando
-// altura de tela estreita a cada rolagem. A partir daí o botão mora dentro
-// do menu, junto de tema e idioma (veja SiteMenu), que no mobile já é a
-// gaveta de todos os controles. Fora da home, onde não existe hero, a
-// segunda linha nem chega a aparecer: o botão nasce direto no menu. No
-// desktop ela também não existe, lá o botão cabe folgado na primeira linha,
-// junto do menu.
+// Modo Boring e idioma são os únicos controles com uma segunda linha própria
+// no mobile (o Modo Boring em cima, o idioma logo abaixo), e ela dura só o
+// tempo da hero: é a oferta de saída feita de cara, na primeira dobra da
+// home, quando a pessoa ainda está decidindo se quer a experiência lúdica ou
+// o currículo direto, com o idioma à mão pra quem decide isso antes mesmo de
+// ler o português. Passada a hero, quem ficou já escolheu ficar, e a linha
+// extra viraria uma tarja permanente roubando altura de tela estreita a cada
+// rolagem. A partir daí os dois moram dentro do menu, junto do tema (veja
+// SiteMenu), que no mobile já é a gaveta de todos os controles. Fora da
+// home, onde não existe hero, a segunda linha nem chega a aparecer: os dois
+// nascem direto no menu. No desktop ela também não existe, lá os dois cabem
+// folgados na primeira linha, junto do menu.
 //
 // A troca das duas linhas é sincronizada no mesmo ponto de scroll: no mobile,
 // na home em Modo Criativo, o cabeçalho começa "reduzido" (só a linha do
@@ -174,25 +176,30 @@ export function SiteFrame({
           </div>
         </div>
 
-        {/* Segunda linha: só o Modo Boring, só no mobile (no desktop já cabe
-            na primeira linha), e só enquanto a hero está na tela, exceto em
-            Modo Boring, onde fica sempre por falta de menu que a guarde.
-            Mesmo mecanismo de recolhimento da primeira linha (max-height, e
-            não translate/opacity, que não devolvem o espaço reservado no
-            fluxo), inclusive a borda, que sai junto: uma borda de 1px sozinha
-            sobre a borda inferior do cabeçalho leria como um risco duplo.
-            Nunca mostra tooltip: é uma tarja estreita, sem espaço sobrando
-            pra bolha, e enquanto ela existe é o único controle na tela, já
-            autoexplicativo. */}
+        {/* Segunda linha: Modo Boring e, logo abaixo, o idioma. Só no mobile
+            (no desktop os dois já cabem na primeira linha) e só enquanto a
+            hero está na tela, exceto em Modo Boring, onde fica sempre por
+            falta de menu que a guarde. Mesmo mecanismo de recolhimento da
+            primeira linha (max-height, e não translate/opacity, que não
+            devolvem o espaço reservado no fluxo), inclusive a borda, que sai
+            junto: uma borda de 1px sozinha sobre a borda inferior do
+            cabeçalho leria como um risco duplo. Nunca mostra tooltip: é uma
+            tarja estreita, sem espaço sobrando pra bolha, e enquanto ela
+            existe o Modo Boring é o único controle já autoexplicativo ali.
+            O idioma entra aqui pelo mesmo motivo que o Modo Boring: na
+            primeira dobra, antes do menu aparecer, essa é a única porta pro
+            controle no mobile (fora daqui, ele só mora dentro do menu, ver
+            SiteMenu). */}
         <div
           className={`overflow-hidden transition-all duration-300 lg:hidden ${
             boringRowVisible
-              ? "max-h-16 border-t border-line py-2 opacity-100"
+              ? "max-h-28 border-t border-line py-2 opacity-100"
               : "pointer-events-none max-h-0 py-0 opacity-0"
           }`}
         >
-          <div className="flex justify-center px-6">
+          <div className="flex flex-col items-center gap-2 px-6">
             <BoringToggle dict={dict} />
+            <LocaleSwitcher locale={locale} dict={dict} />
           </div>
         </div>
       </header>
