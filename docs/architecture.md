@@ -579,17 +579,6 @@ Desliga por completo (a instância nem chega a existir) em Modo Boring e para
 quem pede menos movimento no sistema, voltando ao scroll cru do navegador
 nos dois casos, em ambas as instâncias (página e overlay).
 
-**A pilha de `CasesGrid` reage à velocidade da rolagem, não só à posição.**
-Uma leve inclinação (`skewY`, ver `stackSkew`) cresce com a rapidez do gesto
-e volta a zero assim que ele desacelera (`useVelocity` sobre o scroll bruto,
-amortecido por outra mola), o peso físico de um baralho reagindo à mão em vez
-de deslizar rígido. Contida a menos de 1,5 grau, de propósito: é textura de
-movimento, não ornamento, e fica de fora dos elementos regidos pelo cursor
-dentro da mesma seção (o selo "ver caso", os pontos de posição), cuja
-matemática usa a posição bruta do mouse e descasaria do cursor de verdade se
-herdasse a inclinação do ancestral. Some para quem pede menos movimento no
-sistema.
-
 **`ScrollProgress`** (`src/components/ui/ScrollProgress.tsx`) é uma régua de
 2px presa ao topo da viewport, acima do cabeçalho, com a largura ligada ao
 progresso de rolagem da página inteira (`useScroll` sem `target`, mais uma
