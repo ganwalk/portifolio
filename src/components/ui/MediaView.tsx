@@ -5,10 +5,6 @@ import type { Locale } from "@/i18n/config";
 // Vídeos são mudos, em loop e com poster, comportamento de textura viva, não
 // de player. Usamos <img> puro em vez de next/image porque o export estático
 // não otimiza imagem no servidor e as URLs remotas mudam junto com as mídias.
-// crossOrigin="anonymous" é obrigatório aqui: o HoverWarpMedia lê esses
-// elementos como textura WebGL, e sem o atributo o navegador marca a textura
-// como "tainted" mesmo quando o CDN (Pexels) já libera CORS, quebrando o
-// desenho sem erro visível nenhum.
 
 export function MediaView({
   media,
@@ -30,7 +26,6 @@ export function MediaView({
             src={media.poster}
             alt=""
             aria-hidden
-            crossOrigin="anonymous"
             className="absolute inset-0 h-full w-full object-cover"
           />
         )}
@@ -43,7 +38,6 @@ export function MediaView({
           loop
           playsInline
           preload="metadata"
-          crossOrigin="anonymous"
           aria-label={media.alt[locale]}
         />
       </div>
@@ -57,7 +51,6 @@ export function MediaView({
       src={media.src}
       alt={media.alt[locale]}
       loading="lazy"
-      crossOrigin="anonymous"
     />
   );
 }
