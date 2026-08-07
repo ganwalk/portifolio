@@ -12,7 +12,6 @@ import {
   useScroll,
   useSpring,
   useTransform,
-  useVelocity,
   type MotionValue,
 } from "framer-motion";
 import { CaseMetrics } from "@/components/ui/CaseMetrics";
@@ -96,14 +95,6 @@ import type { Dictionary } from "@/i18n/dictionaries";
 // pilha soma ao de Lenis em vez de competir com ele. Superamortecida de
 // propósito (sem overshoot): pilha que passa do ponto e volta enjoa. Quem
 // pede menos movimento no sistema recebe o progresso bruto, sem mola.
-//
-// A pilha também reage à VELOCIDADE da rolagem, não só à posição: uma leve
-// inclinação (`skewY`, ver `stackSkew` em `CasesGrid`) cresce com a rapidez
-// do gesto e volta a zero assim que ele desacelera, o peso físico de um
-// baralho reagindo à mão. Contida a menos de 1,5 grau, de propósito: é
-// textura de movimento, não ornamento, e fica de fora dos elementos regidos
-// pelo cursor (selo, pontos de posição), cuja matemática usa a posição bruta
-// do mouse e descasaria do cursor de verdade se herdasse a inclinação.
 //
 // O que rege a LÓGICA (qual fatia está ativa) continua sendo o progresso
 // bruto: a mola atrasa uns décimos, e um índice ativo atrasado tornaria o
@@ -765,27 +756,6 @@ export function CasesGrid({
   // Sem paralaxe pra quem pediu menos movimento no sistema.
   const parallax = reduceMotion ? 0 : 6;
 
-  // Leve inclinação da pilha durante rolagem rápida, o "peso" físico de um
-  // baralho reagindo à velocidade da mão, não só à posição do scroll. Some
-  // assim que a rolagem desacelera (a mesma mola volta o valor a zero) e não
-  // existe pra quem pediu menos movimento no sistema. A amplitude é contida
-  // de propósito: menos de 1,5 grau, o suficiente pra sentir sem virar
-  // ornamento, e só a pilha inclina, não os elementos regidos pelo cursor
-  // (selo e pontos de posição, logo abaixo), que ficam de fora de propósito:
-  // a matemática deles usa a posição bruta do mouse, e inclinar o ancestral
-  // deles abriria um descompasso visível entre o selo e o cursor de verdade.
-  const rawScrollY = useScroll().scrollY;
-  const scrollVelocity = useVelocity(rawScrollY);
-  const smoothVelocity = useSpring(scrollVelocity, {
-    stiffness: 300,
-    damping: 40,
-    mass: 0.4,
-  });
-  const stackSkew = useTransform(smoothVelocity, [-2200, 0, 2200], [1.4, 0, -1.4], {
-    clamp: true,
-  });
-  const skewY = reduceMotion ? 0 : stackSkew;
-
   // A LÓGICA continua no scroll cru: qual fatia é clicável e recebe foco de
   // teclado não pode chegar uns décimos atrasada da mão de quem rola.
   useMotionValueEvent(scrollYProgress, "change", (v) => {
@@ -856,7 +826,7 @@ export function CasesGrid({
           onMouseMove={handleStickyMouseMove}
           onMouseLeave={handleStickyMouseLeave}
         >
-          <motion.div style={{ skewY }} className="absolute inset-0">
+          <div className="absolute inset-0">
             {slides.map((slide, index) => (
               <SlidePanel
                 key={slide.map(({ caseStudy }) => caseStudy.slug).join("+")}
@@ -874,7 +844,7 @@ export function CasesGrid({
                 onExpand={(caseStudy, rect) => setExpanding({ caseStudy, rect })}
               />
             ))}
-          </motion.div>
+          </div>
 
           {/* A contagem já mora em cada card ("03 / 06", o índice do case na
               lista inteira), então o rodapé não repete outra em nível de
