@@ -1,10 +1,9 @@
 "use client";
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
 import { useTheme } from "next-themes";
+import { LocaleSwitcher } from "@/components/controls/LocaleSwitcher";
 import { useHydrated } from "@/lib/use-hydrated";
-import { locales, localeNames, type Locale } from "@/i18n/config";
+import type { Locale } from "@/i18n/config";
 import type { Dictionary } from "@/i18n/dictionaries";
 
 // Tema e idioma: no desktop moram do lado direito do cabeçalho, junto da
@@ -19,15 +18,9 @@ interface ControlBarProps {
 
 export function ControlBar({ locale, dict }: ControlBarProps) {
   const { resolvedTheme, setTheme } = useTheme();
-  const pathname = usePathname();
   // Tema e preferências só existem no cliente. Antes de hidratar, os rótulos
   // mostram o estado padrão para não divergir do HTML gerado no build.
   const mounted = useHydrated();
-
-  const switchLocalePath = (target: Locale) => {
-    const rest = pathname.replace(new RegExp(`^/${locale}`), "");
-    return `/${target}${rest || "/"}`;
-  };
 
   // Só texto: nada de moldura nem fundo. O estado ativo se resolve na cor.
   const buttonClass =
@@ -45,24 +38,7 @@ export function ControlBar({ locale, dict }: ControlBarProps) {
         {mounted && resolvedTheme === "dark" ? "☀" : "☾"}
       </button>
 
-      <nav aria-label={dict.controls.language} className="flex gap-2">
-        {locales.map((l) => (
-          <Link
-            key={l}
-            href={switchLocalePath(l)}
-            hrefLang={l}
-            aria-current={l === locale ? "true" : undefined}
-            className={`type-mono px-1 py-1.5 ${
-              l === locale
-                ? "text-foreground underline underline-offset-4"
-                : "text-muted hover:text-foreground"
-            }`}
-            title={localeNames[l]}
-          >
-            {l.toUpperCase()}
-          </Link>
-        ))}
-      </nav>
+      <LocaleSwitcher locale={locale} dict={dict} />
     </div>
   );
 }
