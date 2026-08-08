@@ -1,3 +1,4 @@
+import { useRef } from "react";
 import { Reveal } from "@/components/ui/Reveal";
 import { SkillsOrbit } from "@/components/ui/SkillsOrbit";
 import { profile } from "@/data/profile";
@@ -13,12 +14,14 @@ import type { Dictionary } from "@/i18n/dictionaries";
 // A bio sobe parágrafo por parágrafo, cada um com seu próprio atraso, em vez
 // do bloco inteiro nascer junto.
 //
-// As habilidades trocam a linha corrida com bullet por uma constelação
-// (SkillsOrbit): passar o mouse pela área inteira solta as tags do lugar,
-// liga cada uma ao cursor por uma linha fina e as põe em órbita dele. Quando
-// a última assenta, uma frase aparece no meio, no mesmo estilo de selo do
-// "Case completo em breve" do CasesGrid.
+// As habilidades trocam a linha corrida com bullet por uma corrente
+// (SkillsOrbit): o gatilho é a dobra inteira, não só a área das tags, e cada
+// tag só se solta do lugar quando o mouse passa perto da posição dela,
+// entrando numa fila que pende do cursor. Quando a última entra na fila, uma
+// frase aparece acima do mouse, no mesmo estilo de selo do "Case completo em
+// breve" do CasesGrid.
 export function About({ locale, dict }: { locale: Locale; dict: Dictionary }) {
+  const sectionRef = useRef<HTMLElement>(null);
   const allSkills = [
     ...profile.skills.core,
     ...profile.skills.tools,
@@ -26,7 +29,11 @@ export function About({ locale, dict }: { locale: Locale; dict: Dictionary }) {
   ];
 
   return (
-    <section id="about" className="gutter section-y border-t border-line">
+    <section
+      id="about"
+      ref={sectionRef}
+      className="gutter section-y border-t border-line"
+    >
       <Reveal>
         <h2 className="type-mono mb-16">{dict.about.title}</h2>
       </Reveal>
@@ -45,7 +52,11 @@ export function About({ locale, dict }: { locale: Locale; dict: Dictionary }) {
             <h3 className="type-mono mb-4 text-muted">
               {dict.about.skillsTitle}
             </h3>
-            <SkillsOrbit skills={allSkills} message={dict.about.skillsOrbitMessage} />
+            <SkillsOrbit
+              skills={allSkills}
+              message={dict.about.skillsOrbitMessage}
+              sectionRef={sectionRef}
+            />
           </div>
 
           <div>
