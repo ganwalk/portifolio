@@ -6,11 +6,14 @@ import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 // Habilidades como uma fita presa ao cursor: em repouso, tags quadradas na
 // grade normal (flex-wrap). O gatilho é a dobra "sobre" inteira (sectionRef),
 // não só a área das tags, então o efeito funciona mesmo com o mouse passando
-// por cima da bio ou do resto da coluna. Cada tag só entra na fila quando o
-// cursor passa por CIMA da própria caixa dela (bounding box + uma margem
-// pequena, não um raio largo): é o que garante que nenhuma tag se solte antes
-// da hora, nem que passar perto de uma capture as vizinhas de carona. Cada
-// tag capturada vira um elo de uma corrente que pende abaixo do mouse, ligado
+// por cima da bio ou do resto da coluna. Entrar na dobra não libera captura
+// na hora: só depois de ACTIVATE_DELAY_MS parado ali, pra quem só está de
+// passagem (rolando a página) não ver caixa nenhuma se mexer. Cada tag só
+// entra na fila quando o cursor passa por CIMA da própria caixa dela
+// (bounding box + uma margem pequena, não um raio largo): é o que garante
+// que nenhuma tag se solte antes da hora, nem que passar perto de uma
+// capture as vizinhas de carona. Cada tag capturada vira um elo de uma
+// corrente que pende abaixo do mouse, ligado
 // ao elo anterior por uma linha fina, cada um perseguindo a posição do elo à
 // frente com o mesmo atraso (mesma mola de sempre), o que dá o chicote de
 // cobra/fita reagindo à velocidade do mouse: quanto mais rápido o cursor se
@@ -29,8 +32,15 @@ import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 // margem de duas tags vizinhas na mesma linha se sobrepõe no meio do vão e
 // as duas capturam juntas.
 const CAPTURE_PAD = 3;
-const LINK_SPACING = 40; // px, distância entre elos da corrente
+// px do mouse até a primeira caixa: maior que LINK_SPACING de propósito. O
+// cursor personalizado (ver cursor/hover.webp) é uma mãozinha de 56x63 com o
+// hotspot no topo, então ela ocupa quase 63px abaixo da posição real do
+// mouse; com o mesmo espaçamento dos outros elos, a primeira caixa nascia
+// tampada pela própria mão.
+const FIRST_LINK_SPACING = 68;
+const LINK_SPACING = 40; // px, distância entre os demais elos da corrente
 const EASE = 0.2; // suavização por quadro: quanto maior, mais rígido; a cauda ainda atrasa porque o alvo de cada elo é a posição já suavizada do anterior
+const ACTIVATE_DELAY_MS = 1000; // tempo parado na dobra antes da corrente poder capturar qualquer tag
 const MESSAGE_DELAY_MS = 5000; // tempo desde a primeira captura até a frase aparecer, se ainda faltar coletar alguma
 const MESSAGE_OFFSET = 28; // px acima do cursor
 const LINE_OPACITY = 0.35;
@@ -83,6 +93,7 @@ export function SkillsOrbit({
 
     let raf = 0;
     let active = false;
+    let activateTimer: number | null = null;
     let revealTimer: number | null = null;
     let revealScheduled = false;
 
@@ -117,6 +128,10 @@ export function SkillsOrbit({
 
     function reset() {
       active = false;
+      if (activateTimer !== null) {
+        window.clearTimeout(activateTimer);
+        activateTimer = null;
+      }
       captured.clear();
       capturedOrder.length = 0;
       chainPos.clear();
@@ -136,7 +151,10 @@ export function SkillsOrbit({
 
     function onMouseEnter() {
       measureNatural();
-      active = true;
+      activateTimer = window.setTimeout(() => {
+        active = true;
+        activateTimer = null;
+      }, ACTIVATE_DELAY_MS);
     }
 
     function onMouseLeave() {
@@ -175,7 +193,7 @@ export function SkillsOrbit({
         let targetAbsY: number;
         if (k === 0) {
           targetAbsX = mouse.x;
-          targetAbsY = mouse.y + LINK_SPACING;
+          targetAbsY = mouse.y + FIRST_LINK_SPACING;
         } else {
           const prevI = capturedOrder[k - 1];
           const prevRest = natural[prevI];
@@ -241,6 +259,7 @@ export function SkillsOrbit({
 
     return () => {
       cancelAnimationFrame(raf);
+      if (activateTimer !== null) window.clearTimeout(activateTimer);
       if (revealTimer !== null) window.clearTimeout(revealTimer);
       section.removeEventListener("mousemove", onMouseMove);
       section.removeEventListener("mouseenter", onMouseEnter);

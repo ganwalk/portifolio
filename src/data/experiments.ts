@@ -24,18 +24,102 @@ export const experiments: Experiment[] = [
       es: "Estampados, cuadros & pósters",
       zh: "印花、画框与海报",
     },
-    // Sugestão de mídia real: uma colagem finalizada em alta, ou um carrossel
-    // de recortes escaneados.
+    // Vitrine de verdade: oito peças reais (ver pasta ilustras/) em ciclo
+    // contínuo (ver ExperimentCard.tsx), não só no hover. `media` fica como
+    // a primeira peça da galeria, usada por quem pede menos movimento no
+    // sistema (prefers-reduced-motion): mostra ela parada, sem ciclar.
     media: {
       kind: "image",
-      src: "https://picsum.photos/seed/colagem-armando/1200/1200",
+      src: `${basePath}/photos/ilustra-venturo.webp`,
       alt: {
-        pt: "Fotografia placeholder para a série de colagens",
-        en: "Placeholder photograph for the collage series",
-        es: "Fotografía placeholder para la serie de collages",
-        zh: "拼贴系列的占位图片",
+        pt: "Selo ornamentado 'Venturo do Brasil', com lua e sol ao centro",
+        en: "Ornamented 'Venturo do Brasil' seal, with a sun and moon at the center",
+        es: "Sello ornamentado 'Venturo do Brasil', con sol y luna al centro",
+        zh: "华丽的 Venturo do Brasil 徽章，中央是日月图案",
       },
     },
+    gallery: [
+      {
+        src: `${basePath}/photos/ilustra-venturo.webp`,
+        alt: {
+          pt: "Selo ornamentado 'Venturo do Brasil', com lua e sol ao centro",
+          en: "Ornamented 'Venturo do Brasil' seal, with a sun and moon at the center",
+          es: "Sello ornamentado 'Venturo do Brasil', con sol y luna al centro",
+          zh: "华丽的 Venturo do Brasil 徽章，中央是日月图案",
+        },
+        asciiArt: "☆(＾▽＾)☆",
+      },
+      {
+        src: `${basePath}/photos/ilustra-cabeca.webp`,
+        alt: {
+          pt: "Pôster psicodélico de um rosto sob um halo espiralado colorido",
+          en: "Psychedelic poster of a face under a spiraling colorful halo",
+          es: "Póster psicodélico de un rostro bajo un halo espiralado de colores",
+          zh: "迷幻风格海报，一张脸庞笼罩在旋转的彩色光环下",
+        },
+        asciiArt: "(⊙▽⊙)",
+      },
+      {
+        src: `${basePath}/photos/ilustra-manuzika.webp`,
+        alt: {
+          pt: "Colagem de uma garota balançando presa a uma flor vermelha gigante",
+          en: "Collage of a girl on a swing hanging from a giant red flower",
+          es: "Collage de una chica en un columpio colgado de una flor roja gigante",
+          zh: "拼贴画，女孩坐在巨大红花垂下的秋千上",
+        },
+        asciiArt: "❀ヽ(・∀・)ﾉ❀",
+      },
+      {
+        src: `${basePath}/photos/ilustra-simetria.webp`,
+        alt: {
+          pt: "Duas figuras espelhadas em rosa e verde sobre fundo preto",
+          en: "Two mirrored pink and green figures on a black background",
+          es: "Dos figuras espejadas en rosa y verde sobre fondo negro",
+          zh: "黑色背景上一对粉绿相对称的镜像图形",
+        },
+        asciiArt: "(ノ´∀｀)ノ",
+      },
+      {
+        src: `${basePath}/photos/ilustra-auuuuu.webp`,
+        alt: {
+          pt: "Figura granulada sob um halo de arco-íris em espiral",
+          en: "Grainy figure under a spiraling rainbow halo",
+          es: "Figura granulada bajo un halo de arcoíris en espiral",
+          zh: "颗粒质感的人像，笼罩在螺旋彩虹光环下",
+        },
+        asciiArt: "☼(°◡°)☼",
+      },
+      {
+        src: `${basePath}/photos/ilustra-flores.webp`,
+        alt: {
+          pt: "Ilustração botânica emoldurada, com flores e folhas coloridas",
+          en: "Framed botanical illustration, with colorful flowers and leaves",
+          es: "Ilustración botánica enmarcada, con flores y hojas de colores",
+          zh: "装裱的植物插画，色彩缤纷的花朵与叶子",
+        },
+        asciiArt: "✿(◠‿◠)✿",
+      },
+      {
+        src: `${basePath}/photos/ilustra-irezumi.webp`,
+        alt: {
+          pt: "Mandala em espiral com uma figura ao centro, sobre fundo marmorizado",
+          en: "Spiraling mandala with a figure at the center, over a marbled background",
+          es: "Mandala en espiral con una figura al centro, sobre fondo marmolado",
+          zh: "螺旋曼陀罗图案，中央有一个人物，背景为大理石纹理",
+        },
+        asciiArt: "(◉_◉)",
+      },
+      {
+        src: `${basePath}/photos/ilustra-majuju.webp`,
+        alt: {
+          pt: "Pintura surreal de uma figura numa porta emoldurada por asas de mariposa",
+          en: "Surreal painting of a figure in a doorway framed by moth wings",
+          es: "Pintura surrealista de una figura en una puerta enmarcada por alas de polilla",
+          zh: "超现实画作，一扇被飞蛾翅膀环绕的门中站着一个人影",
+        },
+        asciiArt: "(づ￣³￣)づ",
+      },
+    ],
   },
   {
     id: "animacao-01",
@@ -53,8 +137,9 @@ export const experiments: Experiment[] = [
     },
     // "Cagumela": teste de animação de um personagem e cenário autorais.
     // O vídeo é o resultado final, em loop mudo; o hover troca a vitrine
-    // pelos stills do processo (ver ExperimentCard.tsx), em ordem: model
-    // sheet do personagem, concept art do cenário, paleta fechada.
+    // pelos stills do processo (ver ExperimentCard.tsx), em ordem: concept
+    // art do cenário, depois model sheet do personagem. Sai do hover, volta
+    // pro vídeo.
     media: {
       kind: "video",
       src: `${basePath}/videos/cagumela-ceu.mp4`,
@@ -68,15 +153,6 @@ export const experiments: Experiment[] = [
     },
     process: [
       {
-        src: `${basePath}/photos/cagumela-modelsheet.webp`,
-        caption: {
-          pt: "Model sheet do personagem, o traço antes de animar",
-          en: "Character model sheet, the linework before animating",
-          es: "Model sheet del personaje, el trazo antes de animar",
-          zh: "角色设定表，动画前先定好的线稿",
-        },
-      },
-      {
         src: `${basePath}/photos/cagumela-quarto.webp`,
         caption: {
           pt: "Concept art do cenário, a cor antes da cena",
@@ -86,12 +162,12 @@ export const experiments: Experiment[] = [
         },
       },
       {
-        src: `${basePath}/photos/cagumela-paleta.webp`,
+        src: `${basePath}/photos/cagumela-modelsheet.webp`,
         caption: {
-          pt: "Paleta fechada antes do quadro final",
-          en: "Palette locked before the final frame",
-          es: "Paleta cerrada antes del cuadro final",
-          zh: "定稿画面前先锁定的色板",
+          pt: "Model sheet do personagem, o traço antes de animar",
+          en: "Character model sheet, the linework before animating",
+          es: "Model sheet del personaje, el trazo antes de animar",
+          zh: "角色设定表，动画前先定好的线稿",
         },
       },
     ],

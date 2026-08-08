@@ -56,11 +56,21 @@ export interface ProcessFrame {
   caption: Localized;
 }
 
+/** Um quadro de uma galeria que troca sozinha, sem precisar de hover (ver ExperimentCard.tsx). */
+export interface GalleryFrame {
+  src: string;
+  alt: Localized;
+  /** Ascii art de uma linha, mostrada na legenda que segue o mouse durante o hover. */
+  asciiArt: string;
+}
+
 export interface Experiment {
   id: string;
   title: Localized;
   medium: Localized;
   media: Media;
-  /** Bastidores reais, opcional: só cards com material de processo usam. */
+  /** Bastidores reais, opcional: só cards com material de processo usam. Revelado só no hover. */
   process?: ProcessFrame[];
+  /** Vitrine que cicla sozinha, opcional: só cards com uma série de peças usam. Troca com ou sem hover. */
+  gallery?: GalleryFrame[];
 }

@@ -6,14 +6,27 @@ import { MediaView } from "@/components/ui/MediaView";
 import type { Experiment } from "@/data/types";
 import type { Locale } from "@/i18n/config";
 
-// Card do Playground. A maioria só mostra a mídia de vitrine (MediaView),
-// mas quem tem `process` (bastidores reais) ganha um segundo comportamento
-// no hover: em vez da vitrine parada, os stills do processo entram em
-// ciclo (crossfade, um relógio simples) e uma legenda em caixa acompanha o
-// cursor dizendo que etapa é aquela, no mesmo idioma "letreiro preso ao
-// mouse" do SkillsOrbit. Sem `process`, o card nunca monta esse aparato.
-const CYCLE_MS = 1600;
-const CAPTION_OFFSET = 16;
+// Card do Playground. Três comportamentos possíveis, escolhidos pelos campos
+// que o experimento tem:
+//
+// - Só `media` (a maioria): vitrine parada ou vídeo em loop, via MediaView,
+//   sem nenhum aparato a mais.
+// - `process` (bastidores reais, ex.: o teste de animação): a vitrine
+//   normal continua até o hover, que troca pelos stills do processo em
+//   ciclo (crossfade) com uma legenda em texto acompanhando o cursor.
+// - `gallery` (uma série de peças, ex.: as ilustrações): entra em ciclo
+//   sozinha, com ou sem hover, no lugar da vitrine normal; o hover só
+//   acrescenta uma ascii art de uma linha (a peça de cada quadro) que
+//   acompanha o cursor, no mesmo idioma "letreiro preso ao mouse" do
+//   SkillsOrbit.
+const PROCESS_CYCLE_MS = 1600;
+const GALLERY_CYCLE_MS = 2800;
+const TOOLTIP_OFFSET_X = 16;
+// O cursor personalizado (ver cursor/hover.webp) é uma mãozinha de 56x63
+// com o hotspot no topo, então ela ocupa quase 63px abaixo da posição real
+// do mouse: um offset vertical raso deixava a legenda nascendo tampada pela
+// própria mão.
+const TOOLTIP_OFFSET_Y = 60;
 
 export function ExperimentCard({
   experiment,
@@ -25,53 +38,82 @@ export function ExperimentCard({
   const reduceMotion = useReducedMotion();
   const process = experiment.process;
   const hasProcess = Boolean(process && process.length > 0 && !reduceMotion);
+  const gallery = experiment.gallery;
+  const hasGallery = Boolean(gallery && gallery.length > 0);
 
   const mediaBoxRef = useRef<HTMLDivElement>(null);
-  const captionRef = useRef<HTMLDivElement>(null);
+  const tooltipRef = useRef<HTMLDivElement>(null);
   const [hovering, setHovering] = useState(false);
-  const [frameIndex, setFrameIndex] = useState(0);
+  const [processIndex, setProcessIndex] = useState(0);
+  const [galleryIndex, setGalleryIndex] = useState(0);
 
   const showProcess = hasProcess && hovering;
+  const showAsciiTooltip = hasGallery && !reduceMotion && hovering;
+  const showTooltip = showProcess || showAsciiTooltip;
 
   useEffect(() => {
     if (!showProcess || !process) return;
     const interval = window.setInterval(() => {
-      setFrameIndex((i) => (i + 1) % process.length);
-    }, CYCLE_MS);
+      setProcessIndex((i) => (i + 1) % process.length);
+    }, PROCESS_CYCLE_MS);
     return () => window.clearInterval(interval);
   }, [showProcess, process]);
 
   useEffect(() => {
-    if (!showProcess) return;
+    if (!hasGallery || reduceMotion || !gallery) return;
+    const interval = window.setInterval(() => {
+      setGalleryIndex((i) => (i + 1) % gallery.length);
+    }, GALLERY_CYCLE_MS);
+    return () => window.clearInterval(interval);
+  }, [hasGallery, reduceMotion, gallery]);
+
+  useEffect(() => {
+    if (!showTooltip) return;
     const box = mediaBoxRef.current;
     if (!box) return;
     function onMove(event: MouseEvent) {
       const rect = box!.getBoundingClientRect();
-      const el = captionRef.current;
+      const el = tooltipRef.current;
       if (!el) return;
-      el.style.transform = `translate(${event.clientX - rect.left + CAPTION_OFFSET}px, ${event.clientY - rect.top + CAPTION_OFFSET}px)`;
+      el.style.transform = `translate(${event.clientX - rect.left + TOOLTIP_OFFSET_X}px, ${event.clientY - rect.top + TOOLTIP_OFFSET_Y}px)`;
     }
     box.addEventListener("mousemove", onMove);
     return () => box.removeEventListener("mousemove", onMove);
-  }, [showProcess]);
+  }, [showTooltip]);
 
   return (
     <figure
       className="group relative border border-line bg-background"
       onMouseEnter={() => {
-        setFrameIndex(0);
+        setProcessIndex(0);
         setHovering(true);
       }}
       onMouseLeave={() => setHovering(false)}
     >
       <div ref={mediaBoxRef} className="relative aspect-square overflow-hidden bg-surface">
-        <MediaView
-          media={experiment.media}
-          locale={locale}
-          className={`h-full w-full object-cover transition-[transform,opacity] duration-700 ease-out group-hover:scale-105 ${
-            showProcess ? "opacity-0" : "opacity-100"
-          }`}
-        />
+        {!hasGallery && (
+          <MediaView
+            media={experiment.media}
+            locale={locale}
+            className={`h-full w-full object-cover transition-[transform,opacity] duration-700 ease-out group-hover:scale-105 ${
+              showProcess ? "opacity-0" : "opacity-100"
+            }`}
+          />
+        )}
+
+        {hasGallery &&
+          gallery!.map((frame, i) => (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              key={frame.src}
+              src={frame.src}
+              alt={i === galleryIndex ? frame.alt[locale] : ""}
+              aria-hidden={i !== galleryIndex}
+              loading={i === 0 ? undefined : "lazy"}
+              className="absolute inset-0 h-full w-full object-cover transition-[opacity,transform] duration-700 ease-out group-hover:scale-105"
+              style={{ opacity: i === galleryIndex ? 1 : 0 }}
+            />
+          ))}
 
         {hasProcess &&
           process!.map((frame, i) => (
@@ -82,17 +124,19 @@ export function ExperimentCard({
               alt=""
               aria-hidden
               className="absolute inset-0 h-full w-full object-cover transition-opacity duration-300 ease-out"
-              style={{ opacity: showProcess && i === frameIndex ? 1 : 0 }}
+              style={{ opacity: showProcess && i === processIndex ? 1 : 0 }}
             />
           ))}
 
-        {showProcess && process && (
+        {showTooltip && (
           <div
-            ref={captionRef}
+            ref={tooltipRef}
             aria-hidden
-            className="pointer-events-none absolute left-0 top-0 z-10 max-w-[75%] whitespace-normal border border-line bg-background px-3 py-1.5 font-mono text-xs tracking-wide"
+            className={`pointer-events-none absolute left-0 top-0 z-10 max-w-[75%] whitespace-normal border border-line bg-background px-3 py-1.5 font-mono tracking-wide ${
+              showAsciiTooltip ? "text-sm" : "text-xs"
+            }`}
           >
-            {process[frameIndex].caption[locale]}
+            {showProcess && process ? process[processIndex].caption[locale] : gallery![galleryIndex].asciiArt}
           </div>
         )}
       </div>
