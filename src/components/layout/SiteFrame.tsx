@@ -194,7 +194,7 @@ export function SiteFrame({
               : "pointer-events-none max-h-0 py-0 opacity-0"
           }`}
         >
-          <div className="flex flex-col items-center gap-2 px-6">
+          <div className="flex flex-row flex-wrap items-center justify-center gap-3 px-6">
             <BoringToggle dict={dict} />
             <LocaleSwitcher locale={locale} dict={dict} />
           </div>
@@ -205,7 +205,7 @@ export function SiteFrame({
         {children}
       </main>
 
-      <footer className="no-print flex flex-wrap items-center justify-between gap-4 border-t border-line px-6 py-14 sm:px-12 xl:px-20">
+      <footer className="no-print flex flex-col flex-wrap items-center justify-center gap-4 border-t border-line px-6 py-14 text-center sm:flex-row sm:items-center sm:justify-between sm:text-left sm:px-12 xl:px-20">
         <p className="type-mono text-muted">{dict.footer.rights}</p>
         <p className="type-mono text-muted">
           {new Date().getFullYear()} · {profile.name}

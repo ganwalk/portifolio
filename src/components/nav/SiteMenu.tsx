@@ -162,7 +162,7 @@ export function SiteMenu({
                       <motion.div variants={itemVariants}>
                         <Link
                           href={`/${locale}/#${item.id}`}
-                          className="relative flex items-center gap-4 py-1"
+                          className="relative flex items-center justify-center gap-4 py-1 lg:justify-start"
                           onClick={() => toggle(false)}
                         >
                           <span className="type-mono relative z-10 text-muted transition-colors duration-500 ease-out group-hover:text-background">

@@ -25,16 +25,21 @@ import { useMediaQuery } from "@/lib/use-media-query";
 
 // Projetos em destaque como uma sequência amarrada ao scroll da própria
 // página, não um carrossel com botões e timer, A PARTIR DO sm: (640px). No
-// mobile (abaixo disso) é uma lista comum, cartão por cartão, em fluxo de
-// documento normal (ver MobileCaseList, mais abaixo): a versão presa ao
-// scroll empilhava mal em telas pequenas, o cabeçalho fixo cobria o topo do
-// painel ativo em certas posições de rolagem, e o trio de artistas
-// (empilhado dentro do próprio painel antes do lg:) competia com a pilha de
-// fatias, mostrando métricas de dois cases sobrepostas na mesma tela.
-// `useMediaQuery` decide qual das duas versões monta (ver CasesGrid), não
-// CSS: montar as duas ao mesmo tempo (uma escondida) deixaria o
-// `useScroll` da versão presa calculando sobre uma seção de altura zero à
-// toa, mesmo invisível.
+// mobile (abaixo disso) é um carrossel horizontal por gesto, cartão a
+// cartão (ver MobileCaseList, mais abaixo): a versão presa ao scroll
+// empilhava mal em telas pequenas, o cabeçalho fixo cobria o topo do painel
+// ativo em certas posições de rolagem, e o trio de artistas (empilhado
+// dentro do próprio painel antes do lg:) competia com a pilha de fatias,
+// mostrando métricas de dois cases sobrepostas na mesma tela.
+// `useMediaQuery` decide qual das duas versões monta (ver CasesGrid): a
+// versão presa ao scroll (`useScroll`, `SlidePanel` etc.) mora inteira em
+// `DesktopCasesGrid`, um componente à parte que só é montado quando
+// `isDesktop` é verdadeiro. Montar as duas ao mesmo tempo (uma escondida
+// via CSS) deixaria o `useScroll` da versão presa apontando pra um ref que
+// nunca prende a nenhum elemento enquanto o mobile está em cena, o que o
+// Framer Motion acusa em console (ref definido mas nunca hidratado) mesmo
+// sem quebrar nada visualmente; como componente à parte, o hook só existe
+// enquanto o elemento que ele mede também existe.
 //
 // A partir daqui, tudo descreve a versão de desktop: a seção sai direto da
 // hero (sem título nem subtítulo próprios, só um rótulo acessível no
@@ -716,27 +721,71 @@ function ExpandedCase({
   );
 }
 
-// Versão mobile: pilha de baralho presa ao scroll (SlidePanel/CaseColumn,
-// abaixo) some abaixo do sm:. No touch a pilha empilhava mal: o cabeçalho
-// fixo cobria o topo do painel ativo em certas posições de rolagem, e o
-// trio de artistas (empilhado dentro do próprio painel antes do lg:)
-// competia com a pilha de fatias, mostrando métricas de dois cases
-// sobrepostas na mesma tela. Aqui cada case é um cartão comum, em fluxo de
-// documento normal (sem sticky, sem scroll amarrado): rolar É a navegação
-// nativa do sistema, sem o cabeçalho fixo brigar com nada porque não há
-// mais nada "preso" por baixo dele. Sem seletor de fatia, sem selo que
-// segue o cursor (não existe hover de verdade em touch): abre a página do
-// case direto, sem o overlay expandido em FLIP.
+// Versão mobile: carrossel horizontal por gesto (scroll-snap nativo, sem
+// biblioteca) some a partir do sm:. A pilha presa ao scroll (SlidePanel/
+// CaseColumn, abaixo) empilhava mal em tela pequena: o cabeçalho fixo cobria
+// o topo do painel ativo em certas posições de rolagem, e o trio de artistas
+// (empilhado dentro do próprio painel antes do lg:) competia com a pilha de
+// fatias, mostrando métricas de dois cases sobrepostas na mesma tela. A
+// lista vertical comum que veio depois resolvia isso, mas virava só mais uma
+// parede de scroll igual a todo o resto da página: nenhum convite a
+// interagir, nenhuma diferença do feed que a pessoa acabou de rolar pra
+// chegar até aqui.
+//
+// Aqui cada case é um cartão largo (82vw, a ponta do próximo espia na borda
+// direita, o convite visual a continuar arrastando), com scroll-snap
+// centralizando um de cada vez: arrastar É a navegação, sem seta, sem
+// autoplay, o mesmo princípio de "rolar é o controle" que já rege a versão
+// de desktop, só que no eixo horizontal. Os pontos abaixo do trilho leem a
+// posição (não navegam, mesmo padrão não clicável dos pontos do desktop),
+// acesos via IntersectionObserver no próprio trilho: cada cartão cruza 60%
+// de visibilidade dentro do trilho (root próprio, não a janela, senão um
+// cartão fora da faixa mas dentro da altura da viewport contaria como
+// visível) vira o ativo. Sem seletor de fatia, sem selo que segue o cursor
+// (não existe hover de verdade em touch): abre a página do case direto, sem
+// o overlay expandido em FLIP que a versão de desktop usa.
 function MobileCaseList({ locale, dict }: { locale: Locale; dict: Dictionary }) {
+  const trackRef = useRef<HTMLDivElement>(null);
+  const [activeIndex, setActiveIndex] = useState(0);
+
+  useEffect(() => {
+    const track = trackRef.current;
+    if (!track) return;
+    const cards = Array.from(
+      track.querySelectorAll<HTMLElement>("[data-mobile-case-index]"),
+    );
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (!entry.isIntersecting) continue;
+          const index = Number((entry.target as HTMLElement).dataset.mobileCaseIndex);
+          setActiveIndex(index);
+        }
+      },
+      { root: track, threshold: 0.6 },
+    );
+    for (const card of cards) observer.observe(card);
+    return () => observer.disconnect();
+  }, []);
+
   return (
     <div className="sm:hidden">
-      {cases.map((caseStudy, index) => {
-        const metric = caseStudy.metrics[0];
-        return (
-          <Reveal key={caseStudy.slug}>
+      <Reveal>
+        <p className="gutter type-mono mb-4 text-muted">{dict.cases.swipeHint}</p>
+      </Reveal>
+
+      <div
+        ref={trackRef}
+        className="no-scrollbar flex snap-x snap-mandatory gap-4 overflow-x-auto px-6 pb-2"
+      >
+        {cases.map((caseStudy, index) => {
+          const metric = caseStudy.metrics[0];
+          return (
             <Link
+              key={caseStudy.slug}
+              data-mobile-case-index={index}
               href={`/${locale}/work/${caseStudy.slug}/`}
-              className="relative block aspect-[3/4] w-full overflow-hidden border-t border-line bg-black text-white first:border-t-0"
+              className="relative block aspect-[3/4] w-[82vw] shrink-0 snap-center overflow-hidden bg-black text-white"
             >
               <MediaView
                 media={caseStudy.cover}
@@ -745,7 +794,7 @@ function MobileCaseList({ locale, dict }: { locale: Locale; dict: Dictionary }) 
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/10 to-black/45" />
 
-              <div className="gutter absolute inset-0 flex flex-col justify-between py-8">
+              <div className="absolute inset-0 flex flex-col justify-between p-6">
                 <div className="flex items-start justify-between gap-4">
                   <p className="type-mono text-white/70">
                     {pad(index + 1)} / {pad(cases.length)} · {caseStudy.year}
@@ -761,7 +810,7 @@ function MobileCaseList({ locale, dict }: { locale: Locale; dict: Dictionary }) 
                 </div>
 
                 <div>
-                  <h3 className="type-display type-inktrap pt-[0.16em] text-[12vw] leading-[0.9]">
+                  <h3 className="type-display type-inktrap pt-[0.16em] text-[11vw] leading-[0.9]">
                     {caseStudy.title[locale]}
                   </h3>
                   <p className="type-mono mt-3 text-white/70">
@@ -774,14 +823,53 @@ function MobileCaseList({ locale, dict }: { locale: Locale; dict: Dictionary }) 
                 </div>
               </div>
             </Link>
-          </Reveal>
-        );
-      })}
+          );
+        })}
+      </div>
+
+      {/* Leitura de posição, não navegação: mesmo padrão não clicável dos
+          pontos do desktop (ver CasesGrid), só que contando cartões em vez
+          de fatias. */}
+      <div className="mt-5 flex items-center justify-center gap-2">
+        {cases.map((caseStudy, index) => (
+          <span
+            key={caseStudy.slug}
+            className={`h-1.5 w-1.5 rounded-full transition-colors ${
+              index === activeIndex ? "bg-foreground" : "bg-line"
+            }`}
+          />
+        ))}
+      </div>
     </div>
   );
 }
 
+// Ponto de entrada da seção: só decide qual versão montar. A versão de
+// desktop mora inteira em `DesktopCasesGrid`, componente à parte (não um
+// `if` no meio deste aqui) justamente para que o `useScroll` dela só exista
+// enquanto o elemento que ela mede também existe (ver comentário no topo do
+// arquivo).
 export function CasesGrid({
+  locale,
+  dict,
+}: {
+  locale: Locale;
+  dict: Dictionary;
+}) {
+  const isDesktop = useMediaQuery("(min-width: 640px)");
+
+  if (!isDesktop) {
+    return (
+      <section id="work" aria-label={dict.cases.title} className="border-t border-line">
+        <MobileCaseList locale={locale} dict={dict} />
+      </section>
+    );
+  }
+
+  return <DesktopCasesGrid locale={locale} dict={dict} />;
+}
+
+function DesktopCasesGrid({
   locale,
   dict,
 }: {
@@ -794,13 +882,6 @@ export function CasesGrid({
     caseStudy: CaseStudy;
     rect: DOMRect;
   } | null>(null);
-  // Abaixo do sm: a pilha de baralho vira uma lista comum (MobileCaseList,
-  // acima): quem decide qual das duas versões monta é este valor, lido
-  // antes de qualquer outro hook usar `sectionRef`/`useScroll` (que tratam
-  // um ref nunca preenchido sem quebrar, mas não faz sentido calcular o
-  // resto se o componente nem vai desenhar a versão presa ao scroll).
-  const isDesktop = useMediaQuery("(min-width: 640px)");
-
   // O trio de artistas sempre é uma fatia só (groupedSlides) na versão de
   // desktop: lado a lado a partir do lg:, empilhado dentro do mesmo painel
   // antes disso (ver SlidePanel). Reduz o scroll do trio a 1/3, em vez de
@@ -894,14 +975,6 @@ export function CasesGrid({
   }
 
   const hoveredCase = cases.find((c) => c.slug === hoveredSlug) ?? null;
-
-  if (!isDesktop) {
-    return (
-      <section id="work" aria-label={dict.cases.title} className="border-t border-line">
-        <MobileCaseList locale={locale} dict={dict} />
-      </section>
-    );
-  }
 
   return (
     <section id="work" aria-label={dict.cases.title} className="border-t border-line">

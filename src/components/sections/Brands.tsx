@@ -40,7 +40,9 @@ export function Brands({ locale, dict }: { locale: Locale; dict: Dictionary }) {
                 <img
                   src={brand.logo}
                   alt={brand.name[locale]}
-                  className="mx-6 h-8 w-auto object-contain sm:mx-8 sm:h-10 dark:invert"
+                  className={`mx-6 w-auto object-contain sm:mx-8 dark:invert ${
+                    brand.large ? "h-12 sm:h-14" : "h-8 sm:h-10"
+                  }`}
                 />
               ) : (
                 <span className="type-serif-display mx-6 whitespace-nowrap text-2xl sm:mx-8 sm:text-3xl">

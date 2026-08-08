@@ -55,7 +55,7 @@ export function Contact({ dict }: { dict: Dictionary }) {
           conteúdo pede. No mobile ela ganha uma altura própria mais contida
           (aspect-ratio, não fração da tela) e continua de ponta a ponta na
           horizontal, sem virar um quadrado pequeno preso no meio da seção. */}
-      <div className="gutter section-y sm:flex sm:w-1/2 sm:flex-shrink-0 sm:flex-col sm:justify-center sm:py-0">
+      <div className="gutter section-y text-center sm:flex sm:w-1/2 sm:flex-shrink-0 sm:flex-col sm:justify-center sm:py-0 sm:text-left">
         <Reveal>
           <h2 className="type-serif-display type-inktrap mb-6 text-5xl sm:text-7xl">
             {dict.contact.title}
