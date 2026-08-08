@@ -49,9 +49,18 @@ export interface CaseStudy {
   group?: string;
 }
 
+/** Um still do processo por trás de um experimento, revelado em ciclo no hover do card (ver ExperimentCard.tsx). */
+export interface ProcessFrame {
+  src: string;
+  /** Frase curta dizendo que etapa do processo aquele still registra. */
+  caption: Localized;
+}
+
 export interface Experiment {
   id: string;
   title: Localized;
   medium: Localized;
   media: Media;
+  /** Bastidores reais, opcional: só cards com material de processo usam. */
+  process?: ProcessFrame[];
 }

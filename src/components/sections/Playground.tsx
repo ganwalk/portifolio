@@ -1,4 +1,4 @@
-import { MediaView } from "@/components/ui/MediaView";
+import { ExperimentCard } from "@/components/ui/ExperimentCard";
 import { Reveal } from "@/components/ui/Reveal";
 import { experiments } from "@/data/experiments";
 import type { Locale } from "@/i18n/config";
@@ -25,23 +25,7 @@ export function Playground({
       <div className="grid grid-cols-1 gap-8 sm:grid-cols-3 lg:gap-12">
         {experiments.map((experiment, index) => (
           <Reveal key={experiment.id} delay={index * 0.1}>
-            <figure className="group border border-line bg-background">
-              <div className="aspect-square overflow-hidden bg-surface">
-                <MediaView
-                  media={experiment.media}
-                  locale={locale}
-                  className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
-                />
-              </div>
-              <figcaption className="border-t border-line p-4">
-                <span className="block font-medium">
-                  {experiment.title[locale]}
-                </span>
-                <span className="type-mono text-muted">
-                  {experiment.medium[locale]}
-                </span>
-              </figcaption>
-            </figure>
+            <ExperimentCard experiment={experiment} locale={locale} />
           </Reveal>
         ))}
       </div>
