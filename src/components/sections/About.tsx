@@ -1,5 +1,5 @@
 import { Reveal } from "@/components/ui/Reveal";
-import { MagneticTag } from "@/components/ui/MagneticTag";
+import { SkillsOrbit } from "@/components/ui/SkillsOrbit";
 import { profile } from "@/data/profile";
 import { localeNames, type Locale } from "@/i18n/config";
 import type { Dictionary } from "@/i18n/dictionaries";
@@ -13,12 +13,11 @@ import type { Dictionary } from "@/i18n/dictionaries";
 // A bio sobe parágrafo por parágrafo, cada um com seu próprio atraso, em vez
 // do bloco inteiro nascer junto.
 //
-// As habilidades trocam a linha corrida com bullet por tags quadradas
-// (MagneticTag, mesma ausência de raio do resto dos controles do site) que
-// puxam sutilmente na direção do cursor: mesmo raciocínio de mola
-// cursor→posição já usado na lente da hero, aplicado a um elemento de
-// verdade em vez de um círculo flutuante. Cada tag entra com seu próprio
-// atraso, escalonado pela mesma lista.
+// As habilidades trocam a linha corrida com bullet por uma constelação
+// (SkillsOrbit): passar o mouse pela área inteira solta as tags do lugar,
+// liga cada uma ao cursor por uma linha fina e as põe em órbita dele. Quando
+// a última assenta, uma frase aparece no meio, no mesmo estilo de selo do
+// "Case completo em breve" do CasesGrid.
 export function About({ locale, dict }: { locale: Locale; dict: Dictionary }) {
   const allSkills = [
     ...profile.skills.core,
@@ -46,13 +45,7 @@ export function About({ locale, dict }: { locale: Locale; dict: Dictionary }) {
             <h3 className="type-mono mb-4 text-muted">
               {dict.about.skillsTitle}
             </h3>
-            <div className="flex flex-wrap gap-2">
-              {allSkills.map((skill, i) => (
-                <Reveal key={skill} delay={0.2 + i * 0.03}>
-                  <MagneticTag>{skill}</MagneticTag>
-                </Reveal>
-              ))}
-            </div>
+            <SkillsOrbit skills={allSkills} message={dict.about.skillsOrbitMessage} />
           </div>
 
           <div>

@@ -7,6 +7,7 @@ export const en: Dictionary = {
       "Interactive experiences from banking to music, grounded in metrics, SEO and performance.",
   },
   nav: {
+    home: "Home",
     work: "Work",
     about: "About",
     contact: "Contact",
@@ -14,6 +15,7 @@ export const en: Dictionary = {
     close: "Close",
     skipToContent: "Skip to content",
     menuDescriptions: {
+      home: "Back to the top of the page.",
       work: "Interfaces that solve real problems, from banking to music.",
       playground:
         "Illustration, animation and music production, the experiments that feed the work.",
@@ -74,6 +76,7 @@ export const en: Dictionary = {
       "Today, at AUVP, I'm responsible for interactive experiences that adapt to the real needs of the people using them, always grounded in metrics, SEO and performance. I love what I do, I'm lucky to do what I love, and maybe we'll end up making something together.",
     ],
     skillsTitle: "Tools & skills",
+    skillsOrbitMessage: "If I don't know it yet, I dig in until I learn it!",
     languagesTitle: "Languages",
   },
   contact: {

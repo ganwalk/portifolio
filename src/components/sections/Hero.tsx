@@ -386,6 +386,7 @@ export function Hero({ dict }: { dict: Dictionary }) {
   // quando decide aparecer.
   return (
     <section
+      id="home"
       ref={sectionRef}
       onMouseMove={onMouseMove}
       onMouseLeave={() => radius.set(0)}

@@ -9,6 +9,7 @@ export const pt = {
       "Experiências interativas do banking à música, fundamentadas em métricas, SEO e performance.",
   },
   nav: {
+    home: "Início",
     work: "Projetos",
     about: "Sobre",
     contact: "Contato",
@@ -18,6 +19,7 @@ export const pt = {
     // Uma frase curta por item do menu, revelada ao lado do rótulo em
     // destaque (ver SiteMenu.tsx). Chaves batem com os `id` de cada item.
     menuDescriptions: {
+      home: "Volta pro topo da página.",
       work: "Interfaces que resolvem problema de verdade, do banking à música.",
       playground:
         "Ilustração, animação e produção musical, os experimentos que alimentam o trabalho.",
@@ -86,6 +88,10 @@ export const pt = {
       "Hoje, na AUVP, sou responsável por experiências interativas que se adaptam às necessidades reais de quem as usa, sempre fundamentadas em métricas, SEO e performance. Amo o que faço, tenho sorte de fazer o que amo, e talvez a gente ainda faça algo juntos.",
     ],
     skillsTitle: "Ferramentas e habilidades",
+    // Aparece quando todas as tags de habilidade terminam de entrar em
+    // órbita do cursor (ver SkillsOrbit.tsx). Mesmo estilo de selo do
+    // "Case completo em breve" do CasesGrid.
+    skillsOrbitMessage: "Se eu não sei fazer ainda, eu fuço até eu aprender!",
     languagesTitle: "Idiomas",
   },
   contact: {
