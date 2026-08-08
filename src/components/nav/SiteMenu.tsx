@@ -12,15 +12,18 @@ import type { Locale } from "@/i18n/config";
 import type { Dictionary } from "@/i18n/dictionaries";
 
 // Navegação lúdica: botão no cabeçalho abre um overlay de tela cheia com os
-// links em tipografia gigante. Passar o mouse em cada link varre uma barra
-// sólida por trás da linha inteira (bg-foreground, o mesmo preto/branco do
-// resto do site, sem cor nova), invertendo rótulo e índice para a cor do
-// fundo por cima dela (mesma lógica de hover já usada no Modo Boring, ver
-// BoringToggle: bg-foreground + text-background), e revela ao lado uma frase
-// curta contando do que aquela seção trata (dict.nav.menuDescriptions, só no
-// lg: onde sobra largura ao lado do rótulo gigante). Os rótulos vão na Whyte
-// Inktrap (.type-inktrap), a mesma dos outros destaques do site. No Modo
-// Boring o menu não existe: a página utilitária é uma coluna só.
+// links em tipografia gigante, separados por linhas finas (border-line, a
+// mesma régua de divisão do resto do site). Passar o mouse em cada link fecha
+// uma barra sólida atrás da linha inteira como uma vinheta, crescendo do
+// centro pra cima e pra baixo ao mesmo tempo, não varrendo de um lado
+// (bg-foreground, o mesmo preto/branco do resto do site, sem cor nova),
+// invertendo rótulo e índice para a cor do fundo por cima dela (mesma lógica
+// de hover já usada no Modo Boring, ver BoringToggle: bg-foreground +
+// text-background), e revela ao lado uma frase curta contando do que aquela
+// seção trata (dict.nav.menuDescriptions, só no lg: onde sobra largura ao
+// lado do rótulo gigante). Os rótulos vão na Whyte Inktrap (.type-inktrap), a
+// mesma dos outros destaques do site. No Modo Boring o menu não existe: a
+// página utilitária é uma coluna só.
 
 const listVariants = {
   open: { transition: { staggerChildren: 0.07, delayChildren: 0.15 } },
@@ -128,17 +131,22 @@ export function SiteMenu({
                   // este div de fora, sem afetar o hover (o navegador conta
                   // como "sobre .group" qualquer descendente, inclusive o
                   // link dentro do recorte).
-                  <div key={item.id} className="group relative">
+                  <div
+                    key={item.id}
+                    className={`group relative ${index > 0 ? "border-t border-line" : ""}`}
+                  >
                     {/* Barra sólida atrás da linha inteira, escondida
-                        (scale-x-0) em repouso e varrendo da esquerda pra
-                        direita no hover: bg-foreground, o mesmo preto/branco
-                        do resto do site, nenhuma cor nova. Sangra até a
-                        borda real da página (-left/-right no exato valor do
-                        padding-inline de .gutter em cada faixa, ver
-                        globals.css), não só até a borda do conteúdo. */}
+                        (scale-y-0) em repouso e fechando como uma vinheta no
+                        hover: cresce do centro pra cima e pra baixo ao mesmo
+                        tempo (origin-center), não varre de um lado.
+                        bg-foreground, o mesmo preto/branco do resto do site,
+                        nenhuma cor nova. Sangra até a borda real da página
+                        (-left/-right no exato valor do padding-inline de
+                        .gutter em cada faixa, ver globals.css), não só até a
+                        borda do conteúdo. */}
                     <span
                       aria-hidden
-                      className="absolute -left-6 -right-6 inset-y-0 origin-left scale-x-0 bg-foreground transition-transform duration-500 ease-out group-hover:scale-x-100 sm:-left-12 sm:-right-12 xl:-left-20 xl:-right-20"
+                      className="absolute -left-6 -right-6 inset-y-0 origin-center scale-y-0 bg-foreground transition-transform duration-500 ease-out group-hover:scale-y-100 sm:-left-12 sm:-right-12 xl:-left-20 xl:-right-20"
                     />
                     <div className="overflow-hidden">
                       <motion.div variants={itemVariants}>
@@ -155,8 +163,17 @@ export function SiteMenu({
                               fonte de manchete que estava aqui, e o rótulo
                               mais longo de então passava da borda direita
                               numa tela estreita. Do sm pra cima sobra espaço
-                              de sobra e o corpo continua o mesmo. */}
-                          <span className="type-display type-inktrap relative z-10 text-[11vw] leading-none text-foreground transition-colors duration-500 ease-out group-hover:text-background sm:text-[7vw]">
+                              de sobra e o corpo continua o mesmo.
+                              translate-y-[0.07em]: a caixa de linha (leading-
+                              none) reserva espaço pra descendentes que um
+                              rótulo só de caixa alta nunca usa, então a
+                              tinta das letras se assenta um pouco acima do
+                              centro geométrico da própria caixa. Sem esse
+                              nudge, medido empiricamente (~7,5px numa fonte
+                              de ~100px, ou seja ~0,07em), a barra de destaque
+                              centralizada na caixa parecia descentralizada
+                              do eixo óptico do texto. */}
+                          <span className="type-display type-inktrap relative z-10 translate-y-[0.07em] text-[11vw] leading-none text-foreground transition-colors duration-500 ease-out group-hover:text-background sm:text-[7vw]">
                             {item.label}
                           </span>
                           {/* Frase curta contando do que a seção trata,
