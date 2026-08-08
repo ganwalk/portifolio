@@ -75,6 +75,9 @@ export const pt = {
       "Métricas ilustrativas, números finais em fase de consolidação.",
     fullCase: "Ver página completa",
   },
+  brands: {
+    title: "Marcas com que já trabalhei",
+  },
   playground: {
     title: "Extras",
     subtitle:
@@ -103,6 +106,8 @@ export const pt = {
     // Escrita em cada quadro da grade interativa, uma palavra por linha,
     // alinhada à direita (ver InteractiveGridImage). Mesmo padrão de
     // hero.subtitleWords: array pronto, cada idioma decide a própria quebra.
+    // Os quatro idiomas aparecem juntos, ciclando quadro a quadro (ver
+    // Contact.tsx): esta chave é só a versão em português da frase.
     gridWords: ["Fale", "comigo!"],
   },
   boring: {

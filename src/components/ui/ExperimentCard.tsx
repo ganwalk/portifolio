@@ -95,7 +95,7 @@ export function ExperimentCard({
           <MediaView
             media={experiment.media}
             locale={locale}
-            className={`h-full w-full object-cover transition-[transform,opacity] duration-700 ease-out group-hover:scale-105 ${
+            className={`h-full w-full object-cover transition-opacity duration-700 ease-out ${
               showProcess ? "opacity-0" : "opacity-100"
             }`}
           />
@@ -110,7 +110,7 @@ export function ExperimentCard({
               alt={i === galleryIndex ? frame.alt[locale] : ""}
               aria-hidden={i !== galleryIndex}
               loading={i === 0 ? undefined : "lazy"}
-              className="absolute inset-0 h-full w-full object-cover transition-[opacity,transform] duration-700 ease-out group-hover:scale-105"
+              className="absolute inset-0 h-full w-full object-cover transition-opacity duration-700 ease-out"
               style={{ opacity: i === galleryIndex ? 1 : 0 }}
             />
           ))}

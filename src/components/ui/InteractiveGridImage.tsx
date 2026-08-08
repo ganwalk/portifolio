@@ -22,16 +22,19 @@ const EASE = 0.1; // suavização por quadro
 interface InteractiveGridImageProps {
   src: string;
   alt: string;
-  /** Escrita em cima de cada quadro, uma palavra por linha, alinhada à
-   *  direita (mesmo alinhamento que a numeração tinha antes dela). */
-  words: readonly string[];
+  /** Uma frase (um array de palavras, uma por linha, alinhada à direita) por
+   *  idioma do site. Cada quadro da grade recebe uma frase por vez, na
+   *  ordem, ciclando (quadro 0 = idioma 0, quadro 1 = idioma 1, ...): o
+   *  convite "fale comigo" aparece em todos os idiomas ao mesmo tempo, não
+   *  repetido igual em todo quadro. */
+  phrases: readonly (readonly string[])[];
   className?: string;
 }
 
 export function InteractiveGridImage({
   src,
   alt,
-  words,
+  phrases,
   className = "",
 }: InteractiveGridImageProps) {
   const { isBoringMode } = useBoringMode();
@@ -168,14 +171,14 @@ export function InteractiveGridImage({
             dh,
           );
 
-          // A mesma frase (`words`) escrita em todo quadro, uma palavra por
-          // linha, alinhada à direita: cada quadro é um carimbo repetido do
-          // convite, não uma numeração distinta. O ajuste ao tamanho segue o
+          // Um idioma por quadro, ciclando (ver comentário na prop
+          // `phrases`): cada quadro é um convite num idioma diferente do
+          // site, não um carimbo repetido. O ajuste ao tamanho segue o
           // mesmo raciocínio de antes (fonte proporcional ao lado menor do
-          // quadro), mas agora medindo a largura de verdade de cada palavra
-          // (measureText), já que "comigo!" é bem mais largo que um número
-          // de um ou dois dígitos, e a altura precisa caber TODAS as linhas,
-          // não uma só.
+          // quadro), mas medindo a largura de verdade de cada palavra
+          // (measureText), já que o comprimento muda de idioma pra idioma, e
+          // a altura precisa caber TODAS as linhas, não uma só.
+          const words = phrases[(r * COLS + c) % phrases.length];
           const fs = Math.max(7, Math.min(dw, dh) * 0.1);
           const pad = fs * 0.4;
           const lineHeight = fs * 1.15;
@@ -238,7 +241,7 @@ export function InteractiveGridImage({
       canvas.removeEventListener("pointerleave", clearPointer);
       canvas.removeEventListener("pointercancel", clearPointer);
     };
-  }, [src, words, isBoringMode]);
+  }, [src, phrases, isBoringMode]);
 
   if (isBoringMode) return null;
 
