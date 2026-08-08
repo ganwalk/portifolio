@@ -89,4 +89,11 @@ export interface Brand {
    * nome sólido, a mesma linguagem de vaga aberta do resto do site.
    */
   isInvite?: boolean;
+  /**
+   * true pra logos quadradas (Minuto Indie, Hits Perdidos): numa altura
+   * fixa, uma logo quadrada ocupa bem menos largura que as retangulares
+   * (AUVP, Defensoria), pesando visualmente menos no letreiro mesmo sem
+   * nenhuma margem transparente pra cortar. Compensa com uma altura maior.
+   */
+  large?: boolean;
 }

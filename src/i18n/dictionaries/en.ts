@@ -57,6 +57,7 @@ export const en: Dictionary = {
     title: "Featured projects",
     interactiveExperiences: "Interactive experiences",
     scrollHint: "Scroll to navigate",
+    swipeHint: "Swipe to browse",
     viewCase: "View case",
     comingSoon: "Full case study coming soon",
     metricsDisclaimer:
@@ -64,7 +65,7 @@ export const en: Dictionary = {
     fullCase: "View full page",
   },
   brands: {
-    title: "Brands I've worked with",
+    title: "They believe in my work",
   },
   playground: {
     title: "Extras",

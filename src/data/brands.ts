@@ -19,10 +19,12 @@ export const brands: Brand[] = [
   {
     name: { pt: "Minuto Indie", en: "Minuto Indie", es: "Minuto Indie", zh: "Minuto Indie" },
     logo: `${basePath}/logos/minuto-indie.webp`,
+    large: true,
   },
   {
     name: { pt: "Hits Perdidos", en: "Hits Perdidos", es: "Hits Perdidos", zh: "Hits Perdidos" },
     logo: `${basePath}/logos/hits-perdidos.webp`,
+    large: true,
   },
   {
     name: {

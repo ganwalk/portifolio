@@ -89,7 +89,13 @@ export function SkillsOrbit({
   }, []);
 
   useEffect(() => {
-    if (reduceMotion) return;
+    // Sem hover de verdade em touch, a corrente nunca capturava nada mesmo
+    // antes desta checagem (mousemove/mouseenter não disparam lá), mas o
+    // efeito ainda montava os listeners e o rAF à toa; agora nem monta,
+    // então a linha (sempre presente no DOM, só invisível por padrão)
+    // nunca corre risco de acender sozinha num evento de mouse sintético
+    // que algum navegador touch dispare num toque.
+    if (reduceMotion || isCoarsePointer) return;
     const section = sectionRef.current;
     const container = containerRef.current;
     if (!section || !container) return;
@@ -275,7 +281,7 @@ export function SkillsOrbit({
       section.removeEventListener("mouseenter", onMouseEnter);
       section.removeEventListener("mouseleave", onMouseLeave);
     };
-  }, [skills, reduceMotion, sectionRef]);
+  }, [skills, reduceMotion, sectionRef, isCoarsePointer]);
 
   // Quem pede menos movimento no sistema recebe as tags paradas na grade,
   // sem linha, sem corrente, sem mensagem: mesma vitrine, sem o movimento.

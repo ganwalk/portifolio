@@ -336,6 +336,18 @@ export function Hero({ dict }: { dict: Dictionary }) {
 
   const titleLens = hasPointer && !reduceMotion && !titleUnsupported;
 
+  // A lente só liga depois de 2s na página: de cara ela competia com a
+  // animação de entrada do nome e do retrato, o olhar ainda nem tinha
+  // pousado no título e o vidro já distorcia tudo. O atraso é só pro
+  // GATILHO (onMouseMove ignora eventos antes disso); a mola e a máscara
+  // continuam do jeito que já eram, a lente simplesmente começa fechada por
+  // mais um instante.
+  const [lensReady, setLensReady] = useState(false);
+  useEffect(() => {
+    const timer = window.setTimeout(() => setLensReady(true), 2000);
+    return () => window.clearTimeout(timer);
+  }, []);
+
   const mouseX = useMotionValue(-600);
   const mouseY = useMotionValue(-600);
   const radius = useMotionValue(0);
@@ -361,6 +373,7 @@ export function Hero({ dict }: { dict: Dictionary }) {
   const lensOpacity = useTransform(r, [0, 8], [0, 1]);
 
   const onMouseMove = (event: React.MouseEvent) => {
+    if (!lensReady) return;
     const section = sectionRef.current;
     if (!section) return;
     const rect = section.getBoundingClientRect();
