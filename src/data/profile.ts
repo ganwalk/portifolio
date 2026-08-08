@@ -36,27 +36,60 @@ export const profile = {
       },
     },
   ],
+  // Nomes próprios (linguagens, produtos) ficam iguais nos quatro idiomas de
+  // propósito: HTML, React e Figma não se traduzem. O resto segue a mesma
+  // forma { pt, en, es, zh } do resto do arquivo (ver languages acima).
   skills: {
     core: [
-      "UX/UI Design",
-      "Protótipos de alta fidelidade",
-      "Design Systems",
-      "HTML",
-      "React",
-      "TypeScript",
+      { pt: "UX/UI Design", en: "UX/UI Design", es: "UX/UI Design", zh: "UX/UI Design" },
+      {
+        pt: "Protótipos de alta fidelidade",
+        en: "High-fidelity prototypes",
+        es: "Prototipos de alta fidelidad",
+        zh: "高保真原型",
+      },
+      { pt: "Design Systems", en: "Design Systems", es: "Sistemas de diseño", zh: "设计系统" },
+      { pt: "HTML", en: "HTML", es: "HTML", zh: "HTML" },
+      { pt: "React", en: "React", es: "React", zh: "React" },
+      { pt: "TypeScript", en: "TypeScript", es: "TypeScript", zh: "TypeScript" },
     ],
     tools: [
-      "Figma",
-      "Adobe CC",
-      "Canva",
-      "Microsoft Clarity",
-      "Google Analytics",
+      { pt: "Figma", en: "Figma", es: "Figma", zh: "Figma" },
+      { pt: "Adobe CC", en: "Adobe CC", es: "Adobe CC", zh: "Adobe CC" },
+      { pt: "Canva", en: "Canva", es: "Canva", zh: "Canva" },
+      {
+        pt: "Microsoft Clarity",
+        en: "Microsoft Clarity",
+        es: "Microsoft Clarity",
+        zh: "Microsoft Clarity",
+      },
+      {
+        pt: "Google Analytics",
+        en: "Google Analytics",
+        es: "Google Analytics",
+        zh: "Google Analytics",
+      },
     ],
     secondary: [
-      "Animação",
-      "Ilustração & colagem",
-      "Produção musical",
-      "Edição de vídeo",
+      { pt: "Animação", en: "Animation", es: "Animación", zh: "动画" },
+      {
+        pt: "Ilustração & colagem",
+        en: "Illustration & collage",
+        es: "Ilustración & collage",
+        zh: "插画与拼贴",
+      },
+      {
+        pt: "Produção musical",
+        en: "Music production",
+        es: "Producción musical",
+        zh: "音乐制作",
+      },
+      {
+        pt: "Edição de vídeo",
+        en: "Video editing",
+        es: "Edición de video",
+        zh: "视频剪辑",
+      },
     ],
   },
   experience: [

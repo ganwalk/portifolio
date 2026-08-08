@@ -7,27 +7,43 @@ import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 // grade normal (flex-wrap). O gatilho é a dobra "sobre" inteira (sectionRef),
 // não só a área das tags, então o efeito funciona mesmo com o mouse passando
 // por cima da bio ou do resto da coluna. Cada tag só entra na fila quando o
-// cursor passa perto da posição de repouso dela, uma de cada vez, nunca todas
-// juntas: por isso captura por proximidade em vez de um gatilho de hover
-// único. Cada tag capturada vira um elo de uma corrente que pende abaixo do
-// mouse, ligado ao elo anterior por uma linha fina, cada um perseguindo a
-// posição do elo à frente com o mesmo atraso (mesma mola de sempre), o que dá
-// o chicote de cobra/fita reagindo à velocidade do mouse: quanto mais rápido
-// o cursor se move, mais a cauda atrasa e estica. Quando a última tag entra
-// na corrente, a frase aparece acima do cursor (não em cima da corrente, que
-// pende pra baixo), no mesmo estilo de selo do "Case completo em breve" do
-// CasesGrid.
+// cursor passa por CIMA da própria caixa dela (bounding box + uma margem
+// pequena, não um raio largo): é o que garante que nenhuma tag se solte antes
+// da hora, nem que passar perto de uma capture as vizinhas de carona. Cada
+// tag capturada vira um elo de uma corrente que pende abaixo do mouse, ligado
+// ao elo anterior por uma linha fina, cada um perseguindo a posição do elo à
+// frente com o mesmo atraso (mesma mola de sempre), o que dá o chicote de
+// cobra/fita reagindo à velocidade do mouse: quanto mais rápido o cursor se
+// move, mais a cauda atrasa e estica. 5 segundos depois da primeira captura,
+// se a pessoa ainda não coletou todas, a frase aparece acima do cursor (nunca
+// em cima da corrente, que pende pra baixo). As caixas têm fundo sólido
+// (bg-background) de propósito: sem isso a linha por trás delas atravessa o
+// meio da caixa em vez de só ligar uma à outra.
 //
 // rAF com escrita direta no DOM (style.transform, sem state por quadro),
 // mesmo raciocínio de InteractiveGridImage e HeroTitleGL: são ~15 elementos
 // animando toda hora que o cursor se move, e passar isso por state do React
 // recriaria o componente inteiro a cada quadro.
-const CAPTURE_RADIUS = 70; // px, raio de proximidade da própria posição de repouso da tag
+// px de margem além da própria caixa da tag, pra não exigir precisão de
+// pixel: precisa ficar abaixo de metade do gap-2 (8px) do flex-wrap, senão a
+// margem de duas tags vizinhas na mesma linha se sobrepõe no meio do vão e
+// as duas capturam juntas.
+const CAPTURE_PAD = 3;
 const LINK_SPACING = 40; // px, distância entre elos da corrente
 const EASE = 0.2; // suavização por quadro: quanto maior, mais rígido; a cauda ainda atrasa porque o alvo de cada elo é a posição já suavizada do anterior
-const REVEAL_DELAY_MS = 350; // tempo até a mensagem aparecer, depois que a última tag entra na corrente
+const MESSAGE_DELAY_MS = 5000; // tempo desde a primeira captura até a frase aparecer, se ainda faltar coletar alguma
 const MESSAGE_OFFSET = 28; // px acima do cursor
 const LINE_OPACITY = 0.35;
+
+const mobileTagVariants = {
+  hidden: { opacity: 0, y: 14, rotate: -3 },
+  visible: (i: number) => ({
+    opacity: 1,
+    y: 0,
+    rotate: 0,
+    transition: { delay: i * 0.045, duration: 0.4, ease: [0.16, 1, 0.3, 1] as const },
+  }),
+};
 
 export function SkillsOrbit({
   skills,
@@ -45,6 +61,19 @@ export function SkillsOrbit({
   const messageRef = useRef<HTMLDivElement>(null);
 
   const [revealMessage, setRevealMessage] = useState(false);
+  // Sem hover de verdade em touch, o gatilho da corrente nunca dispara: em
+  // troca, telas sem ponteiro fino ganham uma entrada em cascata (cada tag
+  // "pousa" na grade com seu próprio atraso), pra essa dobra não ficar tão
+  // parada no mobile quanto no desktop.
+  const [isCoarsePointer, setIsCoarsePointer] = useState(false);
+
+  useEffect(() => {
+    const query = window.matchMedia("(hover: none), (pointer: coarse)");
+    const sync = () => setIsCoarsePointer(query.matches);
+    sync();
+    query.addEventListener("change", sync);
+    return () => query.removeEventListener("change", sync);
+  }, []);
 
   useEffect(() => {
     if (reduceMotion) return;
@@ -58,11 +87,11 @@ export function SkillsOrbit({
     let revealScheduled = false;
 
     const mouse = { x: 0, y: 0 };
-    // Posição "de repouso" de cada tag, relativa ao container das tags:
-    // medida de novo sempre que o mouse entra na dobra, porque o layout
-    // (flex-wrap) muda com a largura da tela e não dá pra confiar numa
-    // medida antiga.
-    const natural: { x: number; y: number }[] = [];
+    // Posição e metade do tamanho "de repouso" de cada tag, relativa ao
+    // container das tags: medida de novo sempre que o mouse entra na dobra,
+    // porque o layout (flex-wrap) muda com a largura da tela e não dá pra
+    // confiar numa medida antiga.
+    const natural: { x: number; y: number; halfW: number; halfH: number }[] = [];
     const current = skills.map(() => ({ x: 0, y: 0 }));
     const captured = new Set<number>();
     const capturedOrder: number[] = [];
@@ -80,6 +109,8 @@ export function SkillsOrbit({
         natural.push({
           x: box.left - containerBox.left + box.width / 2,
           y: box.top - containerBox.top + box.height / 2,
+          halfW: box.width / 2,
+          halfH: box.height / 2,
         });
       }
     }
@@ -114,22 +145,26 @@ export function SkillsOrbit({
 
     function frame() {
       if (active) {
+        const hadCapture = capturedOrder.length > 0;
+
         skills.forEach((_, i) => {
           if (captured.has(i)) return;
           const rest = natural[i];
           if (!rest) return;
-          const dx = mouse.x - rest.x;
-          const dy = mouse.y - rest.y;
-          if (dx * dx + dy * dy < CAPTURE_RADIUS * CAPTURE_RADIUS) {
+          const withinX = Math.abs(mouse.x - rest.x) <= rest.halfW + CAPTURE_PAD;
+          const withinY = Math.abs(mouse.y - rest.y) <= rest.halfH + CAPTURE_PAD;
+          if (withinX && withinY) {
             captured.add(i);
             capturedOrder.push(i);
             chainPos.set(i, capturedOrder.length - 1);
           }
         });
 
-        if (capturedOrder.length === skills.length && !revealScheduled) {
+        if (!hadCapture && capturedOrder.length > 0 && !revealScheduled) {
           revealScheduled = true;
-          revealTimer = window.setTimeout(() => setRevealMessage(true), REVEAL_DELAY_MS);
+          revealTimer = window.setTimeout(() => {
+            if (capturedOrder.length < skills.length) setRevealMessage(true);
+          }, MESSAGE_DELAY_MS);
         }
       }
 
@@ -221,7 +256,7 @@ export function SkillsOrbit({
         {skills.map((skill) => (
           <span
             key={skill}
-            className="type-mono inline-block border border-line px-3 py-1.5"
+            className="type-mono inline-block border border-line bg-background px-3 py-1.5"
           >
             {skill}
           </span>
@@ -248,15 +283,20 @@ export function SkillsOrbit({
       </svg>
 
       {skills.map((skill, i) => (
-        <span
+        <motion.span
           key={skill}
           ref={(el) => {
             tagRefs.current[i] = el;
           }}
-          className="type-mono relative inline-block border border-line px-3 py-1.5"
+          className="type-mono relative inline-block border border-line bg-background px-3 py-1.5"
+          custom={i}
+          initial={isCoarsePointer ? "hidden" : false}
+          whileInView={isCoarsePointer ? "visible" : undefined}
+          viewport={{ once: true, amount: 0.4 }}
+          variants={mobileTagVariants}
         >
           {skill}
-        </span>
+        </motion.span>
       ))}
 
       <AnimatePresence>

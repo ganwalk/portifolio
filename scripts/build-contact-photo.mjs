@@ -29,7 +29,7 @@ import { fileURLToPath } from "node:url";
 // pathname devolveria "frames%20eu", que não existe no disco.
 const here = (path) => fileURLToPath(new URL(path, import.meta.url));
 
-const SRC = here("../frames eu/contatos.jpg");
+const SRC = here("../frames eu/WhatsApp Image 2026-08-08 at 12.33.01.jpeg");
 const OUT_DIR = here("../public/photos");
 const OUT = `${OUT_DIR}/armando-contato.webp`;
 const WIDTH = 1050;
