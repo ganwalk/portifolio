@@ -15,7 +15,7 @@ export const en: Dictionary = {
     close: "Close",
     skipToContent: "Skip to content",
     menuDescriptions: {
-      home: "Back to the top of the page.",
+      home: "You loved watching me spin around.",
       work: "Interfaces that solve real problems, from banking to music.",
       playground:
         "Illustration, animation and music production, the experiments that feed the work.",
@@ -76,7 +76,7 @@ export const en: Dictionary = {
       "Today, at AUVP, I'm responsible for interactive experiences that adapt to the real needs of the people using them, always grounded in metrics, SEO and performance. I love what I do, I'm lucky to do what I love, and maybe we'll end up making something together.",
     ],
     skillsTitle: "Tools & skills",
-    skillsOrbitMessage: "If I don't know it yet, I dig in until I learn it!",
+    skillsOrbitMessage: "If I don't know it, I dig in until I learn it!",
     languagesTitle: "Languages",
   },
   contact: {

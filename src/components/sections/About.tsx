@@ -26,7 +26,7 @@ export function About({ locale, dict }: { locale: Locale; dict: Dictionary }) {
     ...profile.skills.core,
     ...profile.skills.tools,
     ...profile.skills.secondary,
-  ];
+  ].map((skill) => skill[locale]);
 
   return (
     <section

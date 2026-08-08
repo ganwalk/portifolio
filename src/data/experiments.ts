@@ -9,16 +9,16 @@ export const experiments: Experiment[] = [
   {
     id: "colagem-01",
     title: {
-      pt: "Colagens digitais",
-      en: "Digital collages",
-      es: "Collages digitales",
-      zh: "数字拼贴",
+      pt: "Colagens e ilustrações digitais",
+      en: "Digital collages and illustrations",
+      es: "Collages e ilustraciones digitales",
+      zh: "数字拼贴与插画",
     },
     medium: {
-      pt: "Ilustração & colagem",
-      en: "Illustration & collage",
-      es: "Ilustración & collage",
-      zh: "插画与拼贴",
+      pt: "Estampas, quadros & pôsteres",
+      en: "Prints, frames & posters",
+      es: "Estampados, cuadros & pósters",
+      zh: "印花、画框与海报",
     },
     // Sugestão de mídia real: uma colagem finalizada em alta, ou um carrossel
     // de recortes escaneados.

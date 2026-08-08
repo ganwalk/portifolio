@@ -190,15 +190,13 @@ export function SiteMenu({
                               revelada junto da barra, na cor do fundo por
                               cima dela, digitada caractere por caractere (daí
                               o estado de hover em JS, não só group-hover: o
-                              tempo de digitação depende do texto real). Só no
-                              lg:, onde sobra largura ao lado do rótulo
-                              gigante; em telas estreitas o rótulo já ocupa a
-                              linha inteira. Sem .type-mono aqui de propósito
-                              (mesmo critério do tooltip em BoringToggle): a
-                              classe força caixa alta, e uma frase inteira em
-                              versal lê pior que em caixa normal. Fonte mono
-                              só no family. */}
-                          <span className="relative z-10 ml-auto hidden max-w-xs self-center text-right font-mono text-xs tracking-wide text-background opacity-0 transition-opacity duration-150 ease-out group-hover:opacity-100 lg:block">
+                              tempo de digitação depende do texto real), em
+                              caixa alta (uppercase, não .type-mono: a classe
+                              muda outras coisas além da caixa, e aqui só a
+                              caixa importa). Só no lg:, onde sobra largura ao
+                              lado do rótulo gigante; em telas estreitas o
+                              rótulo já ocupa a linha inteira. */}
+                          <span className="relative z-10 ml-auto hidden max-w-xs self-center text-right font-mono text-xs uppercase tracking-wide text-background opacity-0 transition-opacity duration-150 ease-out group-hover:opacity-100 lg:block">
                             <TypewriterText
                               key={hoveredId === item.id ? "typing" : "idle"}
                               text={dict.nav.menuDescriptions[item.id]}

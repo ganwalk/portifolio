@@ -15,7 +15,7 @@ export const es: Dictionary = {
     close: "Cerrar",
     skipToContent: "Saltar al contenido",
     menuDescriptions: {
-      home: "Vuelve al inicio de la página.",
+      home: "Te encantó verme girar.",
       work: "Interfaces que resuelven problemas reales, del banking a la música.",
       playground:
         "Ilustración, animación y producción musical, los experimentos que alimentan el trabajo.",
@@ -77,7 +77,7 @@ export const es: Dictionary = {
       "Hoy, en AUVP, soy responsable de experiencias interactivas que se adaptan a las necesidades reales de quienes las usan, siempre fundamentadas en métricas, SEO y performance. Amo lo que hago, tengo la suerte de hacer lo que amo, y quizás terminemos haciendo algo juntos.",
     ],
     skillsTitle: "Herramientas y habilidades",
-    skillsOrbitMessage: "¡Si todavía no sé hacerlo, insisto hasta aprender!",
+    skillsOrbitMessage: "¡Si no sé hacerlo, insisto hasta aprender!",
     languagesTitle: "Idiomas",
   },
   contact: {

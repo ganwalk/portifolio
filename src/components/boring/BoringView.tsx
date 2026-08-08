@@ -112,7 +112,9 @@ export function BoringView({
               ...profile.skills.core,
               ...profile.skills.tools,
               ...profile.skills.secondary,
-            ].join(" · ")}
+            ]
+              .map((skill) => skill[locale])
+              .join(" · ")}
           </p>
         </div>
         <div>
