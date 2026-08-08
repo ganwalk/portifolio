@@ -29,7 +29,7 @@ export function LocaleSwitcher({
   return (
     <nav
       aria-label={dict.controls.language}
-      className={`flex gap-2 ${className}`}
+      className={`flex gap-1 ${className}`}
     >
       {locales.map((l) => (
         <Link
@@ -37,7 +37,7 @@ export function LocaleSwitcher({
           href={switchLocalePath(l)}
           hrefLang={l}
           aria-current={l === locale ? "true" : undefined}
-          className={`type-mono px-1 py-1.5 ${
+          className={`type-mono px-0.5 py-1.5 ${
             l === locale
               ? "text-foreground underline underline-offset-4"
               : "text-muted hover:text-foreground"

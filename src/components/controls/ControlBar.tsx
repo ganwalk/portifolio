@@ -27,7 +27,7 @@ export function ControlBar({ locale, dict }: ControlBarProps) {
     "type-mono cursor-pointer text-muted hover:text-foreground transition-colors";
 
   return (
-    <div className="no-print flex flex-wrap items-center gap-4">
+    <div className="no-print flex flex-wrap items-center gap-2">
       <button
         type="button"
         className={buttonClass}
