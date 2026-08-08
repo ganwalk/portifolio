@@ -13,7 +13,12 @@ import type { Locale } from "@/i18n/config";
 // cursor dizendo que etapa é aquela, no mesmo idioma "letreiro preso ao
 // mouse" do SkillsOrbit. Sem `process`, o card nunca monta esse aparato.
 const CYCLE_MS = 1600;
-const CAPTION_OFFSET = 16;
+const CAPTION_OFFSET_X = 16;
+// O cursor personalizado (ver cursor/hover.webp) é uma mãozinha de 56x63
+// com o hotspot no topo, então ela ocupa quase 63px abaixo da posição real
+// do mouse: um offset vertical raso deixava a legenda nascendo tampada pela
+// própria mão.
+const CAPTION_OFFSET_Y = 60;
 
 export function ExperimentCard({
   experiment,
@@ -49,7 +54,7 @@ export function ExperimentCard({
       const rect = box!.getBoundingClientRect();
       const el = captionRef.current;
       if (!el) return;
-      el.style.transform = `translate(${event.clientX - rect.left + CAPTION_OFFSET}px, ${event.clientY - rect.top + CAPTION_OFFSET}px)`;
+      el.style.transform = `translate(${event.clientX - rect.left + CAPTION_OFFSET_X}px, ${event.clientY - rect.top + CAPTION_OFFSET_Y}px)`;
     }
     box.addEventListener("mousemove", onMove);
     return () => box.removeEventListener("mousemove", onMove);

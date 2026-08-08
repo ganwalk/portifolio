@@ -53,8 +53,9 @@ export const experiments: Experiment[] = [
     },
     // "Cagumela": teste de animação de um personagem e cenário autorais.
     // O vídeo é o resultado final, em loop mudo; o hover troca a vitrine
-    // pelos stills do processo (ver ExperimentCard.tsx), em ordem: model
-    // sheet do personagem, concept art do cenário, paleta fechada.
+    // pelos stills do processo (ver ExperimentCard.tsx), em ordem: concept
+    // art do cenário, depois model sheet do personagem. Sai do hover, volta
+    // pro vídeo.
     media: {
       kind: "video",
       src: `${basePath}/videos/cagumela-ceu.mp4`,
@@ -68,15 +69,6 @@ export const experiments: Experiment[] = [
     },
     process: [
       {
-        src: `${basePath}/photos/cagumela-modelsheet.webp`,
-        caption: {
-          pt: "Model sheet do personagem, o traço antes de animar",
-          en: "Character model sheet, the linework before animating",
-          es: "Model sheet del personaje, el trazo antes de animar",
-          zh: "角色设定表，动画前先定好的线稿",
-        },
-      },
-      {
         src: `${basePath}/photos/cagumela-quarto.webp`,
         caption: {
           pt: "Concept art do cenário, a cor antes da cena",
@@ -86,12 +78,12 @@ export const experiments: Experiment[] = [
         },
       },
       {
-        src: `${basePath}/photos/cagumela-paleta.webp`,
+        src: `${basePath}/photos/cagumela-modelsheet.webp`,
         caption: {
-          pt: "Paleta fechada antes do quadro final",
-          en: "Palette locked before the final frame",
-          es: "Paleta cerrada antes del cuadro final",
-          zh: "定稿画面前先锁定的色板",
+          pt: "Model sheet do personagem, o traço antes de animar",
+          en: "Character model sheet, the linework before animating",
+          es: "Model sheet del personaje, el trazo antes de animar",
+          zh: "角色设定表，动画前先定好的线稿",
         },
       },
     ],
