@@ -106,14 +106,15 @@ function HeroContent({
   // mesma conta de altura. No desktop ele volta a ser absoluto, à direita,
   // porque lá sobra espaço ao lado da manchete e não precisa disputar altura
   // com mais nada.
-  // pt-24 no mobile: a segunda linha do cabeçalho (Modo Boring e, logo
-  // abaixo, o idioma) fica sempre visível, até antes de rolar (veja
-  // SiteFrame), então a hero precisa reservar espaço pra ela por baixo, senão
-  // "ARMANDO CUSTODIO" nasce colado na tarja. A segunda linha cresceu de uma
-  // pra duas fileiras quando o idioma ganhou lugar ali, e o respiro precisou
-  // crescer junto.
+  // pt-20 no mobile: o cabeçalho é uma barra só, sempre visível, até antes
+  // de rolar (veja SiteFrame), então a hero precisa reservar espaço pra ela
+  // por cima, senão o nome nasce colado na tarja. Antes eram duas linhas
+  // (Modo Boring numa, idioma embaixo), e o respiro precisava cobrir as
+  // duas; virando a barra uma linha só (Modo Boring, lua e idioma dividindo
+  // a mesma altura), sobra menos vazio pra reservar, e o conteúdo da hero
+  // sobe mais perto do topo disponível.
   return (
-    <div className="gutter relative flex flex-1 flex-col items-center justify-between pb-14 pt-24 sm:items-stretch sm:pt-32">
+    <div className="gutter relative flex flex-1 flex-col items-center justify-between pb-14 pt-20 sm:items-stretch sm:pt-32">
       {/* Dentro do HeroContent, e não solto no <section>: assim a cópia
           espelhada também recebe o canvas, e o nome deformado inverte junto
           com o resto em vez de sumir atrás do disco de tinta da lente. */}
