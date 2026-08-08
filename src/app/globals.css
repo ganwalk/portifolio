@@ -227,6 +227,36 @@ body {
   }
 }
 
+/* Entrada do retrato, só no desktop (mesmo corte de 640px do resto da
+   hero): sobe de baixo pra cima junto com o nome e o resto da composição,
+   na mesma curva cubic-bezier(0.16, 1, 0.3, 1) e janela de tempo dos
+   reveals em Hero.tsx (delay 0.35s + índice × 0.12s: este entra entre o
+   subtítulo e o CTA). CSS puro, não Framer: framer-motion só aplica o
+   estado inicial depois que o React hidrata, e até lá o navegador já
+   pintou o retrato no estado final (testado: a versão em Framer chegava a
+   nascer com opacity 1 já na primeira pintura, a animação nunca rodava de
+   verdade). @media resolve com o valor certo desde a primeira renderização,
+   sem depender de hidratação. backwards mantém o quadro inicial (oculto)
+   até o delay começar, e a regra global de prefers-reduced-motion (mais
+   abaixo neste arquivo) já encolhe a duração pra quem pede menos
+   movimento, sem precisar de mais uma condicional aqui. */
+@media (min-width: 640px) {
+  .portrait-enter {
+    animation: portrait-enter 0.9s cubic-bezier(0.16, 1, 0.3, 1) 0.45s backwards;
+  }
+}
+
+@keyframes portrait-enter {
+  from {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 /* Dentro da lente o retrato inverte junto com o resto da página. */
 .lens-invert .portrait-frames {
   filter: invert(1);

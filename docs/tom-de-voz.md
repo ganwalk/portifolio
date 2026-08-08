@@ -22,7 +22,7 @@ Para pausar a frase: vírgula, ponto, dois pontos ou parênteses. Para separar i
 em linha: bullet (·), que já faz parte da identidade visual.
 
 **Exceção técnica:** hífen e sublinhado continuam válidos onde são sintaxe e não
-texto, ou seja, slugs de URL (`guia-da-musica-2026`), nomes de arquivo, chaves de
+texto, ou seja, slugs de URL (`ecossistema-auvp`), nomes de arquivo, chaves de
 localStorage, classes CSS e propriedades de código. O que a pessoa lê na tela é que
 precisa estar limpo.
 

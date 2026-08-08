@@ -63,6 +63,9 @@ export const en: Dictionary = {
       "Illustrative metrics, final numbers being consolidated.",
     fullCase: "View full page",
   },
+  brands: {
+    title: "Brands I've worked with",
+  },
   playground: {
     title: "Extras",
     subtitle:

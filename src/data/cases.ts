@@ -1,6 +1,6 @@
 import type { CaseStudy } from "./types";
 
-// Lineup de lançamento: 2 cases de Banking + 4 de Música. Os três artistas
+// Lineup de lançamento: 2 cases de Banking + 3 de Música. Os três artistas
 // (Ganwalk, Dezert Horse, Pink Opala) são projetos individuais, cada um com
 // a própria página e o próprio lugar no carrossel da home, não um case
 // guarda chuva só.
@@ -84,11 +84,13 @@ export const cases: CaseStudy[] = [
     slug: "ecossistema-auvp",
     area: "banking",
     year: "2023/2026",
+    // "Sites", não "Sites AUVP": a lista vai crescer com sites fora da
+    // AUVP, o rótulo não pode ficar preso a um cliente só.
     title: {
-      pt: "Sites AUVP",
-      en: "AUVP websites",
-      es: "Sitios AUVP",
-      zh: "AUVP 网站",
+      pt: "Sites",
+      en: "Websites",
+      es: "Sitios",
+      zh: "网站",
     },
     statement: {
       pt: "Desenho e mantenho o ecossistema de webpages da AUVP Capital, guiado por métricas, SEO e performance.",
@@ -291,56 +293,6 @@ export const cases: CaseStudy[] = [
         en: "Pink clouds against a late afternoon sky",
         es: "Nubes rosadas sobre un cielo de atardecer",
         zh: "傍晚天空中的粉色云层",
-      },
-    },
-    comingSoon: true,
-  },
-  {
-    slug: "guia-da-musica-2026",
-    area: "music",
-    year: "2026",
-    title: {
-      pt: "Guia da Música 2026",
-      en: "Music Guide 2026",
-      es: "Guía de la Música 2026",
-      zh: "2026 音乐指南",
-    },
-    statement: {
-      pt: "Projetei o Guia da Música 2026, uma experiência editorial e interativa para navegar o ano da música.",
-      en: "I designed the Music Guide 2026, an editorial, interactive experience for navigating the year in music.",
-      es: "Diseñé la Guía de la Música 2026, una experiencia editorial e interactiva para navegar el año de la música.",
-      zh: "设计了《2026 音乐指南》，一份用于浏览全年音乐动态的编辑式互动体验。",
-    },
-    tags: {
-      pt: ["Editorial", "Interatividade", "Música"],
-      en: ["Editorial", "Interactivity", "Music"],
-      es: ["Editorial", "Interactividad", "Música"],
-      zh: ["编辑设计", "互动设计", "音乐"],
-    },
-    metrics: [
-      {
-        value: "+XX",
-        label: {
-          pt: "mil leituras",
-          en: "thousand reads",
-          es: "mil lecturas",
-          zh: "千次阅读",
-        },
-        illustrative: true,
-      },
-    ],
-    // Sugestão de mídia real: scroll gravado do próprio Guia, mostrando as
-    // interações editoriais, ou animação da capa da edição 2026.
-    cover: {
-      kind: "video",
-      src: "https://videos.pexels.com/video-files/856242/856242-hd_1920_1080_30fps.mp4",
-      poster:
-        "https://images.pexels.com/videos/856242/free-video-856242.jpg?auto=compress&w=1280",
-      alt: {
-        pt: "Páginas de um livro sendo viradas",
-        en: "Book pages being turned",
-        es: "Páginas de un libro pasando",
-        zh: "书页被翻动",
       },
     },
     comingSoon: true,

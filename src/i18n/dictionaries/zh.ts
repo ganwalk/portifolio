@@ -63,6 +63,9 @@ export const zh: Dictionary = {
     metricsDisclaimer: "示意性数据，最终数字仍在整理中。",
     fullCase: "查看完整页面",
   },
+  brands: {
+    title: "合作过的品牌",
+  },
   playground: {
     title: "花絮",
     subtitle: "插画、动画和音乐制作，滋养着我的创作的实验。",

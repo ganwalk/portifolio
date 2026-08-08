@@ -1,6 +1,10 @@
 import { Reveal } from "@/components/ui/Reveal";
 import { InteractiveGridImage } from "@/components/ui/InteractiveGridImage";
 import { profile } from "@/data/profile";
+import { pt } from "@/i18n/dictionaries/pt";
+import { en } from "@/i18n/dictionaries/en";
+import { es } from "@/i18n/dictionaries/es";
+import { zh } from "@/i18n/dictionaries/zh";
 import type { Dictionary } from "@/i18n/dictionaries";
 
 // basePath não é aplicado a src montado à mão em JS (só a next/image e
@@ -8,6 +12,33 @@ import type { Dictionary } from "@/i18n/dictionaries";
 // SelfPortrait.tsx.
 const basePath = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
 const CONTACT_IMAGE = `${basePath}/photos/armando-contato.webp`;
+
+// Além dos quatro idiomas do site, mais oito só pra esta grade: o recado é
+// "disponível pro mundo todo" (mesmo espírito do globo em hero.availability),
+// então outros alfabetos são bem-vindos aqui mesmo sem página traduzida
+// pra eles. Não é o sistema de i18n do site (por isso mora aqui, não em
+// dictionaries/): é tempero visual, sem rota, sem SEO, sem menu próprio.
+const EXTRA_GRID_PHRASES = [
+  ["Parle", "moi !"], // francês
+  ["Sprich", "mit mir!"], // alemão
+  ["Parla", "con me!"], // italiano
+  ["話して", "ください"], // japonês
+  ["나에게", "말해줘!"], // coreano
+  ["Поговори", "со мной!"], // russo
+  ["تحدث", "معي!"], // árabe
+  ["मुझसे", "बात करो"], // hindi
+];
+
+// Um quadro por idioma na grade interativa, não repetindo o do visitante:
+// o convite "fale comigo" aparece em vários idiomas ao mesmo tempo (ver
+// InteractiveGridImage), começando pelos quatro do site.
+const GRID_PHRASES = [
+  pt.contact.gridWords,
+  en.contact.gridWords,
+  es.contact.gridWords,
+  zh.contact.gridWords,
+  ...EXTRA_GRID_PHRASES,
+];
 
 export function Contact({ dict }: { dict: Dictionary }) {
   const links = Object.entries(profile.links).filter(([, url]) => url);
@@ -88,7 +119,7 @@ export function Contact({ dict }: { dict: Dictionary }) {
         <InteractiveGridImage
           src={CONTACT_IMAGE}
           alt={dict.contact.imageAlt}
-          words={dict.contact.gridWords}
+          phrases={GRID_PHRASES}
           className="h-full w-full border-t border-line sm:border-t-0 sm:border-l"
         />
       </Reveal>

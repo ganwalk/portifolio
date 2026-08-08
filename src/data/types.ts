@@ -74,3 +74,13 @@ export interface Experiment {
   /** Vitrine que cicla sozinha, opcional: só cards com uma série de peças usam. Troca com ou sem hover. */
   gallery?: GalleryFrame[];
 }
+
+/** Uma marca no carrossel "Marcas com que já trabalhei" (ver Brands.tsx). */
+export interface Brand {
+  name: Localized;
+  /**
+   * true só no convite final ("Sua marca"): ganha caixa pontilhada em vez de
+   * nome sólido, a mesma linguagem de vaga aberta do resto do site.
+   */
+  isInvite?: boolean;
+}
