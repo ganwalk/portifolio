@@ -17,9 +17,11 @@ import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 // ao elo anterior por uma linha fina, cada um perseguindo a posição do elo à
 // frente com o mesmo atraso (mesma mola de sempre), o que dá o chicote de
 // cobra/fita reagindo à velocidade do mouse: quanto mais rápido o cursor se
-// move, mais a cauda atrasa e estica. 5 segundos depois da primeira captura,
-// se a pessoa ainda não coletou todas, a frase aparece acima do cursor (nunca
-// em cima da corrente, que pende pra baixo). As caixas têm fundo sólido
+// move, mais a cauda atrasa e estica. A frase aparece acima do cursor (nunca
+// em cima da corrente, que pende pra baixo) por dois gatilhos, o que vier
+// primeiro: 5 segundos depois da primeira captura (pra quem só brinca com
+// uma ou duas tags, sem varrer a dobra inteira), ou assim que a última tag
+// entra na corrente (a recompensa de quem coletou todas). As caixas têm fundo sólido
 // (bg-background) de propósito: sem isso a linha por trás delas atravessa o
 // meio da caixa em vez de só ligar uma à outra.
 //
@@ -41,7 +43,8 @@ const FIRST_LINK_SPACING = 68;
 const LINK_SPACING = 40; // px, distância entre os demais elos da corrente
 const EASE = 0.2; // suavização por quadro: quanto maior, mais rígido; a cauda ainda atrasa porque o alvo de cada elo é a posição já suavizada do anterior
 const ACTIVATE_DELAY_MS = 1000; // tempo parado na dobra antes da corrente poder capturar qualquer tag
-const MESSAGE_DELAY_MS = 5000; // tempo desde a primeira captura até a frase aparecer, se ainda faltar coletar alguma
+const MESSAGE_DELAY_MS = 5000; // tempo desde a primeira captura até a frase aparecer, se a coleção completa não chegar antes
+const MESSAGE_COMPLETE_DELAY_MS = 350; // tempo depois da ÚLTIMA captura até a frase aparecer, mesmo raciocínio
 const MESSAGE_OFFSET = 28; // px acima do cursor
 const LINE_OPACITY = 0.35;
 
@@ -96,6 +99,7 @@ export function SkillsOrbit({
     let activateTimer: number | null = null;
     let revealTimer: number | null = null;
     let revealScheduled = false;
+    let completeScheduled = false;
 
     const mouse = { x: 0, y: 0 };
     // Posição e metade do tamanho "de repouso" de cada tag, relativa ao
@@ -136,6 +140,7 @@ export function SkillsOrbit({
       capturedOrder.length = 0;
       chainPos.clear();
       revealScheduled = false;
+      completeScheduled = false;
       if (revealTimer !== null) {
         window.clearTimeout(revealTimer);
         revealTimer = null;
@@ -183,6 +188,11 @@ export function SkillsOrbit({
           revealTimer = window.setTimeout(() => {
             if (capturedOrder.length < skills.length) setRevealMessage(true);
           }, MESSAGE_DELAY_MS);
+        }
+
+        if (capturedOrder.length === skills.length && !completeScheduled) {
+          completeScheduled = true;
+          window.setTimeout(() => setRevealMessage(true), MESSAGE_COMPLETE_DELAY_MS);
         }
       }
 

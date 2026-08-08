@@ -1,19 +1,28 @@
 import type { Brand } from "./types";
 
-// Marcas reais primeiro, depois placeholders explícitos, terminando no
-// convite ("Sua marca"): quem rola o carrossel até o fim vê que a lista
-// está aberta, não fechada. Nomes próprios não mudam de idioma; só o
-// convite final traduz de verdade.
+// basePath não é aplicado a src montado à mão em JS (só a next/image e
+// links internos do próprio Next): o mesmo motivo do CONTACT_IMAGE em
+// Contact.tsx.
+const basePath = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
+
+// Marcas reais primeiro (logo de verdade, ver scripts/build-brand-logos.mjs
+// para a origem de cada arquivo), depois placeholders explícitos (sem logo,
+// só o nome), terminando no convite ("Sua marca"): quem rola o carrossel
+// até o fim vê que a lista está aberta, não fechada. Nomes próprios não
+// mudam de idioma; só o convite final traduz de verdade.
 
 export const brands: Brand[] = [
   {
     name: { pt: "AUVP", en: "AUVP", es: "AUVP", zh: "AUVP" },
+    logo: `${basePath}/logos/auvp.webp`,
   },
   {
     name: { pt: "Minuto Indie", en: "Minuto Indie", es: "Minuto Indie", zh: "Minuto Indie" },
+    logo: `${basePath}/logos/minuto-indie.webp`,
   },
   {
     name: { pt: "Hits Perdidos", en: "Hits Perdidos", es: "Hits Perdidos", zh: "Hits Perdidos" },
+    logo: `${basePath}/logos/hits-perdidos.webp`,
   },
   {
     name: {
@@ -22,6 +31,7 @@ export const brands: Brand[] = [
       es: "Defensoría Pública de Goiás",
       zh: "Defensoria Pública de Goiás",
     },
+    logo: `${basePath}/logos/defensoria-goias.webp`,
   },
   {
     name: { pt: "Estúdio Coletivo", en: "Estúdio Coletivo", es: "Estudio Colectivo", zh: "Estúdio Coletivo" },

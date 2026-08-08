@@ -16,17 +16,31 @@ import {
 } from "framer-motion";
 import { CaseMetrics } from "@/components/ui/CaseMetrics";
 import { MediaView } from "@/components/ui/MediaView";
+import { Reveal } from "@/components/ui/Reveal";
 import { cases } from "@/data/cases";
 import type { CaseStudy } from "@/data/types";
 import type { Locale } from "@/i18n/config";
 import type { Dictionary } from "@/i18n/dictionaries";
+import { useMediaQuery } from "@/lib/use-media-query";
 
 // Projetos em destaque como uma sequência amarrada ao scroll da própria
-// página, não um carrossel com botões e timer: a seção sai direto da hero
-// (sem título nem subtítulo próprios, só um rótulo acessível no <section>
-// pra quem usa leitor de tela) e já entra prendendo o scroll. É alta (uma
-// tela inteira por fatia) e fica presa (position: sticky) enquanto o
-// visitante rola por ela, e cada fatia entra deslizando de baixo pra cima
+// página, não um carrossel com botões e timer, A PARTIR DO sm: (640px). No
+// mobile (abaixo disso) é uma lista comum, cartão por cartão, em fluxo de
+// documento normal (ver MobileCaseList, mais abaixo): a versão presa ao
+// scroll empilhava mal em telas pequenas, o cabeçalho fixo cobria o topo do
+// painel ativo em certas posições de rolagem, e o trio de artistas
+// (empilhado dentro do próprio painel antes do lg:) competia com a pilha de
+// fatias, mostrando métricas de dois cases sobrepostas na mesma tela.
+// `useMediaQuery` decide qual das duas versões monta (ver CasesGrid), não
+// CSS: montar as duas ao mesmo tempo (uma escondida) deixaria o
+// `useScroll` da versão presa calculando sobre uma seção de altura zero à
+// toa, mesmo invisível.
+//
+// A partir daqui, tudo descreve a versão de desktop: a seção sai direto da
+// hero (sem título nem subtítulo próprios, só um rótulo acessível no
+// <section> pra quem usa leitor de tela) e já entra prendendo o scroll. É
+// alta (uma tela inteira por fatia) e fica presa (position: sticky) enquanto
+// o visitante rola por ela, e cada fatia entra deslizando de baixo pra cima
 // (translateY, não clip-path) até assentar no lugar, empilhando por cima da
 // anterior como um baralho de cartas: a fatia que fica por baixo encolhe um
 // pouco e escurece enquanto a próxima sobe sobre ela, dando profundidade
@@ -43,8 +57,8 @@ import type { Dictionary } from "@/i18n/dictionaries";
 // (`buildSlides`, calculado uma vez fora do componente porque `cases` é
 // estático), lado a lado a partir do `lg:` (1024px) ou empilhados
 // verticalmente dentro do mesmo painel antes disso: reduz o scroll do trio
-// a 1/3 do que seria com um artista por fatia, no mobile também, não só no
-// desktop. Essa fatia ganha uma coluna extra, estreita, antes das outras
+// a 1/3 do que seria com um artista por fatia. Essa fatia ganha uma coluna
+// extra, estreita, antes das outras
 // (à esquerda no lg:, à esquerda também empilhada): só a frase
 // "Experiências interativas" girada 90°, na Whyte Inktrap, uma régua de
 // contexto, não um case clicável. O rótulo de índice de cada coluna
@@ -483,7 +497,6 @@ function CaseColumn({
                 </span>
                 <span className="type-mono text-white/70">
                   {metric.label[locale]}
-                  {metric.illustrative && " *"}
                 </span>
               </motion.p>
             </div>
@@ -703,6 +716,71 @@ function ExpandedCase({
   );
 }
 
+// Versão mobile: pilha de baralho presa ao scroll (SlidePanel/CaseColumn,
+// abaixo) some abaixo do sm:. No touch a pilha empilhava mal: o cabeçalho
+// fixo cobria o topo do painel ativo em certas posições de rolagem, e o
+// trio de artistas (empilhado dentro do próprio painel antes do lg:)
+// competia com a pilha de fatias, mostrando métricas de dois cases
+// sobrepostas na mesma tela. Aqui cada case é um cartão comum, em fluxo de
+// documento normal (sem sticky, sem scroll amarrado): rolar É a navegação
+// nativa do sistema, sem o cabeçalho fixo brigar com nada porque não há
+// mais nada "preso" por baixo dele. Sem seletor de fatia, sem selo que
+// segue o cursor (não existe hover de verdade em touch): abre a página do
+// case direto, sem o overlay expandido em FLIP.
+function MobileCaseList({ locale, dict }: { locale: Locale; dict: Dictionary }) {
+  return (
+    <div className="sm:hidden">
+      {cases.map((caseStudy, index) => {
+        const metric = caseStudy.metrics[0];
+        return (
+          <Reveal key={caseStudy.slug}>
+            <Link
+              href={`/${locale}/work/${caseStudy.slug}/`}
+              className="relative block aspect-[3/4] w-full overflow-hidden border-t border-line bg-black text-white first:border-t-0"
+            >
+              <MediaView
+                media={caseStudy.cover}
+                locale={locale}
+                className="absolute inset-0 h-full w-full object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/10 to-black/45" />
+
+              <div className="gutter absolute inset-0 flex flex-col justify-between py-8">
+                <div className="flex items-start justify-between gap-4">
+                  <p className="type-mono text-white/70">
+                    {pad(index + 1)} / {pad(cases.length)} · {caseStudy.year}
+                  </p>
+                  <p className="text-right">
+                    <span className="type-serif-display block text-4xl">
+                      {metric.value}
+                    </span>
+                    <span className="type-mono text-white/70">
+                      {metric.label[locale]}
+                    </span>
+                  </p>
+                </div>
+
+                <div>
+                  <h3 className="type-display type-inktrap pt-[0.16em] text-[12vw] leading-[0.9]">
+                    {caseStudy.title[locale]}
+                  </h3>
+                  <p className="type-mono mt-3 text-white/70">
+                    {caseStudy.tags[locale].join(" • ")}
+                  </p>
+                  <span className="type-mono mt-6 inline-flex items-center gap-3 border border-white/40 px-6 py-3">
+                    {caseStudy.comingSoon ? dict.cases.comingSoon : dict.cases.viewCase}
+                    <span aria-hidden>→</span>
+                  </span>
+                </div>
+              </div>
+            </Link>
+          </Reveal>
+        );
+      })}
+    </div>
+  );
+}
+
 export function CasesGrid({
   locale,
   dict,
@@ -716,16 +794,19 @@ export function CasesGrid({
     caseStudy: CaseStudy;
     rect: DOMRect;
   } | null>(null);
+  // Abaixo do sm: a pilha de baralho vira uma lista comum (MobileCaseList,
+  // acima): quem decide qual das duas versões monta é este valor, lido
+  // antes de qualquer outro hook usar `sectionRef`/`useScroll` (que tratam
+  // um ref nunca preenchido sem quebrar, mas não faz sentido calcular o
+  // resto se o componente nem vai desenhar a versão presa ao scroll).
+  const isDesktop = useMediaQuery("(min-width: 640px)");
 
-  // O trio de artistas sempre é uma fatia só (groupedSlides), em qualquer
-  // largura: lado a lado a partir do lg:, empilhado dentro do mesmo painel
-  // antes disso (ver SlidePanel). Reduz o scroll do trio a 1/3 também no
-  // mobile, em vez de um projeto por tela inteira.
+  // O trio de artistas sempre é uma fatia só (groupedSlides) na versão de
+  // desktop: lado a lado a partir do lg:, empilhado dentro do mesmo painel
+  // antes disso (ver SlidePanel). Reduz o scroll do trio a 1/3, em vez de
+  // um projeto por tela inteira.
   const slides = groupedSlides;
   const { windows, total: sectionScreens } = slideWindows(slides.length);
-  const hasIllustrative = cases.some((c) =>
-    c.metrics.some((m) => m.illustrative),
-  );
 
   const { scrollYProgress } = useScroll({
     target: sectionRef,
@@ -813,6 +894,14 @@ export function CasesGrid({
   }
 
   const hoveredCase = cases.find((c) => c.slug === hoveredSlug) ?? null;
+
+  if (!isDesktop) {
+    return (
+      <section id="work" aria-label={dict.cases.title} className="border-t border-line">
+        <MobileCaseList locale={locale} dict={dict} />
+      </section>
+    );
+  }
 
   return (
     <section id="work" aria-label={dict.cases.title} className="border-t border-line">
@@ -916,12 +1005,6 @@ export function CasesGrid({
           </motion.div>
         </div>
       </div>
-
-      {hasIllustrative && (
-        <p className="gutter type-mono py-8 text-muted">
-          * {dict.cases.metricsDisclaimer}
-        </p>
-      )}
 
       <AnimatePresence>
         {expanding && (
