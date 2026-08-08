@@ -91,9 +91,10 @@ export const pt = {
       "Hoje, na AUVP, sou responsável por experiências interativas que se adaptam às necessidades reais de quem as usa, sempre fundamentadas em métricas, SEO e performance. Amo o que faço, tenho sorte de fazer o que amo, e talvez a gente ainda faça algo juntos.",
     ],
     skillsTitle: "Ferramentas e habilidades",
-    // Aparece 5s depois que a primeira tag de habilidade entra na corrente
-    // presa ao cursor (ver SkillsOrbit.tsx), se a pessoa ainda não coletou
-    // todas. Mesmo estilo de selo do "Case completo em breve" do CasesGrid.
+    // Aparece por dois gatilhos (ver SkillsOrbit.tsx): 5s depois que a
+    // primeira tag entra na corrente presa ao cursor, ou assim que a
+    // última entra, o que vier primeiro. Mesmo estilo de selo do "Case
+    // completo em breve" do CasesGrid.
     skillsOrbitMessage: "Se eu não sei fazer, eu fuço até aprender!",
     languagesTitle: "Idiomas",
   },

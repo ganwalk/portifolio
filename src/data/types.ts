@@ -79,6 +79,12 @@ export interface Experiment {
 export interface Brand {
   name: Localized;
   /**
+   * Logo real, em preto e branco (ver scripts/build-brand-logos.mjs).
+   * Opcional: placeholders sem logo real (e o convite final) mostram só o
+   * nome em texto.
+   */
+  logo?: string;
+  /**
    * true só no convite final ("Sua marca"): ganha caixa pontilhada em vez de
    * nome sólido, a mesma linguagem de vaga aberta do resto do site.
    */
