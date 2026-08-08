@@ -1,33 +1,42 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type RefObject } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 
-// Habilidades como uma constelação: em repouso, tags quadradas na grade
-// normal (flex-wrap). Ao passar o mouse por cima da área inteira, cada tag
-// se solta do lugar, se liga ao cursor por uma linha fina e entra em órbita
-// dele, cada uma na sua posição fixa ao redor do círculo (um ângulo por
-// índice, mais um relógio comum que gira todas juntas). Quando a última
-// termina de assentar na órbita, uma frase aparece no meio, no mesmo estilo
-// de selo do "Case completo em breve" do CasesGrid. Solta o mouse e tudo
-// volta pro lugar, na mesma mola.
+// Habilidades como uma fita presa ao cursor: em repouso, tags quadradas na
+// grade normal (flex-wrap). O gatilho é a dobra "sobre" inteira (sectionRef),
+// não só a área das tags, então o efeito funciona mesmo com o mouse passando
+// por cima da bio ou do resto da coluna. Cada tag só entra na fila quando o
+// cursor passa perto da posição de repouso dela, uma de cada vez, nunca todas
+// juntas: por isso captura por proximidade em vez de um gatilho de hover
+// único. Cada tag capturada vira um elo de uma corrente que pende abaixo do
+// mouse, ligado ao elo anterior por uma linha fina, cada um perseguindo a
+// posição do elo à frente com o mesmo atraso (mesma mola de sempre), o que dá
+// o chicote de cobra/fita reagindo à velocidade do mouse: quanto mais rápido
+// o cursor se move, mais a cauda atrasa e estica. Quando a última tag entra
+// na corrente, a frase aparece acima do cursor (não em cima da corrente, que
+// pende pra baixo), no mesmo estilo de selo do "Case completo em breve" do
+// CasesGrid.
 //
 // rAF com escrita direta no DOM (style.transform, sem state por quadro),
 // mesmo raciocínio de InteractiveGridImage e HeroTitleGL: são ~15 elementos
 // animando toda hora que o cursor se move, e passar isso por state do React
 // recriaria o componente inteiro a cada quadro.
-const ORBIT_RADIUS = 110; // px
-const ORBIT_SPEED = 0.6; // rad/s, velocidade angular do relógio comum
-const EASE = 0.12; // suavização por quadro, mesmo valor de InteractiveGridImage
-const REVEAL_DELAY_MS = 900; // tempo até a mensagem aparecer, depois que a órbita começa
+const CAPTURE_RADIUS = 70; // px, raio de proximidade da própria posição de repouso da tag
+const LINK_SPACING = 40; // px, distância entre elos da corrente
+const EASE = 0.2; // suavização por quadro: quanto maior, mais rígido; a cauda ainda atrasa porque o alvo de cada elo é a posição já suavizada do anterior
+const REVEAL_DELAY_MS = 350; // tempo até a mensagem aparecer, depois que a última tag entra na corrente
+const MESSAGE_OFFSET = 28; // px acima do cursor
 const LINE_OPACITY = 0.35;
 
 export function SkillsOrbit({
   skills,
   message,
+  sectionRef,
 }: {
   skills: string[];
   message: string;
+  sectionRef: RefObject<HTMLElement | null>;
 }) {
   const reduceMotion = useReducedMotion();
   const containerRef = useRef<HTMLDivElement>(null);
@@ -39,22 +48,25 @@ export function SkillsOrbit({
 
   useEffect(() => {
     if (reduceMotion) return;
+    const section = sectionRef.current;
     const container = containerRef.current;
-    if (!container) return;
+    if (!section || !container) return;
 
     let raf = 0;
-    let orbiting = false;
+    let active = false;
     let revealTimer: number | null = null;
-    let angleClock = 0;
-    let lastTime = performance.now();
+    let revealScheduled = false;
 
     const mouse = { x: 0, y: 0 };
-    // Posição "de repouso" de cada tag, relativa ao container: medida de
-    // novo sempre que a órbita começa, porque o layout (flex-wrap) muda de
-    // largura da tela e não dá pra confiar numa medida antiga.
+    // Posição "de repouso" de cada tag, relativa ao container das tags:
+    // medida de novo sempre que o mouse entra na dobra, porque o layout
+    // (flex-wrap) muda com a largura da tela e não dá pra confiar numa
+    // medida antiga.
     const natural: { x: number; y: number }[] = [];
     const current = skills.map(() => ({ x: 0, y: 0 }));
-    const angle0 = skills.map((_, i) => (i / skills.length) * Math.PI * 2);
+    const captured = new Set<number>();
+    const capturedOrder: number[] = [];
+    const chainPos = new Map<number, number>();
 
     function measureNatural() {
       const containerBox = container!.getBoundingClientRect();
@@ -72,21 +84,12 @@ export function SkillsOrbit({
       }
     }
 
-    function onMouseMove(event: MouseEvent) {
-      const box = container!.getBoundingClientRect();
-      mouse.x = event.clientX - box.left;
-      mouse.y = event.clientY - box.top;
-    }
-
-    function onMouseEnter() {
-      measureNatural();
-      orbiting = true;
-      if (revealTimer !== null) window.clearTimeout(revealTimer);
-      revealTimer = window.setTimeout(() => setRevealMessage(true), REVEAL_DELAY_MS);
-    }
-
-    function onMouseLeave() {
-      orbiting = false;
+    function reset() {
+      active = false;
+      captured.clear();
+      capturedOrder.length = 0;
+      chainPos.clear();
+      revealScheduled = false;
       if (revealTimer !== null) {
         window.clearTimeout(revealTimer);
         revealTimer = null;
@@ -94,72 +97,124 @@ export function SkillsOrbit({
       setRevealMessage(false);
     }
 
-    function frame(time: number) {
-      const dt = Math.min((time - lastTime) / 1000, 0.05);
-      lastTime = time;
-      if (orbiting) angleClock += ORBIT_SPEED * dt;
+    function onMouseMove(event: MouseEvent) {
+      const containerBox = container!.getBoundingClientRect();
+      mouse.x = event.clientX - containerBox.left;
+      mouse.y = event.clientY - containerBox.top;
+    }
+
+    function onMouseEnter() {
+      measureNatural();
+      active = true;
+    }
+
+    function onMouseLeave() {
+      reset();
+    }
+
+    function frame() {
+      if (active) {
+        skills.forEach((_, i) => {
+          if (captured.has(i)) return;
+          const rest = natural[i];
+          if (!rest) return;
+          const dx = mouse.x - rest.x;
+          const dy = mouse.y - rest.y;
+          if (dx * dx + dy * dy < CAPTURE_RADIUS * CAPTURE_RADIUS) {
+            captured.add(i);
+            capturedOrder.push(i);
+            chainPos.set(i, capturedOrder.length - 1);
+          }
+        });
+
+        if (capturedOrder.length === skills.length && !revealScheduled) {
+          revealScheduled = true;
+          revealTimer = window.setTimeout(() => setRevealMessage(true), REVEAL_DELAY_MS);
+        }
+      }
+
+      capturedOrder.forEach((i, k) => {
+        const rest = natural[i];
+        if (!rest) return;
+        let targetAbsX: number;
+        let targetAbsY: number;
+        if (k === 0) {
+          targetAbsX = mouse.x;
+          targetAbsY = mouse.y + LINK_SPACING;
+        } else {
+          const prevI = capturedOrder[k - 1];
+          const prevRest = natural[prevI];
+          targetAbsX = prevRest.x + current[prevI].x;
+          targetAbsY = prevRest.y + current[prevI].y + LINK_SPACING;
+        }
+        const targetDeltaX = targetAbsX - rest.x;
+        const targetDeltaY = targetAbsY - rest.y;
+        current[i].x += (targetDeltaX - current[i].x) * EASE;
+        current[i].y += (targetDeltaY - current[i].y) * EASE;
+      });
+
+      skills.forEach((_, i) => {
+        if (captured.has(i)) return;
+        current[i].x += (0 - current[i].x) * EASE;
+        current[i].y += (0 - current[i].y) * EASE;
+      });
 
       skills.forEach((_, i) => {
         const el = tagRefs.current[i];
+        if (el) el.style.transform = `translate(${current[i].x}px, ${current[i].y}px)`;
+
         const line = lineRefs.current[i];
+        if (!line) return;
         const rest = natural[i];
-        if (!el) return;
-
-        let targetX = 0;
-        let targetY = 0;
-        let centerX = rest?.x ?? 0;
-        let centerY = rest?.y ?? 0;
-
-        if (orbiting && rest) {
-          const angle = angle0[i] + angleClock;
-          const orbitX = mouse.x + Math.cos(angle) * ORBIT_RADIUS;
-          const orbitY = mouse.y + Math.sin(angle) * ORBIT_RADIUS;
-          targetX = orbitX - rest.x;
-          targetY = orbitY - rest.y;
+        if (!rest || !captured.has(i)) {
+          line.style.opacity = "0";
+          return;
         }
-
-        current[i].x += (targetX - current[i].x) * EASE;
-        current[i].y += (targetY - current[i].y) * EASE;
-        el.style.transform = `translate(${current[i].x}px, ${current[i].y}px)`;
-
-        if (rest) {
-          centerX = rest.x + current[i].x;
-          centerY = rest.y + current[i].y;
+        const k = chainPos.get(i) ?? 0;
+        const absX = rest.x + current[i].x;
+        const absY = rest.y + current[i].y;
+        let fromX: number;
+        let fromY: number;
+        if (k === 0) {
+          fromX = mouse.x;
+          fromY = mouse.y;
+        } else {
+          const prevI = capturedOrder[k - 1];
+          const prevRest = natural[prevI];
+          fromX = prevRest.x + current[prevI].x;
+          fromY = prevRest.y + current[prevI].y;
         }
-
-        if (line) {
-          line.setAttribute("x1", String(centerX));
-          line.setAttribute("y1", String(centerY));
-          line.setAttribute("x2", String(mouse.x));
-          line.setAttribute("y2", String(mouse.y));
-          line.style.opacity = orbiting ? String(LINE_OPACITY) : "0";
-        }
+        line.setAttribute("x1", String(fromX));
+        line.setAttribute("y1", String(fromY));
+        line.setAttribute("x2", String(absX));
+        line.setAttribute("y2", String(absY));
+        line.style.opacity = String(LINE_OPACITY);
       });
 
       const messageEl = messageRef.current;
       if (messageEl) {
-        messageEl.style.transform = `translate(${mouse.x}px, ${mouse.y}px) translate(-50%, -50%)`;
+        messageEl.style.transform = `translate(${mouse.x}px, ${mouse.y - MESSAGE_OFFSET}px) translate(-50%, -100%)`;
       }
 
       raf = requestAnimationFrame(frame);
     }
 
-    container.addEventListener("mousemove", onMouseMove);
-    container.addEventListener("mouseenter", onMouseEnter);
-    container.addEventListener("mouseleave", onMouseLeave);
+    section.addEventListener("mousemove", onMouseMove);
+    section.addEventListener("mouseenter", onMouseEnter);
+    section.addEventListener("mouseleave", onMouseLeave);
     raf = requestAnimationFrame(frame);
 
     return () => {
       cancelAnimationFrame(raf);
       if (revealTimer !== null) window.clearTimeout(revealTimer);
-      container.removeEventListener("mousemove", onMouseMove);
-      container.removeEventListener("mouseenter", onMouseEnter);
-      container.removeEventListener("mouseleave", onMouseLeave);
+      section.removeEventListener("mousemove", onMouseMove);
+      section.removeEventListener("mouseenter", onMouseEnter);
+      section.removeEventListener("mouseleave", onMouseLeave);
     };
-  }, [skills, reduceMotion]);
+  }, [skills, reduceMotion, sectionRef]);
 
   // Quem pede menos movimento no sistema recebe as tags paradas na grade,
-  // sem linha, sem órbita, sem mensagem: mesma vitrine, sem o movimento.
+  // sem linha, sem corrente, sem mensagem: mesma vitrine, sem o movimento.
   if (reduceMotion) {
     return (
       <div className="flex flex-wrap gap-2">

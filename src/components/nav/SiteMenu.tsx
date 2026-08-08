@@ -6,6 +6,7 @@ import { createPortal } from "react-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import { BoringToggle } from "@/components/controls/BoringToggle";
 import { ControlBar } from "@/components/controls/ControlBar";
+import { TypewriterText } from "@/components/ui/TypewriterText";
 import { useBoringMode } from "@/contexts/BoringModeContext";
 import { useHydrated } from "@/lib/use-hydrated";
 import type { Locale } from "@/i18n/config";
@@ -14,16 +15,17 @@ import type { Dictionary } from "@/i18n/dictionaries";
 // Navegação lúdica: botão no cabeçalho abre um overlay de tela cheia com os
 // links em tipografia gigante, separados por linhas finas (border-line, a
 // mesma régua de divisão do resto do site). Passar o mouse em cada link fecha
-// uma barra sólida atrás da linha inteira como uma vinheta, crescendo do
-// centro pra cima e pra baixo ao mesmo tempo, não varrendo de um lado
-// (bg-foreground, o mesmo preto/branco do resto do site, sem cor nova),
-// invertendo rótulo e índice para a cor do fundo por cima dela (mesma lógica
-// de hover já usada no Modo Boring, ver BoringToggle: bg-foreground +
-// text-background), e revela ao lado uma frase curta contando do que aquela
-// seção trata (dict.nav.menuDescriptions, só no lg: onde sobra largura ao
-// lado do rótulo gigante). Os rótulos vão na Whyte Inktrap (.type-inktrap), a
-// mesma dos outros destaques do site. No Modo Boring o menu não existe: a
-// página utilitária é uma coluna só.
+// uma barra sólida atrás da linha inteira como uma vinheta, rápida e sólida
+// (150ms), crescendo do centro pra cima e pra baixo ao mesmo tempo, não
+// varrendo de um lado (bg-foreground, o mesmo preto/branco do resto do site,
+// sem cor nova), invertendo rótulo e índice para a cor do fundo por cima dela
+// (mesma lógica de hover já usada no Modo Boring, ver BoringToggle:
+// bg-foreground + text-background), e revela ao lado uma frase curta
+// contando do que aquela seção trata, digitada caractere por caractere
+// (dict.nav.menuDescriptions + TypewriterText, só no lg: onde sobra largura
+// ao lado do rótulo gigante). Os rótulos vão na Whyte Inktrap
+// (.type-inktrap), a mesma dos outros destaques do site. No Modo Boring o
+// menu não existe: a página utilitária é uma coluna só.
 
 const listVariants = {
   open: { transition: { staggerChildren: 0.07, delayChildren: 0.15 } },
@@ -49,11 +51,17 @@ export function SiteMenu({
   const { isBoringMode } = useBoringMode();
   const hydrated = useHydrated();
   const [open, setOpen] = useState(false);
+  const [hoveredId, setHoveredId] = useState<string | null>(null);
+
+  const toggle = (next: boolean) => {
+    setOpen(next);
+    if (!next) setHoveredId(null);
+  };
 
   useEffect(() => {
     if (!open) return;
     const onKey = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setOpen(false);
+      if (event.key === "Escape") toggle(false);
     };
     window.addEventListener("keydown", onKey);
     document.documentElement.style.overflow = "hidden";
@@ -73,8 +81,6 @@ export function SiteMenu({
     { id: "playground", label: dict.playground.title },
     { id: "contact", label: dict.nav.contact },
   ];
-
-  const toggle = (next: boolean) => setOpen(next);
 
   return (
     <>
@@ -135,6 +141,8 @@ export function SiteMenu({
                   <div
                     key={item.id}
                     className={`group relative ${index > 0 ? "border-t border-line" : ""}`}
+                    onMouseEnter={() => setHoveredId(item.id)}
+                    onMouseLeave={() => setHoveredId((current) => (current === item.id ? null : current))}
                   >
                     {/* Barra sólida atrás da linha inteira, escondida
                         (scale-y-0) em repouso e fechando como uma vinheta no
@@ -144,10 +152,11 @@ export function SiteMenu({
                         nenhuma cor nova. Sangra até a borda real da página
                         (-left/-right no exato valor do padding-inline de
                         .gutter em cada faixa, ver globals.css), não só até a
-                        borda do conteúdo. */}
+                        borda do conteúdo. Rápida o bastante pra parecer um
+                        corte sólido, não um desvanecer. */}
                     <span
                       aria-hidden
-                      className="absolute -left-6 -right-6 inset-y-0 origin-center scale-y-0 bg-foreground transition-transform duration-500 ease-out group-hover:scale-y-100 sm:-left-12 sm:-right-12 xl:-left-20 xl:-right-20"
+                      className="absolute -left-6 -right-6 inset-y-0 origin-center scale-y-0 bg-foreground transition-transform duration-150 ease-out group-hover:scale-y-100 sm:-left-12 sm:-right-12 xl:-left-20 xl:-right-20"
                     />
                     <div className="overflow-hidden">
                       <motion.div variants={itemVariants}>
@@ -179,15 +188,22 @@ export function SiteMenu({
                           </span>
                           {/* Frase curta contando do que a seção trata,
                               revelada junto da barra, na cor do fundo por
-                              cima dela. Só no lg:, onde sobra largura ao lado
-                              do rótulo gigante; em telas estreitas o rótulo
-                              já ocupa a linha inteira. Sem .type-mono aqui de
-                              propósito (mesmo critério do tooltip em
-                              BoringToggle): a classe força caixa alta, e uma
-                              frase inteira em versal lê pior que em caixa
-                              normal. Fonte mono só no family. */}
-                          <span className="relative z-10 ml-auto hidden max-w-xs self-center text-right font-mono text-xs tracking-wide text-background opacity-0 transition-opacity duration-500 ease-out group-hover:opacity-100 lg:block">
-                            {dict.nav.menuDescriptions[item.id]}
+                              cima dela, digitada caractere por caractere (daí
+                              o estado de hover em JS, não só group-hover: o
+                              tempo de digitação depende do texto real). Só no
+                              lg:, onde sobra largura ao lado do rótulo
+                              gigante; em telas estreitas o rótulo já ocupa a
+                              linha inteira. Sem .type-mono aqui de propósito
+                              (mesmo critério do tooltip em BoringToggle): a
+                              classe força caixa alta, e uma frase inteira em
+                              versal lê pior que em caixa normal. Fonte mono
+                              só no family. */}
+                          <span className="relative z-10 ml-auto hidden max-w-xs self-center text-right font-mono text-xs tracking-wide text-background opacity-0 transition-opacity duration-150 ease-out group-hover:opacity-100 lg:block">
+                            <TypewriterText
+                              key={hoveredId === item.id ? "typing" : "idle"}
+                              text={dict.nav.menuDescriptions[item.id]}
+                              active={hoveredId === item.id}
+                            />
                           </span>
                         </Link>
                       </motion.div>
