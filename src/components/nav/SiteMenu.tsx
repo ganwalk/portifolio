@@ -224,7 +224,7 @@ export function SiteMenu({
                   a cortina de troca de modo cobre a tela em seguida e o corte
                   não aparece. No desktop tudo já vive na própria barra, então
                   some daqui para não duplicar. */}
-              <div className="flex flex-wrap items-center gap-4 pb-6 lg:hidden">
+              <div className="flex flex-wrap items-center gap-2 pb-6 lg:hidden">
                 <BoringToggle dict={dict} onToggle={() => toggle(false)} />
                 <ControlBar locale={locale} dict={dict} />
               </div>

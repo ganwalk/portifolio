@@ -734,16 +734,39 @@ function ExpandedCase({
 //
 // Aqui cada case é um cartão largo (82vw, a ponta do próximo espia na borda
 // direita, o convite visual a continuar arrastando), com scroll-snap
-// centralizando um de cada vez: arrastar É a navegação, sem seta, sem
-// autoplay, o mesmo princípio de "rolar é o controle" que já rege a versão
-// de desktop, só que no eixo horizontal. Os pontos abaixo do trilho leem a
-// posição (não navegam, mesmo padrão não clicável dos pontos do desktop),
-// acesos via IntersectionObserver no próprio trilho: cada cartão cruza 60%
-// de visibilidade dentro do trilho (root próprio, não a janela, senão um
-// cartão fora da faixa mas dentro da altura da viewport contaria como
-// visível) vira o ativo. Sem seletor de fatia, sem selo que segue o cursor
-// (não existe hover de verdade em touch): abre a página do case direto, sem
-// o overlay expandido em FLIP que a versão de desktop usa.
+// ancorando cada um pela borda ESQUERDA (snap-start, não snap-center):
+// scroll-padding-left no trilho, do mesmo tamanho do gutter, faz cada
+// cartão assentar exatamente onde o primeiro assenta, sempre à mesma
+// distância da borda da tela. snap-center foi a primeira tentativa, mas
+// centralizar cada cartão faz a MATEMÁTICA da centralização variar com a
+// posição (o primeiro cartão nasce colado à esquerda, sem o que centralizar
+// contra; os do meio ganham espia simétrica dos dois vizinhos), e o ritmo de
+// arrastar de um cartão pro outro fica inconsistente, a "dobra" entre um e
+// outro parecendo maior ou menor dependendo de qual cartão está ativo.
+// snap-start com o mesmo scroll-padding em todo cartão devolve um ritmo
+// único, sempre igual, cartão a cartão. O cartão ativo também ganha um leve
+// destaque sobre os vizinhos (opacidade, via `activeIndex`), o mesmo
+// princípio de profundidade que já diferencia a fatia em foco na pilha de
+// desktop (ver coveredDim em SlidePanel), só que aqui a MUDANÇA de foco vem
+// do gesto de arrastar, não do scroll vertical da página. Só opacidade, sem
+// escala: uma primeira versão encolhia o cartão inativo também (scale-95),
+// mas `transform: scale` só afeta a PINTURA, não o espaço reservado no
+// layout (aspect-[3/4] já fixa a caixa de cada cartão), então o cartão
+// encolhido sobrava com uma margem visível em volta, nos quatro lados, não
+// só nas laterais: o topo e a base da "dobra" (o pedaço do próximo cartão
+// que espia na borda) ficavam com um respiro vertical que os cartões
+// vizinhos, cheios, não tinham, quebrando o alinhamento da fileira. Só
+// opacidade preenche a caixa inteira sempre, ativo ou não, sem esse
+// descompasso. Arrastar É a navegação, sem seta, sem autoplay, o mesmo
+// princípio de "rolar é o controle" que já rege a versão de desktop, só que
+// no eixo horizontal. Os pontos abaixo do trilho leem a posição (não navegam, mesmo
+// padrão não clicável dos pontos do desktop), acesos via IntersectionObserver
+// no próprio trilho: cada cartão cruza 60% de visibilidade dentro do trilho
+// (root próprio, não a janela, senão um cartão fora da faixa mas dentro da
+// altura da viewport contaria como visível) vira o ativo. Sem seletor de
+// fatia, sem selo que segue o cursor (não existe hover de verdade em touch):
+// abre a página do case direto, sem o overlay expandido em FLIP que a
+// versão de desktop usa.
 function MobileCaseList({ locale, dict }: { locale: Locale; dict: Dictionary }) {
   const trackRef = useRef<HTMLDivElement>(null);
   const [activeIndex, setActiveIndex] = useState(0);
@@ -777,15 +800,19 @@ function MobileCaseList({ locale, dict }: { locale: Locale; dict: Dictionary }) 
       <div
         ref={trackRef}
         className="no-scrollbar flex snap-x snap-mandatory gap-4 overflow-x-auto px-6 pb-2"
+        style={{ scrollPaddingLeft: "1.5rem" }}
       >
         {cases.map((caseStudy, index) => {
           const metric = caseStudy.metrics[0];
+          const isActive = index === activeIndex;
           return (
             <Link
               key={caseStudy.slug}
               data-mobile-case-index={index}
               href={`/${locale}/work/${caseStudy.slug}/`}
-              className="relative block aspect-[3/4] w-[82vw] shrink-0 snap-center overflow-hidden bg-black text-white"
+              className={`relative block aspect-[3/4] w-[82vw] shrink-0 snap-start overflow-hidden bg-black text-white transition-opacity duration-500 ease-out ${
+                isActive ? "opacity-100" : "opacity-60"
+              }`}
             >
               <MediaView
                 media={caseStudy.cover}
