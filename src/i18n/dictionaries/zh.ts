@@ -6,6 +6,7 @@ export const zh: Dictionary = {
     description: "从银行到音乐的互动体验，始终以数据指标、SEO 和性能为基础。",
   },
   nav: {
+    home: "首页",
     work: "作品",
     about: "关于",
     contact: "联系",
@@ -13,6 +14,7 @@ export const zh: Dictionary = {
     close: "关闭",
     skipToContent: "跳到主要内容",
     menuDescriptions: {
+      home: "回到页面顶部。",
       work: "解决真实问题的界面设计，从银行业到音乐产业。",
       playground: "插画、动画和音乐制作，滋养创作的实验场。",
       about: "音乐、字体排印、拼贴和技术，样样都沾一点，随时随地。",
@@ -73,6 +75,7 @@ export const zh: Dictionary = {
       "现在，我在 AUVP 负责设计能适应真实用户需求的互动体验，一切都以数据指标、SEO 和性能为基础。我热爱我的工作，也很幸运能做自己热爱的事，也许未来我们还能一起做点什么。",
     ],
     skillsTitle: "工具与技能",
+    skillsOrbitMessage: "还不会的话，我就钻研到会为止！",
     languagesTitle: "语言",
   },
   contact: {

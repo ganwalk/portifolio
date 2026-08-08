@@ -67,6 +67,7 @@ export function SiteMenu({
 
   type MenuItemId = keyof Dictionary["nav"]["menuDescriptions"];
   const items: { id: MenuItemId; label: string }[] = [
+    { id: "home", label: dict.nav.home },
     { id: "work", label: dict.nav.work },
     { id: "about", label: dict.nav.about },
     { id: "playground", label: dict.playground.title },
