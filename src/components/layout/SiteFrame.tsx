@@ -139,9 +139,9 @@ export function SiteFrame({
             desfaz o recolhimento e o overflow-hidden que o mobile usa,
             senão o cabeçalho ficava inclicável lá mesmo com altura normal. */}
         <div
-          className={`grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-2 overflow-hidden px-6 transition-all duration-300 sm:px-12 lg:flex lg:max-h-none lg:gap-8 lg:overflow-visible lg:opacity-100 lg:pointer-events-auto xl:px-20 ${
+          className={`${heroMini ? "flex justify-between" : "grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)]"} items-center gap-2 overflow-hidden px-6 transition-all duration-300 sm:px-12 lg:flex lg:justify-normal lg:max-h-none lg:gap-8 lg:overflow-visible lg:opacity-100 lg:pointer-events-auto xl:px-20 ${
             rowVisible
-              ? "max-h-20 py-3 opacity-100"
+              ? "max-h-20 min-h-14 py-3 opacity-100"
               : "pointer-events-none max-h-0 py-0 opacity-0"
           } ${scrolled ? "lg:py-2" : "lg:py-3"}`}
         >
@@ -170,15 +170,21 @@ export function SiteFrame({
 
           <div className="relative justify-self-center lg:order-first">
             {/* Mobile, hero: a lua entra aqui, entre Modo Boring e idioma.
-                layoutId compartilhado com a cópia do canto direito (abaixo):
-                ao trocar heroMini, o Framer Motion anima a MESMA lua
-                deslizando de um lugar pro outro, em vez de sumir e
-                reaparecer. */}
-            <div className={`lg:hidden ${heroMini ? "block" : "hidden"}`}>
-              <motion.div layoutId="mobile-header-moon">
+                layoutId compartilhado com a cópia do canto direito (abaixo),
+                mas as duas NUNCA ficam montadas ao mesmo tempo (ao contrário
+                de uma versão anterior, que escondia uma via CSS e deixava a
+                outra sempre no DOM): esconder por CSS não passa pelo ciclo
+                de montagem do React, e é exatamente esse ciclo que o Framer
+                Motion observa pra disparar a animação de layout
+                compartilhado. Com um "if" de verdade trocando qual das duas
+                está montada, o Framer reconhece a saída de uma e a entrada
+                da outra com o mesmo layoutId como o MESMO elemento mudando
+                de lugar, e anima a transição em vez de cortar direto. */}
+            {heroMini && (
+              <motion.div layoutId="mobile-header-moon" className="lg:hidden">
                 <MoonPhase className="h-5 w-5" />
               </motion.div>
-            </div>
+            )}
             {/* Assinatura: sempre visível no desktop; no mobile, só fora da
                 hero (heroMini troca o lugar dela pela lua, acima). */}
             <Link
@@ -200,13 +206,15 @@ export function SiteFrame({
               <LocaleSwitcher locale={locale} dict={dict} />
             </div>
             {/* Mobile, fora da hero: a lua, migrada do centro (mesma
-                layoutId da cópia de lá). Independente da cópia lg: acima,
-                que nunca faz parte dessa troca. */}
-            <div className={`lg:hidden ${heroMini ? "hidden" : "block"}`}>
-              <motion.div layoutId="mobile-header-moon">
+                layoutId da cópia de lá; ver comentário lá em cima sobre
+                montar/desmontar de verdade, não só trocar visibilidade via
+                CSS). Independente da cópia lg: abaixo, que nunca faz parte
+                dessa troca. */}
+            {!heroMini && (
+              <motion.div layoutId="mobile-header-moon" className="lg:hidden">
                 <MoonPhase className="h-5 w-5" />
               </motion.div>
-            </div>
+            )}
             <MoonPhase className="hidden h-5 w-5 lg:block" />
           </div>
         </div>
