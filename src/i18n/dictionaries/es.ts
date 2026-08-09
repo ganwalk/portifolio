@@ -76,9 +76,10 @@ export const es: Dictionary = {
   about: {
     title: "Sobre mí",
     bio: [
-      "Intento ser un poco de todo: apasionado por la música, nerd de la tipografía, ilustrador de collages, productor en el tiempo libre, entusiasta de la tecnología, editor de video y curioso a tiempo completo.",
-      "Amo crear, y siento que nunca hay tiempo suficiente para probar todo lo que quiero. El diseño es mi profesión desde hace una década, pero la historia empieza mucho antes: en la costumbre constante de transformar todo lo que pasa por mis manos en un objeto de expresión propia. Ha sido casi todo tipo de medios, del banking al mercado de la música y todo lo que aparece en el medio. Hacer cosas es lo que me completa.",
-      "Hoy, en AUVP, soy responsable de experiencias interactivas que se adaptan a las necesidades reales de quienes las usan, siempre fundamentadas en métricas, SEO y performance. Amo lo que hago, tengo la suerte de hacer lo que amo, y quizás terminemos haciendo algo juntos.",
+      "Curioso a tiempo completo, soy un poco de todo: apasionado por la música, ilustrador, entusiasta de la tecnología y nerd de temas aleatorios, y hace ya una década convertí mis ganas de crear en profesión.",
+      "Soy un “fisgón profesional” que ya se metió en casi todo tipo de medios, del mercado financiero a la industria de la música, sacar ideas del papel es lo que me mueve.",
+      "Actualmente, trabajo en un banco (a ver si adivinas cuál) y atiendo clientes en todo el mundo, creando experiencias interactivas enfocadas en las necesidades reales de los usuarios, siempre guiadas por datos, SEO, rendimiento y muy buen gusto (¡el mío!).",
+      "Amo lo que hago, tengo la suerte de hacer lo que amo, y quizás terminemos haciendo algo juntos.",
     ],
     skillsTitle: "Herramientas y habilidades",
     skillsOrbitMessage: "¡Si no sé hacerlo, insisto hasta aprender!",
