@@ -373,27 +373,55 @@ export function Hero({ dict }: { dict: Dictionary }) {
   // lente abre e fecha junto com o círculo em vez de piscar.
   const lensOpacity = useTransform(r, [0, 8], [0, 1]);
 
+  // Raio alvo pro ponto atual do cursor: função só da distância até o CTA
+  // (perto dele a lente encolhe, cedendo o palco ao clique), sem nenhum
+  // efeito colateral. Extraída do onMouseMove pra também servir o efeito de
+  // entrada abaixo, que precisa do mesmo cálculo sem esperar por um evento
+  // de mouse novo.
+  const targetRadiusAt = useCallback((clientX: number, clientY: number) => {
+    const cta = ctaRef.current?.getBoundingClientRect();
+    if (!cta) return LENS_MAX;
+    const distance = Math.hypot(
+      clientX - (cta.left + cta.width / 2),
+      clientY - (cta.top + cta.height / 2),
+    );
+    const t = Math.min(Math.max((distance - 90) / 340, 0), 1);
+    return LENS_MIN + (LENS_MAX - LENS_MIN) * t;
+  }, []);
+
   const onMouseMove = (event: React.MouseEvent) => {
+    const section = sectionRef.current;
+    if (!section) return;
+    const rect = section.getBoundingClientRect();
+    // A posição sempre é rastreada, mesmo antes da lente ligar (abaixo): é
+    // ela que alimenta o crescimento de entrada assim que `lensReady` vira
+    // true, mesmo que o cursor esteja parado naquele instante, sem esperar
+    // por um próximo movimento.
+    mouseX.set(event.clientX - rect.left);
+    mouseY.set(event.clientY - rect.top);
+    if (!lensReady) return;
+    radius.set(targetRadiusAt(event.clientX, event.clientY));
+  };
+
+  // Quando a lente liga (2s, ver lensReady acima), se o cursor já estiver
+  // parado sobre a hero, nenhum mousemove novo dispara pra acender o raio:
+  // sem isso, o círculo só nasceria no PRÓXIMO movimento do mouse, uma
+  // lente que "esquece" de aparecer até alguém mexer o dedo de novo. Em vez
+  // disso, dispara o crescimento diretamente daqui, contra a última posição
+  // já rastreada (ou o sentinel fora de tela, se o cursor nunca passou pela
+  // hero, e então o círculo nasce fora de vista mesmo, sem efeito visível
+  // nenhum): raio vai de 0 até o alvo, e a MESMA mola que já suaviza o
+  // resto do gesto (`r`) cuida sozinha do crescimento, sem precisar de uma
+  // animação à parte.
+  useEffect(() => {
     if (!lensReady) return;
     const section = sectionRef.current;
     if (!section) return;
     const rect = section.getBoundingClientRect();
-    mouseX.set(event.clientX - rect.left);
-    mouseY.set(event.clientY - rect.top);
-
-    // Perto do CTA a lente encolhe: o raio é função da distância ao botão.
-    const cta = ctaRef.current?.getBoundingClientRect();
-    if (cta) {
-      const distance = Math.hypot(
-        event.clientX - (cta.left + cta.width / 2),
-        event.clientY - (cta.top + cta.height / 2),
-      );
-      const t = Math.min(Math.max((distance - 90) / 340, 0), 1);
-      radius.set(LENS_MIN + (LENS_MAX - LENS_MIN) * t);
-    } else {
-      radius.set(LENS_MAX);
-    }
-  };
+    const clientX = rect.left + mouseX.get();
+    const clientY = rect.top + mouseY.get();
+    radius.set(targetRadiusAt(clientX, clientY));
+  }, [lensReady, mouseX, mouseY, radius, targetRadiusAt]);
 
   // Na home o cabeçalho é fixed (veja SiteFrame), não reserva espaço no
   // fluxo, então a hero ocupa a tela inteira e a barra flutua por cima
