@@ -77,7 +77,6 @@ export const es: Dictionary = {
     title: "Sobre mí",
     bio: [
       "Curioso a tiempo completo, soy un poco de todo: apasionado por la música, ilustrador, entusiasta de la tecnología y nerd de temas aleatorios, y hace ya una década convertí mis ganas de crear en profesión.",
-      "Soy un “fisgón profesional” que ya se metió en casi todo tipo de medios, del mercado financiero a la industria de la música, sacar ideas del papel es lo que me mueve.",
       "Actualmente, trabajo en un banco (a ver si adivinas cuál) y atiendo clientes en todo el mundo, creando experiencias interactivas enfocadas en las necesidades reales de los usuarios, siempre guiadas por datos, SEO, rendimiento y muy buen gusto (¡el mío!).",
       "Amo lo que hago, tengo la suerte de hacer lo que amo, y quizás terminemos haciendo algo juntos.",
     ],
