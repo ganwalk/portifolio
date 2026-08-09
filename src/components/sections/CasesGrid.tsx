@@ -726,50 +726,161 @@ function ExpandedCase({
 // CaseColumn, abaixo) empilhava mal em tela pequena: o cabeçalho fixo cobria
 // o topo do painel ativo em certas posições de rolagem, e o trio de artistas
 // (empilhado dentro do próprio painel antes do lg:) competia com a pilha de
-// fatias, mostrando métricas de dois cases sobrepostas na mesma tela. A
-// lista vertical comum que veio depois resolvia isso, mas virava só mais uma
-// parede de scroll igual a todo o resto da página: nenhum convite a
-// interagir, nenhuma diferença do feed que a pessoa acabou de rolar pra
-// chegar até aqui.
+// fatias, mostrando métricas de dois cases sobrepostas na mesma tela. Uma
+// lista vertical comum resolvia isso, mas virava só mais uma parede de
+// scroll igual a todo o resto da página; um carrossel liso, com cartões só
+// trocando de opacidade, ainda parecia raso perto da pilha animada do
+// desktop.
 //
-// Aqui cada case é um cartão largo (82vw, a ponta do próximo espia na borda
-// direita, o convite visual a continuar arrastando), com scroll-snap
-// ancorando cada um pela borda ESQUERDA (snap-start, não snap-center):
-// scroll-padding-left no trilho, do mesmo tamanho do gutter, faz cada
-// cartão assentar exatamente onde o primeiro assenta, sempre à mesma
-// distância da borda da tela. snap-center foi a primeira tentativa, mas
-// centralizar cada cartão faz a MATEMÁTICA da centralização variar com a
+// Aqui cada cartão gira em 3D conforme passa pela tela (MobileCaseCard,
+// abaixo), um efeito coverflow real: `rotateY` num plano com `perspective`
+// própria, não `scale`. Uma primeira versão encolhia o cartão inativo
+// (scale-95), mas `transform: scale` só afeta a PINTURA, não o espaço
+// reservado no layout (aspect-[3/4] já fixa a caixa de cada cartão), então o
+// cartão encolhido sobrava com uma margem visível em volta, nos quatro
+// lados: o topo e a base da "dobra" (o pedaço do próximo cartão que espia na
+// borda) ganhavam um respiro vertical que os cartões cheios não tinham,
+// quebrando o alinhamento da fileira. `rotateY` não tem esse problema: gira
+// em profundidade, não encolhe a caixa, os quatro cantos continuam onde
+// sempre estiveram. O giro (e a mídia por trás, que desliza um pouco em
+// contrassenso, o mesmo paralaxe que já existe na pilha de desktop) é
+// contínuo, preso ao PRÓPRIO progresso do cartão dentro do trilho
+// (`useScroll` com `target` + `container`, não um estado discreto): o
+// cartão nasce inclinado e apagado entrando pela direita, endireita e
+// acende ao passar pelo centro, e volta a inclinar saindo pela esquerda,
+// acompanhando o dedo quadro a quadro, não só quando o snap termina. Some
+// pra quem pede menos movimento no sistema (reduceMotion): aí os cartões
+// ficam sempre chapados, só a rolagem em si continua.
+//
+// Scroll-snap ancora cada cartão pela borda ESQUERDA (snap-start, não
+// snap-center): scroll-padding-left no trilho, do mesmo tamanho do gutter,
+// faz cada cartão assentar exatamente onde o primeiro assenta, sempre à
+// mesma distância da borda da tela. snap-center foi a primeira tentativa,
+// mas centralizar cada cartão faz a MATEMÁTICA da centralização variar com a
 // posição (o primeiro cartão nasce colado à esquerda, sem o que centralizar
 // contra; os do meio ganham espia simétrica dos dois vizinhos), e o ritmo de
-// arrastar de um cartão pro outro fica inconsistente, a "dobra" entre um e
-// outro parecendo maior ou menor dependendo de qual cartão está ativo.
-// snap-start com o mesmo scroll-padding em todo cartão devolve um ritmo
-// único, sempre igual, cartão a cartão. O cartão ativo também ganha um leve
-// destaque sobre os vizinhos (opacidade, via `activeIndex`), o mesmo
-// princípio de profundidade que já diferencia a fatia em foco na pilha de
-// desktop (ver coveredDim em SlidePanel), só que aqui a MUDANÇA de foco vem
-// do gesto de arrastar, não do scroll vertical da página. Só opacidade, sem
-// escala: uma primeira versão encolhia o cartão inativo também (scale-95),
-// mas `transform: scale` só afeta a PINTURA, não o espaço reservado no
-// layout (aspect-[3/4] já fixa a caixa de cada cartão), então o cartão
-// encolhido sobrava com uma margem visível em volta, nos quatro lados, não
-// só nas laterais: o topo e a base da "dobra" (o pedaço do próximo cartão
-// que espia na borda) ficavam com um respiro vertical que os cartões
-// vizinhos, cheios, não tinham, quebrando o alinhamento da fileira. Só
-// opacidade preenche a caixa inteira sempre, ativo ou não, sem esse
-// descompasso. Arrastar É a navegação, sem seta, sem autoplay, o mesmo
-// princípio de "rolar é o controle" que já rege a versão de desktop, só que
-// no eixo horizontal. Os pontos abaixo do trilho leem a posição (não navegam, mesmo
-// padrão não clicável dos pontos do desktop), acesos via IntersectionObserver
-// no próprio trilho: cada cartão cruza 60% de visibilidade dentro do trilho
+// arrastar de um cartão pro outro ficava inconsistente. Arrastar É a
+// navegação, sem seta, sem autoplay, o mesmo princípio de "rolar é o
+// controle" que já rege a versão de desktop, só que no eixo horizontal. Os
+// pontos abaixo do trilho leem a posição (não navegam, mesmo padrão não
+// clicável dos pontos do desktop), acesos via IntersectionObserver no
+// próprio trilho: cada cartão cruza 60% de visibilidade dentro do trilho
 // (root próprio, não a janela, senão um cartão fora da faixa mas dentro da
 // altura da viewport contaria como visível) vira o ativo. Sem seletor de
 // fatia, sem selo que segue o cursor (não existe hover de verdade em touch):
 // abre a página do case direto, sem o overlay expandido em FLIP que a
 // versão de desktop usa.
+
+/** Amplitude do giro 3D, em graus, nas pontas do percurso do cartão (0 no
+ *  centro). Contida de propósito: o bastante pra ficar claro que o cartão
+ *  tem profundidade, sem virar ilegível nem embaralhar o texto por cima. */
+const MOBILE_TILT_DEG = 26;
+
+function MobileCaseCard({
+  caseStudy,
+  index,
+  totalCases,
+  locale,
+  dict,
+  trackRef,
+  reduceMotion,
+}: {
+  caseStudy: CaseStudy;
+  index: number;
+  totalCases: number;
+  locale: Locale;
+  dict: Dictionary;
+  trackRef: React.RefObject<HTMLDivElement | null>;
+  reduceMotion: boolean;
+}) {
+  const cardRef = useRef<HTMLDivElement>(null);
+  // offset "start end" → "end start": 0 no instante em que o cartão entra
+  // pela borda direita do trilho, 1 quando termina de sair pela esquerda.
+  // 0.5 cai perto do centro, o mesmo instante em que o IntersectionObserver
+  // abaixo (em MobileCaseList) marca este cartão como ativo.
+  const { scrollXProgress } = useScroll({
+    target: cardRef,
+    container: trackRef,
+    axis: "x",
+    offset: ["start end", "end start"],
+  });
+  const rotateY = useTransform(
+    scrollXProgress,
+    [0, 0.5, 1],
+    [MOBILE_TILT_DEG, 0, -MOBILE_TILT_DEG],
+  );
+  const opacity = useTransform(scrollXProgress, [0, 0.5, 1], [0.55, 1, 0.55]);
+  // Mídia desliza em contrassenso, o mesmo paralaxe que já existe no scroll
+  // vertical da versão de desktop (ver mediaY em CaseColumn): scale-125 no
+  // wrapper cobre a folga que o deslocamento abriria nas bordas.
+  const mediaX = useTransform(scrollXProgress, [0, 0.5, 1], ["-6%", "0%", "6%"]);
+  const metric = caseStudy.metrics[0];
+
+  return (
+    <div
+      ref={cardRef}
+      data-mobile-case-index={index}
+      className="relative aspect-[3/4] w-[82vw] shrink-0 snap-start overflow-hidden bg-black text-white"
+      style={reduceMotion ? undefined : { perspective: 800 }}
+    >
+      <motion.div
+        className="absolute inset-0"
+        style={reduceMotion ? undefined : { rotateY, opacity }}
+      >
+        <Link
+          href={`/${locale}/work/${caseStudy.slug}/`}
+          className="absolute inset-0 block"
+        >
+          <motion.div
+            className="absolute inset-0 scale-125"
+            style={reduceMotion ? undefined : { x: mediaX }}
+          >
+            <MediaView
+              media={caseStudy.cover}
+              locale={locale}
+              className="absolute inset-0 h-full w-full object-cover"
+            />
+          </motion.div>
+          <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/10 to-black/45" />
+
+          <div className="absolute inset-0 flex flex-col justify-between p-6">
+            <div className="flex items-start justify-between gap-4">
+              <p className="type-mono text-white/70">
+                {pad(index + 1)} / {pad(totalCases)} · {caseStudy.year}
+              </p>
+              <p className="text-right">
+                <span className="type-serif-display block text-4xl">
+                  {metric.value}
+                </span>
+                <span className="type-mono text-white/70">
+                  {metric.label[locale]}
+                </span>
+              </p>
+            </div>
+
+            <div>
+              <h3 className="type-display type-inktrap pt-[0.16em] text-[11vw] leading-[0.9]">
+                {caseStudy.title[locale]}
+              </h3>
+              <p className="type-mono mt-3 text-white/70">
+                {caseStudy.tags[locale].join(" • ")}
+              </p>
+              <span className="type-mono mt-6 inline-flex items-center gap-3 border border-white/40 px-6 py-3">
+                {caseStudy.comingSoon ? dict.cases.comingSoon : dict.cases.viewCase}
+                <span aria-hidden>→</span>
+              </span>
+            </div>
+          </div>
+        </Link>
+      </motion.div>
+    </div>
+  );
+}
+
 function MobileCaseList({ locale, dict }: { locale: Locale; dict: Dictionary }) {
   const trackRef = useRef<HTMLDivElement>(null);
   const [activeIndex, setActiveIndex] = useState(0);
+  const reduceMotion = useReducedMotion();
 
   useEffect(() => {
     const track = trackRef.current;
@@ -802,56 +913,18 @@ function MobileCaseList({ locale, dict }: { locale: Locale; dict: Dictionary }) 
         className="no-scrollbar flex snap-x snap-mandatory gap-4 overflow-x-auto px-6 pb-2"
         style={{ scrollPaddingLeft: "1.5rem" }}
       >
-        {cases.map((caseStudy, index) => {
-          const metric = caseStudy.metrics[0];
-          const isActive = index === activeIndex;
-          return (
-            <Link
-              key={caseStudy.slug}
-              data-mobile-case-index={index}
-              href={`/${locale}/work/${caseStudy.slug}/`}
-              className={`relative block aspect-[3/4] w-[82vw] shrink-0 snap-start overflow-hidden bg-black text-white transition-opacity duration-500 ease-out ${
-                isActive ? "opacity-100" : "opacity-60"
-              }`}
-            >
-              <MediaView
-                media={caseStudy.cover}
-                locale={locale}
-                className="absolute inset-0 h-full w-full object-cover"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/10 to-black/45" />
-
-              <div className="absolute inset-0 flex flex-col justify-between p-6">
-                <div className="flex items-start justify-between gap-4">
-                  <p className="type-mono text-white/70">
-                    {pad(index + 1)} / {pad(cases.length)} · {caseStudy.year}
-                  </p>
-                  <p className="text-right">
-                    <span className="type-serif-display block text-4xl">
-                      {metric.value}
-                    </span>
-                    <span className="type-mono text-white/70">
-                      {metric.label[locale]}
-                    </span>
-                  </p>
-                </div>
-
-                <div>
-                  <h3 className="type-display type-inktrap pt-[0.16em] text-[11vw] leading-[0.9]">
-                    {caseStudy.title[locale]}
-                  </h3>
-                  <p className="type-mono mt-3 text-white/70">
-                    {caseStudy.tags[locale].join(" • ")}
-                  </p>
-                  <span className="type-mono mt-6 inline-flex items-center gap-3 border border-white/40 px-6 py-3">
-                    {caseStudy.comingSoon ? dict.cases.comingSoon : dict.cases.viewCase}
-                    <span aria-hidden>→</span>
-                  </span>
-                </div>
-              </div>
-            </Link>
-          );
-        })}
+        {cases.map((caseStudy, index) => (
+          <MobileCaseCard
+            key={caseStudy.slug}
+            caseStudy={caseStudy}
+            index={index}
+            totalCases={cases.length}
+            locale={locale}
+            dict={dict}
+            trackRef={trackRef}
+            reduceMotion={!!reduceMotion}
+          />
+        ))}
       </div>
 
       {/* Leitura de posição, não navegação: mesmo padrão não clicável dos

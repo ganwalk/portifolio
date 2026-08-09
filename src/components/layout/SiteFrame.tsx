@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState, type ReactNode } from "react";
+import { motion } from "framer-motion";
 import { BoringToggle } from "@/components/controls/BoringToggle";
 import { ControlBar } from "@/components/controls/ControlBar";
 import { LocaleSwitcher } from "@/components/controls/LocaleSwitcher";
@@ -17,63 +18,59 @@ import type { Dictionary } from "@/i18n/dictionaries";
 //
 // O cabeçalho muda de arranjo com a largura, mantendo uma só ordem de DOM
 // (menu+Boring, assinatura, tema/som/idioma+lua): no mobile é grid de três
-// colunas, com a assinatura centralizada; no desktop vira flex e a assinatura
-// vai para a frente da fila (order-first), com o segundo cluster empurrado
-// para a direita. No mobile a mesa de controle (tema/som/idioma) mora dentro
-// do menu; no desktop ela se divide nos dois clusters da própria barra. Ao
+// colunas (minmax(0,1fr) nas duas pontas, não 1fr puro: força as duas
+// colunas flanqueadoras a ficarem exatamente do mesmo tamanho mesmo quando
+// o conteúdo de cada uma pede larguras mínimas diferentes, senão a coluna
+// central, "Armando Custodio", centraliza contra colunas desiguais e sai do
+// centro de verdade da barra); no desktop vira flex e a assinatura vai para
+// a frente da fila (order-first), com o segundo cluster empurrado para a
+// direita. No mobile a mesa de controle (tema/som/idioma) mora dentro do
+// menu; no desktop ela se divide nos dois clusters da própria barra. Ao
 // rolar, a barra encorpa (fundo mais sólido) para não sumir sobre as mídias.
 // Some por completo na impressão.
 //
-// Modo Boring e idioma são os únicos controles com uma segunda linha própria
-// no mobile (o Modo Boring em cima, o idioma logo abaixo), e ela dura só o
-// tempo da hero: é a oferta de saída feita de cara, na primeira dobra da
-// home, quando a pessoa ainda está decidindo se quer a experiência lúdica ou
-// o currículo direto, com o idioma à mão pra quem decide isso antes mesmo de
-// ler o português. Passada a hero, quem ficou já escolheu ficar, e a linha
-// extra viraria uma tarja permanente roubando altura de tela estreita a cada
-// rolagem. A partir daí os dois moram dentro do menu, junto do tema (veja
-// SiteMenu), que no mobile já é a gaveta de todos os controles. Fora da
-// home, onde não existe hero, a segunda linha nem chega a aparecer: os dois
-// nascem direto no menu. No desktop ela também não existe, lá os dois cabem
-// folgados na primeira linha, junto do menu.
+// A barra em si é UMA linha só, sempre presente, em qualquer largura: nunca
+// alterna entre duas barras diferentes. No mobile, na home em Modo Criativo,
+// só o CONTEÚDO da barra muda com o scroll, trocando dinamicamente dentro da
+// mesma linha (sem recolher uma pra abrir outra): durante a hero (antes da
+// primeira dobra passar) ela mostra [Modo Boring, lua, idioma], a oferta de
+// saída feita de cara, com a lua entre os dois porque é ali que ela nasce
+// nessa composição; passada a hero, [menu, Armando Custodio] entram e a lua
+// migra pro canto direito, o arranjo padrão do resto do site (mesmo
+// layoutId na lua nas duas composições, então ela literalmente desliza de
+// um lugar pro outro em vez de sumir e reaparecer). Essa troca de conteúdo é
+// exclusiva do mobile: no desktop a barra sempre mostra tudo de uma vez
+// (Boring+menu à esquerda, tema/idioma+lua à direita), sobra espaço e
+// esconder qualquer parte só tiraria acesso sem ganhar nada em troca. Fora
+// da home, ou já em Modo Boring, o mobile também já nasce direto no arranjo
+// padrão (menu, assinatura, lua à direita): a composição de hero só faz
+// sentido junto da própria hero.
 //
-// A troca das duas linhas é sincronizada no mesmo ponto de scroll: no mobile,
-// na home em Modo Criativo, o cabeçalho começa "reduzido" (só a linha do
-// Modo Boring, sem tooltip) e a primeira linha (menu, assinatura, lua) fica
-// recolhida, deixando a hero ocupar a primeira dobra quase sozinha. Passada
-// a altura da tela, elas se revezam: a primeira linha abre e a segunda
-// fecha, então o cabeçalho nunca mostra as duas ao mesmo tempo, e a saída
-// para o Modo Boring nunca fica órfã (ela some junto com o aparecimento do
-// menu que passa a guardá-la). No desktop a primeira linha é sempre visível,
-// em qualquer página e desde o primeiro pixel: lá o espaço sobra, esconder a
-// barra só tira acesso sem ganhar nada em troca. Em Modo Boring fora da
-// home, a primeira linha também é sempre visível, em qualquer largura: sem
-// hero para esconder atrás.
+// Em Modo Boring o cabeçalho ganha uma SEGUNDA linha, essa sim recolhível,
+// com Modo Boring e idioma: lá o menu não existe (a página utilitária é uma
+// coluna só, veja SiteMenu), então sem essa linha não sobraria porta nenhuma
+// de volta para o Modo Criativo. Fica sempre presente, em qualquer scroll,
+// só no mobile (no desktop os dois já cabem na primeira linha, junto do
+// menu).
 //
-// Em Modo Boring a segunda linha é a exceção que continua sempre presente,
-// em qualquer página e qualquer scroll: lá o menu não existe (a página
-// utilitária é uma coluna só, veja SiteMenu), então sem essa linha não
-// sobraria porta nenhuma de volta para o Modo Criativo.
-//
-// No mobile, na home em Modo Boring, a primeira linha some pelo mesmo
-// motivo oposto: a própria BoringView já abre com o nome como H1 do próprio
-// conteúdo (o "cabeçalho de currículo"), então repetir a assinatura na barra
-// fixa no mesmo instante é redundância pura numa tela estreita. A linha
-// reaparece assim que o scroll alcança a seção "Sobre" (`#about`, logo
-// abaixo), o mesmo ponto em que a assinatura do documento já saiu da vista e
-// a barra passa a ser a única referência de identidade na tela. No desktop
-// a primeira linha continua sempre visível, mesmo critério de sobra de
-// espaço do restante do cabeçalho.
+// No mobile, na home em Modo Boring, a PRIMEIRA linha (a barra principal)
+// some por completo até o scroll alcançar a seção "Sobre" (`#about`): a
+// própria BoringView já abre com o nome como H1 do próprio conteúdo (o
+// "cabeçalho de currículo"), então repetir a assinatura na barra fixa no
+// mesmo instante é redundância pura numa tela estreita, e só a segunda linha
+// (a saída pro Modo Criativo) precisa existir ali. A barra reaparece assim
+// que a assinatura do documento já saiu da vista e ela passa a ser a única
+// referência de identidade na tela. No desktop a primeira linha continua
+// sempre visível, mesmo critério de sobra de espaço do resto do cabeçalho.
 //
 // Na home em Modo Criativo o cabeçalho é `fixed`, não `sticky`: um elemento
-// sticky reserva a própria altura no fluxo do documento mesmo com a primeira
-// linha escondida via opacity/max-height (são propriedades visuais, não
-// afetam a reserva de espaço do fixed), o que deixava uma tarja vazia no
-// topo do mobile antes da hero aparecer. Fixed nunca reserva espaço, então a
-// hero pode ocupar a tela inteira (100svh) e o cabeçalho flutua por cima
-// dela o tempo todo, mesmo reduzido a uma linha. Fora da home (ou em
-// Boring), continua sticky: essas páginas não têm hero e sempre dependeram
-// do cabeçalho empurrando o conteúdo para baixo.
+// sticky reserva a própria altura no fluxo do documento mesmo com o
+// conteúdo interno trocando via opacity/max-height (propriedades visuais,
+// não afetam a reserva de espaço do fixed). Fixed nunca reserva espaço,
+// então a hero pode ocupar a tela inteira (100svh) e o cabeçalho flutua por
+// cima dela o tempo todo. Fora da home (ou em Boring), continua sticky:
+// essas páginas não têm hero e sempre dependeram do cabeçalho empurrando o
+// conteúdo para baixo.
 
 export function SiteFrame({
   children,
@@ -108,11 +105,17 @@ export function SiteFrame({
     return () => window.removeEventListener("scroll", onScroll);
   }, [isBoringHome]);
 
-  const headerVisible = isBoringHome ? pastAbout : !isHomeHero || pastFirstFold;
-  // Linha do Modo Boring no mobile: só enquanto a hero está na tela (home em
-  // Modo Criativo, antes da primeira dobra passar). Em Modo Boring fica
-  // sempre, é a única volta possível sem menu.
-  const boringRowVisible = isBoringMode || (isHomeHero && !pastFirstFold);
+  // A barra principal só some por completo em Modo Boring, antes da seção
+  // Sobre (ver comentário acima); em qualquer outro caso ela fica sempre
+  // visível, mesmo na hero, só trocando de conteúdo (heroMini, abaixo).
+  const rowVisible = !isBoringHome || pastAbout;
+  // Composição de hero, mobile only: Modo Boring, lua, idioma no lugar de
+  // menu, assinatura, lua. Só existe na home em Modo Criativo, antes da
+  // primeira dobra passar.
+  const heroMini = isHomeHero && !pastFirstFold;
+  // Segunda linha do Modo Boring: a única volta possível sem menu, por isso
+  // fica sempre presente enquanto o modo dura, em qualquer scroll.
+  const boringRowVisible = isBoringMode;
 
   return (
     <div className="flex min-h-svh flex-col">
@@ -128,26 +131,22 @@ export function SiteFrame({
           scrolled ? "bg-background/95" : "bg-background/85"
         }`}
       >
-        {/* Primeira linha: menu, assinatura, lua. No mobile, na home em Modo
-            Criativo, começa recolhida (max-h-0) até o scroll passar da
-            primeira dobra; max-height em vez de translate/opacity porque
-            translate não retira o espaço reservado no fluxo, e aqui a linha
-            é filha normal do flex-col (não teria como flutuar por cima da
-            segunda linha sem empurrá-la). No desktop, ou fora dessa
-            combinação específica de mobile+home+criativo, sempre expandida:
-            lg:pointer-events-auto e lg:overflow-visible desfazem, só aí, o
-            pointer-events-none e o overflow-hidden que a versão recolhida
-            usa no mobile, senão o cabeçalho inteiro ficava inclicável e a
-            tooltip cortada no desktop mesmo com max-height/opacity já
-            revertidos por lg:max-h-none/lg:opacity-100. */}
+        {/* Linha principal: menu+Boring, assinatura, lua+controles. Só
+            recolhe (max-h-0) na combinação específica mobile+home+Boring,
+            antes da seção Sobre (ver comentário no topo do arquivo); fora
+            disso fica sempre com altura normal, e no mobile o CONTEÚDO de
+            cada coluna troca conforme heroMini (abaixo). No desktop, lg:
+            desfaz o recolhimento e o overflow-hidden que o mobile usa,
+            senão o cabeçalho ficava inclicável lá mesmo com altura normal. */}
         <div
-          className={`grid grid-cols-[1fr_auto_1fr] items-center gap-2 overflow-hidden px-6 transition-all duration-300 sm:px-12 lg:flex lg:max-h-none lg:gap-8 lg:overflow-visible lg:opacity-100 lg:pointer-events-auto xl:px-20 ${
-            headerVisible
+          className={`grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-2 overflow-hidden px-6 transition-all duration-300 sm:px-12 lg:flex lg:max-h-none lg:gap-8 lg:overflow-visible lg:opacity-100 lg:pointer-events-auto xl:px-20 ${
+            rowVisible
               ? "max-h-20 py-3 opacity-100"
               : "pointer-events-none max-h-0 py-0 opacity-0"
           } ${scrolled ? "lg:py-2" : "lg:py-3"}`}
         >
           <div className="flex items-center gap-4 justify-self-start">
+            {/* Desktop: Modo Boring e menu sempre juntos, sem alternância. */}
             <div className="hidden lg:flex">
               <BoringToggle
                 dict={dict}
@@ -155,38 +154,73 @@ export function SiteFrame({
                 dismissTooltip={pastFirstFold}
               />
             </div>
-            <SiteMenu locale={locale} dict={dict} />
+            {/* Mobile, hero: o Modo Boring assume o lugar do menu, mesma
+                oferta de saída que a segunda linha oferecia antes, agora
+                dentro da própria barra. Nunca mostra tooltip: tarja
+                estreita, sem espaço sobrando pra bolha. */}
+            <div className={`lg:hidden ${heroMini ? "flex" : "hidden"}`}>
+              <BoringToggle dict={dict} />
+            </div>
+            {/* Menu de verdade: sempre visível no desktop (sem alternância,
+                junto do Modo Boring acima); no mobile só fora da hero. */}
+            <div className={heroMini ? "hidden lg:flex" : "flex"}>
+              <SiteMenu locale={locale} dict={dict} />
+            </div>
           </div>
 
-          <Link
-            href={`/${locale}/`}
-            className="wordmark justify-self-center whitespace-nowrap lg:order-first"
-          >
-            {profile.name}
-          </Link>
+          <div className="relative justify-self-center lg:order-first">
+            {/* Mobile, hero: a lua entra aqui, entre Modo Boring e idioma.
+                layoutId compartilhado com a cópia do canto direito (abaixo):
+                ao trocar heroMini, o Framer Motion anima a MESMA lua
+                deslizando de um lugar pro outro, em vez de sumir e
+                reaparecer. */}
+            <div className={`lg:hidden ${heroMini ? "block" : "hidden"}`}>
+              <motion.div layoutId="mobile-header-moon">
+                <MoonPhase className="h-5 w-5" />
+              </motion.div>
+            </div>
+            {/* Assinatura: sempre visível no desktop; no mobile, só fora da
+                hero (heroMini troca o lugar dela pela lua, acima). */}
+            <Link
+              href={`/${locale}/`}
+              className={`wordmark whitespace-nowrap lg:block ${heroMini ? "hidden" : "block"}`}
+            >
+              {profile.name}
+            </Link>
+          </div>
 
           <div className="flex items-center gap-4 justify-self-end lg:ml-auto">
+            {/* Desktop: tema/som/idioma sempre visível, sem alternância. */}
             <div className="hidden lg:flex">
               <ControlBar locale={locale} dict={dict} />
             </div>
-            <MoonPhase className="h-5 w-5" delayUntilSecondFold={isHomeHero} />
+            {/* Mobile, hero: idioma no lugar do tema (que só existe dentro
+                do menu, indisponível durante a hero de qualquer forma). */}
+            <div className={`lg:hidden ${heroMini ? "block" : "hidden"}`}>
+              <LocaleSwitcher locale={locale} dict={dict} />
+            </div>
+            {/* Mobile, fora da hero: a lua, migrada do centro (mesma
+                layoutId da cópia de lá). Independente da cópia lg: acima,
+                que nunca faz parte dessa troca. */}
+            <div className={`lg:hidden ${heroMini ? "hidden" : "block"}`}>
+              <motion.div layoutId="mobile-header-moon">
+                <MoonPhase className="h-5 w-5" />
+              </motion.div>
+            </div>
+            <MoonPhase className="hidden h-5 w-5 lg:block" />
           </div>
         </div>
 
-        {/* Segunda linha: Modo Boring e, logo abaixo, o idioma. Só no mobile
-            (no desktop os dois já cabem na primeira linha) e só enquanto a
-            hero está na tela, exceto em Modo Boring, onde fica sempre por
-            falta de menu que a guarde. Mesmo mecanismo de recolhimento da
-            primeira linha (max-height, e não translate/opacity, que não
-            devolvem o espaço reservado no fluxo), inclusive a borda, que sai
-            junto: uma borda de 1px sozinha sobre a borda inferior do
-            cabeçalho leria como um risco duplo. Nunca mostra tooltip: é uma
-            tarja estreita, sem espaço sobrando pra bolha, e enquanto ela
-            existe o Modo Boring é o único controle já autoexplicativo ali.
-            O idioma entra aqui pelo mesmo motivo que o Modo Boring: na
-            primeira dobra, antes do menu aparecer, essa é a única porta pro
-            controle no mobile (fora daqui, ele só mora dentro do menu, ver
-            SiteMenu). */}
+        {/* Segunda linha: só em Modo Boring, Modo Boring e idioma (a única
+            volta possível sem menu). Só no mobile (no desktop os dois já
+            cabem na primeira linha) e sempre presente enquanto o modo dura,
+            em qualquer scroll. Mesmo mecanismo de recolhimento da primeira
+            linha (max-height, e não translate/opacity, que não devolvem o
+            espaço reservado no fluxo), inclusive a borda, que sai junto: uma
+            borda de 1px sozinha sobre a borda inferior do cabeçalho leria
+            como um risco duplo. Nunca mostra tooltip: é uma tarja estreita,
+            sem espaço sobrando pra bolha, e enquanto ela existe o Modo
+            Boring é o único controle já autoexplicativo ali. */}
         <div
           className={`overflow-hidden transition-all duration-300 lg:hidden ${
             boringRowVisible

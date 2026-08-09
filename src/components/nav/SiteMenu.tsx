@@ -138,9 +138,14 @@ export function SiteMenu({
                   // este div de fora, sem afetar o hover (o navegador conta
                   // como "sobre .group" qualquer descendente, inclusive o
                   // link dentro do recorte).
+                  //
+                  // A régua entre itens (border-t) só existe do lg: pra cima:
+                  // ela separa a vinheta de UM item da vinheta do vizinho no
+                  // hover, mas hover de verdade não existe em touch, então no
+                  // mobile a régua não delimita nada, só risca a tela à toa.
                   <div
                     key={item.id}
-                    className={`group relative ${index > 0 ? "border-t border-line" : ""}`}
+                    className={`group relative ${index > 0 ? "lg:border-t lg:border-line" : ""}`}
                     onMouseEnter={() => setHoveredId(item.id)}
                     onMouseLeave={() => setHoveredId((current) => (current === item.id ? null : current))}
                   >
@@ -162,7 +167,7 @@ export function SiteMenu({
                       <motion.div variants={itemVariants}>
                         <Link
                           href={`/${locale}/#${item.id}`}
-                          className="relative flex items-center justify-center gap-4 py-1 lg:justify-start"
+                          className="relative flex items-center gap-4 py-1"
                           onClick={() => toggle(false)}
                         >
                           <span className="type-mono relative z-10 text-muted transition-colors duration-500 ease-out group-hover:text-background">
@@ -174,16 +179,22 @@ export function SiteMenu({
                               mais longo de então passava da borda direita
                               numa tela estreita. Do sm pra cima sobra espaço
                               de sobra e o corpo continua o mesmo.
-                              translate-y-[0.07em]: a caixa de linha (leading-
+                              translate-y-[0.35em]: a caixa de linha (leading-
                               none) reserva espaço pra descendentes que um
                               rótulo só de caixa alta nunca usa, então a
-                              tinta das letras se assenta um pouco acima do
-                              centro geométrico da própria caixa. Sem esse
-                              nudge, medido empiricamente (~7,5px numa fonte
-                              de ~100px, ou seja ~0,07em), a barra de destaque
-                              centralizada na caixa parecia descentralizada
-                              do eixo óptico do texto. */}
-                          <span className="type-display type-inktrap relative z-10 translate-y-[0.07em] text-[11vw] leading-none text-foreground transition-colors duration-500 ease-out group-hover:text-background sm:text-[7vw]">
+                              tinta das letras se assenta um bom tanto acima
+                              do centro geométrico da própria caixa. Medido
+                              direto contra o centro real da linha que contém
+                              cada item (a régua entre um item e o próximo,
+                              não a caixa CSS do próprio rótulo, que é maior
+                              que a tinta): sem esse nudge a tinta sobrava
+                              perceptivelmente alta dentro da própria linha.
+                              Um valor bem menor (~0,07em) tinha sido usado
+                              antes, medido só contra a caixa CSS do rótulo em
+                              vez do centro visual da linha (que é o que o
+                              olho realmente compara), e por isso não dava
+                              conta do desvio de verdade. */}
+                          <span className="type-display type-inktrap relative z-10 translate-y-[0.35em] text-[11vw] leading-none text-foreground transition-colors duration-500 ease-out group-hover:text-background sm:text-[7vw]">
                             {item.label}
                           </span>
                           {/* Frase curta contando do que a seção trata,
