@@ -319,9 +319,14 @@ function SlidePanel({
           className="pointer-events-none absolute inset-0 z-10 bg-black"
         />
         {multi && (
-          <div className="flex w-8 shrink-0 items-center justify-center sm:w-10 lg:w-14">
+          // bg-background, não bg-black: ao contrário da mídia (sempre a
+          // cores, a exceção proposital do resto do arquivo), esta régua não
+          // mostra nenhum projeto, é só um separador de rótulo. Sem cor
+          // própria pra defender, ela acompanha o tema como o resto do
+          // site, em vez de herdar o preto do painel por trás.
+          <div className="flex w-8 shrink-0 items-center justify-center bg-background sm:w-10 lg:w-14">
             <span
-              className="type-inktrap whitespace-nowrap text-xs uppercase tracking-widest text-white/50"
+              className="type-inktrap whitespace-nowrap text-xs uppercase tracking-widest text-muted"
               style={{ writingMode: "vertical-rl", transform: "rotate(180deg)" }}
             >
               {dict.cases.interactiveExperiences}
@@ -832,6 +837,19 @@ function MobileCaseCard({
   // vertical da versão de desktop (ver mediaY em CaseColumn): scale-125 no
   // wrapper cobre a folga que o deslocamento abriria nas bordas.
   const mediaX = useTransform(scrollXProgress, [0, 0.5, 1], ["-10%", "0%", "10%"]);
+  // O gradiente escuro por cima da mídia gira junto com o resto do cartão
+  // por herança (é filho do MESMO motion.div que tem o rotateY, sem
+  // transform próprio: confirmado que o retângulo dele acompanha o giro do
+  // pai, pixel a pixel). O que faltava não era o giro em si, e sim ele
+  // responder a ele: um gradiente escuro tem pouca textura própria, então
+  // olho nu não nota o giro em cima de uma superfície quase lisa, e a
+  // escuridão parecia "grudada" ali, alheia ao resto se inclinando. Escala
+  // a própria opacidade do gradiente pelo mesmo progresso: mais escuro nas
+  // pontas (cartão de perfil, mais raso), mais claro no centro (cartão de
+  // frente, mídia em foco máximo), reforçando visualmente que a
+  // profundidade cresce junto com o giro, não só a opacidade uniforme do
+  // cartão inteiro (que já existia, mas não bastava pra essa leitura).
+  const gradientOpacity = useTransform(scrollXProgress, [0, 0.5, 1], [1, 0.6, 1]);
   const metric = caseStudy.metrics[0];
 
   return (
@@ -859,7 +877,10 @@ function MobileCaseCard({
               className="absolute inset-0 h-full w-full object-cover"
             />
           </motion.div>
-          <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/10 to-black/45" />
+          <motion.div
+            className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/10 to-black/45"
+            style={reduceMotion ? undefined : { opacity: gradientOpacity }}
+          />
 
           <div className="absolute inset-0 flex flex-col justify-between p-6">
             <div className="flex items-start justify-between gap-4">

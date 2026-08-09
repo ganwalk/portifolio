@@ -68,14 +68,14 @@ export const cases: CaseStudy[] = [
     // reveal dos componentes do Design System em grid.
     cover: {
       kind: "video",
-      src: "https://videos.pexels.com/video-files/7292450/7292450-hd_1920_1080_24fps.mp4",
+      src: "https://videos.pexels.com/video-files/37116270/15723407_1080_1920_25fps.mp4",
       poster:
-        "https://images.pexels.com/videos/7292450/pexels-photo-7292450.jpeg?auto=compress&w=1280",
+        "https://images.pexels.com/videos/37116270/app-application-checkmark-concept-37116270.jpeg?auto=compress&w=1280",
       alt: {
-        pt: "Blocos de concreto modulares em luz de dia",
-        en: "Modular concrete blocks in daylight",
-        es: "Bloques de hormigón modulares con luz de día",
-        zh: "日光下的模块化混凝土块",
+        pt: "Mão desenhando componentes de interface com caneta digital em um tablet",
+        en: "Hand sketching interface components with a digital pen on a tablet",
+        es: "Mano dibujando componentes de interfaz con lápiz digital en una tablet",
+        zh: "手持数位笔在平板上绘制界面组件",
       },
     },
     comingSoon: true,
@@ -84,13 +84,13 @@ export const cases: CaseStudy[] = [
     slug: "ecossistema-auvp",
     area: "banking",
     year: "2023/2026",
-    // "Sites", não "Sites AUVP": a lista vai crescer com sites fora da
-    // AUVP, o rótulo não pode ficar preso a um cliente só.
+    // "Landing Pages", não "Landing Pages AUVP": a lista vai crescer com
+    // páginas fora da AUVP, o rótulo não pode ficar preso a um cliente só.
     title: {
-      pt: "Sites",
-      en: "Websites",
-      es: "Sitios",
-      zh: "网站",
+      pt: "Landing Pages",
+      en: "Landing Pages",
+      es: "Landing Pages",
+      zh: "落地页",
     },
     statement: {
       pt: "Desenho e mantenho o ecossistema de webpages da AUVP Capital, guiado por métricas, SEO e performance.",
@@ -130,14 +130,14 @@ export const cases: CaseStudy[] = [
     // diferentes, ou zoom out de um dashboard do Clarity/GA com dados reais.
     cover: {
       kind: "video",
-      src: "https://videos.pexels.com/video-files/18120439/18120439-hd_1920_1080_60fps.mp4",
+      src: "https://videos.pexels.com/video-files/7872722/7872722-uhd_1440_2732_25fps.mp4",
       poster:
-        "https://images.pexels.com/videos/18120439/pexels-photo-18120439.jpeg?auto=compress&w=1280",
+        "https://images.pexels.com/videos/7872722/decorative-plants-laptop-pexels-photos-7872722.jpeg?auto=compress&w=1280",
       alt: {
-        pt: "Vista aérea de uma cidade entre o rio e as montanhas",
-        en: "Aerial view of a city between the river and the mountains",
-        es: "Vista aérea de una ciudad entre el río y las montañas",
-        zh: "河流与山脉之间的城市航拍",
+        pt: "Mãos rolando a tela de um site em um laptop",
+        en: "Hands scrolling through a website on a laptop",
+        es: "Manos desplazándose por un sitio web en una laptop",
+        zh: "双手在笔记本电脑上滚动浏览网站",
       },
     },
     comingSoon: true,

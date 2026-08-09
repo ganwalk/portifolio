@@ -163,7 +163,28 @@ export function SiteMenu({
                       aria-hidden
                       className="absolute -left-6 -right-6 inset-y-0 origin-center scale-y-0 bg-foreground transition-transform duration-150 ease-out group-hover:scale-y-100 sm:-left-12 sm:-right-12 xl:-left-20 xl:-right-20"
                     />
-                    <div className="overflow-hidden">
+                    {/* py-[0.4em] aqui, não no Link (que já centraliza numeral
+                        e rótulo entre si via items-center, um ajuste ali
+                        mexeria nessa centralização relativa): o rótulo é
+                        deslocado pra baixo por translate-y-[0.35em] mais
+                        adiante (nudge óptico, ver comentário no próprio
+                        rótulo), um valor em em que cresce junto do
+                        text-[Xvw] do rótulo. transform é só pintura, não
+                        muda a altura que este overflow-hidden reserva pro
+                        filho, e em telas bem largas (7vw vira uma fonte
+                        grande) o deslocamento passava da borda inferior
+                        deste recorte, cortando um pedaço do rótulo. Padding
+                        IGUAL nas duas pontas (não só embaixo) dá a mesma
+                        folga pros dois lados sem mover o centro vertical
+                        deste recorte, que é a referência usada pra calibrar
+                        o nudge. text-[11vw]/sm:text-[7vw] aqui não desenha
+                        texto nenhum (este div não tem conteúdo de texto
+                        direto), é só pra fazer o em do py resolver contra a
+                        MESMA escala do rótulo: sem isso o em herdava o
+                        tamanho de fonte ambiente (~16px) em vez do tamanho
+                        de verdade do rótulo, e a folga saía pequena demais
+                        pra cobrir o nudge. */}
+                    <div className="overflow-hidden py-[0.4em] text-[11vw] sm:text-[7vw]">
                       <motion.div variants={itemVariants}>
                         <Link
                           href={`/${locale}/#${item.id}`}
@@ -207,12 +228,27 @@ export function SiteMenu({
                               caixa importa). Só no lg:, onde sobra largura ao
                               lado do rótulo gigante; em telas estreitas o
                               rótulo já ocupa a linha inteira. */}
-                          <span className="relative z-10 ml-auto hidden max-w-xs self-center text-right font-mono text-xs uppercase tracking-wide text-background opacity-0 transition-opacity duration-150 ease-out group-hover:opacity-100 lg:block">
-                            <TypewriterText
-                              key={hoveredId === item.id ? "typing" : "idle"}
-                              text={dict.nav.menuDescriptions[item.id]}
-                              active={hoveredId === item.id}
-                            />
+                          <span className="relative z-10 ml-auto hidden max-w-xs self-center text-right font-mono text-xs uppercase tracking-wide text-background opacity-0 transition-opacity duration-150 ease-out group-hover:opacity-100 lg:grid">
+                            {/* Referência de tamanho invisível, com o texto
+                                CHEIO: reserva de cara a altura final (uma ou
+                                duas linhas, dependendo de cada frase e da
+                                largura disponível), sobreposta à cópia
+                                digitada na mesma célula do grid (mesmo
+                                truque de pilha do BoringToggle, ver
+                                controls/BoringToggle.tsx). Sem ela, a caixa
+                                crescia aos poucos junto com o texto digitado
+                                e dava um leve salto no instante em que a
+                                frase quebrava pra segunda linha. */}
+                            <span aria-hidden className="invisible col-start-1 row-start-1">
+                              {dict.nav.menuDescriptions[item.id]}
+                            </span>
+                            <span className="col-start-1 row-start-1">
+                              <TypewriterText
+                                key={hoveredId === item.id ? "typing" : "idle"}
+                                text={dict.nav.menuDescriptions[item.id]}
+                                active={hoveredId === item.id}
+                              />
+                            </span>
                           </span>
                         </Link>
                       </motion.div>
