@@ -90,9 +90,10 @@ export const pt = {
   about: {
     title: "Sobre",
     bio: [
-      "Tento ser um pouco de tudo: apaixonado por música, nerd de tipografia, ilustrador de colagens, produtor nas horas vagas, entusiasta de tecnologia, editor de vídeo e curioso em tempo integral.",
-      "Amo criar, e sinto que nunca há tempo suficiente para experimentar tudo que quero. Há uma década faço do design profissão, mas a história começa bem antes: numa mania constante de transformar tudo que passa pela minha mão em objeto de expressão própria. Já foi quase todo tipo de mídia, do banking ao mercado da música e tudo que aparece no meio. Fazer coisas é o que me completa.",
-      "Hoje, na AUVP, sou responsável por experiências interativas que se adaptam às necessidades reais de quem as usa, sempre fundamentadas em métricas, SEO e performance. Amo o que faço, tenho sorte de fazer o que amo, e talvez a gente ainda faça algo juntos.",
+      "Curioso em tempo integral, sou um pouco de tudo: apaixonado por música, ilustrador, entusiasta de tecnologia e nerd de assuntos aleatórios, e já há uma década transformei minha vontade de criar em profissão.",
+      "Sou um “fuçador profissional” que já mergulhou em quase todo tipo de mídia, do mercado financeiro à indústria da música, tirar ideias do papel é o que me move.",
+      "Atualmente, estou em um banco (você consegue descobrir qual se for curioso) e atendo clientes no mundo todo criando experiências interativas focadas nas necessidades reais dos usuários, sempre guiadas por dados, SEO, performance e um ótimo bom gosto (o meu!).",
+      "Adoro o que faço, tenho sorte de fazer o que amo, e talvez a gente ainda faça algo juntos.",
     ],
     skillsTitle: "Ferramentas e habilidades",
     // Aparece por dois gatilhos (ver SkillsOrbit.tsx): 5s depois que a

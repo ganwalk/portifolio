@@ -75,9 +75,10 @@ export const en: Dictionary = {
   about: {
     title: "About",
     bio: [
-      "I try to be a little bit of everything: music lover, typography nerd, collage illustrator, part time producer, tech enthusiast, video editor and full time curious person.",
-      "I love creating, and I feel like there's never enough time to try everything I want to. Design has been my profession for a decade, but the story starts much earlier: a lifelong habit of turning everything that passes through my hands into an object of self expression. It's been almost every kind of media, from banking to the music industry and everything in between. Making things is what makes me whole.",
-      "Today, at AUVP, I'm responsible for interactive experiences that adapt to the real needs of the people using them, always grounded in metrics, SEO and performance. I love what I do, I'm lucky to do what I love, and maybe we'll end up making something together.",
+      "A full-time curious person, I'm a little bit of everything: music lover, illustrator, tech enthusiast and nerd for random topics, and a decade ago I turned my drive to create into a profession.",
+      "I'm a “professional tinkerer” who's dug into almost every kind of media, from finance to the music industry, getting ideas off the page is what moves me.",
+      "Right now, I work at a bank (see if you can guess which one) and serve clients worldwide, building interactive experiences focused on real user needs, always guided by data, SEO, performance and great taste (mine!).",
+      "I love what I do, I'm lucky to do what I love, and maybe we'll end up making something together.",
     ],
     skillsTitle: "Tools & skills",
     skillsOrbitMessage: "If I don't know it, I dig in until I learn it!",
