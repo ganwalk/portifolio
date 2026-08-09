@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState, type ReactNode } from "react";
-import { motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import { BoringToggle } from "@/components/controls/BoringToggle";
 import { ControlBar } from "@/components/controls/ControlBar";
 import { LocaleSwitcher } from "@/components/controls/LocaleSwitcher";
@@ -35,16 +35,25 @@ import type { Dictionary } from "@/i18n/dictionaries";
 // mesma linha (sem recolher uma pra abrir outra): durante a hero (antes da
 // primeira dobra passar) ela mostra [Modo Boring, lua, idioma], a oferta de
 // saída feita de cara, com a lua entre os dois porque é ali que ela nasce
-// nessa composição; passada a hero, [menu, Armando Custodio] entram e a lua
-// migra pro canto direito, o arranjo padrão do resto do site (mesmo
-// layoutId na lua nas duas composições, então ela literalmente desliza de
-// um lugar pro outro em vez de sumir e reaparecer). Essa troca de conteúdo é
-// exclusiva do mobile: no desktop a barra sempre mostra tudo de uma vez
-// (Boring+menu à esquerda, tema/idioma+lua à direita), sobra espaço e
-// esconder qualquer parte só tiraria acesso sem ganhar nada em troca. Fora
-// da home, ou já em Modo Boring, o mobile também já nasce direto no arranjo
-// padrão (menu, assinatura, lua à direita): a composição de hero só faz
-// sentido junto da própria hero.
+// nessa composição, EQUIDISTANTE dos dois vizinhos (flex+justify-between só
+// nessa composição, não a mesma grade de colunas iguais que centraliza a
+// assinatura na composição normal: os dois vizinhos têm larguras bem
+// diferentes, e "centro da barra" e "meio caminho entre os dois" são pontos
+// diferentes); passada a hero, [menu, Armando Custodio] entram e a lua migra
+// pro canto direito, o arranjo padrão do resto do site. As duas composições
+// trocam com um crossfade sincronizado (AnimatePresence, mode="popLayout"
+// pra quem sai não empurrar quem entra: os pares têm larguras diferentes),
+// mesma duração e curva em todo mundo (HEADER_SWAP_TRANSITION) incluindo a
+// lua, que usa a mesma layoutId nas duas composições e por isso desliza de
+// um lugar pro outro em vez de sumir e reaparecer: um `if` de verdade monta
+// só uma cópia por vez (esconder por CSS, testado antes, não passa pelo
+// ciclo de montagem que o Framer observa pra disparar a animação). Essa
+// troca de conteúdo é exclusiva do mobile: no desktop a barra sempre mostra
+// tudo de uma vez (Boring+menu à esquerda, tema/idioma+lua à direita), sobra
+// espaço e esconder qualquer parte só tiraria acesso sem ganhar nada em
+// troca. Fora da home, ou já em Modo Boring, o mobile também já nasce direto
+// no arranjo padrão (menu, assinatura, lua à direita): a composição de hero
+// só faz sentido junto da própria hero.
 //
 // Em Modo Boring o cabeçalho ganha uma SEGUNDA linha, essa sim recolhível,
 // com Modo Boring e idioma: lá o menu não existe (a página utilitária é uma
@@ -71,6 +80,12 @@ import type { Dictionary } from "@/i18n/dictionaries";
 // cima dela o tempo todo. Fora da home (ou em Boring), continua sticky:
 // essas páginas não têm hero e sempre dependeram do cabeçalho empurrando o
 // conteúdo para baixo.
+
+// Transição compartilhada pela troca de conteúdo do cabeçalho mobile (ver
+// heroMini, abaixo): mesma duração e curva pra lua (layoutId) e pro
+// crossfade dos outros controles, então tudo se move junto, num só gesto,
+// em vez de a lua deslizar num tempo e o resto cortar seco no dela.
+const HEADER_SWAP_TRANSITION = { duration: 0.45, ease: [0.16, 1, 0.3, 1] as const };
 
 export function SiteFrame({
   children,
@@ -146,7 +161,9 @@ export function SiteFrame({
           } ${scrolled ? "lg:py-2" : "lg:py-3"}`}
         >
           <div className="flex items-center gap-4 justify-self-start">
-            {/* Desktop: Modo Boring e menu sempre juntos, sem alternância. */}
+            {/* Desktop: Modo Boring e menu sempre juntos, sem alternância,
+                cópias próprias (nunca fazem parte do crossfade mobile
+                abaixo). */}
             <div className="hidden lg:flex">
               <BoringToggle
                 dict={dict}
@@ -154,68 +171,121 @@ export function SiteFrame({
                 dismissTooltip={pastFirstFold}
               />
             </div>
-            {/* Mobile, hero: o Modo Boring assume o lugar do menu, mesma
-                oferta de saída que a segunda linha oferecia antes, agora
-                dentro da própria barra. Nunca mostra tooltip: tarja
-                estreita, sem espaço sobrando pra bolha. */}
-            <div className={`lg:hidden ${heroMini ? "flex" : "hidden"}`}>
-              <BoringToggle dict={dict} />
-            </div>
-            {/* Menu de verdade: sempre visível no desktop (sem alternância,
-                junto do Modo Boring acima); no mobile só fora da hero. */}
-            <div className={heroMini ? "hidden lg:flex" : "flex"}>
+            <div className="hidden lg:flex">
               <SiteMenu locale={locale} dict={dict} />
+            </div>
+            {/* Mobile: crossfade entre Modo Boring (hero, assume o lugar do
+                menu) e o menu de verdade (fora da hero). mode="popLayout"
+                tira quem está saindo do fluxo assim que a saída começa, pra
+                quem está entrando ocupar o lugar sem os dois brigarem por
+                espaço no meio da transição (os dois têm larguras bem
+                diferentes). Duração e curva batem com a da lua
+                (HEADER_SWAP_TRANSITION): as duas coisas se movem juntas. */}
+            <div className="relative lg:hidden">
+              <AnimatePresence mode="popLayout" initial={false}>
+                {heroMini ? (
+                  <motion.div
+                    key="boring-mini"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={HEADER_SWAP_TRANSITION}
+                  >
+                    <BoringToggle dict={dict} />
+                  </motion.div>
+                ) : (
+                  <motion.div
+                    key="menu-mobile"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={HEADER_SWAP_TRANSITION}
+                  >
+                    <SiteMenu locale={locale} dict={dict} />
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
           </div>
 
           <div className="relative justify-self-center lg:order-first">
-            {/* Mobile, hero: a lua entra aqui, entre Modo Boring e idioma.
-                layoutId compartilhado com a cópia do canto direito (abaixo),
-                mas as duas NUNCA ficam montadas ao mesmo tempo (ao contrário
-                de uma versão anterior, que escondia uma via CSS e deixava a
-                outra sempre no DOM): esconder por CSS não passa pelo ciclo
-                de montagem do React, e é exatamente esse ciclo que o Framer
-                Motion observa pra disparar a animação de layout
-                compartilhado. Com um "if" de verdade trocando qual das duas
-                está montada, o Framer reconhece a saída de uma e a entrada
-                da outra com o mesmo layoutId como o MESMO elemento mudando
-                de lugar, e anima a transição em vez de cortar direto. */}
-            {heroMini && (
-              <motion.div layoutId="mobile-header-moon" className="lg:hidden">
-                <MoonPhase className="h-5 w-5" />
-              </motion.div>
-            )}
-            {/* Assinatura: sempre visível no desktop; no mobile, só fora da
-                hero (heroMini troca o lugar dela pela lua, acima). */}
+            {/* Desktop: assinatura sempre visível, cópia própria (nunca faz
+                parte do crossfade mobile abaixo). */}
             <Link
               href={`/${locale}/`}
-              className={`wordmark whitespace-nowrap lg:block ${heroMini ? "hidden" : "block"}`}
+              className="wordmark hidden whitespace-nowrap lg:block"
             >
               {profile.name}
             </Link>
+            {/* Mobile: crossfade entre a lua (hero, entre Modo Boring e
+                idioma) e a assinatura (fora da hero). A lua usa layoutId
+                compartilhado com a cópia do canto direito (abaixo): as duas
+                NUNCA ficam montadas ao mesmo tempo (um `if` de verdade, não
+                CSS escondendo uma das duas), então o Framer reconhece a
+                saída de uma e a entrada da outra como o MESMO elemento
+                mudando de lugar, e anima a migração em vez de cortar
+                direto. A assinatura, sem layoutId (não migra, só aparece/
+                desaparece), crossfade simples no mesmo grupo. */}
+            <div className="relative lg:hidden">
+              <AnimatePresence mode="popLayout" initial={false}>
+                {heroMini ? (
+                  <motion.div
+                    key="moon-mini"
+                    layoutId="mobile-header-moon"
+                    transition={HEADER_SWAP_TRANSITION}
+                  >
+                    <MoonPhase className="h-5 w-5" />
+                  </motion.div>
+                ) : (
+                  <motion.div
+                    key="wordmark-mobile"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={HEADER_SWAP_TRANSITION}
+                  >
+                    <Link href={`/${locale}/`} className="wordmark whitespace-nowrap">
+                      {profile.name}
+                    </Link>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
           </div>
 
           <div className="flex items-center gap-4 justify-self-end lg:ml-auto">
-            {/* Desktop: tema/som/idioma sempre visível, sem alternância. */}
+            {/* Desktop: tema/som/idioma e lua sempre visíveis, cópias
+                próprias (nunca fazem parte do crossfade mobile abaixo). */}
             <div className="hidden lg:flex">
               <ControlBar locale={locale} dict={dict} />
             </div>
-            {/* Mobile, hero: idioma no lugar do tema (que só existe dentro
-                do menu, indisponível durante a hero de qualquer forma). */}
-            <div className={`lg:hidden ${heroMini ? "block" : "hidden"}`}>
-              <LocaleSwitcher locale={locale} dict={dict} />
-            </div>
-            {/* Mobile, fora da hero: a lua, migrada do centro (mesma
-                layoutId da cópia de lá; ver comentário lá em cima sobre
-                montar/desmontar de verdade, não só trocar visibilidade via
-                CSS). Independente da cópia lg: abaixo, que nunca faz parte
-                dessa troca. */}
-            {!heroMini && (
-              <motion.div layoutId="mobile-header-moon" className="lg:hidden">
-                <MoonPhase className="h-5 w-5" />
-              </motion.div>
-            )}
             <MoonPhase className="hidden h-5 w-5 lg:block" />
+            {/* Mobile: crossfade entre idioma (hero, no lugar do tema, que só
+                existe dentro do menu) e a lua migrada do centro (mesma
+                layoutId da cópia de lá, ver comentário acima). */}
+            <div className="relative lg:hidden">
+              <AnimatePresence mode="popLayout" initial={false}>
+                {heroMini ? (
+                  <motion.div
+                    key="locale-mini"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={HEADER_SWAP_TRANSITION}
+                  >
+                    <LocaleSwitcher locale={locale} dict={dict} />
+                  </motion.div>
+                ) : (
+                  <motion.div
+                    key="moon-normal"
+                    layoutId="mobile-header-moon"
+                    transition={HEADER_SWAP_TRANSITION}
+                  >
+                    <MoonPhase className="h-5 w-5" />
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
           </div>
         </div>
 

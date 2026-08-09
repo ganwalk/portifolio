@@ -772,9 +772,13 @@ function ExpandedCase({
 // versão de desktop usa.
 
 /** Amplitude do giro 3D, em graus, nas pontas do percurso do cartão (0 no
- *  centro). Contida de propósito: o bastante pra ficar claro que o cartão
- *  tem profundidade, sem virar ilegível nem embaralhar o texto por cima. */
-const MOBILE_TILT_DEG = 26;
+ *  centro): o cartão INTEIRO gira, então mesmo num ângulo generoso o texto
+ *  por cima gira junto com a mídia, sem embaralhar nada, só empurrando a
+ *  perspectiva. */
+const MOBILE_TILT_DEG = 42;
+/** Recuo em Z, em px, nas pontas do percurso: o cartão ativo fica mais perto
+ *  da tela que os vizinhos, reforçando a profundidade que o giro já sugere. */
+const MOBILE_TILT_DEPTH = 90;
 
 function MobileCaseCard({
   caseStudy,
@@ -798,22 +802,36 @@ function MobileCaseCard({
   // pela borda direita do trilho, 1 quando termina de sair pela esquerda.
   // 0.5 cai perto do centro, o mesmo instante em que o IntersectionObserver
   // abaixo (em MobileCaseList) marca este cartão como ativo.
-  const { scrollXProgress } = useScroll({
+  const { scrollXProgress: rawProgress } = useScroll({
     target: cardRef,
     container: trackRef,
     axis: "x",
     offset: ["start end", "end start"],
+  });
+  // Suavizado por mola, não o valor bruto do dedo: o mesmo raciocínio da
+  // pilha de desktop (ver o comentário no topo do arquivo sobre a mola de
+  // scroll ali), só que sub amortecida o bastante pra dar um leve
+  // "assentamento" físico ao giro sem ficar boiando atrás do gesto.
+  const scrollXProgress = useSpring(rawProgress, {
+    stiffness: 300,
+    damping: 30,
+    mass: 0.5,
   });
   const rotateY = useTransform(
     scrollXProgress,
     [0, 0.5, 1],
     [MOBILE_TILT_DEG, 0, -MOBILE_TILT_DEG],
   );
-  const opacity = useTransform(scrollXProgress, [0, 0.5, 1], [0.55, 1, 0.55]);
+  const z = useTransform(
+    scrollXProgress,
+    [0, 0.5, 1],
+    [-MOBILE_TILT_DEPTH, 0, -MOBILE_TILT_DEPTH],
+  );
+  const opacity = useTransform(scrollXProgress, [0, 0.5, 1], [0.35, 1, 0.35]);
   // Mídia desliza em contrassenso, o mesmo paralaxe que já existe no scroll
   // vertical da versão de desktop (ver mediaY em CaseColumn): scale-125 no
   // wrapper cobre a folga que o deslocamento abriria nas bordas.
-  const mediaX = useTransform(scrollXProgress, [0, 0.5, 1], ["-6%", "0%", "6%"]);
+  const mediaX = useTransform(scrollXProgress, [0, 0.5, 1], ["-10%", "0%", "10%"]);
   const metric = caseStudy.metrics[0];
 
   return (
@@ -825,14 +843,14 @@ function MobileCaseCard({
     >
       <motion.div
         className="absolute inset-0"
-        style={reduceMotion ? undefined : { rotateY, opacity }}
+        style={reduceMotion ? undefined : { rotateY, z, opacity }}
       >
         <Link
           href={`/${locale}/work/${caseStudy.slug}/`}
           className="absolute inset-0 block"
         >
           <motion.div
-            className="absolute inset-0 scale-125"
+            className="absolute inset-0 scale-150"
             style={reduceMotion ? undefined : { x: mediaX }}
           >
             <MediaView
@@ -903,9 +921,9 @@ function MobileCaseList({ locale, dict }: { locale: Locale; dict: Dictionary }) 
   }, []);
 
   return (
-    <div className="sm:hidden">
+    <div className="py-10 sm:hidden">
       <Reveal>
-        <p className="gutter type-mono mb-4 text-muted">{dict.cases.swipeHint}</p>
+        <p className="gutter type-mono mb-6 text-muted">{dict.cases.swipeHint}</p>
       </Reveal>
 
       <div
@@ -930,7 +948,7 @@ function MobileCaseList({ locale, dict }: { locale: Locale; dict: Dictionary }) 
       {/* Leitura de posição, não navegação: mesmo padrão não clicável dos
           pontos do desktop (ver CasesGrid), só que contando cartões em vez
           de fatias. */}
-      <div className="mt-5 flex items-center justify-center gap-2">
+      <div className="mt-6 flex items-center justify-center gap-2">
         {cases.map((caseStudy, index) => (
           <span
             key={caseStudy.slug}
