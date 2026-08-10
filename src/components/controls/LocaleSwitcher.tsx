@@ -36,6 +36,11 @@ export function LocaleSwitcher({
           key={l}
           href={switchLocalePath(l)}
           hrefLang={l}
+          // scroll={false}: por padrão o Link reseta a rolagem pro topo a
+          // cada navegação, mas trocar de idioma não é ir pra outro lugar,
+          // é reler o MESMO lugar em outro idioma. Sem isso, quem troca de
+          // idioma no meio da leitura perdia o ponto onde estava.
+          scroll={false}
           aria-current={l === locale ? "true" : undefined}
           className={`type-mono px-0.5 py-1.5 ${
             l === locale

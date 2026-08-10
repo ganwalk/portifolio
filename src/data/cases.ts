@@ -180,17 +180,21 @@ export const cases: CaseStudy[] = [
       },
     ],
     // Sugestão de mídia real: screencast navegando pela experiência, com o
-    // áudio do artista tocando ao fundo.
+    // áudio do artista tocando ao fundo. O placeholder antigo (estúdio de
+    // gravação) foi pro case de produção musical (ver experiments.ts), que
+    // combina melhor com ele; este aqui é código/terminal rolando na tela,
+    // mais afinado com o "a identidade visual do artista ganha vida na
+    // tela" do statement acima.
     cover: {
       kind: "video",
-      src: "https://videos.pexels.com/video-files/7586165/7586165-hd_1920_1080_24fps.mp4",
+      src: "https://videos.pexels.com/video-files/852292/852292-hd_1728_1080_25fps.mp4",
       poster:
-        "https://images.pexels.com/videos/7586165/adult-analogue-art-audio-engineer-7586165.jpeg?auto=compress&w=1280",
+        "https://images.pexels.com/videos/852292/free-video-852292.jpg?auto=compress&w=1260&h=750&dpr=1",
       alt: {
-        pt: "Estúdio de gravação em luz âmbar, mesa de mixagem em primeiro plano",
-        en: "Recording studio in amber light, mixing desk in the foreground",
-        es: "Estudio de grabación con luz ámbar, mesa de mezclas en primer plano",
-        zh: "琥珀色灯光下的录音棚，前景是调音台",
+        pt: "Código rolando em tela escura, como um terminal em execução",
+        en: "Code scrolling on a dark screen, like a running terminal",
+        es: "Código desplazándose en una pantalla oscura, como una terminal en ejecución",
+        zh: "深色屏幕上滚动的代码，如同运行中的终端",
       },
     },
     comingSoon: true,

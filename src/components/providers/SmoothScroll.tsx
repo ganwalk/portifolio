@@ -45,6 +45,26 @@ import { useBoringMode } from "@/contexts/BoringModeContext";
 // que mata toda interceptação, não só a suaviza.
 const LERP = 0.11;
 
+// A instância mora num módulo, não só dentro do componente: Lenis já
+// intercepta o scroll de verdade (ver comentário acima), então um
+// `window.scrollTo` cru chamado de fora (o clique na assinatura pra voltar
+// ao topo, ver SiteFrame.tsx) perde a queda de braço pro próximo quadro da
+// própria Lenis, que reafirma a posição que ELA acha que é a certa. Só a
+// própria instância sabe se mover sem essa disputa. `null` sempre que ela
+// não existir (Modo Boring, `prefers-reduced-motion`, ou antes do efeito
+// rodar): `scrollToTop` cai pro `window.scrollTo` cru nesses casos, sem
+// suavização (coerente: se Lenis está desligada é porque menos movimento
+// foi pedido, uma rolagem instantânea não contradiz isso).
+let activeLenis: Lenis | null = null;
+
+export function scrollToTop() {
+  if (activeLenis) {
+    activeLenis.scrollTo(0, { duration: 1.2 });
+  } else {
+    window.scrollTo({ top: 0 });
+  }
+}
+
 export function SmoothScroll() {
   const { isBoringMode } = useBoringMode();
   const [prefersReduced, setPrefersReduced] = useState(false);
@@ -63,6 +83,7 @@ export function SmoothScroll() {
     if (disabled) return;
 
     const lenis = new Lenis({ lerp: LERP, syncTouch: false });
+    activeLenis = lenis;
 
     let rafId: number;
     const raf = (time: number) => {
@@ -74,6 +95,7 @@ export function SmoothScroll() {
     return () => {
       cancelAnimationFrame(rafId);
       lenis.destroy();
+      activeLenis = null;
     };
   }, [disabled]);
 

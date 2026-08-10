@@ -9,6 +9,7 @@ import { ControlBar } from "@/components/controls/ControlBar";
 import { LocaleSwitcher } from "@/components/controls/LocaleSwitcher";
 import { SiteMenu } from "@/components/nav/SiteMenu";
 import { MoonPhase } from "@/components/ui/MoonPhase";
+import { scrollToTop } from "@/components/providers/SmoothScroll";
 import { useBoringMode } from "@/contexts/BoringModeContext";
 import { profile } from "@/data/profile";
 import type { Locale } from "@/i18n/config";
@@ -105,6 +106,21 @@ export function SiteFrame({
   const isHome = pathname === `/${locale}` || pathname === `/${locale}/`;
   const isHomeHero = !isBoringMode && isHome;
   const isBoringHome = isBoringMode && isHome;
+
+  // Clicar na assinatura já na home: um Link pra rota atual não navega (o
+  // Next não recarrega nem reseta o scroll pra uma URL onde já se está),
+  // então sem isso o clique não fazia nada visível pra quem já tinha rolado
+  // a página. Fora da home o Link segue normal (navega pra lá, chega no
+  // topo por ser carregamento de página nova, sem precisar de nada extra
+  // aqui). scrollToTop (SmoothScroll.tsx), não window.scrollTo cru: Lenis
+  // intercepta o scroll de verdade, e um scrollTo cru perde a disputa pro
+  // próximo quadro dela mesma, que reafirma a posição anterior (o clique
+  // não fazia nada visível, mesmo com o preventDefault certo).
+  function scrollToTopIfHome(event: React.MouseEvent) {
+    if (!isHome) return;
+    event.preventDefault();
+    scrollToTop();
+  }
 
   useEffect(() => {
     const onScroll = () => {
@@ -213,6 +229,7 @@ export function SiteFrame({
                 parte do crossfade mobile abaixo). */}
             <Link
               href={`/${locale}/`}
+              onClick={scrollToTopIfHome}
               className="wordmark hidden whitespace-nowrap lg:block"
             >
               {profile.name}
@@ -244,6 +261,7 @@ export function SiteFrame({
                   <motion.div
                     key="moon-mini"
                     layoutId="mobile-header-moon"
+                    className="flex items-center"
                     transition={HEADER_SWAP_TRANSITION}
                   >
                     <MoonPhase className="h-5 w-5" label={dict.controls.theme} />
@@ -256,7 +274,11 @@ export function SiteFrame({
                     exit={{ opacity: 0 }}
                     transition={HEADER_SWAP_TRANSITION}
                   >
-                    <Link href={`/${locale}/`} className="wordmark whitespace-nowrap">
+                    <Link
+                      href={`/${locale}/`}
+                      onClick={scrollToTopIfHome}
+                      className="wordmark whitespace-nowrap"
+                    >
                       {profile.name}
                     </Link>
                   </motion.div>
@@ -294,6 +316,7 @@ export function SiteFrame({
                   <motion.div
                     key="moon-normal"
                     layoutId="mobile-header-moon"
+                    className="flex items-center"
                     transition={HEADER_SWAP_TRANSITION}
                   >
                     <MoonPhase className="h-5 w-5" label={dict.controls.theme} />
