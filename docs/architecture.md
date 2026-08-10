@@ -209,12 +209,26 @@ decorativa. O que dá vida é movimento e tipografia, não ornamento.
   retrato deixa de ser absoluto e vira um item do próprio flex (via `order`,
   entre o bloco de título e o de CTA, ver acima), e o respiro nome/subtítulo
   (margem fixa dentro do bloco de título) e o respiro subtítulo/retrato
-  (gap do contêiner) usam o MESMO valor (`gap-7`/`mt-7`): um `justify-between`
+  (gap do contêiner) usam o MESMO valor (`gap-6`/`mt-6`): um `justify-between`
   sozinho não garantia isso, porque reparte só o espaço que sobra depois de
   reservar os dois, um valor que muda com a altura da tela, não uma margem
   fixa igual dos dois lados. O bloco de CTA, no fim, usa `mt-auto` pra
   absorver esse espaço sobrando sozinho, sem devolver nada aos dois gaps de
   cima.
+
+  **Todo o respiro vertical do mobile foi calibrado pra caber numa tela
+  baixa de verdade, não só num `100svh` de simulador sem chrome nenhum.**
+  Medido contra os ~664px de altura útil de um iPhone com a barra do Safari
+  ainda visível (pior caso comum, pior que um iPhone SE): o respiro entre o
+  cabeçalho e o nome (`pt-16`, sem repetir uma segunda camada de margem
+  específica do bloco de título por cima), o gap equidistante acima
+  (`gap-6`/`mt-6`, descido de `gap-7`/`mt-7`), o retrato (encolhido de
+  `52vw`/`max-w-64` pra `46vw`/`max-w-56`, o maior bloco fixo da composição
+  e por isso o que mais rendeu), o respiro dentro do bloco de CTA (`gap-5`,
+  descido de `gap-8`) e a margem antes da linha de disponibilidade (`mt-4`,
+  descida de `mt-8`) foram todos apertados juntos até o CTA "veja meu
+  trabalho" e a própria disponibilidade caberem na primeira dobra sem
+  precisar rolar, mantendo o respiro equidistante do parágrafo acima.
 
   A opacidade do grão sai por `--noise-opacity`, e na hero ela é o dobro do
   resto do site (0.10 contra 0.05). Nos cases o ruído pousa em cima de imagem,
@@ -490,6 +504,13 @@ decorativa. O que dá vida é movimento e tipografia, não ornamento.
   mídia de cada cartão só monta perto da viewport (`useNearViewport`): com
   vídeo mudo em loop em cada capa, montar os seis de uma vez tocaria todos
   ao mesmo tempo fora de tela.
+
+  **Sem gap nem borda entre os cartões, e sem `border-t` no início da
+  seção.** Já que cada um ocupa a largura inteira e quase a altura inteira
+  da tela, um respiro ou uma régua entre eles só cortaria o "reel" contínuo
+  de projeto em projeto; o primeiro cartão entra colado direto ao fim da
+  hero, do mesmo jeito que a pilha de desktop também não tem margem nem
+  moldura entre fatias.
 - **Lua de fases** (`MoonPhase`): no canto direito do cabeçalho, percorre as
   fases da lua conforme o scroll, três lunações por página. Também é o
   seletor de tema: um clique alterna claro/escuro (não existe mais um botão

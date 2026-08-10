@@ -888,8 +888,13 @@ function MobileCaseCard({
 function MobileCaseList({ locale, dict }: { locale: Locale; dict: Dictionary }) {
   const reduceMotion = useReducedMotion();
 
+  // Sem respiro nem régua entre os cartões: cada um já ocupa a largura e
+  // quase a altura inteira da tela (MOBILE_CARD_HEIGHT), então um espaço ou
+  // uma borda entre eles só cortaria o "reel" contínuo de projeto em
+  // projeto, a mesma leitura de painel cheio que a versão de desktop já
+  // tem (lá também sem margem nem moldura entre fatias).
   return (
-    <div className="section-y flex flex-col gap-8 sm:hidden">
+    <div className="flex flex-col sm:hidden">
       {cases.map((caseStudy, index) => (
         <MobileCaseCard
           key={caseStudy.slug}
@@ -920,8 +925,13 @@ export function CasesGrid({
   const isDesktop = useMediaQuery("(min-width: 640px)");
 
   if (!isDesktop) {
+    // Sem border-t: nas demais seções ela separa um bloco com respiro
+    // próprio do anterior, mas aqui o primeiro cartão já entra colado ao
+    // fim da hero, cheio da própria mídia (preta, de ponta a ponta), e uma
+    // régua ali só recortaria essa mídia bem no topo, sem separar coisa
+    // nenhuma que já não estivesse óbvio pela própria mudança de conteúdo.
     return (
-      <section id="work" aria-label={dict.cases.title} className="border-t border-line">
+      <section id="work" aria-label={dict.cases.title}>
         <MobileCaseList locale={locale} dict={dict} />
       </section>
     );
