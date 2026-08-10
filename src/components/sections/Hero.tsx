@@ -108,16 +108,27 @@ function HeroContent({
   // retrato→CTA saem sempre com o mesmo respiro entre si, sem precisar
   // calcular esse valor à mão (e sem o risco de sobrar tudo num vão só,
   // como um `mt-auto` no último item faria). pt/pb continuam fixos (não
-  // entram nessa conta): reservam só o espaço mínimo de segurança, o
-  // suficiente pra afastar o nome do cabeçalho fixo por cima (`pt-16`,
-  // pouco mais que a própria barra de 3.5rem) e dar uma borda solta embaixo
-  // (`pb-16`, o mesmo valor, pelo mesmo respiro nos dois lados). No desktop
-  // o retrato volta a ser absoluto (sai do fluxo do flex) e o wrapper
-  // nome+subtítulo volta a ser um bloco só (não mais `contents`), porque lá
-  // sobra espaço ao lado da manchete e o respiro entre nome e subtítulo
-  // volta a ser a margem fixa de sempre (`sm:mt-9`), não parte dessa conta.
+  // entram nessa conta): reservam a margem solta nas duas pontas, ACIMA do
+  // nome e ABAIXO do bloco de CTA.
+  //
+  // pt (`pt-24`) e pb (`pb-10`) NÃO são o mesmo valor de propósito, mesmo
+  // os dois lendo como "a mesma margem solta" na tela: o cabeçalho é fixed,
+  // flutua por cima da hero sem reservar espaço no fluxo (veja SiteFrame),
+  // então de todo o `pt` só o que sobra depois da própria barra (3.5rem)
+  // vira respiro visível de verdade. pb-16/pt-16 iguais como número
+  // pareciam simétricos no código mas saíam bem torto na tela: a margem
+  // visível embaixo do CTA (os 4rem inteiros do pb) ficava bem maior que a
+  // margem visível entre a barra e o nome (só a sobra depois da barra).
+  // `pt-24` desconta a barra e ainda sobra praticamente o mesmo respiro que
+  // o `pb-10` dá embaixo, então as duas pontas leem como a mesma margem, e
+  // o grupo inteiro desce um pouco, mais perto do centro vertical da dobra.
+  // No desktop o retrato volta a ser absoluto (sai do fluxo do flex) e o
+  // wrapper nome+subtítulo volta a ser um bloco só (não mais `contents`),
+  // porque lá sobra espaço ao lado da manchete e o respiro entre nome e
+  // subtítulo volta a ser a margem fixa de sempre (`sm:mt-9`), não parte
+  // dessa conta.
   return (
-    <div className="gutter relative flex flex-1 flex-col items-center justify-between pb-16 pt-16 sm:items-stretch sm:pb-14 sm:pt-32">
+    <div className="gutter relative flex flex-1 flex-col items-center justify-between pb-10 pt-24 sm:items-stretch sm:pb-14 sm:pt-32">
       {/* Dentro do HeroContent, e não solto no <section>: assim a cópia
           espelhada também recebe o canvas, e o nome deformado inverte junto
           com o resto em vez de sumir atrás do disco de tinta da lente. */}
@@ -216,12 +227,17 @@ function HeroContent({
         </motion.p>
       </div>
 
-      {/* w-[46vw]/max-w-56 no mobile (contra 52vw/max-w-64 antes): o
-          retrato é o maior bloco fixo da composição, então encolhê-lo um
-          pouco foi o jeito de sobrar altura pro CTA sem afinar o respiro
-          entre nome, subtítulo e retrato (que precisa continuar igual dos
-          dois lados, ver comentário no topo da função) nem apertar o
-          próprio retrato a ponto de ficar ilegível.
+      {/* w-[50vw]/max-w-60 no mobile: o `justify-between` do contêiner (ver
+          comentário no topo da função) reparte sozinho o que sobra de
+          altura entre os quatro itens, então o retrato não precisa mais
+          ficar pequeno só pra abrir espaço pro resto caber, como numa
+          versão anterior (46vw/max-w-56, ainda menor que o 52vw/max-w-64
+          original). Um pouco maior de propósito, o "ligeiramente" pedido:
+          o retrato é o elemento mais vivo da composição (gira sozinho, em
+          flipbook), merece presença, sem chegar perto do tamanho "de
+          verdade" do desktop abaixo nem apertar o resto da hero numa tela
+          baixa (o flex ainda encolhe os vãos sozinho se precisar, nunca
+          estoura a tela, ver comentário no topo da função).
 
           w-[36vw]/max-w-[520px] é o tamanho "de verdade" do retrato, pensado
           pra tela de desktop grande. Na faixa de notebook (lg até antes do
@@ -242,7 +258,7 @@ function HeroContent({
           o topo do retrato perto do topo do h1, com respiro parecido. */}
       <SelfPortrait
         label={dict.hero.portraitAlt}
-        className="portrait-enter pointer-events-none relative order-2 w-[46vw] max-w-56 sm:absolute sm:right-[5vw] sm:top-[6%] sm:order-none sm:w-[36vw] sm:max-w-[520px] lg:top-[17%] lg:w-[30vw] lg:max-w-[340px] 2xl:top-[14%] 2xl:w-[36vw] 2xl:max-w-[520px]"
+        className="portrait-enter pointer-events-none relative order-2 w-[50vw] max-w-60 sm:absolute sm:right-[5vw] sm:top-[6%] sm:order-none sm:w-[36vw] sm:max-w-[520px] lg:top-[17%] lg:w-[30vw] lg:max-w-[340px] 2xl:top-[14%] 2xl:w-[36vw] 2xl:max-w-[520px]"
       />
 
       <div className="relative order-3 flex flex-col items-center gap-5 sm:items-start sm:gap-10 sm:mt-16">
