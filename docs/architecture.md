@@ -604,6 +604,17 @@ decorativa. O que dá vida é movimento e tipografia, não ornamento.
   que ele gruda** (a janela do `useScroll` cobre duas alturas de tela —
   entrada mais o tempo preso — então o cartão sempre trava na metade do
   caminho).
+- **"Acreditam no meu trabalho" (`Brands`) mora dentro de `About`, não é
+  mais dobra própria.** Já foi uma régua fina entre CasesGrid e About, com
+  `<section>` e `aria-label` próprios; hoje é conteúdo comum de About,
+  logo abaixo da bio e das habilidades (o marquee de logos, ver
+  `ui/Marquee.tsx`, virou o último bloco do `<div>` de duas colunas). O
+  rótulo trocou de um `<p>` solto pra um `<h3>`, a mesma marcação que já
+  organiza "Habilidades" e "Idiomas" ao lado: os três ficam no mesmo nível
+  da árvore de cabeçalhos, dentro do `<h2>` "Sobre" que os une, em vez de
+  um rótulo textual desconectado da hierarquia. `border-t` fecha só esse
+  bloco (não a seção inteira), o mesmo traço fino que antes separava as
+  duas dobras.
 - **Lua de fases** (`MoonPhase`): no canto direito do cabeçalho, percorre as
   fases da lua conforme o scroll, três lunações por página. Também é o
   seletor de tema: um clique alterna claro/escuro (não existe mais um botão

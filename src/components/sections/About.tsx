@@ -1,4 +1,5 @@
 import { useRef } from "react";
+import { Brands } from "@/components/sections/Brands";
 import { Reveal } from "@/components/ui/Reveal";
 import { SkillsOrbit } from "@/components/ui/SkillsOrbit";
 import { profile } from "@/data/profile";
@@ -20,6 +21,13 @@ import type { Dictionary } from "@/i18n/dictionaries";
 // entrando numa fila que pende do cursor. Quando a última entra na fila, uma
 // frase aparece acima do mouse, no mesmo estilo de selo do "Case completo em
 // breve" do CasesGrid.
+//
+// "Acreditam no meu trabalho" (Brands) fecha a dobra, abaixo da bio e das
+// habilidades: já foi uma dobra própria, uma régua fina entre o trabalho
+// (CasesGrid) e a pessoa por trás dele, mas fazia mais sentido como o
+// último credencial de "quem sou eu" do que como uma seção à parte com
+// título próprio. `border-t` aqui, não na seção inteira: fecha só esse
+// bloco, o mesmo traço fino que separava as duas dobras antes.
 export function About({ locale, dict }: { locale: Locale; dict: Dictionary }) {
   const sectionRef = useRef<HTMLElement>(null);
   const allSkills = [
@@ -74,6 +82,10 @@ export function About({ locale, dict }: { locale: Locale; dict: Dictionary }) {
           </div>
         </Reveal>
       </div>
+
+      <Reveal delay={0.2} className="mt-16 border-t border-line pt-10 sm:mt-20 sm:pt-12">
+        <Brands locale={locale} dict={dict} />
+      </Reveal>
     </section>
   );
 }
