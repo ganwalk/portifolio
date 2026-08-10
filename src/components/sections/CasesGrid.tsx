@@ -861,7 +861,18 @@ function MobileCaseCard({
         </motion.div>
         <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/10 to-black/45" />
 
-        <div className="gutter absolute inset-0 flex flex-col justify-between py-10">
+        {/* pt-16, não py-10 nos dois lados: o cabeçalho é fixed e flutua por
+            cima da pilha inteira (z-40, mais alto que qualquer cartão
+            sticky aqui embaixo), então sem esse respiro extra a linha de
+            índice do cartão TRAVADO no topo (ver `sticky` acima) nascia
+            parcialmente atrás da barra, mesmo antes do próximo cartão
+            chegar pra cobri-la de verdade. pt-16 desconta a altura da barra
+            (3.5rem) e sobra um pouco de respiro, o mesmo raciocínio do
+            `pt-24` da hero (ver Hero.tsx); pb-10 embaixo não tem esse
+            problema (nada flutua ali) e continua o valor de sempre. Assim
+            a única coisa que chega a cobrir a informação de um cartão é o
+            PRÓXIMO cartão chegando por cima, nunca o cabeçalho. */}
+        <div className="gutter absolute inset-0 flex flex-col justify-between pb-10 pt-16">
           <Reveal className="flex items-start justify-between gap-4">
             <p className="type-mono text-white/70">
               {pad(index + 1)} / {pad(totalCases)} · {caseStudy.year}
