@@ -554,12 +554,9 @@ decorativa. O que dá vida é movimento e tipografia, não ornamento.
   A mídia de cada cartão ainda ganha um paralaxe PRÓPRIO conforme entra e
   sai da tela (`useScroll` medindo contra a janela, sem `container`), mas
   só nela, dentro do `overflow-hidden` do cartão, nunca no cartão inteiro:
-  um deslocamento interno não abre nenhuma borda. O texto entra pelo
-  `Reveal` padrão do site, não mais uma máscara bespoke por linha: sem um
-  progresso de fatia compartilhado regendo tudo, o `Reveal` já é a
-  linguagem de entrada do resto da home. A mídia de cada cartão só monta
-  perto da viewport (`useNearViewport`): com vídeo mudo em loop em cada
-  capa, montar os seis de uma vez tocaria todos ao mesmo tempo fora de
+  um deslocamento interno não abre nenhuma borda. A mídia de cada cartão só
+  monta perto da viewport (`useNearViewport`): com vídeo mudo em loop em
+  cada capa, montar os seis de uma vez tocaria todos ao mesmo tempo fora de
   tela.
 
   Sem gap nem borda entre os cartões, e sem `border-t` no início da seção:
@@ -568,42 +565,58 @@ decorativa. O que dá vida é movimento e tipografia, não ornamento.
   cartão entra colado direto ao fim da hero, do mesmo jeito que a pilha de
   desktop também não tem margem nem moldura entre fatias.
 
-  O topo do cartão (hoje o título, ver abaixo) começa com `pt-16`, não a
-  mesma padding de baixo (`pb-10`): o cabeçalho é `fixed` e flutua por cima
-  de TODA a pilha (`z-40`, mais alto que qualquer cartão sticky aqui
-  embaixo), então sem esse respiro extra a informação do cartão travado no
-  topo nascia parcialmente atrás da barra, mesmo antes do próximo cartão
-  chegar pra cobri-la de verdade. `pt-16` desconta a altura da barra
-  (3.5rem) e sobra um pouco de respiro, o mesmo raciocínio do `pt-24` da
-  hero (ver acima). Assim a única coisa que chega a cobrir a informação de
-  um cartão é o PRÓXIMO cartão chegando por cima, nunca o cabeçalho.
+  O topo do cartão começa com `pt-16`, não a mesma padding de baixo
+  (`pb-10`): o cabeçalho é `fixed` e flutua por cima de TODA a pilha
+  (`z-40`, mais alto que qualquer cartão sticky aqui embaixo), então sem
+  esse respiro extra a informação do cartão travado no topo nascia
+  parcialmente atrás da barra, mesmo antes do próximo cartão chegar pra
+  cobri-la de verdade. `pt-16` desconta a altura da barra (3.5rem) e sobra
+  um pouco de respiro, o mesmo raciocínio do `pt-24` da hero (ver acima).
+  Assim a única coisa que chega a cobrir a informação de um cartão é o
+  PRÓXIMO cartão chegando por cima, nunca o cabeçalho.
 
-  **Título em cima, métrica embaixo: invertido do painel de desktop, de
-  propósito.** Um cartão sticky só é revelado de CIMA pra BAIXO conforme
-  sobe da base da tela (é o próprio topo dele que aparece primeiro, o
-  resto ainda embaixo da dobra); com o título embaixo (como no desktop,
-  primeira versão mobile também), ele só chegava colado ao fim da subida,
-  quase de um golpe só, e a métrica no topo já tinha aparecido bem antes —
-  o nome do projeto, que devia ser a primeira coisa lida, era a ÚLTIMA a
-  chegar. Com o título no topo ele nasce cedo e tem a subida inteira do
-  cartão pra entrar e assentar (`Reveal` padrão, sem delay); a métrica,
-  agora embaixo, só chega perto do fim, uma pontuação depois do nome já
-  estabelecido, não antes dele.
+  **Disposição de repouso igual ao desktop (métrica em cima, título
+  embaixo): só a ENTRADA muda, não o layout final.** Uma primeira versão
+  trocou os dois de lugar de vez (título em cima permanente, métrica
+  embaixo permanente) pra resolver um problema real: um cartão sticky só é
+  revelado de CIMA pra BAIXO conforme sobe da base da tela, então com o
+  título no seu lugar de sempre (embaixo) ele só chegava colado ao fim da
+  subida, quase de um golpe só, enquanto a métrica (no topo) já tinha
+  aparecido bem antes — o nome do projeto, que devia ser a primeira coisa
+  lida, era a ÚLTIMA a chegar. Mas essa troca definitiva desalinhava o
+  mobile do desktop sem necessidade: o problema era só de SEQUÊNCIA de
+  entrada, não de lugar de repouso.
 
-  A métrica não usa `Reveal`: o componente nasce com uma margem negativa
-  de 8% no pé da viewport (pensada pra conteúdo comum de página, que
-  cruza essa borda enquanto ainda está "chegando"), mas a linha da
-  métrica aqui não cruza nada — ela DESCANSA perto do pé do cartão
-  (`pb-10`) o tempo inteiro em que ele fica travado, caindo direto
-  dentro dessa margem excluída, e o `whileInView` nunca disparava (bug
-  real, pego só depois de medir a posição renderizada: a métrica
-  simplesmente nunca aparecia). A entrada dela usa o `progress` que já
-  mede a chegada do cartão (o mesmo do paralaxe da mídia, `mediaY`
-  acima): `useTransform(progress, [0.35, 0.5], ...)` fecha bem quando o
-  cartão termina de assentar, porque **0.5 é exatamente o instante em
-  que ele gruda** (a janela do `useScroll` cobre duas alturas de tela —
-  entrada mais o tempo preso — então o cartão sempre trava na metade do
-  caminho).
+  A correção: o título nasce deslocado pra cima por um `titleY`
+  (`useTransform`), ocupando visualmente o canto onde a métrica mora, e só
+  desce pro seu lugar de repouso (embaixo) perto do fim da entrada — a
+  métrica, no seu canto de sempre mas ESCONDIDA até ali (`metricOpacity`),
+  só aparece quando o título já desocupou aquele espaço. `titleY` segura um
+  valor constante (`-66vh`, a distância aproximada entre os dois cantos) de
+  `progress` 0 a 0.35 (a "posição fixa" pedida: por boa parte da entrada o
+  título já não se desloca mais RELATIVO ao cartão, só o resto do cartão
+  sobe ao redor dele) e solta pra `0vh` (repouso) só entre 0.35 e 0.5,
+  exatamente quando o cartão termina de assentar. Uma alternativa mais
+  literal (título travado numa posição fixa DA TELA, não do cartão, o que
+  pediria empurrar `titleY` bem além do topo do cartão durante boa parte da
+  entrada) foi descartada: o cartão tem `overflow-hidden`, e conteúdo não
+  pode ser transformado pra fora da própria caixa dele, mesmo que o
+  resultado caísse dentro da viewport — só as duas posições finais (canto
+  da métrica e canto do título), que já vivem DENTRO da caixa do cartão,
+  são alcançáveis sem cortar.
+
+  Nem título nem métrica usam `Reveal` aqui: `Reveal` nasce com uma margem
+  negativa de 8% no pé da viewport (pensada pra conteúdo comum de página,
+  que cruza essa borda enquanto ainda está "chegando"), mas a métrica
+  DESCANSA perto do pé do cartão (`pb-10`) o tempo inteiro em que ele fica
+  travado, caindo direto dentro dessa margem excluída — o `whileInView`
+  nunca disparava (bug real, pego só depois de medir a posição renderizada:
+  a métrica simplesmente nunca aparecia). As duas usam o `progress` que já
+  mede a chegada do cartão (o mesmo do paralaxe da mídia, `mediaY` acima):
+  `useTransform(progress, [0.35, 0.5], ...)` fecha bem quando o cartão
+  termina de assentar, porque **0.5 é exatamente o instante em que ele
+  gruda** (a janela do `useScroll` cobre duas alturas de tela — entrada
+  mais o tempo preso — então o cartão sempre trava na metade do caminho).
 - **"Acreditam no meu trabalho" (`Brands`) mora dentro de `About`, não é
   mais dobra própria.** Já foi uma régua fina entre CasesGrid e About, com
   `<section>` e `aria-label` próprios; hoje é conteúdo comum de About,
