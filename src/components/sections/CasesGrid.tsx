@@ -66,11 +66,7 @@ const MotionLink = motion.create(Link);
 // (`buildSlides`, calculado uma vez fora do componente porque `cases` é
 // estático), lado a lado a partir do `lg:` (1024px) ou empilhados
 // verticalmente dentro do mesmo painel antes disso: reduz o scroll do trio
-// a 1/3 do que seria com um artista por fatia. Essa fatia ganha uma coluna
-// extra, estreita, antes das outras
-// (à esquerda no lg:, à esquerda também empilhada): só a frase
-// "Experiências interativas" girada 90°, na Whyte Inktrap, uma régua de
-// contexto, não um case clicável. O rótulo de índice de cada coluna
+// a 1/3 do que seria com um artista por fatia. O rótulo de índice de cada coluna
 // ("03 / 06") sempre conta cases, não fatias: SlidePanel repassa o índice
 // original (`flatIndex`) pra cada CaseColumn, independente de quantas
 // fatias existem; é a ÚNICA contagem da seção, não existe outra em nível de
@@ -322,21 +318,6 @@ function SlidePanel({
           style={{ opacity: coveredDim }}
           className="pointer-events-none absolute inset-0 z-10 bg-black"
         />
-        {multi && (
-          // bg-background, não bg-black: ao contrário da mídia (sempre a
-          // cores, a exceção proposital do resto do arquivo), esta régua não
-          // mostra nenhum projeto, é só um separador de rótulo. Sem cor
-          // própria pra defender, ela acompanha o tema como o resto do
-          // site, em vez de herdar o preto do painel por trás.
-          <div className="flex w-8 shrink-0 items-center justify-center bg-background sm:w-10 lg:w-14">
-            <span
-              className="type-inktrap whitespace-nowrap text-xs uppercase tracking-widest text-muted"
-              style={{ writingMode: "vertical-rl", transform: "rotate(180deg)" }}
-            >
-              {dict.cases.interactiveExperiences}
-            </span>
-          </div>
-        )}
         {/* Lado a lado só a partir do lg: até lá (mobile e tablet, onde
             três colunas apertadas ficariam ilegíveis) o trio empilha na
             vertical, dentro do mesmo painel preso ao scroll, uma fatia só

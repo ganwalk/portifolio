@@ -161,6 +161,28 @@ mudar o respiro do site inteiro é mexer em um lugar. O gutter cresce em três
 degraus (1.5rem, 3rem, 5rem) e o ritmo vertical em outros três (7rem, 9rem,
 11rem).
 
+`.section-y-tight` é o mesmo ritmo, ancorado 1rem abaixo (6rem, 8rem, 10rem):
+usada em Sobre e Extras, onde o respiro cheio (pensado pra dobras com
+pilha/mídia, como CasesGrid e Contato) sobrava contra um conteúdo mais
+compacto (texto corrido, orbit de skills, grade de mini-projetos).
+
+**`.section-y`/`.section-y-tight` não são escritas dentro de `@layer` do
+Tailwind, e por isso batem QUALQUER utilitário do Tailwind em empate de
+especificidade, mesmo um escrito depois no className.** CSS Cascade Layers:
+uma regra fora de camada nomeada tem prioridade sobre qualquer regra DENTRO
+de uma camada, não importa a ordem de saída no arquivo final. Como o
+Tailwind v4 gera suas próprias classes dentro de `@layer utilities`, um
+`sm:py-0` de Contato tentando zerar o padding de `.section-y` (ambos mesma
+especificidade de seletor) simplesmente perdia sempre, e o padding continuava
+cheio, mesmo depois de sm:. Achado ao medir o computed style real do Contato,
+não pela leitura do código (o className parecia correto). A correção não foi
+lutar contra a camada, foi sair dela: a coluna de texto de Contato hoje usa
+`pt-28`/`sm:pt-0`/`pb-16`/`sm:pb-0` (utilitários puros do Tailwind, mesma
+camada entre si, sem `.section-y` no meio disputando prioridade) em vez de
+`section-y`. `pb-16`, não os mesmos 7rem do topo: no mobile é o respiro entre
+os botões de rede social e a imagem interativa logo abaixo (empilhados), e o
+valor cheio de `.section-y` lia como um vão grande demais pra esse gesto.
+
 O Modo Boring não usa nenhuma das duas: currículo é documento, tem densidade
 própria e margem de leitura, não de vitrine.
 
@@ -448,11 +470,6 @@ decorativa. O que dá vida é movimento e tipografia, não ornamento.
   agrupamento. Título e métrica encolhem (`multi`) quando a coluna é uma de
   três, pra não vazar de um terço da largura (ou da fatia vertical de altura
   empilhada, no mobile).
-
-  A fatia do trio ganha uma quarta coluna, estreita, à esquerda das três:
-  só a frase "Experiências interativas" girada 90° (`writing-mode:
-  vertical-rl`), na Whyte Inktrap (mesma fonte dos títulos, não a mono do
-  resto dos rótulos), uma régua de contexto, não um case clicável.
 
   Uma camada de vocabulário de agência vive em cima da pilha, atrás do
   `MotionConfig` do Modo Boring: texto em máscara escalonada. Índice,
@@ -860,17 +877,20 @@ basePath), fonte de verdade de todo metadado que precisa de URL absoluta:
 Três arquivos em `src/app/`, gerados por `scripts/build-favicon.mjs`, cada um
 respondendo a um navegador diferente. O desenho é o mesmo dos outros
 destaques: a assinatura em Whyte Inktrap e a inversão tinta/papel da lente,
-num quadrado de tinta com o "A" vazado em papel. Nada além disso: a 16px, que
-é o tamanho que importa numa aba, qualquer segundo elemento (a gravura, o
-retrato) vira mancha. O que sobra do desenho da fonte nesse tamanho são os ink
-traps do "A", que é justamente o detalhe que dá nome à família.
+num quadrado de tinta com "A." vazado em papel, o ponto que fecha a
+assinatura. Nada além disso: a 16px, que é o tamanho que importa numa aba,
+qualquer segundo elemento (a gravura, o retrato) vira mancha. O que sobra do
+desenho da fonte nesse tamanho são os ink traps do "A", que é justamente o
+detalhe que dá nome à família. O glifo sai de `font.getPath("A.", ...)`, não
+de `charToGlyph`: são dois glifos (a letra e o ponto), e é a própria fonte
+quem resolve o avanço entre eles.
 
 - `icon.svg`: o que Chrome e Firefox preferem, e o único que inverte sozinho
   conforme o tema do sistema, por uma media query DENTRO do arquivo (favicon
   em SVG honra `prefers-color-scheme` nesses dois).
 - `favicon.ico`: Safari e navegador antigo, que não leem SVG. Não tem como
   inverter, então fica na versão clara, a padrão do site. Numa barra de abas
-  escura o quadrado se funde ao fundo e sobra o "A" branco, que continua
+  escura o quadrado se funde ao fundo e sobra o "A." branco, que continua
   legível: num desenho vazado, um dos dois elementos sempre contrasta com o
   que está em volta. Os quadros (16, 32 e 48) vão como PNG dentro do
   contêiner ICO, que é o que todo navegador atual lê, e o script monta o

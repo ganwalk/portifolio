@@ -54,8 +54,19 @@ export function Contact({ dict }: { dict: Dictionary }) {
           dobra grande demais; sem esse mínimo, a seção só cresce até onde o
           conteúdo pede. No mobile ela ganha uma altura própria mais contida
           (aspect-ratio, não fração da tela) e continua de ponta a ponta na
-          horizontal, sem virar um quadrado pequeno preso no meio da seção. */}
-      <div className="gutter section-y text-center sm:flex sm:w-1/2 sm:flex-shrink-0 sm:flex-col sm:justify-center sm:py-0 sm:text-left">
+          horizontal, sem virar um quadrado pequeno preso no meio da seção.
+
+          pt-28, não `section-y`: mesmo valor do topo de `section-y`
+          (7rem), mas escrito como padding só de cima porque o pé da coluna
+          precisa de um valor PRÓPRIO, menor, só no mobile (pb-16):
+          empilhado, é o respiro entre os botões de rede social e a imagem
+          logo abaixo, e o valor cheio de `section-y` (igual ao do topo)
+          lia como um vão grande demais para o mesmo gesto de "linha
+          seguinte". Do sm: pra cima a coluna fica lado a lado da imagem,
+          não empilhada, então esse pé de página não existe mais: sm:pt-0/
+          sm:pb-0 devolve o centro vertical inteiro pro `justify-center`
+          decidir. */}
+      <div className="gutter pb-16 pt-28 text-center sm:flex sm:w-1/2 sm:flex-shrink-0 sm:flex-col sm:justify-center sm:pb-0 sm:pt-0 sm:text-left">
         <Reveal>
           <h2 className="type-serif-display type-inktrap mb-6 text-5xl sm:text-7xl">
             {dict.contact.title}

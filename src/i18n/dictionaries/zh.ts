@@ -56,7 +56,6 @@ export const zh: Dictionary = {
   },
   cases: {
     title: "精选项目",
-    interactiveExperiences: "互动体验",
     scrollHint: "滚动浏览",
     viewCase: "查看案例",
     comingSoon: "完整案例即将呈现",
