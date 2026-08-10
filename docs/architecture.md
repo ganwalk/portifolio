@@ -532,6 +532,16 @@ decorativa. O que dá vida é movimento e tipografia, não ornamento.
   página apareceria entre um cartão e o outro a cada troca), e o primeiro
   cartão entra colado direto ao fim da hero, do mesmo jeito que a pilha de
   desktop também não tem margem nem moldura entre fatias.
+
+  A informação do cartão (índice, métrica) começa com `pt-16`, não a mesma
+  padding de baixo (`pb-10`): o cabeçalho é `fixed` e flutua por cima de
+  TODA a pilha (`z-40`, mais alto que qualquer cartão sticky aqui embaixo),
+  então sem esse respiro extra a linha de índice do cartão travado no topo
+  nascia parcialmente atrás da barra, mesmo antes do próximo cartão chegar
+  pra cobri-la de verdade. `pt-16` desconta a altura da barra (3.5rem) e
+  sobra um pouco de respiro, o mesmo raciocínio do `pt-24` da hero (ver
+  acima). Assim a única coisa que chega a cobrir a informação de um cartão
+  é o PRÓXIMO cartão chegando por cima, nunca o cabeçalho.
 - **Lua de fases** (`MoonPhase`): no canto direito do cabeçalho, percorre as
   fases da lua conforme o scroll, três lunações por página. Também é o
   seletor de tema: um clique alterna claro/escuro (não existe mais um botão
