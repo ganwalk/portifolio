@@ -16,6 +16,7 @@ import {
 } from "framer-motion";
 import { CaseMetrics } from "@/components/ui/CaseMetrics";
 import { MediaView } from "@/components/ui/MediaView";
+import { Reveal } from "@/components/ui/Reveal";
 import { cases } from "@/data/cases";
 import type { CaseStudy } from "@/data/types";
 import type { Locale } from "@/i18n/config";
@@ -747,13 +748,17 @@ function ExpandedCase({
 // devagar em contrassenso (o mesmo paralaxe da versão de desktop, ver
 // mediaY em CaseColumn), mas só nela, dentro do `overflow-hidden` do
 // cartão, nunca no cartão inteiro: um deslocamento interno não abre
-// nenhuma borda, ao contrário da escala que saiu. O título e a métrica não
-// usam mais o `Reveal` padrão do site: como o cartão sticky só se revela de
-// cima pra baixo, o título (que mora embaixo, na disposição final) chegava
-// por último, depois da métrica; agora ele nasce deslocado pro lugar da
-// métrica e desce pro seu canto de repouso ao longo da própria entrada
-// (`titleY`/`metricOpacity`, ver MobileCaseCard abaixo), preso ao progresso
-// de scroll de cada cartão, não a um `whileInView` genérico.
+// nenhuma borda, ao contrário da escala que saiu. O texto entra com o
+// `Reveal` padrão do site (o mesmo de About/Playground), não mais uma
+// máscara bespoke por linha: mobile não tem um "progresso da fatia"
+// compartilhado pra reger isso (cada cartão rola no seu próprio tempo), e o
+// Reveal já é a linguagem de entrada do resto da home. Um efeito com o
+// título trocando de lugar com a métrica durante a rolagem chegou a existir
+// aqui (título nascia no canto da métrica e descia pro seu lugar de
+// repouso perto do fim da entrada) e saiu: lido, o resultado incomodava
+// mais do que ajudava. As informações ficam fixas na posição de sempre,
+// métrica em cima e título embaixo, cada uma entrando com seu próprio
+// `Reveal`.
 //
 // A mídia de cada cartão só monta perto da viewport (`useNearViewport`,
 // abaixo): com vídeo mudo em loop em cada capa, deixar os seis
@@ -825,35 +830,6 @@ function MobileCaseCard({
   // deslocamento interno, dentro do overflow-hidden abaixo, não abre borda
   // nenhuma pro fundo da página.
   const mediaY = useTransform(progress, [0, 1], ["-8%", "8%"]);
-  // Título e métrica trocam de lugar TEMPORARIAMENTE durante a entrada, não
-  // na disposição final: a disposição de repouso continua a de sempre
-  // (métrica em cima, título embaixo, igual desktop). O que muda é COMO se
-  // chega lá.
-  //
-  // Um cartão sticky só é revelado de CIMA pra BAIXO conforme sobe da base
-  // da tela (é o próprio topo dele que aparece primeiro): com o título no
-  // seu lugar de repouso (embaixo), ele só aparecia colado ao fim da
-  // subida, quase de um golpe só, enquanto a métrica (no topo) já tinha
-  // aparecido bem antes — o nome do projeto, que devia ser a primeira
-  // coisa lida, era a ÚLTIMA a chegar.
-  //
-  // Em vez de mudar ONDE o título mora (o que trocaria a disposição final
-  // também), ele nasce deslocado pra cima por `titleY` — ocupando visualmente
-  // o lugar onde a métrica mora — e SÓ desce pro seu lugar de repouso perto
-  // do fim da entrada. `-66vh` é a distância aproximada entre os dois
-  // lugares (o vão entre o topo e a base do cartão, descontado o próprio
-  // respiro de cada bloco); segurando esse valor constante de progress 0 a
-  // 0.35 (a "posição fixa" pedida: por boa parte da entrada, o título já
-  // não se move mais, só o resto do cartão sobe ao redor dele) e soltando
-  // pra 0 (repouso) só entre 0.35 e 0.5, exatamente quando o cartão termina
-  // de assentar (0.5 é o instante em que ele gruda, matemática de
-  // useScroll: a janela cobre duas alturas de tela, e o cartão sempre trava
-  // na metade do caminho). A métrica, no seu lugar de sempre mas ESCONDIDA
-  // até ali (`metricOpacity`), só aparece quando o título já desocupou seu
-  // canto — nunca as duas coisas disputando o mesmo espaço ao mesmo tempo.
-  const titleY = useTransform(progress, [0, 0.35, 0.5], ["-66vh", "-66vh", "0vh"]);
-  const metricOpacity = useTransform(progress, [0.35, 0.5], [0, 1]);
-  const metricY = useTransform(progress, [0.35, 0.5], [16, 0]);
   const metric = caseStudy.metrics[0];
 
   return (
@@ -892,18 +868,9 @@ function MobileCaseCard({
             `pt-24` da hero (ver Hero.tsx); pb-10 embaixo não tem esse
             problema (nada flutua ali) e continua o valor de sempre. Assim
             a única coisa que chega a cobrir a informação de um cartão é o
-            PRÓXIMO cartão chegando por cima, nunca o cabeçalho.
-
-            Disposição de repouso igual ao desktop (métrica em cima, título
-            embaixo): só a ENTRADA é diferente agora, ver titleY/
-            metricOpacity acima. */}
+            PRÓXIMO cartão chegando por cima, nunca o cabeçalho. */}
         <div className="gutter absolute inset-0 flex flex-col justify-between pb-10 pt-16">
-          <motion.div
-            style={
-              reduceMotion ? undefined : { opacity: metricOpacity, y: metricY }
-            }
-            className="flex items-start justify-between gap-4"
-          >
+          <Reveal className="flex items-start justify-between gap-4">
             <p className="type-mono text-white/70">
               {pad(index + 1)} / {pad(totalCases)} · {caseStudy.year}
             </p>
@@ -915,9 +882,9 @@ function MobileCaseCard({
                 {metric.label[locale]}
               </span>
             </p>
-          </motion.div>
+          </Reveal>
 
-          <motion.div style={reduceMotion ? undefined : { y: titleY }}>
+          <Reveal delay={0.08}>
             <h3 className="type-display type-inktrap pt-[0.16em] text-[11vw] leading-[0.9]">
               {caseStudy.title[locale]}
             </h3>
@@ -928,7 +895,7 @@ function MobileCaseCard({
               {caseStudy.comingSoon ? dict.cases.comingSoon : dict.cases.viewCase}
               <span aria-hidden>→</span>
             </span>
-          </motion.div>
+          </Reveal>
         </div>
       </MotionLink>
     </div>

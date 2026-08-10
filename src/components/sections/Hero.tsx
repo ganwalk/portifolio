@@ -164,10 +164,16 @@ function HeroContent({
         {/* Transparente, não escondido, quando o canvas assume o desenho: o
             <h1> continua sendo o que o leitor de tela lê e o que o buscador
             indexa, e continua ocupando o mesmo espaço, que é justamente de
-            onde saem as medidas que o canvas usa pra desenhar. */}
+            onde saem as medidas que o canvas usa pra desenhar.
+
+            lg:text-[9vw], menor que os 8.2vw do sm: em vw mas MAIOR em
+            pixel (a faixa lg começa numa viewport bem mais larga): na
+            faixa de notebook (lg até antes do 2xl) o nome pesava demais ao
+            lado do retrato, que também encolhe um pouco nessa faixa (ver
+            SelfPortrait abaixo). */}
         <h1
           ref={titleRef}
-          className={`type-display type-inktrap order-1 text-center text-[14.5vw] leading-[0.84] tracking-[0.015em] sm:text-left sm:text-[8.2vw] lg:text-[11vw] 2xl:text-[10vw] ${
+          className={`type-display type-inktrap order-1 text-center text-[14.5vw] leading-[0.84] tracking-[0.015em] sm:text-left sm:text-[8.2vw] lg:text-[9vw] 2xl:text-[10vw] ${
             titleOnCanvas ? "opacity-0" : ""
           }`}
         >
