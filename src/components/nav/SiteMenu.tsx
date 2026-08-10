@@ -6,6 +6,7 @@ import { createPortal } from "react-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import { BoringToggle } from "@/components/controls/BoringToggle";
 import { ControlBar } from "@/components/controls/ControlBar";
+import { MoonPhase } from "@/components/ui/MoonPhase";
 import { TypewriterText } from "@/components/ui/TypewriterText";
 import { useBoringMode } from "@/contexts/BoringModeContext";
 import { useHydrated } from "@/lib/use-hydrated";
@@ -262,8 +263,13 @@ export function SiteMenu({
                   Boring vem junto porque a linha própria dele no cabeçalho
                   dura só o tempo da hero (veja SiteFrame): passada a primeira
                   dobra, este é o único lugar onde ele existe no mobile, e por
-                  isso abre o grupo, à frente de tema e idioma. Fecha o menu
-                  no mesmo clique (onToggle): sem isso o overlay some da tela
+                  isso abre o grupo, à frente de tema e idioma. A lua entra
+                  aqui de novo (cópia própria, sem layoutId: a de cima é quem
+                  migra pelo cabeçalho, ver SiteFrame) porque o overlay do
+                  menu cobre a barra inteira por cima (z-50 contra o z-40 do
+                  cabeçalho), e sem uma segunda cópia o tema ficaria
+                  inacessível enquanto o menu está aberto. Fecha o menu no
+                  mesmo clique (onToggle): sem isso o overlay some da tela
                   (o componente inteiro para de renderizar em Modo Boring,
                   logo acima) mas o estado continua "aberto", a limpeza que
                   devolve a rolagem ao <html> nunca roda e a página do Modo
@@ -271,8 +277,9 @@ export function SiteMenu({
                   a cortina de troca de modo cobre a tela em seguida e o corte
                   não aparece. No desktop tudo já vive na própria barra, então
                   some daqui para não duplicar. */}
-              <div className="flex flex-wrap items-center gap-2 pb-6 lg:hidden">
+              <div className="flex flex-wrap items-center gap-3 pb-6 lg:hidden">
                 <BoringToggle dict={dict} onToggle={() => toggle(false)} />
+                <MoonPhase className="h-5 w-5" label={dict.controls.theme} />
                 <ControlBar locale={locale} dict={dict} />
               </div>
             </div>

@@ -60,8 +60,18 @@ export function Contact({ dict }: { dict: Dictionary }) {
           <h2 className="type-serif-display type-inktrap mb-6 text-5xl sm:text-7xl">
             {dict.contact.title}
           </h2>
-          <p className="mb-4 text-muted">{dict.contact.subtitle}</p>
-          <p className="type-mono mb-16 text-muted">
+          {/* mb-10 no mobile: a linha de disponibilidade que ficava logo
+              abaixo (ver comentário abaixo) levava o respiro até o email;
+              sem ela ali, o subtítulo precisa desse respiro sozinho, senão
+              o email nasce colado nele. Do sm: pra cima o respiro volta a
+              vir da linha seguinte, como sempre foi. */}
+          <p className="mb-10 text-muted sm:mb-4">{dict.contact.subtitle}</p>
+          {/* Já mostrada na hero, com o mesmo texto: aqui era repetição pura
+              e, no mobile, uma linha a mais entre o subtítulo e o email numa
+              tela que já é curta. Fica só do sm: pra cima, onde sobra
+              espaço e a coluna de texto tem folga de sobra pra repetir o
+              recado sem pesar. */}
+          <p className="type-mono mb-16 hidden text-muted sm:block">
             {dict.hero.availability}
           </p>
         </Reveal>
