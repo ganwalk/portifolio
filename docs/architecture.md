@@ -568,15 +568,53 @@ decorativa. O que dá vida é movimento e tipografia, não ornamento.
   cartão entra colado direto ao fim da hero, do mesmo jeito que a pilha de
   desktop também não tem margem nem moldura entre fatias.
 
-  A informação do cartão (índice, métrica) começa com `pt-16`, não a mesma
-  padding de baixo (`pb-10`): o cabeçalho é `fixed` e flutua por cima de
-  TODA a pilha (`z-40`, mais alto que qualquer cartão sticky aqui embaixo),
-  então sem esse respiro extra a linha de índice do cartão travado no topo
-  nascia parcialmente atrás da barra, mesmo antes do próximo cartão chegar
-  pra cobri-la de verdade. `pt-16` desconta a altura da barra (3.5rem) e
-  sobra um pouco de respiro, o mesmo raciocínio do `pt-24` da hero (ver
-  acima). Assim a única coisa que chega a cobrir a informação de um cartão
-  é o PRÓXIMO cartão chegando por cima, nunca o cabeçalho.
+  O topo do cartão (hoje o título, ver abaixo) começa com `pt-16`, não a
+  mesma padding de baixo (`pb-10`): o cabeçalho é `fixed` e flutua por cima
+  de TODA a pilha (`z-40`, mais alto que qualquer cartão sticky aqui
+  embaixo), então sem esse respiro extra a informação do cartão travado no
+  topo nascia parcialmente atrás da barra, mesmo antes do próximo cartão
+  chegar pra cobri-la de verdade. `pt-16` desconta a altura da barra
+  (3.5rem) e sobra um pouco de respiro, o mesmo raciocínio do `pt-24` da
+  hero (ver acima). Assim a única coisa que chega a cobrir a informação de
+  um cartão é o PRÓXIMO cartão chegando por cima, nunca o cabeçalho.
+
+  **Título em cima, métrica embaixo: invertido do painel de desktop, de
+  propósito.** Um cartão sticky só é revelado de CIMA pra BAIXO conforme
+  sobe da base da tela (é o próprio topo dele que aparece primeiro, o
+  resto ainda embaixo da dobra); com o título embaixo (como no desktop,
+  primeira versão mobile também), ele só chegava colado ao fim da subida,
+  quase de um golpe só, e a métrica no topo já tinha aparecido bem antes —
+  o nome do projeto, que devia ser a primeira coisa lida, era a ÚLTIMA a
+  chegar. Com o título no topo ele nasce cedo e tem a subida inteira do
+  cartão pra entrar e assentar (`Reveal` padrão, sem delay); a métrica,
+  agora embaixo, só chega perto do fim, uma pontuação depois do nome já
+  estabelecido, não antes dele.
+
+  A métrica não usa `Reveal`: o componente nasce com uma margem negativa
+  de 8% no pé da viewport (pensada pra conteúdo comum de página, que
+  cruza essa borda enquanto ainda está "chegando"), mas a linha da
+  métrica aqui não cruza nada — ela DESCANSA perto do pé do cartão
+  (`pb-10`) o tempo inteiro em que ele fica travado, caindo direto
+  dentro dessa margem excluída, e o `whileInView` nunca disparava (bug
+  real, pego só depois de medir a posição renderizada: a métrica
+  simplesmente nunca aparecia). A entrada dela usa o `progress` que já
+  mede a chegada do cartão (o mesmo do paralaxe da mídia, `mediaY`
+  acima): `useTransform(progress, [0.35, 0.5], ...)` fecha bem quando o
+  cartão termina de assentar, porque **0.5 é exatamente o instante em
+  que ele gruda** (a janela do `useScroll` cobre duas alturas de tela —
+  entrada mais o tempo preso — então o cartão sempre trava na metade do
+  caminho).
+- **"Acreditam no meu trabalho" (`Brands`) mora dentro de `About`, não é
+  mais dobra própria.** Já foi uma régua fina entre CasesGrid e About, com
+  `<section>` e `aria-label` próprios; hoje é conteúdo comum de About,
+  logo abaixo da bio e das habilidades (o marquee de logos, ver
+  `ui/Marquee.tsx`, virou o último bloco do `<div>` de duas colunas). O
+  rótulo trocou de um `<p>` solto pra um `<h3>`, a mesma marcação que já
+  organiza "Habilidades" e "Idiomas" ao lado: os três ficam no mesmo nível
+  da árvore de cabeçalhos, dentro do `<h2>` "Sobre" que os une, em vez de
+  um rótulo textual desconectado da hierarquia. `border-t` fecha só esse
+  bloco (não a seção inteira), o mesmo traço fino que antes separava as
+  duas dobras.
 - **Lua de fases** (`MoonPhase`): no canto direito do cabeçalho, percorre as
   fases da lua conforme o scroll, três lunações por página. Também é o
   seletor de tema: um clique alterna claro/escuro (não existe mais um botão

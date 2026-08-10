@@ -1,31 +1,29 @@
 import { Marquee } from "@/components/ui/Marquee";
-import { Reveal } from "@/components/ui/Reveal";
 import { brands } from "@/data/brands";
 import type { Locale } from "@/i18n/config";
 import type { Dictionary } from "@/i18n/dictionaries";
 
-// Dobra fina, só uma linha de altura: uma régua de crédito entre o trabalho
-// (CasesGrid) e a pessoa por trás dele (About), no mesmo espírito do selo
-// "ver caso" que já roda em letreiro contínuo em CasesGrid (ver
-// ui/Marquee.tsx). Marcas com logo de verdade (ver `logo` em
-// data/brands.ts) mostram a logo, já convertida pro preto e branco do site
-// (scripts/build-brand-logos.mjs); as sem logo (placeholders explícitos)
-// mostram só o nome em texto. dark:invert nas logos: são PNGs/SVGs
-// rasterizados com o preto já fixo no pixel, não currentColor, então não
-// acompanhariam sozinhas a troca de tema como o resto do site acompanha;
-// a mesma lógica já usada no retrato da hero dentro da lente
-// (.lens-invert), aqui aplicada por marca. "Sua marca" por último: uma
-// caixa pontilhada em vez de nome sólido, o convite explícito de que a
-// lista está aberta.
+// Linha de crédito fina, não mais uma dobra própria: mora dentro de About,
+// logo abaixo da bio e das habilidades (ver About.tsx), como um fechamento
+// da seção "quem sou eu" em vez de uma régua solta entre o trabalho
+// (CasesGrid) e a pessoa por trás dele. O rótulo aqui é um <h3>, não um <p>
+// solto: mesma marcação que já organiza "Habilidades" e "Idiomas" ao lado,
+// então os leitores de tela encontram os três no mesmo nível da árvore de
+// cabeçalhos, dentro do <h2> "Sobre" que os une.
+//
+// Marcas com logo de verdade (ver `logo` em data/brands.ts) mostram a logo,
+// já convertida pro preto e branco do site (scripts/build-brand-logos.mjs);
+// as sem logo (placeholders explícitos) mostram só o nome em texto.
+// dark:invert nas logos: são PNGs/SVGs rasterizados com o preto já fixo no
+// pixel, não currentColor, então não acompanhariam sozinhas a troca de tema
+// como o resto do site acompanha; a mesma lógica já usada no retrato da
+// hero dentro da lente (.lens-invert), aqui aplicada por marca. "Sua marca"
+// por último: uma caixa pontilhada em vez de nome sólido, o convite
+// explícito de que a lista está aberta.
 export function Brands({ locale, dict }: { locale: Locale; dict: Dictionary }) {
   return (
-    <section
-      aria-label={dict.brands.title}
-      className="border-t border-line py-8 sm:py-10"
-    >
-      <Reveal>
-        <p className="gutter type-mono mb-6 text-muted">{dict.brands.title}</p>
-      </Reveal>
+    <div>
+      <h3 className="type-mono mb-4 text-muted">{dict.brands.title}</h3>
 
       <Marquee durationSeconds={32}>
         <ul className="flex items-center">
@@ -56,6 +54,6 @@ export function Brands({ locale, dict }: { locale: Locale; dict: Dictionary }) {
           ))}
         </ul>
       </Marquee>
-    </section>
+    </div>
   );
 }
