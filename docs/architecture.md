@@ -205,30 +205,33 @@ decorativa. O que dá vida é movimento e tipografia, não ornamento.
   no fluxo. `.texture-noise-animate` sobre a hero inteira dá o grão de
   filme flutuando, sem vinheta nem nenhum outro efeito por cima.
 
-  **No mobile, o subtítulo fica equidistante entre o nome e o retrato.** O
-  retrato deixa de ser absoluto e vira um item do próprio flex (via `order`,
-  entre o bloco de título e o de CTA, ver acima), e o respiro nome/subtítulo
-  (margem fixa dentro do bloco de título) e o respiro subtítulo/retrato
-  (gap do contêiner) usam o MESMO valor (`gap-6`/`mt-6`): um `justify-between`
-  sozinho não garantia isso, porque reparte só o espaço que sobra depois de
-  reservar os dois, um valor que muda com a altura da tela, não uma margem
-  fixa igual dos dois lados. O bloco de CTA, no fim, usa `mt-auto` pra
-  absorver esse espaço sobrando sozinho, sem devolver nada aos dois gaps de
-  cima.
-
-  **Todo o respiro vertical do mobile foi calibrado pra caber numa tela
-  baixa de verdade, não só num `100svh` de simulador sem chrome nenhum.**
-  Medido contra os ~664px de altura útil de um iPhone com a barra do Safari
-  ainda visível (pior caso comum, pior que um iPhone SE): o respiro entre o
-  cabeçalho e o nome (`pt-16`, sem repetir uma segunda camada de margem
-  específica do bloco de título por cima), o gap equidistante acima
-  (`gap-6`/`mt-6`, descido de `gap-7`/`mt-7`), o retrato (encolhido de
-  `52vw`/`max-w-64` pra `46vw`/`max-w-56`, o maior bloco fixo da composição
-  e por isso o que mais rendeu), o respiro dentro do bloco de CTA (`gap-5`,
-  descido de `gap-8`) e a margem antes da linha de disponibilidade (`mt-4`,
-  descida de `mt-8`) foram todos apertados juntos até o CTA "veja meu
-  trabalho" e a própria disponibilidade caberem na primeira dobra sem
-  precisar rolar, mantendo o respiro equidistante do parágrafo acima.
+  **No mobile, nome, subtítulo, retrato e o bloco de CTA são QUATRO itens
+  diretos do mesmo flex, todos equidistantes entre si, e o próprio
+  `justify-between` calcula o respiro.** Uma primeira versão tentava
+  calcular esse valor à mão (uma margem fixa pro nome/subtítulo, um gap
+  igual pro contêiner, e um `mt-auto` no bloco de CTA pra empurrá-lo pro
+  fim): funcionava, mas o `mt-auto` absorvia SOZINHO todo o espaço que
+  sobrava depois de descontar os valores fixos, então o vão entre o
+  retrato e o CTA saía muito maior que os outros dois, exatamente o
+  oposto de "equidistante". A versão atual larga a conta na mão do
+  próprio flex: o wrapper que agrupava nome+subtítulo vira `display:
+  contents` nessa faixa (some da árvore de LAYOUT, mas continua na árvore
+  de DOM, então herda `text-align` normalmente pros filhos), e os dois
+  passam a ser itens do flex por conta própria, junto do retrato (que já
+  virava item do flex no mobile, via `order`, ver acima) e do bloco de
+  CTA. Com os quatro na mesma `justify-between`, o espaço sobrando reparte
+  em partes IGUAIS entre os três vãos, sempre, em qualquer altura de tela,
+  sem precisar calibrar valor nenhum à mão. `pt-16`/`pb-16` continuam
+  fixos, fora dessa conta: só a segurança mínima pra não deixar o nome
+  nascer atrás do cabeçalho fixo (a barra tem `3.5rem`) e uma borda solta
+  simétrica embaixo. No desktop (`sm:`) o wrapper volta a ser um bloco só
+  (não mais `contents`) e o retrato volta a ser absoluto (sai do fluxo do
+  flex): lá o respiro nome/subtítulo volta a ser a margem fixa de sempre
+  (`sm:mt-9`), porque sobra espaço ao lado da manchete e não precisa
+  disputar altura com mais nada. Testado até 320×568 (a menor tela comum):
+  os vãos encolhem juntos conforme a altura aperta, sem nunca sobrepor
+  nada nem estourar a tela, porque é o próprio motor de flexbox recalculando
+  a cada resize, não um valor fixo medido contra um único aparelho.
 
   A opacidade do grão sai por `--noise-opacity`, e na hero ela é o dobro do
   resto do site (0.10 contra 0.05). Nos cases o ruído pousa em cima de imagem,
@@ -486,31 +489,49 @@ decorativa. O que dá vida é movimento e tipografia, não ornamento.
   rolar é a navegação ("role para navegar") e os pontos de posição
   (`gap-2`), que animam a troca em vez de só saltar de um pro outro.
 
-  **No mobile (abaixo do sm:) a seção não prende o scroll.** Já foi pilha
-  presa ao scroll (empilhava mal em tela pequena: o cabeçalho fixo cobria o
-  topo do painel ativo em certas posições, e o trio de artistas competia com
-  a pilha) e depois um carrossel horizontal por gesto (o arrastar lateral
-  lia fraco, e ainda brigava com o eixo em que o resto da página rola). A
-  versão atual (`MobileCaseList`/`MobileCaseCard`, em `CasesGrid.tsx`) volta
-  pro eixo vertical natural: cada projeto é um painel de quase tela cheia
-  (`78svh`, o "destaque total" que ainda deixa uma beirada do próximo
-  cartão visível acima da dobra, convite silencioso pra continuar rolando),
-  empilhados na ordem normal do documento. Cada cartão ganha uma leve escala
-  e paralaxe própria conforme cruza o centro da tela (`useScroll` medindo
-  contra a janela, sem `container`, já que quem rola aqui é a página de
-  verdade), e o texto entra pelo `Reveal` padrão do site, não mais uma
-  máscara bespoke por linha: sem um progresso de fatia compartilhado
-  regendo tudo, o `Reveal` já é a linguagem de entrada do resto da home. A
-  mídia de cada cartão só monta perto da viewport (`useNearViewport`): com
-  vídeo mudo em loop em cada capa, montar os seis de uma vez tocaria todos
-  ao mesmo tempo fora de tela.
+  **No mobile (abaixo do sm:) a seção não prende o scroll, mas cada
+  projeto ainda ocupa a tela inteira, com uma passagem dinâmica entre um e
+  outro.** Já foi pilha presa ao scroll (empilhava mal em tela pequena: o
+  cabeçalho fixo cobria o topo do painel ativo em certas posições, e o
+  trio de artistas competia com a pilha), depois carrossel horizontal por
+  gesto (o arrastar lateral lia fraco, e ainda brigava com o eixo em que o
+  resto da página rola), depois rolagem vertical comum com uma leve escala
+  por JS marcando o cartão mais próximo do centro (a escala encolhia a
+  CAIXA visível dentro da própria célula do layout sem encolher a célula
+  em si, revelando o fundo da página nas quatro bordas: um "espaço em
+  branco ao redor" que não devia existir).
 
-  **Sem gap nem borda entre os cartões, e sem `border-t` no início da
-  seção.** Já que cada um ocupa a largura inteira e quase a altura inteira
-  da tela, um respiro ou uma régua entre eles só cortaria o "reel" contínuo
-  de projeto em projeto; o primeiro cartão entra colado direto ao fim da
-  hero, do mesmo jeito que a pilha de desktop também não tem margem nem
-  moldura entre fatias.
+  A versão atual (`MobileCaseList`/`MobileCaseCard`, em `CasesGrid.tsx`)
+  troca a escala por `position: sticky`, sem JS nenhum regendo a
+  transição: cada cartão é `sticky top-0 h-svh` (tela cheia de verdade),
+  empilhado na ordem normal do documento, sem gap. Como cada cartão sticky
+  gruda no topo assim que alcança lá, e o próximo já tem a MESMA altura de
+  viewport (sem sobra pra "esperar" antes de aparecer), o efeito colateral
+  do próprio `position: sticky` é a passagem dinâmica: o cartão de baixo
+  desliza por cima do cartão travado acima dele conforme o dedo rola, sem
+  segunda camada JS decidindo escala ou z-index (a ordem de pintura já
+  segue a ordem do DOM: quem vem depois cobre quem veio antes) e sem
+  nenhuma borda revelando o fundo da página, porque a caixa do cartão
+  nunca encolhe. O mesmo princípio que já rege a pilha de desktop (a fatia
+  de cima cobre a de baixo), só que aqui é o próprio scroll nativo da
+  página quem desenha a cobertura.
+
+  A mídia de cada cartão ainda ganha um paralaxe PRÓPRIO conforme entra e
+  sai da tela (`useScroll` medindo contra a janela, sem `container`), mas
+  só nela, dentro do `overflow-hidden` do cartão, nunca no cartão inteiro:
+  um deslocamento interno não abre nenhuma borda. O texto entra pelo
+  `Reveal` padrão do site, não mais uma máscara bespoke por linha: sem um
+  progresso de fatia compartilhado regendo tudo, o `Reveal` já é a
+  linguagem de entrada do resto da home. A mídia de cada cartão só monta
+  perto da viewport (`useNearViewport`): com vídeo mudo em loop em cada
+  capa, montar os seis de uma vez tocaria todos ao mesmo tempo fora de
+  tela.
+
+  Sem gap nem borda entre os cartões, e sem `border-t` no início da seção:
+  um gap ali quebraria o próprio efeito de `sticky` (uma tira do fundo da
+  página apareceria entre um cartão e o outro a cada troca), e o primeiro
+  cartão entra colado direto ao fim da hero, do mesmo jeito que a pilha de
+  desktop também não tem margem nem moldura entre fatias.
 - **Lua de fases** (`MoonPhase`): no canto direito do cabeçalho, percorre as
   fases da lua conforme o scroll, três lunações por página. Também é o
   seletor de tema: um clique alterna claro/escuro (não existe mais um botão
