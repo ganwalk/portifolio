@@ -106,22 +106,29 @@ function HeroContent({
   // e um justify-between no contêiner não garante isso: ele reparte o espaço
   // SOBRANDO entre os três itens, um valor que muda com a altura da tela,
   // enquanto o respiro nome/subtítulo é a margem fixa de dentro do próprio
-  // bloco de título (mt-7, abaixo). Por isso o gap explícito aqui repete
-  // esse mesmo valor (gap-7) só até o retrato, e o bloco de CTA (que fecha a
+  // bloco de título (mt-6, abaixo). Por isso o gap explícito aqui repete
+  // esse mesmo valor (gap-6) só até o retrato, e o bloco de CTA (que fecha a
   // hero encostado embaixo) usa mt-auto pra absorver sozinho o espaço que
-  // sobra, sem also devolver aquele espaço aos dois gaps de cima. No desktop
+  // sobra, sem devolver aquele espaço aos dois gaps de cima. No desktop
   // o retrato volta a ser absoluto (sai do fluxo do flex) e o justify-between
   // original volta a reger só título e CTA, porque lá sobra espaço ao lado
   // da manchete e não precisa disputar altura com mais nada.
-  // pt-20 no mobile: o cabeçalho é uma barra só, sempre visível, até antes
-  // de rolar (veja SiteFrame), então a hero precisa reservar espaço pra ela
-  // por cima, senão o nome nasce colado na tarja. Antes eram duas linhas
-  // (Modo Boring numa, idioma embaixo), e o respiro precisava cobrir as
-  // duas; virando a barra uma linha só (Modo Boring, lua e idioma dividindo
-  // a mesma altura), sobra menos vazio pra reservar, e o conteúdo da hero
-  // sobe mais perto do topo disponível.
+  //
+  // pt-16 no mobile: o cabeçalho é uma barra só, sempre visível, até antes de
+  // rolar (veja SiteFrame, 3.5rem), então a hero precisa reservar espaço pra
+  // ela por cima, senão o nome nasce colado na tarja; o respiro que sobra
+  // depois de descontar a barra é pequeno de propósito (não repete o mt-6 do
+  // bloco de título como uma segunda camada de respiro por cima da mesma
+  // barra). pb-8, pt-16 e os outros respiros do mobile (abaixo) foram todos
+  // encolhidos juntos por um motivo só: numa tela baixa de verdade (iPhone
+  // SE, ou qualquer aparelho com a barra do navegador ainda visível), a soma
+  // dos respiros passava da altura útil da tela e o CTA "veja meu trabalho"
+  // nascia fora da primeira dobra, obrigando a rolar antes mesmo de ler a
+  // hero inteira. Medido contra os 664px de altura útil de um iPhone com a
+  // barra do Safari visível (o pior caso comum, pior que o iPhone SE puro),
+  // não contra o `100svh` de um simulador sem chrome nenhum.
   return (
-    <div className="gutter relative flex flex-1 flex-col items-center gap-7 pb-14 pt-20 sm:items-stretch sm:justify-between sm:gap-0 sm:pt-32">
+    <div className="gutter relative flex flex-1 flex-col items-center gap-6 pb-8 pt-16 sm:items-stretch sm:justify-between sm:gap-0 sm:pb-14 sm:pt-32">
       {/* Dentro do HeroContent, e não solto no <section>: assim a cópia
           espelhada também recebe o canvas, e o nome deformado inverte junto
           com o resto em vez de sumir atrás do disco de tinta da lente. */}
@@ -138,7 +145,7 @@ function HeroContent({
         />
       )}
 
-      <div className="relative order-1 mt-6 text-center sm:mt-0 sm:text-left">
+      <div className="relative order-1 text-center sm:text-left">
         {/* Transparente, não escondido, quando o canvas assume o desenho: o
             <h1> continua sendo o que o leitor de tela lê e o que o buscador
             indexa, e continua ocupando o mesmo espaço, que é justamente de
@@ -203,7 +210,7 @@ function HeroContent({
             Tailwind de propósito), então só style sobrescreve. */}
         <motion.p
           {...reveal(1)}
-          className="type-serif-display mt-7 flex flex-col items-center text-[6.5vw] italic text-muted sm:mt-9 sm:block sm:text-[3.6vw]"
+          className="type-serif-display mt-6 flex flex-col items-center text-[6.5vw] italic text-muted sm:mt-9 sm:block sm:text-[3.6vw]"
           style={{ fontFamily: "var(--font-switzer)", fontWeight: 400 }}
         >
           <span>{dict.hero.subtitlePrefix}</span>{" "}
@@ -211,7 +218,14 @@ function HeroContent({
         </motion.p>
       </div>
 
-      {/* w-[36vw]/max-w-[520px] é o tamanho "de verdade" do retrato, pensado
+      {/* w-[46vw]/max-w-56 no mobile (contra 52vw/max-w-64 antes): o
+          retrato é o maior bloco fixo da composição, então encolhê-lo um
+          pouco foi o jeito de sobrar altura pro CTA sem afinar o respiro
+          entre nome, subtítulo e retrato (que precisa continuar igual dos
+          dois lados, ver comentário no topo da função) nem apertar o
+          próprio retrato a ponto de ficar ilegível.
+
+          w-[36vw]/max-w-[520px] é o tamanho "de verdade" do retrato, pensado
           pra tela de desktop grande. Na faixa de notebook (lg até antes do
           2xl, a maioria das telas de 13" a 16" cai aqui) ele ainda encolhe
           (o espaço disponível é menor), mas não tanto quanto antes
@@ -230,10 +244,10 @@ function HeroContent({
           o topo do retrato perto do topo do h1, com respiro parecido. */}
       <SelfPortrait
         label={dict.hero.portraitAlt}
-        className="portrait-enter pointer-events-none relative order-2 w-[52vw] max-w-64 sm:absolute sm:right-[5vw] sm:top-[6%] sm:order-none sm:w-[36vw] sm:max-w-[520px] lg:top-[17%] lg:w-[30vw] lg:max-w-[340px] 2xl:top-[14%] 2xl:w-[36vw] 2xl:max-w-[520px]"
+        className="portrait-enter pointer-events-none relative order-2 w-[46vw] max-w-56 sm:absolute sm:right-[5vw] sm:top-[6%] sm:order-none sm:w-[36vw] sm:max-w-[520px] lg:top-[17%] lg:w-[30vw] lg:max-w-[340px] 2xl:top-[14%] 2xl:w-[36vw] 2xl:max-w-[520px]"
       />
 
-      <div className="relative order-3 mt-auto flex flex-col items-center gap-8 sm:items-start sm:gap-10 sm:mt-16">
+      <div className="relative order-3 mt-auto flex flex-col items-center gap-5 sm:items-start sm:gap-10 sm:mt-16">
         <motion.div {...reveal(2)}>
           <a
             ref={ctaRef}
@@ -296,7 +310,7 @@ function HeroContent({
 
           <motion.p
             {...reveal(3)}
-            className="type-mono mt-8 text-center text-muted sm:mt-0 sm:text-right"
+            className="type-mono mt-4 text-center text-muted sm:mt-0 sm:text-right"
             style={{ fontSize: "clamp(0.625rem, 0.55vw, 0.75rem)" }}
           >
             {availabilityBefore}
