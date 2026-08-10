@@ -16,7 +16,6 @@ import {
 } from "framer-motion";
 import { CaseMetrics } from "@/components/ui/CaseMetrics";
 import { MediaView } from "@/components/ui/MediaView";
-import { Reveal } from "@/components/ui/Reveal";
 import { cases } from "@/data/cases";
 import type { CaseStudy } from "@/data/types";
 import type { Locale } from "@/i18n/config";
@@ -67,11 +66,7 @@ const MotionLink = motion.create(Link);
 // (`buildSlides`, calculado uma vez fora do componente porque `cases` é
 // estático), lado a lado a partir do `lg:` (1024px) ou empilhados
 // verticalmente dentro do mesmo painel antes disso: reduz o scroll do trio
-// a 1/3 do que seria com um artista por fatia. Essa fatia ganha uma coluna
-// extra, estreita, antes das outras
-// (à esquerda no lg:, à esquerda também empilhada): só a frase
-// "Experiências interativas" girada 90°, na Whyte Inktrap, uma régua de
-// contexto, não um case clicável. O rótulo de índice de cada coluna
+// a 1/3 do que seria com um artista por fatia. O rótulo de índice de cada coluna
 // ("03 / 06") sempre conta cases, não fatias: SlidePanel repassa o índice
 // original (`flatIndex`) pra cada CaseColumn, independente de quantas
 // fatias existem; é a ÚNICA contagem da seção, não existe outra em nível de
@@ -323,21 +318,6 @@ function SlidePanel({
           style={{ opacity: coveredDim }}
           className="pointer-events-none absolute inset-0 z-10 bg-black"
         />
-        {multi && (
-          // bg-background, não bg-black: ao contrário da mídia (sempre a
-          // cores, a exceção proposital do resto do arquivo), esta régua não
-          // mostra nenhum projeto, é só um separador de rótulo. Sem cor
-          // própria pra defender, ela acompanha o tema como o resto do
-          // site, em vez de herdar o preto do painel por trás.
-          <div className="flex w-8 shrink-0 items-center justify-center bg-background sm:w-10 lg:w-14">
-            <span
-              className="type-inktrap whitespace-nowrap text-xs uppercase tracking-widest text-muted"
-              style={{ writingMode: "vertical-rl", transform: "rotate(180deg)" }}
-            >
-              {dict.cases.interactiveExperiences}
-            </span>
-          </div>
-        )}
         {/* Lado a lado só a partir do lg: até lá (mobile e tablet, onde
             três colunas apertadas ficariam ilegíveis) o trio empilha na
             vertical, dentro do mesmo painel preso ao scroll, uma fatia só
@@ -767,11 +747,13 @@ function ExpandedCase({
 // devagar em contrassenso (o mesmo paralaxe da versão de desktop, ver
 // mediaY em CaseColumn), mas só nela, dentro do `overflow-hidden` do
 // cartão, nunca no cartão inteiro: um deslocamento interno não abre
-// nenhuma borda, ao contrário da escala que saiu. O texto entra com o
-// `Reveal` padrão do site (o mesmo de About/Playground), não mais uma
-// máscara bespoke por linha: mobile não tem um "progresso da fatia"
-// compartilhado pra reger isso (cada cartão rola no seu próprio tempo), e o
-// Reveal já é a linguagem de entrada do resto da home.
+// nenhuma borda, ao contrário da escala que saiu. O título e a métrica não
+// usam mais o `Reveal` padrão do site: como o cartão sticky só se revela de
+// cima pra baixo, o título (que mora embaixo, na disposição final) chegava
+// por último, depois da métrica; agora ele nasce deslocado pro lugar da
+// métrica e desce pro seu canto de repouso ao longo da própria entrada
+// (`titleY`/`metricOpacity`, ver MobileCaseCard abaixo), preso ao progresso
+// de scroll de cada cartão, não a um `whileInView` genérico.
 //
 // A mídia de cada cartão só monta perto da viewport (`useNearViewport`,
 // abaixo): com vídeo mudo em loop em cada capa, deixar os seis
@@ -843,18 +825,33 @@ function MobileCaseCard({
   // deslocamento interno, dentro do overflow-hidden abaixo, não abre borda
   // nenhuma pro fundo da página.
   const mediaY = useTransform(progress, [0, 1], ["-8%", "8%"]);
-  // A métrica entra por este `progress`, não pelo `Reveal` padrão do
-  // título logo abaixo: o `Reveal` nasce com uma margem negativa de 8% no
-  // pé da viewport (pensada pra conteúdo comum de página, que cruza a
-  // borda de baixo enquanto ainda está "chegando"), mas a linha da métrica
-  // aqui não cruza nada, ela DESCANSA perto do pé do cartão (`pb-10`) o
-  // tempo todo que ele fica travado — cai bem dentro dessa margem excluída
-  // e o `whileInView` nunca disparava. `progress` já mede a entrada do
-  // cartão (ver mediaY acima); [0.35, 0.5] fecha bem quando o cartão
-  // termina de assentar (0.5 é exatamente o instante em que ele gruda,
-  // matemática de useScroll: a janela cobre duas alturas de tela, e o
-  // cartão fica preso na metade do caminho), a métrica chegando por
-  // último, depois do nome do projeto (ver comentário mais abaixo).
+  // Título e métrica trocam de lugar TEMPORARIAMENTE durante a entrada, não
+  // na disposição final: a disposição de repouso continua a de sempre
+  // (métrica em cima, título embaixo, igual desktop). O que muda é COMO se
+  // chega lá.
+  //
+  // Um cartão sticky só é revelado de CIMA pra BAIXO conforme sobe da base
+  // da tela (é o próprio topo dele que aparece primeiro): com o título no
+  // seu lugar de repouso (embaixo), ele só aparecia colado ao fim da
+  // subida, quase de um golpe só, enquanto a métrica (no topo) já tinha
+  // aparecido bem antes — o nome do projeto, que devia ser a primeira
+  // coisa lida, era a ÚLTIMA a chegar.
+  //
+  // Em vez de mudar ONDE o título mora (o que trocaria a disposição final
+  // também), ele nasce deslocado pra cima por `titleY` — ocupando visualmente
+  // o lugar onde a métrica mora — e SÓ desce pro seu lugar de repouso perto
+  // do fim da entrada. `-66vh` é a distância aproximada entre os dois
+  // lugares (o vão entre o topo e a base do cartão, descontado o próprio
+  // respiro de cada bloco); segurando esse valor constante de progress 0 a
+  // 0.35 (a "posição fixa" pedida: por boa parte da entrada, o título já
+  // não se move mais, só o resto do cartão sobe ao redor dele) e soltando
+  // pra 0 (repouso) só entre 0.35 e 0.5, exatamente quando o cartão termina
+  // de assentar (0.5 é o instante em que ele gruda, matemática de
+  // useScroll: a janela cobre duas alturas de tela, e o cartão sempre trava
+  // na metade do caminho). A métrica, no seu lugar de sempre mas ESCONDIDA
+  // até ali (`metricOpacity`), só aparece quando o título já desocupou seu
+  // canto — nunca as duas coisas disputando o mesmo espaço ao mesmo tempo.
+  const titleY = useTransform(progress, [0, 0.35, 0.5], ["-66vh", "-66vh", "0vh"]);
   const metricOpacity = useTransform(progress, [0.35, 0.5], [0, 1]);
   const metricY = useTransform(progress, [0.35, 0.5], [16, 0]);
   const metric = caseStudy.metrics[0];
@@ -897,39 +894,15 @@ function MobileCaseCard({
             a única coisa que chega a cobrir a informação de um cartão é o
             PRÓXIMO cartão chegando por cima, nunca o cabeçalho.
 
-            Título em cima, métrica embaixo: invertido do painel de
-            desktop de propósito. Cada cartão sticky só é revelado de
-            CIMA pra BAIXO conforme sobe da base da tela (é o próprio
-            topo dele que aparece primeiro, o resto ainda embaixo da
-            dobra); com o título embaixo (como no desktop) ele só
-            aparecia colado no fim da subida, quase de um
-            golpe só, e a métrica no topo já tinha aparecido bem antes
-            — o nome do projeto, que devia ser a primeira coisa lida,
-            era a ÚLTIMA a chegar. Com o título no topo, ele nasce
-            cedo, tem a subida inteira do cartão pra entrar e assentar
-            (o Reveal abaixo, sem delay), e a métrica, agora embaixo,
-            só chega perto do fim, quando o cartão já está quase
-            todo à vista, uma pontuação depois do nome já estabelecido,
-            não antes dele. */}
+            Disposição de repouso igual ao desktop (métrica em cima, título
+            embaixo): só a ENTRADA é diferente agora, ver titleY/
+            metricOpacity acima. */}
         <div className="gutter absolute inset-0 flex flex-col justify-between pb-10 pt-16">
-          <Reveal>
-            <h3 className="type-display type-inktrap pt-[0.16em] text-[11vw] leading-[0.9]">
-              {caseStudy.title[locale]}
-            </h3>
-            <p className="type-mono mt-3 text-white/70">
-              {caseStudy.tags[locale].join(" • ")}
-            </p>
-            <span className="type-mono mt-6 inline-flex items-center gap-3 border border-white/40 px-6 py-3">
-              {caseStudy.comingSoon ? dict.cases.comingSoon : dict.cases.viewCase}
-              <span aria-hidden>→</span>
-            </span>
-          </Reveal>
-
           <motion.div
             style={
               reduceMotion ? undefined : { opacity: metricOpacity, y: metricY }
             }
-            className="flex items-end justify-between gap-4"
+            className="flex items-start justify-between gap-4"
           >
             <p className="type-mono text-white/70">
               {pad(index + 1)} / {pad(totalCases)} · {caseStudy.year}
@@ -942,6 +915,19 @@ function MobileCaseCard({
                 {metric.label[locale]}
               </span>
             </p>
+          </motion.div>
+
+          <motion.div style={reduceMotion ? undefined : { y: titleY }}>
+            <h3 className="type-display type-inktrap pt-[0.16em] text-[11vw] leading-[0.9]">
+              {caseStudy.title[locale]}
+            </h3>
+            <p className="type-mono mt-3 text-white/70">
+              {caseStudy.tags[locale].join(" • ")}
+            </p>
+            <span className="type-mono mt-6 inline-flex items-center gap-3 border border-white/40 px-6 py-3">
+              {caseStudy.comingSoon ? dict.cases.comingSoon : dict.cases.viewCase}
+              <span aria-hidden>→</span>
+            </span>
           </motion.div>
         </div>
       </MotionLink>

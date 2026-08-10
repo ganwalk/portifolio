@@ -161,6 +161,28 @@ mudar o respiro do site inteiro é mexer em um lugar. O gutter cresce em três
 degraus (1.5rem, 3rem, 5rem) e o ritmo vertical em outros três (7rem, 9rem,
 11rem).
 
+`.section-y-tight` é o mesmo ritmo, ancorado 1rem abaixo (6rem, 8rem, 10rem):
+usada em Sobre e Extras, onde o respiro cheio (pensado pra dobras com
+pilha/mídia, como CasesGrid e Contato) sobrava contra um conteúdo mais
+compacto (texto corrido, orbit de skills, grade de mini-projetos).
+
+**`.section-y`/`.section-y-tight` não são escritas dentro de `@layer` do
+Tailwind, e por isso batem QUALQUER utilitário do Tailwind em empate de
+especificidade, mesmo um escrito depois no className.** CSS Cascade Layers:
+uma regra fora de camada nomeada tem prioridade sobre qualquer regra DENTRO
+de uma camada, não importa a ordem de saída no arquivo final. Como o
+Tailwind v4 gera suas próprias classes dentro de `@layer utilities`, um
+`sm:py-0` de Contato tentando zerar o padding de `.section-y` (ambos mesma
+especificidade de seletor) simplesmente perdia sempre, e o padding continuava
+cheio, mesmo depois de sm:. Achado ao medir o computed style real do Contato,
+não pela leitura do código (o className parecia correto). A correção não foi
+lutar contra a camada, foi sair dela: a coluna de texto de Contato hoje usa
+`pt-28`/`sm:pt-0`/`pb-16`/`sm:pb-0` (utilitários puros do Tailwind, mesma
+camada entre si, sem `.section-y` no meio disputando prioridade) em vez de
+`section-y`. `pb-16`, não os mesmos 7rem do topo: no mobile é o respiro entre
+os botões de rede social e a imagem interativa logo abaixo (empilhados), e o
+valor cheio de `.section-y` lia como um vão grande demais pra esse gesto.
+
 O Modo Boring não usa nenhuma das duas: currículo é documento, tem densidade
 própria e margem de leitura, não de vitrine.
 
@@ -449,11 +471,6 @@ decorativa. O que dá vida é movimento e tipografia, não ornamento.
   três, pra não vazar de um terço da largura (ou da fatia vertical de altura
   empilhada, no mobile).
 
-  A fatia do trio ganha uma quarta coluna, estreita, à esquerda das três:
-  só a frase "Experiências interativas" girada 90° (`writing-mode:
-  vertical-rl`), na Whyte Inktrap (mesma fonte dos títulos, não a mono do
-  resto dos rótulos), uma régua de contexto, não um case clicável.
-
   Uma camada de vocabulário de agência vive em cima da pilha, atrás do
   `MotionConfig` do Modo Boring: texto em máscara escalonada. Índice,
   métrica, título, tags e o convite de "ver caso" moram cada um no seu
@@ -554,12 +571,9 @@ decorativa. O que dá vida é movimento e tipografia, não ornamento.
   A mídia de cada cartão ainda ganha um paralaxe PRÓPRIO conforme entra e
   sai da tela (`useScroll` medindo contra a janela, sem `container`), mas
   só nela, dentro do `overflow-hidden` do cartão, nunca no cartão inteiro:
-  um deslocamento interno não abre nenhuma borda. O texto entra pelo
-  `Reveal` padrão do site, não mais uma máscara bespoke por linha: sem um
-  progresso de fatia compartilhado regendo tudo, o `Reveal` já é a
-  linguagem de entrada do resto da home. A mídia de cada cartão só monta
-  perto da viewport (`useNearViewport`): com vídeo mudo em loop em cada
-  capa, montar os seis de uma vez tocaria todos ao mesmo tempo fora de
+  um deslocamento interno não abre nenhuma borda. A mídia de cada cartão só
+  monta perto da viewport (`useNearViewport`): com vídeo mudo em loop em
+  cada capa, montar os seis de uma vez tocaria todos ao mesmo tempo fora de
   tela.
 
   Sem gap nem borda entre os cartões, e sem `border-t` no início da seção:
@@ -568,42 +582,58 @@ decorativa. O que dá vida é movimento e tipografia, não ornamento.
   cartão entra colado direto ao fim da hero, do mesmo jeito que a pilha de
   desktop também não tem margem nem moldura entre fatias.
 
-  O topo do cartão (hoje o título, ver abaixo) começa com `pt-16`, não a
-  mesma padding de baixo (`pb-10`): o cabeçalho é `fixed` e flutua por cima
-  de TODA a pilha (`z-40`, mais alto que qualquer cartão sticky aqui
-  embaixo), então sem esse respiro extra a informação do cartão travado no
-  topo nascia parcialmente atrás da barra, mesmo antes do próximo cartão
-  chegar pra cobri-la de verdade. `pt-16` desconta a altura da barra
-  (3.5rem) e sobra um pouco de respiro, o mesmo raciocínio do `pt-24` da
-  hero (ver acima). Assim a única coisa que chega a cobrir a informação de
-  um cartão é o PRÓXIMO cartão chegando por cima, nunca o cabeçalho.
+  O topo do cartão começa com `pt-16`, não a mesma padding de baixo
+  (`pb-10`): o cabeçalho é `fixed` e flutua por cima de TODA a pilha
+  (`z-40`, mais alto que qualquer cartão sticky aqui embaixo), então sem
+  esse respiro extra a informação do cartão travado no topo nascia
+  parcialmente atrás da barra, mesmo antes do próximo cartão chegar pra
+  cobri-la de verdade. `pt-16` desconta a altura da barra (3.5rem) e sobra
+  um pouco de respiro, o mesmo raciocínio do `pt-24` da hero (ver acima).
+  Assim a única coisa que chega a cobrir a informação de um cartão é o
+  PRÓXIMO cartão chegando por cima, nunca o cabeçalho.
 
-  **Título em cima, métrica embaixo: invertido do painel de desktop, de
-  propósito.** Um cartão sticky só é revelado de CIMA pra BAIXO conforme
-  sobe da base da tela (é o próprio topo dele que aparece primeiro, o
-  resto ainda embaixo da dobra); com o título embaixo (como no desktop,
-  primeira versão mobile também), ele só chegava colado ao fim da subida,
-  quase de um golpe só, e a métrica no topo já tinha aparecido bem antes —
-  o nome do projeto, que devia ser a primeira coisa lida, era a ÚLTIMA a
-  chegar. Com o título no topo ele nasce cedo e tem a subida inteira do
-  cartão pra entrar e assentar (`Reveal` padrão, sem delay); a métrica,
-  agora embaixo, só chega perto do fim, uma pontuação depois do nome já
-  estabelecido, não antes dele.
+  **Disposição de repouso igual ao desktop (métrica em cima, título
+  embaixo): só a ENTRADA muda, não o layout final.** Uma primeira versão
+  trocou os dois de lugar de vez (título em cima permanente, métrica
+  embaixo permanente) pra resolver um problema real: um cartão sticky só é
+  revelado de CIMA pra BAIXO conforme sobe da base da tela, então com o
+  título no seu lugar de sempre (embaixo) ele só chegava colado ao fim da
+  subida, quase de um golpe só, enquanto a métrica (no topo) já tinha
+  aparecido bem antes — o nome do projeto, que devia ser a primeira coisa
+  lida, era a ÚLTIMA a chegar. Mas essa troca definitiva desalinhava o
+  mobile do desktop sem necessidade: o problema era só de SEQUÊNCIA de
+  entrada, não de lugar de repouso.
 
-  A métrica não usa `Reveal`: o componente nasce com uma margem negativa
-  de 8% no pé da viewport (pensada pra conteúdo comum de página, que
-  cruza essa borda enquanto ainda está "chegando"), mas a linha da
-  métrica aqui não cruza nada — ela DESCANSA perto do pé do cartão
-  (`pb-10`) o tempo inteiro em que ele fica travado, caindo direto
-  dentro dessa margem excluída, e o `whileInView` nunca disparava (bug
-  real, pego só depois de medir a posição renderizada: a métrica
-  simplesmente nunca aparecia). A entrada dela usa o `progress` que já
-  mede a chegada do cartão (o mesmo do paralaxe da mídia, `mediaY`
-  acima): `useTransform(progress, [0.35, 0.5], ...)` fecha bem quando o
-  cartão termina de assentar, porque **0.5 é exatamente o instante em
-  que ele gruda** (a janela do `useScroll` cobre duas alturas de tela —
-  entrada mais o tempo preso — então o cartão sempre trava na metade do
-  caminho).
+  A correção: o título nasce deslocado pra cima por um `titleY`
+  (`useTransform`), ocupando visualmente o canto onde a métrica mora, e só
+  desce pro seu lugar de repouso (embaixo) perto do fim da entrada — a
+  métrica, no seu canto de sempre mas ESCONDIDA até ali (`metricOpacity`),
+  só aparece quando o título já desocupou aquele espaço. `titleY` segura um
+  valor constante (`-66vh`, a distância aproximada entre os dois cantos) de
+  `progress` 0 a 0.35 (a "posição fixa" pedida: por boa parte da entrada o
+  título já não se desloca mais RELATIVO ao cartão, só o resto do cartão
+  sobe ao redor dele) e solta pra `0vh` (repouso) só entre 0.35 e 0.5,
+  exatamente quando o cartão termina de assentar. Uma alternativa mais
+  literal (título travado numa posição fixa DA TELA, não do cartão, o que
+  pediria empurrar `titleY` bem além do topo do cartão durante boa parte da
+  entrada) foi descartada: o cartão tem `overflow-hidden`, e conteúdo não
+  pode ser transformado pra fora da própria caixa dele, mesmo que o
+  resultado caísse dentro da viewport — só as duas posições finais (canto
+  da métrica e canto do título), que já vivem DENTRO da caixa do cartão,
+  são alcançáveis sem cortar.
+
+  Nem título nem métrica usam `Reveal` aqui: `Reveal` nasce com uma margem
+  negativa de 8% no pé da viewport (pensada pra conteúdo comum de página,
+  que cruza essa borda enquanto ainda está "chegando"), mas a métrica
+  DESCANSA perto do pé do cartão (`pb-10`) o tempo inteiro em que ele fica
+  travado, caindo direto dentro dessa margem excluída — o `whileInView`
+  nunca disparava (bug real, pego só depois de medir a posição renderizada:
+  a métrica simplesmente nunca aparecia). As duas usam o `progress` que já
+  mede a chegada do cartão (o mesmo do paralaxe da mídia, `mediaY` acima):
+  `useTransform(progress, [0.35, 0.5], ...)` fecha bem quando o cartão
+  termina de assentar, porque **0.5 é exatamente o instante em que ele
+  gruda** (a janela do `useScroll` cobre duas alturas de tela — entrada
+  mais o tempo preso — então o cartão sempre trava na metade do caminho).
 - **"Acreditam no meu trabalho" (`Brands`) mora dentro de `About`, não é
   mais dobra própria.** Já foi uma régua fina entre CasesGrid e About, com
   `<section>` e `aria-label` próprios; hoje é conteúdo comum de About,
@@ -847,17 +877,20 @@ basePath), fonte de verdade de todo metadado que precisa de URL absoluta:
 Três arquivos em `src/app/`, gerados por `scripts/build-favicon.mjs`, cada um
 respondendo a um navegador diferente. O desenho é o mesmo dos outros
 destaques: a assinatura em Whyte Inktrap e a inversão tinta/papel da lente,
-num quadrado de tinta com o "A" vazado em papel. Nada além disso: a 16px, que
-é o tamanho que importa numa aba, qualquer segundo elemento (a gravura, o
-retrato) vira mancha. O que sobra do desenho da fonte nesse tamanho são os ink
-traps do "A", que é justamente o detalhe que dá nome à família.
+num quadrado de tinta com "A." vazado em papel, o ponto que fecha a
+assinatura. Nada além disso: a 16px, que é o tamanho que importa numa aba,
+qualquer segundo elemento (a gravura, o retrato) vira mancha. O que sobra do
+desenho da fonte nesse tamanho são os ink traps do "A", que é justamente o
+detalhe que dá nome à família. O glifo sai de `font.getPath("A.", ...)`, não
+de `charToGlyph`: são dois glifos (a letra e o ponto), e é a própria fonte
+quem resolve o avanço entre eles.
 
 - `icon.svg`: o que Chrome e Firefox preferem, e o único que inverte sozinho
   conforme o tema do sistema, por uma media query DENTRO do arquivo (favicon
   em SVG honra `prefers-color-scheme` nesses dois).
 - `favicon.ico`: Safari e navegador antigo, que não leem SVG. Não tem como
   inverter, então fica na versão clara, a padrão do site. Numa barra de abas
-  escura o quadrado se funde ao fundo e sobra o "A" branco, que continua
+  escura o quadrado se funde ao fundo e sobra o "A." branco, que continua
   legível: num desenho vazado, um dos dois elementos sempre contrasta com o
   que está em volta. Os quadros (16, 32 e 48) vão como PNG dentro do
   contêiner ICO, que é o que todo navegador atual lê, e o script monta o

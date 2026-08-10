@@ -1,4 +1,4 @@
-// Gera o favicon do site a partir do "A" da Whyte Inktrap.
+// Gera o favicon do site a partir de "A." na Whyte Inktrap.
 //
 // Uso (as ferramentas não ficam no package.json, são de bancada, não do site,
 // mesmo critério do sharp em build-frames.mjs e build-contact-photo.mjs):
@@ -7,11 +7,12 @@
 //   node scripts/build-favicon.mjs
 //
 // O desenho é o mesmo gesto do cabeçalho e da hero: a assinatura em Whyte
-// Inktrap, e a inversão tinta/papel da lente. Um quadrado de tinta com o "A"
-// vazado em papel. Nada além disso: a 16px, que é o tamanho que importa numa
-// aba, qualquer segundo elemento (a gravura do fundo, o retrato) vira mancha.
-// O que sobra do desenho da fonte nesse tamanho são os ink traps do "A", e é
-// justamente o detalhe que dá nome à família.
+// Inktrap, e a inversão tinta/papel da lente. Um quadrado de tinta com "A."
+// vazado em papel, o ponto que fecha a assinatura. Nada além disso: a 16px,
+// que é o tamanho que importa numa aba, qualquer segundo elemento (a
+// gravura do fundo, o retrato) vira mancha. O que sobra do desenho da fonte
+// nesse tamanho são os ink traps do "A", e é justamente o detalhe que dá
+// nome à família.
 //
 // O glifo entra como PATH, não como fonte: a Whyte é licenciada (ABC Dinamo),
 // e contornar uma letra para virar marca é o uso normal de um logotipo,
@@ -54,9 +55,9 @@ const INK_DARK = "#0a0a0a";
 const PAPER_DARK = "#f4f4f4";
 
 const TILE = 64;
-// Largura do "A" dentro do quadrado. 0.66 deixa a letra dominante sem encostar
-// na borda: com menos ela vira um selo com moldura, com mais os vértices do
-// "A" tocam o corte e o desenho perde o ar de letra.
+// Largura de "A." dentro do quadrado. 0.66 deixa a letra dominante sem
+// encostar na borda: com menos ela vira um selo com moldura, com mais os
+// vértices do "A" tocam o corte e o desenho perde o ar de letra.
 const LETTER_WIDTH = 0.66;
 
 const woff2 = await readFile(FONT);
@@ -64,13 +65,15 @@ const ttf = Buffer.from(await decompress(woff2));
 const font = opentype.parse(
   ttf.buffer.slice(ttf.byteOffset, ttf.byteOffset + ttf.length),
 );
-const glyph = font.charToGlyph("A");
-// getPath desenha com a linha de base em y = 0 e a letra subindo para y
-// negativo, que é a convenção da fonte, não a do SVG. O translate abaixo
-// reposiciona; nada de flip, porque o eixo já sai no sentido certo depois que
-// opentype.js converte para coordenadas de tela.
-const path = glyph.getPath(0, 0, 1000).toPathData(2);
-const box = glyph.getBoundingBox();
+// getPath com string (não charToGlyph): "A." é duas glifos, e é a própria
+// fonte quem resolve o avanço entre elas (kerning, se houver, do par "A."
+// definido na Whyte). Desenha com a linha de base em y = 0 e a letra subindo
+// para y negativo, que é a convenção da fonte, não a do SVG. O translate
+// abaixo reposiciona; nada de flip, porque o eixo já sai no sentido certo
+// depois que opentype.js converte para coordenadas de tela.
+const glyphPath = font.getPath("A.", 0, 0, 1000);
+const path = glyphPath.toPathData(2);
+const box = glyphPath.getBoundingBox();
 const width = box.x2 - box.x1;
 const height = box.y2 - box.y1;
 

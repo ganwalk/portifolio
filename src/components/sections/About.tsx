@@ -40,7 +40,7 @@ export function About({ locale, dict }: { locale: Locale; dict: Dictionary }) {
     <section
       id="about"
       ref={sectionRef}
-      className="gutter section-y border-t border-line"
+      className="gutter section-y-tight border-t border-line"
     >
       <Reveal>
         <h2 className="type-mono mb-16">{dict.about.title}</h2>

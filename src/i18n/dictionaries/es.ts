@@ -56,7 +56,6 @@ export const es: Dictionary = {
   },
   cases: {
     title: "Proyectos destacados",
-    interactiveExperiences: "Experiencias interactivas",
     scrollHint: "Desliza para navegar",
     viewCase: "Ver case",
     comingSoon: "Case study completo próximamente",

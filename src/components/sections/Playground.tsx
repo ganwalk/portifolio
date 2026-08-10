@@ -16,7 +16,7 @@ export function Playground({
   dict: Dictionary;
 }) {
   return (
-    <section id="playground" className="gutter section-y border-t border-line">
+    <section id="playground" className="gutter section-y-tight border-t border-line">
       <Reveal>
         <h2 className="type-mono mb-2">{dict.playground.title}</h2>
         <p className="mb-16 max-w-lg text-muted">{dict.playground.subtitle}</p>

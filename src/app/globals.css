@@ -189,6 +189,14 @@ body {
   padding-block: 7rem;
 }
 
+/* Mesmo ritmo de `.section-y` (mesmo salto de 2rem a cada breakpoint), só
+   ancorado 1rem abaixo: usada em "Sobre" e "Extras", onde o respiro cheio
+   das dobras com pilha/mídia (CasesGrid, Contato) sobrava, o conteúdo é
+   mais compacto (texto corrido, orbit de skills, grade de mini-projetos). */
+.section-y-tight {
+  padding-block: 6rem;
+}
+
 @media (min-width: 640px) {
   .gutter {
     padding-inline: 3rem;
@@ -196,6 +204,10 @@ body {
 
   .section-y {
     padding-block: 9rem;
+  }
+
+  .section-y-tight {
+    padding-block: 8rem;
   }
 }
 
@@ -206,6 +218,10 @@ body {
 
   .section-y {
     padding-block: 11rem;
+  }
+
+  .section-y-tight {
+    padding-block: 10rem;
   }
 }
 
