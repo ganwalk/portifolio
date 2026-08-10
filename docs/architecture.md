@@ -233,6 +233,17 @@ decorativa. O que dá vida é movimento e tipografia, não ornamento.
   nada nem estourar a tela, porque é o próprio motor de flexbox recalculando
   a cada resize, não um valor fixo medido contra um único aparelho.
 
+  `text-center`/`sm:text-left` mora no PRÓPRIO `<h1>` e no PRÓPRIO
+  subtítulo agora, não só no wrapper. Já foi só no wrapper, contando com a
+  herança de `text-align` atravessando o `contents` (que funciona: herança
+  de CSS não olha pra árvore de layout) — mas o `<h1>` acabou ganhando um
+  `text-center` PRÓPRIO sem o `sm:text-left` de volta, e como a regra do
+  próprio elemento sempre vence a herdada, o nome ficou centralizado em
+  QUALQUER largura, inclusive desktop, sobrepondo o retrato na faixa de
+  notebook. Cada filho com a própria regra completa (as duas faixas) é mais
+  chato de repetir, mas não depende de um ancestral lembrar de continuar
+  por perto.
+
   A opacidade do grão sai por `--noise-opacity`, e na hero ela é o dobro do
   resto do site (0.10 contra 0.05). Nos cases o ruído pousa em cima de imagem,
   que já tem textura própria, e ali ele é só um véu. Na hero pousa em papel
@@ -547,6 +558,19 @@ decorativa. O que dá vida é movimento e tipografia, não ornamento.
   seletor de tema: um clique alterna claro/escuro (não existe mais um botão
   ☀/☾ à parte, ver `ControlBar`), sem relação nenhuma com o ciclo de fases,
   que continua regido só pelo scroll.
+
+  Virar um `<button>` (pra ser clicável) trouxe um efeito colateral: ao
+  contrário de `<svg>`, que o preflight do Tailwind já reseta pra
+  `display: block`, `<button>` continua com o `display: inline-block` padrão
+  do navegador. Nos três wrappers do crossfade mobile do cabeçalho
+  (`SiteFrame.tsx`, os `<div>` que trocam Modo Boring/menu, lua/assinatura
+  e idioma/lua), esse botão de 20px virava conteúdo INLINE dentro de um
+  `<div>` comum, e o navegador reservava ao redor dele a altura de uma
+  linha de texto inteira (a "tira" do line-height herdado, maior que os
+  20px do botão): a lua ficava ancorada no topo dessa tira, alguns pixels
+  mais baixo que o resto da barra, em vez de centralizada. `flex
+  items-center` nesses três wrappers resolve de raiz (o filho vira item de
+  flex, a tira de line-height nunca entra na conta).
 - **Menu overlay** (`SiteMenu`): navegação de tela cheia com tipografia gigante
   (Whyte Inktrap, via `.type-inktrap` somada ao `.type-display` que já dava
   tamanho e caixa alta) e preview de imagem no hover de cada link. Renderiza
