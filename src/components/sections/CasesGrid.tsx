@@ -731,24 +731,36 @@ function ExpandedCase({
 // cobria o topo do painel ativo em certas posições, e o trio de artistas
 // competia com a pilha), depois carrossel horizontal por gesto (o arrastar
 // lateral lia fraco, e ainda ficava competindo com o resto da página, que
-// rola só na vertical). Esta versão volta pro eixo natural da página: cada
-// projeto é um painel quase de tela cheia (`MOBILE_CARD_HEIGHT`, o mesmo
-// "destaque total" de um projeto por vez que a pilha de desktop já dá, só
-// que sem prender o scroll), empilhados na ordem normal do documento, com
-// uma beirada do próximo já visível acima da dobra (o respiro entre cartões,
-// abaixo) como o único convite pra continuar. Rolar É a navegação, o mesmo
-// princípio do resto do site: sem seta, sem ponto de posição, sem contador
-// de fatia brigando com o scroll de verdade.
+// rola só na vertical), depois rolagem vertical comum com uma leve escala
+// por JS marcando o cartão ativo (a escala reduzia a CAIXA visível dentro
+// da própria célula do layout, sem reduzir a célula em si, revelando o
+// fundo da página nas quatro bordas: exatamente o "espaço em branco ao
+// redor" que não devia existir).
 //
-// Cada cartão ganha um pouco de profundidade PRÓPRIA conforme cruza o
-// centro da tela (`useScroll` com `target` no próprio cartão, sem container:
-// mede contra a janela, que é quem de fato rola aqui): a mídia sobe um tanto
-// devagar em contrassenso (o mesmo paralaxe da versão de desktop, ver mediaY
-// em CaseColumn) e o cartão inteiro ganha uma leve escala, maior perto do
-// centro. A amplitude é pequena de propósito: o produto continua em
-// destaque o tempo todo, o movimento é textura, não o assunto. O texto
-// entra com o `Reveal` padrão do site (o mesmo de About/Playground), não
-// mais uma máscara bespoke por linha: mobile não tem um "progresso da fatia"
+// Esta versão troca a escala por `position: sticky`, sem JS nenhum regendo
+// a transição: cada cartão é `sticky top-0 h-svh` (tela cheia de verdade,
+// não mais um `MOBILE_CARD_HEIGHT` menor que a tela), empilhado na ordem
+// normal do documento, sem gap. Como cada cartão sticky "gruda" no topo
+// assim que alcança lá, e o próximo já entra logo em seguida (a MESMA
+// altura de viewport, sem sobra pra ele "esperar" antes de aparecer), o
+// efeito colateral do próprio `position: sticky` é a passagem dinâmica
+// pedida: o cartão de baixo desliza por cima do cartão travado acima dele,
+// cobrindo-o aos poucos conforme o dedo rola, sem nenhum salto nem
+// segunda camada JS decidindo escala ou z-index (a ordem de pintura já
+// segue a ordem do DOM: quem vem depois cobre quem veio antes). O mesmo
+// princípio que já rege a pilha de desktop (a fatia de cima cobre a de
+// baixo), só que aqui é o próprio scroll nativo da página quem desenha a
+// cobertura, não uma janela de `scrollYProgress` calculada à mão.
+//
+// A mídia de cada cartão ainda ganha um paralaxe PRÓPRIO conforme entra e
+// sai da tela (`useScroll` com `target` no próprio cartão, sem container:
+// mede contra a janela, que é quem de fato rola aqui): ela desliza um tanto
+// devagar em contrassenso (o mesmo paralaxe da versão de desktop, ver
+// mediaY em CaseColumn), mas só nela, dentro do `overflow-hidden` do
+// cartão, nunca no cartão inteiro: um deslocamento interno não abre
+// nenhuma borda, ao contrário da escala que saiu. O texto entra com o
+// `Reveal` padrão do site (o mesmo de About/Playground), não mais uma
+// máscara bespoke por linha: mobile não tem um "progresso da fatia"
 // compartilhado pra reger isso (cada cartão rola no seu próprio tempo), e o
 // Reveal já é a linguagem de entrada do resto da home.
 //
@@ -759,11 +771,6 @@ function ExpandedCase({
 // selo que segue o cursor (não existe hover de verdade em touch): abre a
 // página do case direto, sem o overlay expandido em FLIP que a versão de
 // desktop usa.
-
-/** Altura de cada painel: perto da tela cheia (o "destaque total" pedido),
- *  mas curta o bastante pra deixar uma beirada do próximo cartão visível
- *  logo acima da dobra, o convite silencioso pra continuar rolando. */
-const MOBILE_CARD_HEIGHT = "78svh";
 
 /** true assim que o elemento entra numa margem generosa da viewport (25% de
  *  antecedência): controla o mount da mídia de cada cartão (ver MediaView),
@@ -806,8 +813,11 @@ function MobileCaseCard({
   const cardRef = useRef<HTMLDivElement>(null);
   const isNear = useNearViewport(cardRef);
   // offset "start end" → "end start": 0 quando o cartão entra pela base da
-  // tela, 1 quando termina de sair por cima. 0.5 cai no centro, o pico da
-  // escala e do paralaxe abaixo.
+  // tela, 1 quando termina de sair por cima. Enquanto ele está grudado
+  // (sticky) recebendo o próximo por cima, o próprio retângulo pra de se
+  // mexer, e o progresso trava no valor de quando ele assentou: o paralaxe
+  // acompanha a ENTRADA do cartão, que é o momento em que ele de fato se
+  // move na tela, e descansa enquanto ele está parado sendo coberto.
   const { scrollYProgress: rawProgress } = useScroll({
     target: cardRef,
     offset: ["start end", "end start"],
@@ -818,69 +828,68 @@ function MobileCaseCard({
     mass: 0.4,
   });
   const progress = reduceMotion ? rawProgress : scrollYProgress;
-  const scale = useTransform(progress, [0, 0.5, 1], [0.94, 1, 0.94]);
   // Contrassenso, o mesmo paralaxe da versão de desktop (mediaY em
   // CaseColumn): scale-125 no wrapper cobre a folga que o deslocamento
-  // abriria nas bordas.
+  // abriria nas bordas. Só a mídia se move, nunca o cartão inteiro: um
+  // deslocamento interno, dentro do overflow-hidden abaixo, não abre borda
+  // nenhuma pro fundo da página.
   const mediaY = useTransform(progress, [0, 1], ["-8%", "8%"]);
   const metric = caseStudy.metrics[0];
 
   return (
-    <div ref={cardRef} style={{ height: MOBILE_CARD_HEIGHT }} className="relative w-full">
-      <motion.div
-        style={reduceMotion ? undefined : { scale }}
-        className="absolute inset-0 overflow-hidden bg-black text-white"
+    <div
+      ref={cardRef}
+      className="sticky top-0 h-svh w-full overflow-hidden bg-black text-white"
+    >
+      <Link
+        href={`/${locale}/work/${caseStudy.slug}/`}
+        className="absolute inset-0 block"
       >
-        <Link
-          href={`/${locale}/work/${caseStudy.slug}/`}
-          className="absolute inset-0 block"
+        <motion.div
+          className="absolute inset-0 scale-125"
+          style={reduceMotion ? undefined : { y: mediaY }}
         >
-          <motion.div
-            className="absolute inset-0 scale-125"
-            style={reduceMotion ? undefined : { y: mediaY }}
-          >
-            {isNear ? (
-              <MediaView
-                media={caseStudy.cover}
-                locale={locale}
-                className="absolute inset-0 h-full w-full object-cover"
-              />
-            ) : (
-              <div className="absolute inset-0 bg-surface" />
-            )}
-          </motion.div>
-          <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/10 to-black/45" />
+          {isNear ? (
+            <MediaView
+              media={caseStudy.cover}
+              locale={locale}
+              className="absolute inset-0 h-full w-full object-cover"
+            />
+          ) : (
+            <div className="absolute inset-0 bg-surface" />
+          )}
+        </motion.div>
+        <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/10 to-black/45" />
 
-          <div className="gutter absolute inset-0 flex flex-col justify-between py-10">
-            <Reveal className="flex items-start justify-between gap-4">
-              <p className="type-mono text-white/70">
-                {pad(index + 1)} / {pad(totalCases)} · {caseStudy.year}
-              </p>
-              <p className="text-right">
-                <span className="type-serif-display block text-4xl">
-                  {metric.value}
-                </span>
-                <span className="type-mono text-white/70">
-                  {metric.label[locale]}
-                </span>
-              </p>
-            </Reveal>
-
-            <Reveal delay={0.08}>
-              <h3 className="type-display type-inktrap pt-[0.16em] text-[11vw] leading-[0.9]">
-                {caseStudy.title[locale]}
-              </h3>
-              <p className="type-mono mt-3 text-white/70">
-                {caseStudy.tags[locale].join(" • ")}
-              </p>
-              <span className="type-mono mt-6 inline-flex items-center gap-3 border border-white/40 px-6 py-3">
-                {caseStudy.comingSoon ? dict.cases.comingSoon : dict.cases.viewCase}
-                <span aria-hidden>→</span>
+        <div className="gutter absolute inset-0 flex flex-col justify-between py-10">
+          <Reveal className="flex items-start justify-between gap-4">
+            <p className="type-mono text-white/70">
+              {pad(index + 1)} / {pad(totalCases)} · {caseStudy.year}
+            </p>
+            <p className="text-right">
+              <span className="type-serif-display block text-4xl">
+                {metric.value}
               </span>
-            </Reveal>
-          </div>
-        </Link>
-      </motion.div>
+              <span className="type-mono text-white/70">
+                {metric.label[locale]}
+              </span>
+            </p>
+          </Reveal>
+
+          <Reveal delay={0.08}>
+            <h3 className="type-display type-inktrap pt-[0.16em] text-[11vw] leading-[0.9]">
+              {caseStudy.title[locale]}
+            </h3>
+            <p className="type-mono mt-3 text-white/70">
+              {caseStudy.tags[locale].join(" • ")}
+            </p>
+            <span className="type-mono mt-6 inline-flex items-center gap-3 border border-white/40 px-6 py-3">
+              {caseStudy.comingSoon ? dict.cases.comingSoon : dict.cases.viewCase}
+              <span aria-hidden>→</span>
+            </span>
+          </Reveal>
+        </div>
+      </Link>
     </div>
   );
 }
@@ -888,11 +897,12 @@ function MobileCaseCard({
 function MobileCaseList({ locale, dict }: { locale: Locale; dict: Dictionary }) {
   const reduceMotion = useReducedMotion();
 
-  // Sem respiro nem régua entre os cartões: cada um já ocupa a largura e
-  // quase a altura inteira da tela (MOBILE_CARD_HEIGHT), então um espaço ou
-  // uma borda entre eles só cortaria o "reel" contínuo de projeto em
-  // projeto, a mesma leitura de painel cheio que a versão de desktop já
-  // tem (lá também sem margem nem moldura entre fatias).
+  // Sem gap nem borda entre os cartões: cada um ocupa a largura e a altura
+  // inteiras da tela (h-svh, ver MobileCaseCard), empilhados direto um atrás
+  // do outro. Não é só estética: um gap aqui quebraria o efeito de
+  // `position: sticky` que faz um cartão cobrir o outro (ver comentário no
+  // topo do arquivo) com uma tira do fundo da página aparecendo entre eles a
+  // cada troca.
   return (
     <div className="flex flex-col sm:hidden">
       {cases.map((caseStudy, index) => (

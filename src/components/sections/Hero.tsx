@@ -99,36 +99,25 @@ function HeroContent({
   // flex-1, e não h-full: altura percentual não resolve contra um pai que só
   // ganha altura por flex-grow.
   //
-  // No mobile o retrato deixa de ser posicionado em absoluto e passa a ser um
-  // terceiro item do flex (via order), entre o bloco de título e o de CTA. O
-  // respiro entre nome, subtítulo e retrato precisa ser o MESMO dos dois
-  // lados (o subtítulo fica equidistante do nome acima e do retrato abaixo),
-  // e um justify-between no contêiner não garante isso: ele reparte o espaço
-  // SOBRANDO entre os três itens, um valor que muda com a altura da tela,
-  // enquanto o respiro nome/subtítulo é a margem fixa de dentro do próprio
-  // bloco de título (mt-6, abaixo). Por isso o gap explícito aqui repete
-  // esse mesmo valor (gap-6) só até o retrato, e o bloco de CTA (que fecha a
-  // hero encostado embaixo) usa mt-auto pra absorver sozinho o espaço que
-  // sobra, sem devolver aquele espaço aos dois gaps de cima. No desktop
-  // o retrato volta a ser absoluto (sai do fluxo do flex) e o justify-between
-  // original volta a reger só título e CTA, porque lá sobra espaço ao lado
-  // da manchete e não precisa disputar altura com mais nada.
-  //
-  // pt-16 no mobile: o cabeçalho é uma barra só, sempre visível, até antes de
-  // rolar (veja SiteFrame, 3.5rem), então a hero precisa reservar espaço pra
-  // ela por cima, senão o nome nasce colado na tarja; o respiro que sobra
-  // depois de descontar a barra é pequeno de propósito (não repete o mt-6 do
-  // bloco de título como uma segunda camada de respiro por cima da mesma
-  // barra). pb-8, pt-16 e os outros respiros do mobile (abaixo) foram todos
-  // encolhidos juntos por um motivo só: numa tela baixa de verdade (iPhone
-  // SE, ou qualquer aparelho com a barra do navegador ainda visível), a soma
-  // dos respiros passava da altura útil da tela e o CTA "veja meu trabalho"
-  // nascia fora da primeira dobra, obrigando a rolar antes mesmo de ler a
-  // hero inteira. Medido contra os 664px de altura útil de um iPhone com a
-  // barra do Safari visível (o pior caso comum, pior que o iPhone SE puro),
-  // não contra o `100svh` de um simulador sem chrome nenhum.
+  // No mobile o nome, o subtítulo, o retrato e o bloco de CTA são QUATRO
+  // itens diretos do mesmo flex (o wrapper que antes agrupava nome+subtítulo
+  // vira `contents` nessa faixa, ver abaixo: some da árvore de layout, mas
+  // continua na árvore de DOM, então os dois viram itens do flex por conta
+  // própria). `justify-between` reparte o espaço sobrando em partes IGUAIS
+  // entre os quatro, então nome→subtítulo, subtítulo→retrato e
+  // retrato→CTA saem sempre com o mesmo respiro entre si, sem precisar
+  // calcular esse valor à mão (e sem o risco de sobrar tudo num vão só,
+  // como um `mt-auto` no último item faria). pt/pb continuam fixos (não
+  // entram nessa conta): reservam só o espaço mínimo de segurança, o
+  // suficiente pra afastar o nome do cabeçalho fixo por cima (`pt-16`,
+  // pouco mais que a própria barra de 3.5rem) e dar uma borda solta embaixo
+  // (`pb-16`, o mesmo valor, pelo mesmo respiro nos dois lados). No desktop
+  // o retrato volta a ser absoluto (sai do fluxo do flex) e o wrapper
+  // nome+subtítulo volta a ser um bloco só (não mais `contents`), porque lá
+  // sobra espaço ao lado da manchete e o respiro entre nome e subtítulo
+  // volta a ser a margem fixa de sempre (`sm:mt-9`), não parte dessa conta.
   return (
-    <div className="gutter relative flex flex-1 flex-col items-center gap-6 pb-8 pt-16 sm:items-stretch sm:justify-between sm:gap-0 sm:pb-14 sm:pt-32">
+    <div className="gutter relative flex flex-1 flex-col items-center justify-between pb-16 pt-16 sm:items-stretch sm:pb-14 sm:pt-32">
       {/* Dentro do HeroContent, e não solto no <section>: assim a cópia
           espelhada também recebe o canvas, e o nome deformado inverte junto
           com o resto em vez de sumir atrás do disco de tinta da lente. */}
@@ -145,14 +134,23 @@ function HeroContent({
         />
       )}
 
-      <div className="relative order-1 text-center sm:text-left">
+      {/* contents no mobile: o wrapper some da árvore de LAYOUT (não
+          participa mais do flex como uma caixa só), mas continua na árvore
+          de DOM, então nome e subtítulo passam a ser dois itens diretos do
+          flex, cada um com seu próprio respiro equidistante (ver comentário
+          acima). sm:block desfaz isso no desktop: volta a ser uma caixa só,
+          e nome+subtítulo voltam a andar juntos, um bloco à esquerda. A
+          propriedade herdada (text-align, aqui) continua chegando aos dois
+          do mesmo jeito com `contents`: só a CAIXA do wrapper deixa de
+          existir, a herança de CSS não olha pra árvore de layout. */}
+      <div className="contents sm:relative sm:order-1 sm:block sm:text-left">
         {/* Transparente, não escondido, quando o canvas assume o desenho: o
             <h1> continua sendo o que o leitor de tela lê e o que o buscador
             indexa, e continua ocupando o mesmo espaço, que é justamente de
             onde saem as medidas que o canvas usa pra desenhar. */}
         <h1
           ref={titleRef}
-          className={`type-display type-inktrap text-[14.5vw] leading-[0.84] tracking-[0.015em] sm:text-[8.2vw] lg:text-[11vw] 2xl:text-[10vw] ${
+          className={`type-display type-inktrap order-1 text-center text-[14.5vw] leading-[0.84] tracking-[0.015em] sm:text-[8.2vw] lg:text-[11vw] 2xl:text-[10vw] ${
             titleOnCanvas ? "opacity-0" : ""
           }`}
         >
@@ -210,7 +208,7 @@ function HeroContent({
             Tailwind de propósito), então só style sobrescreve. */}
         <motion.p
           {...reveal(1)}
-          className="type-serif-display mt-6 flex flex-col items-center text-[6.5vw] italic text-muted sm:mt-9 sm:block sm:text-[3.6vw]"
+          className="type-serif-display order-1 flex flex-col items-center text-[6.5vw] italic text-muted sm:mt-9 sm:block sm:text-[3.6vw]"
           style={{ fontFamily: "var(--font-switzer)", fontWeight: 400 }}
         >
           <span>{dict.hero.subtitlePrefix}</span>{" "}
@@ -247,7 +245,7 @@ function HeroContent({
         className="portrait-enter pointer-events-none relative order-2 w-[46vw] max-w-56 sm:absolute sm:right-[5vw] sm:top-[6%] sm:order-none sm:w-[36vw] sm:max-w-[520px] lg:top-[17%] lg:w-[30vw] lg:max-w-[340px] 2xl:top-[14%] 2xl:w-[36vw] 2xl:max-w-[520px]"
       />
 
-      <div className="relative order-3 mt-auto flex flex-col items-center gap-5 sm:items-start sm:gap-10 sm:mt-16">
+      <div className="relative order-3 flex flex-col items-center gap-5 sm:items-start sm:gap-10 sm:mt-16">
         <motion.div {...reveal(2)}>
           <a
             ref={ctaRef}
