@@ -234,7 +234,7 @@ export function SiteFrame({
                     layoutId="mobile-header-moon"
                     transition={HEADER_SWAP_TRANSITION}
                   >
-                    <MoonPhase className="h-5 w-5" />
+                    <MoonPhase className="h-5 w-5" label={dict.controls.theme} />
                   </motion.div>
                 ) : (
                   <motion.div
@@ -259,7 +259,10 @@ export function SiteFrame({
             <div className="hidden lg:flex">
               <ControlBar locale={locale} dict={dict} />
             </div>
-            <MoonPhase className="hidden h-5 w-5 lg:block" />
+            <MoonPhase
+              className="hidden h-5 w-5 lg:block"
+              label={dict.controls.theme}
+            />
             {/* Mobile: crossfade entre idioma (hero, no lugar do tema, que só
                 existe dentro do menu) e a lua migrada do centro (mesma
                 layoutId da cópia de lá, ver comentário acima). */}
@@ -281,7 +284,7 @@ export function SiteFrame({
                     layoutId="mobile-header-moon"
                     transition={HEADER_SWAP_TRANSITION}
                   >
-                    <MoonPhase className="h-5 w-5" />
+                    <MoonPhase className="h-5 w-5" label={dict.controls.theme} />
                   </motion.div>
                 )}
               </AnimatePresence>
@@ -317,7 +320,16 @@ export function SiteFrame({
         {children}
       </main>
 
-      <footer className="no-print flex flex-col flex-wrap items-center justify-center gap-4 border-t border-line px-6 py-14 text-center sm:flex-row sm:items-center sm:justify-between sm:text-left sm:px-12 xl:px-20">
+      {/* No mobile, na home, o rodapé de texto some: a foto que se distorce
+          do Contato (InteractiveGridImage) já fecha a página sozinha, e
+          repetir "feito à mão" mais o ano logo abaixo dela era só mais uma
+          linha depois do último gesto da seção. Some só aí (`isHome`,
+          calculado acima): nas páginas de case, sem uma imagem de fechamento
+          própria, o rodapé continua a referência de fim de página de
+          sempre, em qualquer largura. */}
+      <footer
+        className={`no-print ${isHome ? "hidden sm:flex" : "flex"} flex-col flex-wrap items-center justify-center gap-4 border-t border-line px-6 py-14 text-center sm:flex-row sm:items-center sm:justify-between sm:text-left sm:px-12 xl:px-20`}
+      >
         <p className="type-mono text-muted">{dict.footer.rights}</p>
         <p className="type-mono text-muted">
           {new Date().getFullYear()} · {profile.name}

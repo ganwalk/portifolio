@@ -97,15 +97,22 @@ function HeroContent({
       : dict.hero.availability.slice(breakIndex + breakMarker.length);
 
   // flex-1, e não h-full: altura percentual não resolve contra um pai que só
-  // ganha altura por flex-grow, e o justify-between viraria letra morta.
+  // ganha altura por flex-grow.
   //
   // No mobile o retrato deixa de ser posicionado em absoluto e passa a ser um
-  // terceiro item do flex (via order), entre o bloco de título e o de CTA: o
-  // justify-between do contêiner então reparte o espaço entre os três, e o
-  // retrato nunca mais sobrepõe o botão nem o subtítulo, porque participa da
-  // mesma conta de altura. No desktop ele volta a ser absoluto, à direita,
-  // porque lá sobra espaço ao lado da manchete e não precisa disputar altura
-  // com mais nada.
+  // terceiro item do flex (via order), entre o bloco de título e o de CTA. O
+  // respiro entre nome, subtítulo e retrato precisa ser o MESMO dos dois
+  // lados (o subtítulo fica equidistante do nome acima e do retrato abaixo),
+  // e um justify-between no contêiner não garante isso: ele reparte o espaço
+  // SOBRANDO entre os três itens, um valor que muda com a altura da tela,
+  // enquanto o respiro nome/subtítulo é a margem fixa de dentro do próprio
+  // bloco de título (mt-7, abaixo). Por isso o gap explícito aqui repete
+  // esse mesmo valor (gap-7) só até o retrato, e o bloco de CTA (que fecha a
+  // hero encostado embaixo) usa mt-auto pra absorver sozinho o espaço que
+  // sobra, sem also devolver aquele espaço aos dois gaps de cima. No desktop
+  // o retrato volta a ser absoluto (sai do fluxo do flex) e o justify-between
+  // original volta a reger só título e CTA, porque lá sobra espaço ao lado
+  // da manchete e não precisa disputar altura com mais nada.
   // pt-20 no mobile: o cabeçalho é uma barra só, sempre visível, até antes
   // de rolar (veja SiteFrame), então a hero precisa reservar espaço pra ela
   // por cima, senão o nome nasce colado na tarja. Antes eram duas linhas
@@ -114,7 +121,7 @@ function HeroContent({
   // a mesma altura), sobra menos vazio pra reservar, e o conteúdo da hero
   // sobe mais perto do topo disponível.
   return (
-    <div className="gutter relative flex flex-1 flex-col items-center justify-between pb-14 pt-20 sm:items-stretch sm:pt-32">
+    <div className="gutter relative flex flex-1 flex-col items-center gap-7 pb-14 pt-20 sm:items-stretch sm:justify-between sm:gap-0 sm:pt-32">
       {/* Dentro do HeroContent, e não solto no <section>: assim a cópia
           espelhada também recebe o canvas, e o nome deformado inverte junto
           com o resto em vez de sumir atrás do disco de tinta da lente. */}
@@ -226,7 +233,7 @@ function HeroContent({
         className="portrait-enter pointer-events-none relative order-2 w-[52vw] max-w-64 sm:absolute sm:right-[5vw] sm:top-[6%] sm:order-none sm:w-[36vw] sm:max-w-[520px] lg:top-[17%] lg:w-[30vw] lg:max-w-[340px] 2xl:top-[14%] 2xl:w-[36vw] 2xl:max-w-[520px]"
       />
 
-      <div className="relative order-3 flex flex-col items-center gap-8 sm:items-start sm:gap-10 sm:mt-16">
+      <div className="relative order-3 mt-auto flex flex-col items-center gap-8 sm:items-start sm:gap-10 sm:mt-16">
         <motion.div {...reveal(2)}>
           <a
             ref={ctaRef}

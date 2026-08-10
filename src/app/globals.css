@@ -209,18 +209,6 @@ body {
   }
 }
 
-/* Trilho horizontal do carrossel de projetos no mobile (ver MobileCaseList em
-   CasesGrid.tsx): a barra de rolagem nativa não combina com scroll-snap
-   pensado pra gesto de arrastar, não pra régua de scrollbar. */
-.no-scrollbar {
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-}
-
-.no-scrollbar::-webkit-scrollbar {
-  display: none;
-}
-
 /* Retrato animado da hero: folha de sprite 4x4, um quadro por vez, trocado por
    background-position. A proporção é a do tile gerado por
    scripts/build-frames.mjs, e as URLs vêm por variável porque o basePath do

@@ -57,7 +57,6 @@ export const en: Dictionary = {
     title: "Featured projects",
     interactiveExperiences: "Interactive experiences",
     scrollHint: "Scroll to navigate",
-    swipeHint: "Swipe to browse",
     viewCase: "View case",
     comingSoon: "Full case study coming soon",
     metricsDisclaimer:

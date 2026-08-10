@@ -25,12 +25,12 @@ import { useMediaQuery } from "@/lib/use-media-query";
 
 // Projetos em destaque como uma sequência amarrada ao scroll da própria
 // página, não um carrossel com botões e timer, A PARTIR DO sm: (640px). No
-// mobile (abaixo disso) é um carrossel horizontal por gesto, cartão a
-// cartão (ver MobileCaseList, mais abaixo): a versão presa ao scroll
-// empilhava mal em telas pequenas, o cabeçalho fixo cobria o topo do painel
-// ativo em certas posições de rolagem, e o trio de artistas (empilhado
-// dentro do próprio painel antes do lg:) competia com a pilha de fatias,
-// mostrando métricas de dois cases sobrepostas na mesma tela.
+// mobile (abaixo disso) é rolagem vertical comum, um painel quase de tela
+// cheia por projeto (ver MobileCaseList, mais abaixo): a pilha presa ao
+// scroll empilhava mal em telas pequenas (o cabeçalho fixo cobria o topo do
+// painel ativo em certas posições, e o trio de artistas competia com a pilha
+// de fatias), e um carrossel horizontal por gesto, tentado depois, lia fraco
+// e brigava com o eixo em que a página já rola.
 // `useMediaQuery` decide qual das duas versões monta (ver CasesGrid): a
 // versão presa ao scroll (`useScroll`, `SlidePanel` etc.) mora inteira em
 // `DesktopCasesGrid`, um componente à parte que só é montado quando
@@ -726,64 +726,67 @@ function ExpandedCase({
   );
 }
 
-// Versão mobile: carrossel horizontal por gesto (scroll-snap nativo, sem
-// biblioteca) some a partir do sm:. A pilha presa ao scroll (SlidePanel/
-// CaseColumn, abaixo) empilhava mal em tela pequena: o cabeçalho fixo cobria
-// o topo do painel ativo em certas posições de rolagem, e o trio de artistas
-// (empilhado dentro do próprio painel antes do lg:) competia com a pilha de
-// fatias, mostrando métricas de dois cases sobrepostas na mesma tela. Uma
-// lista vertical comum resolvia isso, mas virava só mais uma parede de
-// scroll igual a todo o resto da página; um carrossel liso, com cartões só
-// trocando de opacidade, ainda parecia raso perto da pilha animada do
-// desktop.
+// Versão mobile: rolagem vertical de verdade, some a partir do sm:. Já foi
+// pilha presa ao scroll (empilhava mal em tela pequena: o cabeçalho fixo
+// cobria o topo do painel ativo em certas posições, e o trio de artistas
+// competia com a pilha), depois carrossel horizontal por gesto (o arrastar
+// lateral lia fraco, e ainda ficava competindo com o resto da página, que
+// rola só na vertical). Esta versão volta pro eixo natural da página: cada
+// projeto é um painel quase de tela cheia (`MOBILE_CARD_HEIGHT`, o mesmo
+// "destaque total" de um projeto por vez que a pilha de desktop já dá, só
+// que sem prender o scroll), empilhados na ordem normal do documento, com
+// uma beirada do próximo já visível acima da dobra (o respiro entre cartões,
+// abaixo) como o único convite pra continuar. Rolar É a navegação, o mesmo
+// princípio do resto do site: sem seta, sem ponto de posição, sem contador
+// de fatia brigando com o scroll de verdade.
 //
-// Aqui cada cartão gira em 3D conforme passa pela tela (MobileCaseCard,
-// abaixo), um efeito coverflow real: `rotateY` num plano com `perspective`
-// própria, não `scale`. Uma primeira versão encolhia o cartão inativo
-// (scale-95), mas `transform: scale` só afeta a PINTURA, não o espaço
-// reservado no layout (aspect-[3/4] já fixa a caixa de cada cartão), então o
-// cartão encolhido sobrava com uma margem visível em volta, nos quatro
-// lados: o topo e a base da "dobra" (o pedaço do próximo cartão que espia na
-// borda) ganhavam um respiro vertical que os cartões cheios não tinham,
-// quebrando o alinhamento da fileira. `rotateY` não tem esse problema: gira
-// em profundidade, não encolhe a caixa, os quatro cantos continuam onde
-// sempre estiveram. O giro (e a mídia por trás, que desliza um pouco em
-// contrassenso, o mesmo paralaxe que já existe na pilha de desktop) é
-// contínuo, preso ao PRÓPRIO progresso do cartão dentro do trilho
-// (`useScroll` com `target` + `container`, não um estado discreto): o
-// cartão nasce inclinado e apagado entrando pela direita, endireita e
-// acende ao passar pelo centro, e volta a inclinar saindo pela esquerda,
-// acompanhando o dedo quadro a quadro, não só quando o snap termina. Some
-// pra quem pede menos movimento no sistema (reduceMotion): aí os cartões
-// ficam sempre chapados, só a rolagem em si continua.
+// Cada cartão ganha um pouco de profundidade PRÓPRIA conforme cruza o
+// centro da tela (`useScroll` com `target` no próprio cartão, sem container:
+// mede contra a janela, que é quem de fato rola aqui): a mídia sobe um tanto
+// devagar em contrassenso (o mesmo paralaxe da versão de desktop, ver mediaY
+// em CaseColumn) e o cartão inteiro ganha uma leve escala, maior perto do
+// centro. A amplitude é pequena de propósito: o produto continua em
+// destaque o tempo todo, o movimento é textura, não o assunto. O texto
+// entra com o `Reveal` padrão do site (o mesmo de About/Playground), não
+// mais uma máscara bespoke por linha: mobile não tem um "progresso da fatia"
+// compartilhado pra reger isso (cada cartão rola no seu próprio tempo), e o
+// Reveal já é a linguagem de entrada do resto da home.
 //
-// Scroll-snap ancora cada cartão pela borda ESQUERDA (snap-start, não
-// snap-center): scroll-padding-left no trilho, do mesmo tamanho do gutter,
-// faz cada cartão assentar exatamente onde o primeiro assenta, sempre à
-// mesma distância da borda da tela. snap-center foi a primeira tentativa,
-// mas centralizar cada cartão faz a MATEMÁTICA da centralização variar com a
-// posição (o primeiro cartão nasce colado à esquerda, sem o que centralizar
-// contra; os do meio ganham espia simétrica dos dois vizinhos), e o ritmo de
-// arrastar de um cartão pro outro ficava inconsistente. Arrastar É a
-// navegação, sem seta, sem autoplay, o mesmo princípio de "rolar é o
-// controle" que já rege a versão de desktop, só que no eixo horizontal. Os
-// pontos abaixo do trilho leem a posição (não navegam, mesmo padrão não
-// clicável dos pontos do desktop), acesos via IntersectionObserver no
-// próprio trilho: cada cartão cruza 60% de visibilidade dentro do trilho
-// (root próprio, não a janela, senão um cartão fora da faixa mas dentro da
-// altura da viewport contaria como visível) vira o ativo. Sem seletor de
-// fatia, sem selo que segue o cursor (não existe hover de verdade em touch):
-// abre a página do case direto, sem o overlay expandido em FLIP que a
-// versão de desktop usa.
+// A mídia de cada cartão só monta perto da viewport (`useNearViewport`,
+// abaixo): com vídeo mudo em loop em cada capa, deixar os seis
+// simultaneamente montados tocaria todos de uma vez, gastando rede e
+// bateria à toa num aparelho que só vê um por vez. Sem seletor de fatia, sem
+// selo que segue o cursor (não existe hover de verdade em touch): abre a
+// página do case direto, sem o overlay expandido em FLIP que a versão de
+// desktop usa.
 
-/** Amplitude do giro 3D, em graus, nas pontas do percurso do cartão (0 no
- *  centro): o cartão INTEIRO gira, então mesmo num ângulo generoso o texto
- *  por cima gira junto com a mídia, sem embaralhar nada, só empurrando a
- *  perspectiva. */
-const MOBILE_TILT_DEG = 42;
-/** Recuo em Z, em px, nas pontas do percurso: o cartão ativo fica mais perto
- *  da tela que os vizinhos, reforçando a profundidade que o giro já sugere. */
-const MOBILE_TILT_DEPTH = 90;
+/** Altura de cada painel: perto da tela cheia (o "destaque total" pedido),
+ *  mas curta o bastante pra deixar uma beirada do próximo cartão visível
+ *  logo acima da dobra, o convite silencioso pra continuar rolando. */
+const MOBILE_CARD_HEIGHT = "78svh";
+
+/** true assim que o elemento entra numa margem generosa da viewport (25% de
+ *  antecedência): controla o mount da mídia de cada cartão (ver MediaView),
+ *  pra vídeo autoplay não ligar todos de uma vez fora de tela. Uma vez
+ *  perto, fica true pra sempre: não faz sentido desmontar e recarregar a
+ *  mídia de um cartão que já foi visitado. */
+function useNearViewport<T extends HTMLElement>(ref: React.RefObject<T | null>) {
+  const [isNear, setIsNear] = useState(false);
+  useEffect(() => {
+    if (isNear) return;
+    const el = ref.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) setIsNear(true);
+      },
+      { rootMargin: "25% 0px" },
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [isNear, ref]);
+  return isNear;
+}
 
 function MobileCaseCard({
   caseStudy,
@@ -791,7 +794,6 @@ function MobileCaseCard({
   totalCases,
   locale,
   dict,
-  trackRef,
   reduceMotion,
 }: {
   caseStudy: CaseStudy;
@@ -799,91 +801,58 @@ function MobileCaseCard({
   totalCases: number;
   locale: Locale;
   dict: Dictionary;
-  trackRef: React.RefObject<HTMLDivElement | null>;
   reduceMotion: boolean;
 }) {
   const cardRef = useRef<HTMLDivElement>(null);
-  // offset "start end" → "end start": 0 no instante em que o cartão entra
-  // pela borda direita do trilho, 1 quando termina de sair pela esquerda.
-  // 0.5 cai perto do centro, o mesmo instante em que o IntersectionObserver
-  // abaixo (em MobileCaseList) marca este cartão como ativo.
-  const { scrollXProgress: rawProgress } = useScroll({
+  const isNear = useNearViewport(cardRef);
+  // offset "start end" → "end start": 0 quando o cartão entra pela base da
+  // tela, 1 quando termina de sair por cima. 0.5 cai no centro, o pico da
+  // escala e do paralaxe abaixo.
+  const { scrollYProgress: rawProgress } = useScroll({
     target: cardRef,
-    container: trackRef,
-    axis: "x",
     offset: ["start end", "end start"],
   });
-  // Suavizado por mola, não o valor bruto do dedo: o mesmo raciocínio da
-  // pilha de desktop (ver o comentário no topo do arquivo sobre a mola de
-  // scroll ali), só que sub amortecida o bastante pra dar um leve
-  // "assentamento" físico ao giro sem ficar boiando atrás do gesto.
-  const scrollXProgress = useSpring(rawProgress, {
-    stiffness: 300,
-    damping: 30,
-    mass: 0.5,
+  const scrollYProgress = useSpring(rawProgress, {
+    stiffness: 260,
+    damping: 32,
+    mass: 0.4,
   });
-  const rotateY = useTransform(
-    scrollXProgress,
-    [0, 0.5, 1],
-    [MOBILE_TILT_DEG, 0, -MOBILE_TILT_DEG],
-  );
-  const z = useTransform(
-    scrollXProgress,
-    [0, 0.5, 1],
-    [-MOBILE_TILT_DEPTH, 0, -MOBILE_TILT_DEPTH],
-  );
-  const opacity = useTransform(scrollXProgress, [0, 0.5, 1], [0.35, 1, 0.35]);
-  // Mídia desliza em contrassenso, o mesmo paralaxe que já existe no scroll
-  // vertical da versão de desktop (ver mediaY em CaseColumn): scale-125 no
-  // wrapper cobre a folga que o deslocamento abriria nas bordas.
-  const mediaX = useTransform(scrollXProgress, [0, 0.5, 1], ["-10%", "0%", "10%"]);
-  // O gradiente escuro por cima da mídia gira junto com o resto do cartão
-  // por herança (é filho do MESMO motion.div que tem o rotateY, sem
-  // transform próprio: confirmado que o retângulo dele acompanha o giro do
-  // pai, pixel a pixel). O que faltava não era o giro em si, e sim ele
-  // responder a ele: um gradiente escuro tem pouca textura própria, então
-  // olho nu não nota o giro em cima de uma superfície quase lisa, e a
-  // escuridão parecia "grudada" ali, alheia ao resto se inclinando. Escala
-  // a própria opacidade do gradiente pelo mesmo progresso: mais escuro nas
-  // pontas (cartão de perfil, mais raso), mais claro no centro (cartão de
-  // frente, mídia em foco máximo), reforçando visualmente que a
-  // profundidade cresce junto com o giro, não só a opacidade uniforme do
-  // cartão inteiro (que já existia, mas não bastava pra essa leitura).
-  const gradientOpacity = useTransform(scrollXProgress, [0, 0.5, 1], [1, 0.6, 1]);
+  const progress = reduceMotion ? rawProgress : scrollYProgress;
+  const scale = useTransform(progress, [0, 0.5, 1], [0.94, 1, 0.94]);
+  // Contrassenso, o mesmo paralaxe da versão de desktop (mediaY em
+  // CaseColumn): scale-125 no wrapper cobre a folga que o deslocamento
+  // abriria nas bordas.
+  const mediaY = useTransform(progress, [0, 1], ["-8%", "8%"]);
   const metric = caseStudy.metrics[0];
 
   return (
-    <div
-      ref={cardRef}
-      data-mobile-case-index={index}
-      className="relative aspect-[3/4] w-[82vw] shrink-0 snap-start overflow-hidden bg-black text-white"
-      style={reduceMotion ? undefined : { perspective: 800 }}
-    >
+    <div ref={cardRef} style={{ height: MOBILE_CARD_HEIGHT }} className="relative w-full">
       <motion.div
-        className="absolute inset-0"
-        style={reduceMotion ? undefined : { rotateY, z, opacity }}
+        style={reduceMotion ? undefined : { scale }}
+        className="absolute inset-0 overflow-hidden bg-black text-white"
       >
         <Link
           href={`/${locale}/work/${caseStudy.slug}/`}
           className="absolute inset-0 block"
         >
           <motion.div
-            className="absolute inset-0 scale-150"
-            style={reduceMotion ? undefined : { x: mediaX }}
+            className="absolute inset-0 scale-125"
+            style={reduceMotion ? undefined : { y: mediaY }}
           >
-            <MediaView
-              media={caseStudy.cover}
-              locale={locale}
-              className="absolute inset-0 h-full w-full object-cover"
-            />
+            {isNear ? (
+              <MediaView
+                media={caseStudy.cover}
+                locale={locale}
+                className="absolute inset-0 h-full w-full object-cover"
+              />
+            ) : (
+              <div className="absolute inset-0 bg-surface" />
+            )}
           </motion.div>
-          <motion.div
-            className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/10 to-black/45"
-            style={reduceMotion ? undefined : { opacity: gradientOpacity }}
-          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/10 to-black/45" />
 
-          <div className="absolute inset-0 flex flex-col justify-between p-6">
-            <div className="flex items-start justify-between gap-4">
+          <div className="gutter absolute inset-0 flex flex-col justify-between py-10">
+            <Reveal className="flex items-start justify-between gap-4">
               <p className="type-mono text-white/70">
                 {pad(index + 1)} / {pad(totalCases)} · {caseStudy.year}
               </p>
@@ -895,9 +864,9 @@ function MobileCaseCard({
                   {metric.label[locale]}
                 </span>
               </p>
-            </div>
+            </Reveal>
 
-            <div>
+            <Reveal delay={0.08}>
               <h3 className="type-display type-inktrap pt-[0.16em] text-[11vw] leading-[0.9]">
                 {caseStudy.title[locale]}
               </h3>
@@ -908,7 +877,7 @@ function MobileCaseCard({
                 {caseStudy.comingSoon ? dict.cases.comingSoon : dict.cases.viewCase}
                 <span aria-hidden>→</span>
               </span>
-            </div>
+            </Reveal>
           </div>
         </Link>
       </motion.div>
@@ -917,68 +886,21 @@ function MobileCaseCard({
 }
 
 function MobileCaseList({ locale, dict }: { locale: Locale; dict: Dictionary }) {
-  const trackRef = useRef<HTMLDivElement>(null);
-  const [activeIndex, setActiveIndex] = useState(0);
   const reduceMotion = useReducedMotion();
 
-  useEffect(() => {
-    const track = trackRef.current;
-    if (!track) return;
-    const cards = Array.from(
-      track.querySelectorAll<HTMLElement>("[data-mobile-case-index]"),
-    );
-    const observer = new IntersectionObserver(
-      (entries) => {
-        for (const entry of entries) {
-          if (!entry.isIntersecting) continue;
-          const index = Number((entry.target as HTMLElement).dataset.mobileCaseIndex);
-          setActiveIndex(index);
-        }
-      },
-      { root: track, threshold: 0.6 },
-    );
-    for (const card of cards) observer.observe(card);
-    return () => observer.disconnect();
-  }, []);
-
   return (
-    <div className="py-10 sm:hidden">
-      <Reveal>
-        <p className="gutter type-mono mb-6 text-muted">{dict.cases.swipeHint}</p>
-      </Reveal>
-
-      <div
-        ref={trackRef}
-        className="no-scrollbar flex snap-x snap-mandatory gap-4 overflow-x-auto px-6 pb-2"
-        style={{ scrollPaddingLeft: "1.5rem" }}
-      >
-        {cases.map((caseStudy, index) => (
-          <MobileCaseCard
-            key={caseStudy.slug}
-            caseStudy={caseStudy}
-            index={index}
-            totalCases={cases.length}
-            locale={locale}
-            dict={dict}
-            trackRef={trackRef}
-            reduceMotion={!!reduceMotion}
-          />
-        ))}
-      </div>
-
-      {/* Leitura de posição, não navegação: mesmo padrão não clicável dos
-          pontos do desktop (ver CasesGrid), só que contando cartões em vez
-          de fatias. */}
-      <div className="mt-6 flex items-center justify-center gap-2">
-        {cases.map((caseStudy, index) => (
-          <span
-            key={caseStudy.slug}
-            className={`h-1.5 w-1.5 rounded-full transition-colors ${
-              index === activeIndex ? "bg-foreground" : "bg-line"
-            }`}
-          />
-        ))}
-      </div>
+    <div className="section-y flex flex-col gap-8 sm:hidden">
+      {cases.map((caseStudy, index) => (
+        <MobileCaseCard
+          key={caseStudy.slug}
+          caseStudy={caseStudy}
+          index={index}
+          totalCases={cases.length}
+          locale={locale}
+          dict={dict}
+          reduceMotion={!!reduceMotion}
+        />
+      ))}
     </div>
   );
 }

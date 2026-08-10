@@ -158,6 +158,16 @@ degraus (1.5rem, 3rem, 5rem) e o ritmo vertical em outros três (7rem, 9rem,
 O Modo Boring não usa nenhuma das duas: currículo é documento, tem densidade
 própria e margem de leitura, não de vitrine.
 
+**No mobile, a home fecha na foto do Contato, não no rodapé.** A grade
+interativa do Contato (`InteractiveGridImage`, a foto que se distorce ao
+toque) já é um fechamento de página por si só; o rodapé de texto
+("feito à mão" + ano, ver `SiteFrame`) e a linha de disponibilidade dentro
+do próprio Contato (repetida da hero) somem só nessa combinação (`isHome` e
+abaixo do `sm:`), porque numa tela curta as duas viravam só mais linha
+depois do último gesto da seção. Nas páginas de case, sem uma imagem de
+fechamento própria, o rodapé continua a referência de fim de página de
+sempre, em qualquer largura.
+
 ## Acessibilidade
 
 Atalho para o conteúdo, foco visível, `aria-pressed` nos interruptores,
@@ -194,6 +204,17 @@ decorativa. O que dá vida é movimento e tipografia, não ornamento.
   barra (`100svh` menos `3.5rem`) porque o cabeçalho é sticky e ocupa espaço
   no fluxo. `.texture-noise-animate` sobre a hero inteira dá o grão de
   filme flutuando, sem vinheta nem nenhum outro efeito por cima.
+
+  **No mobile, o subtítulo fica equidistante entre o nome e o retrato.** O
+  retrato deixa de ser absoluto e vira um item do próprio flex (via `order`,
+  entre o bloco de título e o de CTA, ver acima), e o respiro nome/subtítulo
+  (margem fixa dentro do bloco de título) e o respiro subtítulo/retrato
+  (gap do contêiner) usam o MESMO valor (`gap-7`/`mt-7`): um `justify-between`
+  sozinho não garantia isso, porque reparte só o espaço que sobra depois de
+  reservar os dois, um valor que muda com a altura da tela, não uma margem
+  fixa igual dos dois lados. O bloco de CTA, no fim, usa `mt-auto` pra
+  absorver esse espaço sobrando sozinho, sem devolver nada aos dois gaps de
+  cima.
 
   A opacidade do grão sai por `--noise-opacity`, e na hero ela é o dobro do
   resto do site (0.10 contra 0.05). Nos cases o ruído pousa em cima de imagem,
@@ -450,8 +471,30 @@ decorativa. O que dá vida é movimento e tipografia, não ornamento.
   de fatia competindo com ela: o rodapé da seção tem só um lembrete de que
   rolar é a navegação ("role para navegar") e os pontos de posição
   (`gap-2`), que animam a troca em vez de só saltar de um pro outro.
+
+  **No mobile (abaixo do sm:) a seção não prende o scroll.** Já foi pilha
+  presa ao scroll (empilhava mal em tela pequena: o cabeçalho fixo cobria o
+  topo do painel ativo em certas posições, e o trio de artistas competia com
+  a pilha) e depois um carrossel horizontal por gesto (o arrastar lateral
+  lia fraco, e ainda brigava com o eixo em que o resto da página rola). A
+  versão atual (`MobileCaseList`/`MobileCaseCard`, em `CasesGrid.tsx`) volta
+  pro eixo vertical natural: cada projeto é um painel de quase tela cheia
+  (`78svh`, o "destaque total" que ainda deixa uma beirada do próximo
+  cartão visível acima da dobra, convite silencioso pra continuar rolando),
+  empilhados na ordem normal do documento. Cada cartão ganha uma leve escala
+  e paralaxe própria conforme cruza o centro da tela (`useScroll` medindo
+  contra a janela, sem `container`, já que quem rola aqui é a página de
+  verdade), e o texto entra pelo `Reveal` padrão do site, não mais uma
+  máscara bespoke por linha: sem um progresso de fatia compartilhado
+  regendo tudo, o `Reveal` já é a linguagem de entrada do resto da home. A
+  mídia de cada cartão só monta perto da viewport (`useNearViewport`): com
+  vídeo mudo em loop em cada capa, montar os seis de uma vez tocaria todos
+  ao mesmo tempo fora de tela.
 - **Lua de fases** (`MoonPhase`): no canto direito do cabeçalho, percorre as
-  fases da lua conforme o scroll, três lunações por página.
+  fases da lua conforme o scroll, três lunações por página. Também é o
+  seletor de tema: um clique alterna claro/escuro (não existe mais um botão
+  ☀/☾ à parte, ver `ControlBar`), sem relação nenhuma com o ciclo de fases,
+  que continua regido só pelo scroll.
 - **Menu overlay** (`SiteMenu`): navegação de tela cheia com tipografia gigante
   (Whyte Inktrap, via `.type-inktrap` somada ao `.type-display` que já dava
   tamanho e caixa alta) e preview de imagem no hover de cada link. Renderiza
