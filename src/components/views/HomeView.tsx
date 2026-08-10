@@ -31,8 +31,8 @@ export function HomeView({
     <>
       <Hero dict={dict} />
       <CasesGrid locale={locale} dict={dict} />
-      <Brands locale={locale} dict={dict} />
       <About locale={locale} dict={dict} />
+      <Brands locale={locale} dict={dict} />
       <Playground locale={locale} dict={dict} />
       <Contact dict={dict} />
     </>

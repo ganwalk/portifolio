@@ -181,7 +181,7 @@ export function SiteFrame({
                 espaço no meio da transição (os dois têm larguras bem
                 diferentes). Duração e curva batem com a da lua
                 (HEADER_SWAP_TRANSITION): as duas coisas se movem juntas. */}
-            <div className="relative lg:hidden">
+            <div className="relative flex items-center lg:hidden">
               <AnimatePresence mode="popLayout" initial={false}>
                 {heroMini ? (
                   <motion.div
@@ -225,8 +225,20 @@ export function SiteFrame({
                 saída de uma e a entrada da outra como o MESMO elemento
                 mudando de lugar, e anima a migração em vez de cortar
                 direto. A assinatura, sem layoutId (não migra, só aparece/
-                desaparece), crossfade simples no mesmo grupo. */}
-            <div className="relative lg:hidden">
+                desaparece), crossfade simples no mesmo grupo.
+
+                flex items-center aqui (e nos outros dois wrappers deste
+                crossfade mobile, BoringToggle/menu e idioma/lua): a lua é
+                um <button> desde que virou o seletor de tema (ver
+                MoonPhase.tsx), e <button> não ganha o mesmo display:block
+                que o preflight do Tailwind já dá a <svg>. Sem isso, o
+                navegador tratava o botão como conteúdo inline dentro de um
+                <div> comum, e reservava a altura de uma LINHA de texto
+                inteira ao redor dele (a "tira" invisível do line-height
+                herdado), maior que os 20px do próprio botão: a lua
+                acabava ancorada no topo dessa tira, alguns pixels mais
+                baixo que o resto da barra, em vez de centralizada. */}
+            <div className="relative flex items-center lg:hidden">
               <AnimatePresence mode="popLayout" initial={false}>
                 {heroMini ? (
                   <motion.div
@@ -266,7 +278,7 @@ export function SiteFrame({
             {/* Mobile: crossfade entre idioma (hero, no lugar do tema, que só
                 existe dentro do menu) e a lua migrada do centro (mesma
                 layoutId da cópia de lá, ver comentário acima). */}
-            <div className="relative lg:hidden">
+            <div className="relative flex items-center lg:hidden">
               <AnimatePresence mode="popLayout" initial={false}>
                 {heroMini ? (
                   <motion.div

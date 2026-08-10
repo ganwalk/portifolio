@@ -25,7 +25,7 @@ export const en: Dictionary = {
     },
   },
   controls: {
-    boringOn: ["Get straight to the point", "See my résumé"],
+    boringOn: ["Get to the point!", "See my résumé"],
     boringOff: "Surprise me",
     boringHint: "For those who like it straight to the point ;)",
     boringTooltip: "i HATE animations!",

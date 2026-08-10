@@ -150,18 +150,24 @@ function HeroContent({
           de DOM, então nome e subtítulo passam a ser dois itens diretos do
           flex, cada um com seu próprio respiro equidistante (ver comentário
           acima). sm:block desfaz isso no desktop: volta a ser uma caixa só,
-          e nome+subtítulo voltam a andar juntos, um bloco à esquerda. A
-          propriedade herdada (text-align, aqui) continua chegando aos dois
-          do mesmo jeito com `contents`: só a CAIXA do wrapper deixa de
-          existir, a herança de CSS não olha pra árvore de layout. */}
-      <div className="contents sm:relative sm:order-1 sm:block sm:text-left">
+          e nome+subtítulo voltam a andar juntos, um bloco à esquerda.
+          text-center/sm:text-left mora no PRÓPRIO nome e no PRÓPRIO
+          subtítulo agora, não aqui: depender de herança through um wrapper
+          `contents` (que ainda funciona, a herança de CSS não olha pra
+          árvore de layout) foi o que deixou o `sm:text-left` faltando só no
+          <h1> passar despercebido, centralizando o nome por cima do
+          retrato em qualquer largura de tela, inclusive no desktop. Melhor
+          cada filho já nascer com a própria regra completa (ambas as
+          faixas) do que herdar de um ancestral que nem sempre está por
+          perto pra lembrar. */}
+      <div className="contents sm:relative sm:order-1 sm:block">
         {/* Transparente, não escondido, quando o canvas assume o desenho: o
             <h1> continua sendo o que o leitor de tela lê e o que o buscador
             indexa, e continua ocupando o mesmo espaço, que é justamente de
             onde saem as medidas que o canvas usa pra desenhar. */}
         <h1
           ref={titleRef}
-          className={`type-display type-inktrap order-1 text-center text-[14.5vw] leading-[0.84] tracking-[0.015em] sm:text-[8.2vw] lg:text-[11vw] 2xl:text-[10vw] ${
+          className={`type-display type-inktrap order-1 text-center text-[14.5vw] leading-[0.84] tracking-[0.015em] sm:text-left sm:text-[8.2vw] lg:text-[11vw] 2xl:text-[10vw] ${
             titleOnCanvas ? "opacity-0" : ""
           }`}
         >
@@ -219,7 +225,7 @@ function HeroContent({
             Tailwind de propósito), então só style sobrescreve. */}
         <motion.p
           {...reveal(1)}
-          className="type-serif-display order-1 flex flex-col items-center text-[6.5vw] italic text-muted sm:mt-9 sm:block sm:text-[3.6vw]"
+          className="type-serif-display order-1 flex flex-col items-center text-center text-[6.5vw] italic text-muted sm:mt-9 sm:block sm:text-left sm:text-[3.6vw]"
           style={{ fontFamily: "var(--font-switzer)", fontWeight: 400 }}
         >
           <span>{dict.hero.subtitlePrefix}</span>{" "}
