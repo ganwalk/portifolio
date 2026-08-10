@@ -112,6 +112,12 @@ lê a preferência do navegador e redireciona para o idioma certo, com links vis
 para quem estiver sem JavaScript. Cada idioma gera HTML próprio com o atributo
 `lang` correto, e por isso o root layout mora dentro de `[locale]`.
 
+Trocar de idioma no meio da leitura não deve devolver o visitante ao topo:
+é reler o MESMO lugar, não ir pra outro. `LocaleSwitcher` navega pra uma
+rota de verdade (outro prefixo de locale), e o `<Link>` do Next reseta a
+rolagem por padrão a cada navegação; `scroll={false}` nesse Link desliga
+esse reset, preservando a posição.
+
 ## Tipografia
 
 | Papel                    | Fonte              | Onde aparece                                  |
@@ -407,7 +413,25 @@ decorativa. O que dá vida é movimento e tipografia, não ornamento.
   Clicar no projeto em cena expande pra tela cheia com os dados completos
   do case (mesmo FLIP manual descrito abaixo em "Menu overlay" e "Transição
   de modo": o overlay nasce encolhido sobre o retângulo clicado e anima até
-  a identidade).
+  a identidade). Um leve `whileTap` (escala 0.98) no próprio cartão clicável
+  responde ao toque no instante do gesto, não só quando o overlay termina
+  de nascer; o mesmo cartão no mobile (`MobileCaseCard`, `MotionLink` =
+  `motion.create(Link)`) ganha o mesmo feedback.
+
+  **A página de destino (`/work/[slug]`) usa o MESMO tratamento visual do
+  painel expandido, não um bloco de texto plano.** Antes disso, quem clicava
+  num projeto via o FLIP animado da home terminar num fim de linha reto:
+  texto estático, sem capa em tela cheia, sem movimento nenhum, o corte
+  entre o clique animado e a página real de fato incomodava. `CaseDetail`
+  (`src/components/sections/CaseDetail.tsx`, client component: framer-motion
+  e `Reveal` exigem isso, `page.tsx` continua Server Component e só delega
+  o corpo pra cá) reaproveita a MESMA estrutura de `ExpandedCase` — capa em
+  `h-svh` com zoom lento e contínuo, gradiente, título grande por cima —
+  como o topo de verdade da página, e o resto do corpo (declaração,
+  métricas, tags, grade de apoio) entra com `Reveal` conforme a rolagem
+  chega lá, a mesma linguagem de entrada do resto do site. `<h1>` migrou do
+  texto da declaração (que ficava pesado pra esse papel) pro TÍTULO do
+  case, alinhado ao que já ia no `<title>` da aba (`generateMetadata`).
 
   **Fatia nem sempre é um case só.** Cases adjacentes que compartilham
   `group` no dado (o trio Ganwalk/Dezert Horse/Pink Opala, hoje) sempre
@@ -562,15 +586,17 @@ decorativa. O que dá vida é movimento e tipografia, não ornamento.
   Virar um `<button>` (pra ser clicável) trouxe um efeito colateral: ao
   contrário de `<svg>`, que o preflight do Tailwind já reseta pra
   `display: block`, `<button>` continua com o `display: inline-block` padrão
-  do navegador. Nos três wrappers do crossfade mobile do cabeçalho
-  (`SiteFrame.tsx`, os `<div>` que trocam Modo Boring/menu, lua/assinatura
-  e idioma/lua), esse botão de 20px virava conteúdo INLINE dentro de um
-  `<div>` comum, e o navegador reservava ao redor dele a altura de uma
-  linha de texto inteira (a "tira" do line-height herdado, maior que os
-  20px do botão): a lua ficava ancorada no topo dessa tira, alguns pixels
-  mais baixo que o resto da barra, em vez de centralizada. `flex
-  items-center` nesses três wrappers resolve de raiz (o filho vira item de
-  flex, a tira de line-height nunca entra na conta).
+  do navegador. Precisou de DOIS níveis de `flex items-center` pra
+  resolver, não um só: o primeiro, nos três wrappers do crossfade mobile do
+  cabeçalho (`SiteFrame.tsx`, os `<div>` que trocam Modo Boring/menu,
+  lua/assinatura e idioma/lua), tira a CAIXA desses wrappers da conta, mas
+  o filho direto de cada um é o `motion.div` do próprio `AnimatePresence`
+  (com `layoutId`, na cópia da lua), que também é um `<div>` comum
+  envolvendo o botão inline — a mesma "tira" de line-height reaparecia um
+  nível mais fundo, e a lua continuava ancorada alguns pixels mais baixo
+  que o resto da barra. O segundo `flex items-center` foi direto NESSE
+  `motion.div` (via `className`, nas duas cópias com `layoutId=
+  "mobile-header-moon"`), o nível que de fato encosta no botão.
 - **Menu overlay** (`SiteMenu`): navegação de tela cheia com tipografia gigante
   (Whyte Inktrap, via `.type-inktrap` somada ao `.type-display` que já dava
   tamanho e caixa alta) e preview de imagem no hover de cada link. Renderiza
@@ -680,6 +706,21 @@ teclado, barra e o "encontrar na página" continuam do jeito que sempre foram.
 O toque fica de fora do amortecimento de propósito (`syncTouch: false`, o
 padrão da biblioteca): o momentum do próprio sistema em touch já é bom, e
 sincronizar com ele é o ponto mais instável da biblioteca em iOS mais antigo.
+
+**Rolagem PROGRAMÁTICA (não gerada por gesto do visitante) precisa passar
+pela própria Lenis, não por um `window.scrollTo` cru.** A assinatura no
+cabeçalho (`SiteFrame.tsx`), clicada já na home, precisa voltar ao topo da
+página (um `<Link>` pra rota atual não navega nem reseta scroll sozinho).
+Um `window.scrollTo({top:0, behavior:"smooth"})` direto ali não fazia
+NADA visível: Lenis intercepta o scroll de verdade e, no próximo quadro do
+seu próprio `raf`, reafirma a posição que ELA acha que é a certa,
+descartando o pulo que acabou de acontecer por fora. A instância vive num
+módulo (`activeLenis`, em `SmoothScroll.tsx`, atualizada nos mesmos
+efeitos que já a criam/destroem) e exporta `scrollToTop()`: chama
+`lenis.scrollTo(0, ...)` quando ela existe, cai pro `window.scrollTo` cru
+(sem suavização) quando não (Modo Boring, `prefers-reduced-motion`, ou
+antes do efeito rodar) — coerente, já que Lenis desligada ali significa
+que menos movimento foi pedido.
 
 **Elemento com scroll próprio não fica de fora, ganha a própria instância.**
 O overlay de case em tela cheia de `CasesGrid` (`ExpandedCase`) trava o

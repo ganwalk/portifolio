@@ -23,6 +23,11 @@ import type { Locale } from "@/i18n/config";
 import type { Dictionary } from "@/i18n/dictionaries";
 import { useMediaQuery } from "@/lib/use-media-query";
 
+// motion.create, não motion(Link): a API atual do framer-motion (v11+) pra
+// dar superpoderes de motion (whileTap, aqui) a um componente que já
+// encaminha ref, sem perder o comportamento de navegação do próprio Link.
+const MotionLink = motion.create(Link);
+
 // Projetos em destaque como uma sequência amarrada ao scroll da própria
 // página, não um carrossel com botões e timer, A PARTIR DO sm: (640px). No
 // mobile (abaixo disso) é rolagem vertical comum, um painel quase de tela
@@ -445,6 +450,10 @@ function CaseColumn({
       onClick={(event) =>
         isActive && onExpand(caseStudy, event.currentTarget.getBoundingClientRect())
       }
+      // Feedback tátil no clique: um leve encolhimento antes do FLIP assumir
+      // (ver ExpandedCase), pra o gesto já responder no instante do toque,
+      // não só quando o overlay termina de nascer.
+      whileTap={isActive ? { scale: 0.98 } : undefined}
       tabIndex={isActive ? 0 : -1}
       aria-hidden={!isActive}
       aria-label={caseStudy.title[locale]}
@@ -841,8 +850,9 @@ function MobileCaseCard({
       ref={cardRef}
       className="sticky top-0 h-svh w-full overflow-hidden bg-black text-white"
     >
-      <Link
+      <MotionLink
         href={`/${locale}/work/${caseStudy.slug}/`}
+        whileTap={{ scale: 0.98 }}
         className="absolute inset-0 block"
       >
         <motion.div
@@ -900,7 +910,7 @@ function MobileCaseCard({
             </span>
           </Reveal>
         </div>
-      </Link>
+      </MotionLink>
     </div>
   );
 }

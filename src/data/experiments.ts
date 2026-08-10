@@ -187,17 +187,21 @@ export const experiments: Experiment[] = [
       zh: "音频",
     },
     // Sugestão de mídia real: vídeo do arranjo no DAW rodando, ou player de
-    // áudio com uma faixa autoral.
+    // áudio com uma faixa autoral. Herdou o placeholder que antes morava no
+    // case do Ganwalk (estúdio de gravação): o Ganwalk trocou pra um
+    // placeholder de tela/código, mais afinado com a "identidade visual que
+    // ganha vida" do próprio texto do case, e este estúdio combina melhor
+    // aqui, com produção musical de verdade.
     media: {
       kind: "video",
-      src: "https://videos.pexels.com/video-files/3116506/3116506-hd_1920_1080_25fps.mp4",
+      src: "https://videos.pexels.com/video-files/7586165/7586165-hd_1920_1080_24fps.mp4",
       poster:
-        "https://images.pexels.com/photos/164938/pexels-photo-164938.jpeg?auto=compress&cs=tinysrgb&w=800",
+        "https://images.pexels.com/videos/7586165/adult-analogue-art-audio-engineer-7586165.jpeg?auto=compress&w=1280",
       alt: {
-        pt: "Vinil tocando em uma vitrola, placeholder da produção musical",
-        en: "Vinyl playing on a turntable, music production placeholder",
-        es: "Vinilo sonando en un tocadiscos, placeholder de producción musical",
-        zh: "唱机上播放的黑胶唱片，音乐制作的占位图片",
+        pt: "Estúdio de gravação em luz âmbar, mesa de mixagem em primeiro plano",
+        en: "Recording studio in amber light, mixing desk in the foreground",
+        es: "Estudio de grabación con luz ámbar, mesa de mezclas en primer plano",
+        zh: "琥珀色灯光下的录音棚，前景是调音台",
       },
     },
   },
