@@ -843,6 +843,20 @@ function MobileCaseCard({
   // deslocamento interno, dentro do overflow-hidden abaixo, não abre borda
   // nenhuma pro fundo da página.
   const mediaY = useTransform(progress, [0, 1], ["-8%", "8%"]);
+  // A métrica entra por este `progress`, não pelo `Reveal` padrão do
+  // título logo abaixo: o `Reveal` nasce com uma margem negativa de 8% no
+  // pé da viewport (pensada pra conteúdo comum de página, que cruza a
+  // borda de baixo enquanto ainda está "chegando"), mas a linha da métrica
+  // aqui não cruza nada, ela DESCANSA perto do pé do cartão (`pb-10`) o
+  // tempo todo que ele fica travado — cai bem dentro dessa margem excluída
+  // e o `whileInView` nunca disparava. `progress` já mede a entrada do
+  // cartão (ver mediaY acima); [0.35, 0.5] fecha bem quando o cartão
+  // termina de assentar (0.5 é exatamente o instante em que ele gruda,
+  // matemática de useScroll: a janela cobre duas alturas de tela, e o
+  // cartão fica preso na metade do caminho), a métrica chegando por
+  // último, depois do nome do projeto (ver comentário mais abaixo).
+  const metricOpacity = useTransform(progress, [0.35, 0.5], [0, 1]);
+  const metricY = useTransform(progress, [0.35, 0.5], [16, 0]);
   const metric = caseStudy.metrics[0];
 
   return (
@@ -881,23 +895,24 @@ function MobileCaseCard({
             `pt-24` da hero (ver Hero.tsx); pb-10 embaixo não tem esse
             problema (nada flutua ali) e continua o valor de sempre. Assim
             a única coisa que chega a cobrir a informação de um cartão é o
-            PRÓXIMO cartão chegando por cima, nunca o cabeçalho. */}
-        <div className="gutter absolute inset-0 flex flex-col justify-between pb-10 pt-16">
-          <Reveal className="flex items-start justify-between gap-4">
-            <p className="type-mono text-white/70">
-              {pad(index + 1)} / {pad(totalCases)} · {caseStudy.year}
-            </p>
-            <p className="text-right">
-              <span className="type-serif-display block text-4xl">
-                {metric.value}
-              </span>
-              <span className="type-mono text-white/70">
-                {metric.label[locale]}
-              </span>
-            </p>
-          </Reveal>
+            PRÓXIMO cartão chegando por cima, nunca o cabeçalho.
 
-          <Reveal delay={0.08}>
+            Título em cima, métrica embaixo: invertido do painel de
+            desktop de propósito. Cada cartão sticky só é revelado de
+            CIMA pra BAIXO conforme sobe da base da tela (é o próprio
+            topo dele que aparece primeiro, o resto ainda embaixo da
+            dobra); com o título embaixo (como no desktop) ele só
+            aparecia colado no fim da subida, quase de um
+            golpe só, e a métrica no topo já tinha aparecido bem antes
+            — o nome do projeto, que devia ser a primeira coisa lida,
+            era a ÚLTIMA a chegar. Com o título no topo, ele nasce
+            cedo, tem a subida inteira do cartão pra entrar e assentar
+            (o Reveal abaixo, sem delay), e a métrica, agora embaixo,
+            só chega perto do fim, quando o cartão já está quase
+            todo à vista, uma pontuação depois do nome já estabelecido,
+            não antes dele. */}
+        <div className="gutter absolute inset-0 flex flex-col justify-between pb-10 pt-16">
+          <Reveal>
             <h3 className="type-display type-inktrap pt-[0.16em] text-[11vw] leading-[0.9]">
               {caseStudy.title[locale]}
             </h3>
@@ -909,6 +924,25 @@ function MobileCaseCard({
               <span aria-hidden>→</span>
             </span>
           </Reveal>
+
+          <motion.div
+            style={
+              reduceMotion ? undefined : { opacity: metricOpacity, y: metricY }
+            }
+            className="flex items-end justify-between gap-4"
+          >
+            <p className="type-mono text-white/70">
+              {pad(index + 1)} / {pad(totalCases)} · {caseStudy.year}
+            </p>
+            <p className="text-right">
+              <span className="type-serif-display block text-4xl">
+                {metric.value}
+              </span>
+              <span className="type-mono text-white/70">
+                {metric.label[locale]}
+              </span>
+            </p>
+          </motion.div>
         </div>
       </MotionLink>
     </div>
