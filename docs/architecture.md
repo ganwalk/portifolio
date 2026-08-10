@@ -413,19 +413,30 @@ decorativa. O que dá vida é movimento e tipografia, não ornamento.
   índice ativo atrasado tornaria clique e foco de teclado imprecisos justo
   enquanto a cena ainda se acomoda.
 
-  **A primeira fatia recebe menos scroll que as outras** (`slideWindows`,
-  `FIRST_SLIDE_WEIGHT`). Ela é a única sem fase de entrada, já nasce no
-  lugar, porque não existe nada antes dela pra subir de. Com todas as fatias
-  valendo a mesma altura, essa diferença virava uma tela inteira de rolagem
-  sem nada acontecendo antes da primeira transição, contra pouco mais de
-  meia tela de pausa em cada fatia seguinte: a seção parecia travada logo na
-  entrada e a mão de quem rolava aprendia um ritmo que a seção não cumpria
-  depois. Dando à primeira só o peso da pausa (o que sobra depois da subida
-  que ela não tem), a espera entre uma transição e a próxima fica igual do
-  começo ao fim, e a seção encolhe de 4 para 3,55 telas.
+  **Subida e pausa são medidas em telas, não em fração da própria janela**
+  (`ENTER_SCREENS`, `PAUSE_SCREENS`, `slideWindows`). Uma fatia comum vale
+  `ENTER_SCREENS + PAUSE_SCREENS` telas de scroll: 0,45 subindo (a
+  transição em si) e 0,75 parada em cena, já assentada, recebendo a próxima
+  por cima (o respiro entre um projeto e o outro). `PAUSE_SCREENS` era 0,55
+  (o que sobrava de `1 - ENTER_SCREENS` quando as duas dividiam uma tela
+  só); as fatias liam curtas demais, e aumentar só a pausa, não a subida,
+  dá mais respiro sem deixar a própria transição mais lenta. `ENTER_FRACTION`
+  (a fração da janela de cada fatia usada por `enterRange`) passa a ser
+  derivada dessas duas constantes, não mais um número solto.
 
-  Cada fatia sobe durante os primeiros 45% da própria janela de scroll e
-  depois fica. Esse resto, antes parado, hoje tem paralaxe: a mídia desliza
+  **A primeira fatia recebe só o peso da pausa** (`FIRST_SLIDE_WEIGHT =
+  PAUSE_SCREENS`), sem o da subida. Ela é a única sem fase de entrada, já
+  nasce no lugar, porque não existe nada antes dela pra subir de. Com todas
+  as fatias valendo o mesmo peso, essa diferença virava uma tela quase
+  inteira de rolagem sem nada acontecendo antes da primeira transição,
+  contra só o respiro de pausa em cada fatia seguinte: a seção parecia
+  travada logo na entrada e a mão de quem rolava aprendia um ritmo que a
+  seção não cumpria depois. Dando à primeira só o peso da pausa, a espera
+  entre uma transição e a próxima fica igual do começo ao fim.
+
+  Cada fatia sobe durante a fração inicial da própria janela de scroll
+  (`ENTER_FRACTION`, derivada acima) e depois fica. Esse resto, antes
+  parado, hoje tem paralaxe: a mídia desliza
   devagar (±6% da altura, com escala base cobrindo o dobro do deslocamento
   para não revelar a borda preta do painel) enquanto o texto fica ancorado.
   Rolagem sem nada acontecendo lê como travada, mesmo quando é só uma pausa
