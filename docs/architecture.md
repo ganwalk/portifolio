@@ -592,48 +592,20 @@ decorativa. O que dá vida é movimento e tipografia, não ornamento.
   Assim a única coisa que chega a cobrir a informação de um cartão é o
   PRÓXIMO cartão chegando por cima, nunca o cabeçalho.
 
-  **Disposição de repouso igual ao desktop (métrica em cima, título
-  embaixo): só a ENTRADA muda, não o layout final.** Uma primeira versão
-  trocou os dois de lugar de vez (título em cima permanente, métrica
-  embaixo permanente) pra resolver um problema real: um cartão sticky só é
-  revelado de CIMA pra BAIXO conforme sobe da base da tela, então com o
-  título no seu lugar de sempre (embaixo) ele só chegava colado ao fim da
-  subida, quase de um golpe só, enquanto a métrica (no topo) já tinha
-  aparecido bem antes — o nome do projeto, que devia ser a primeira coisa
-  lida, era a ÚLTIMA a chegar. Mas essa troca definitiva desalinhava o
-  mobile do desktop sem necessidade: o problema era só de SEQUÊNCIA de
-  entrada, não de lugar de repouso.
-
-  A correção: o título nasce deslocado pra cima por um `titleY`
-  (`useTransform`), ocupando visualmente o canto onde a métrica mora, e só
-  desce pro seu lugar de repouso (embaixo) perto do fim da entrada — a
-  métrica, no seu canto de sempre mas ESCONDIDA até ali (`metricOpacity`),
-  só aparece quando o título já desocupou aquele espaço. `titleY` segura um
-  valor constante (`-66vh`, a distância aproximada entre os dois cantos) de
-  `progress` 0 a 0.35 (a "posição fixa" pedida: por boa parte da entrada o
-  título já não se desloca mais RELATIVO ao cartão, só o resto do cartão
-  sobe ao redor dele) e solta pra `0vh` (repouso) só entre 0.35 e 0.5,
-  exatamente quando o cartão termina de assentar. Uma alternativa mais
-  literal (título travado numa posição fixa DA TELA, não do cartão, o que
-  pediria empurrar `titleY` bem além do topo do cartão durante boa parte da
-  entrada) foi descartada: o cartão tem `overflow-hidden`, e conteúdo não
-  pode ser transformado pra fora da própria caixa dele, mesmo que o
-  resultado caísse dentro da viewport — só as duas posições finais (canto
-  da métrica e canto do título), que já vivem DENTRO da caixa do cartão,
-  são alcançáveis sem cortar.
-
-  Nem título nem métrica usam `Reveal` aqui: `Reveal` nasce com uma margem
-  negativa de 8% no pé da viewport (pensada pra conteúdo comum de página,
-  que cruza essa borda enquanto ainda está "chegando"), mas a métrica
-  DESCANSA perto do pé do cartão (`pb-10`) o tempo inteiro em que ele fica
-  travado, caindo direto dentro dessa margem excluída — o `whileInView`
-  nunca disparava (bug real, pego só depois de medir a posição renderizada:
-  a métrica simplesmente nunca aparecia). As duas usam o `progress` que já
-  mede a chegada do cartão (o mesmo do paralaxe da mídia, `mediaY` acima):
-  `useTransform(progress, [0.35, 0.5], ...)` fecha bem quando o cartão
-  termina de assentar, porque **0.5 é exatamente o instante em que ele
-  gruda** (a janela do `useScroll` cobre duas alturas de tela — entrada
-  mais o tempo preso — então o cartão sempre trava na metade do caminho).
+  **Título e métrica ficam fixos, na mesma disposição do desktop (métrica
+  em cima, título embaixo), cada um entrando com o `Reveal` padrão do
+  site.** Duas variantes com o texto se deslocando durante a rolagem
+  chegaram a existir aqui e as duas saíram: uma trocava os dois de lugar em
+  definitivo (título em cima, métrica embaixo, permanente), desalinhando o
+  mobile do desktop sem necessidade; a outra mantinha a disposição final
+  mas fazia o título nascer no canto da métrica e descer pro seu lugar
+  perto do fim da entrada (`titleY`/`metricOpacity` via `useTransform`,
+  preso ao `progress` do próprio cartão). As duas, na prática, liam pior
+  que simplesmente deixar a informação parada: o movimento chamava atenção
+  pra si em vez de servir o conteúdo. `Reveal` sozinho já resolve o
+  problema original (o cartão sticky revela de CIMA pra BAIXO, então
+  informação presa ao PÉ do cartão nasce tarde) com um delay pequeno
+  (`delay={0.08}` no título) em vez de reordenar ou animar posição.
 - **"Acreditam no meu trabalho" (`Brands`) mora dentro de `About`, não é
   mais dobra própria.** Já foi uma régua fina entre CasesGrid e About, com
   `<section>` e `aria-label` próprios; hoje é conteúdo comum de About,
