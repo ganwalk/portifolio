@@ -185,7 +185,7 @@ export function SiteMenu({
                         tamanho de fonte ambiente (~16px) em vez do tamanho
                         de verdade do rótulo, e a folga saía pequena demais
                         pra cobrir o nudge. */}
-                    <div className="overflow-hidden py-[0.4em] text-[11vw] sm:text-[7vw]">
+                    <div className="overflow-hidden py-[0.4em] text-[11vw] sm:text-[7vw] lg:text-[5vw] xl:text-[4vw]">
                       <motion.div variants={itemVariants}>
                         <Link
                           href={`/${locale}/#${item.id}`}
@@ -216,7 +216,7 @@ export function SiteMenu({
                               vez do centro visual da linha (que é o que o
                               olho realmente compara), e por isso não dava
                               conta do desvio de verdade. */}
-                          <span className="type-display type-inktrap relative z-10 translate-y-[0.35em] text-[11vw] leading-none text-foreground transition-colors duration-500 ease-out group-hover:text-background sm:text-[7vw]">
+                          <span className="type-display type-inktrap relative z-10 translate-y-[0.35em] text-[11vw] leading-none text-foreground transition-colors duration-500 ease-out group-hover:text-background sm:text-[7vw] lg:text-[5vw] xl:text-[4vw]">
                             {item.label}
                           </span>
                           {/* Frase curta contando do que a seção trata,
