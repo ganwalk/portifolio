@@ -15,6 +15,8 @@ import {
   type MotionValue,
 } from "framer-motion";
 import { CaseMetrics } from "@/components/ui/CaseMetrics";
+import { CursorLabel } from "@/components/ui/CursorLabel";
+import { GitHubIcon } from "@/components/ui/icons/GitHubIcon";
 import { MediaView } from "@/components/ui/MediaView";
 import { Reveal } from "@/components/ui/Reveal";
 import { cases } from "@/data/cases";
@@ -423,21 +425,13 @@ function CaseColumn({
     [`${parallax}%`, `${-parallax}%`],
   );
   const mediaScale = parallax ? 1 + (parallax * 2) / 100 + 0.02 : 1;
+  const panelRef = useRef<HTMLDivElement>(null);
 
   return (
-    <motion.button
-      type="button"
+    <motion.div
+      ref={panelRef}
       data-case-slug={caseStudy.slug}
-      onClick={(event) =>
-        isActive && onExpand(caseStudy, event.currentTarget.getBoundingClientRect())
-      }
-      // Feedback tátil no clique: um leve encolhimento antes do FLIP assumir
-      // (ver ExpandedCase), pra o gesto já responder no instante do toque,
-      // não só quando o overlay termina de nascer.
-      whileTap={isActive ? { scale: 0.98 } : undefined}
-      tabIndex={isActive ? 0 : -1}
       aria-hidden={!isActive}
-      aria-label={caseStudy.title[locale]}
       className={`relative block h-full w-full flex-1 bg-black text-left ${
         dividerLeft ? "border-t border-white/15 lg:border-l lg:border-t-0" : ""
       } ${isActive ? "" : "pointer-events-none"}`}
@@ -529,23 +523,58 @@ function CaseColumn({
               </motion.p>
             </div>
             <div
-              className={`inline-block overflow-hidden ${multi ? "mt-2 lg:mt-8" : "mt-8"}`}
+              className={`overflow-hidden ${multi ? "mt-2 lg:mt-8" : "mt-8"}`}
             >
-              <motion.span
-                style={{ y: ctaY }}
-                className={`type-mono inline-flex items-center gap-3 border border-white/40 backdrop-blur-sm ${
-                  multi ? "px-3 py-1.5 lg:px-6 lg:py-3" : "px-6 py-3"
-                }`}
-              >
-                {caseStudy.comingSoon ? dict.cases.comingSoon : dict.cases.viewCase}
-                <span aria-hidden>→</span>
-              </motion.span>
+              {/* Dois botões de verdade, não mais o cartão inteiro
+                  clicável: um pro detalhamento (mesmo FLIP de sempre pro
+                  overlay, ver ExpandedCase) e um pro repositório, só quando
+                  o case tiver um (ver repoUrl em data/cases.ts). A logo do
+                  GitHub entra discreta, do tamanho do texto ao redor. */}
+              <motion.div style={{ y: ctaY }} className="flex flex-wrap items-center gap-3">
+                <motion.button
+                  type="button"
+                  onClick={() =>
+                    isActive &&
+                    panelRef.current &&
+                    onExpand(caseStudy, panelRef.current.getBoundingClientRect())
+                  }
+                  // Feedback tátil no clique: um leve encolhimento antes do
+                  // FLIP assumir (ver ExpandedCase), pra o gesto já responder
+                  // no instante do toque, não só quando o overlay termina de
+                  // nascer.
+                  whileTap={isActive ? { scale: 0.98 } : undefined}
+                  tabIndex={isActive ? 0 : -1}
+                  aria-label={caseStudy.title[locale]}
+                  className={`type-mono inline-flex items-center gap-3 border border-white/40 backdrop-blur-sm ${
+                    multi ? "px-3 py-1.5 lg:px-6 lg:py-3" : "px-6 py-3"
+                  }`}
+                >
+                  {caseStudy.comingSoon ? dict.cases.comingSoon : dict.cases.viewCase}
+                  <span aria-hidden>→</span>
+                </motion.button>
+
+                {caseStudy.repoUrl && (
+                  <motion.a
+                    href={caseStudy.repoUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    whileTap={{ scale: 0.98 }}
+                    tabIndex={isActive ? 0 : -1}
+                    aria-label={`${dict.cases.repo} · ${caseStudy.title[locale]}`}
+                    className={`type-mono inline-flex items-center gap-2 border border-white/40 text-white/70 backdrop-blur-sm transition-colors hover:text-white ${
+                      multi ? "px-3 py-1.5 lg:px-4 lg:py-3" : "px-4 py-3"
+                    }`}
+                  >
+                    <GitHubIcon className="h-3.5 w-3.5" />
+                    {dict.cases.repo}
+                  </motion.a>
+                )}
+              </motion.div>
             </div>
           </div>
         </motion.div>
       </div>
-
-    </motion.button>
+    </motion.div>
   );
 }
 
@@ -704,13 +733,6 @@ function ExpandedCase({
             * {dict.cases.metricsDisclaimer}
           </p>
         )}
-
-        <Link
-          href={`/${locale}/work/${caseStudy.slug}/`}
-          className="type-mono mt-16 inline-flex items-center gap-3 underline underline-offset-8"
-        >
-          {dict.cases.fullCase} →
-        </Link>
       </div>
     </motion.div>
   );
@@ -791,6 +813,12 @@ function useNearViewport<T extends HTMLElement>(ref: React.RefObject<T | null>) 
   return isNear;
 }
 
+// Folga extra (em svh) que cada cartão mobile ganha além da própria altura
+// de tela antes que o próximo alcance o topo e comece a subir por cima: mais
+// tempo parado em cada projeto, sem mexer no efeito de sticky em si (ver
+// comentário dentro de MobileCaseCard, abaixo).
+const MOBILE_CARD_REST_VH = 18;
+
 function MobileCaseCard({
   caseStudy,
   index,
@@ -833,71 +861,99 @@ function MobileCaseCard({
   const metric = caseStudy.metrics[0];
 
   return (
-    <div
-      ref={cardRef}
-      className="sticky top-0 h-svh w-full overflow-hidden bg-black text-white"
-    >
-      <MotionLink
-        href={`/${locale}/work/${caseStudy.slug}/`}
-        whileTap={{ scale: 0.98 }}
-        className="absolute inset-0 block"
+    // Contêiner de flow mais alto que a própria tela (100svh do cartão +
+    // MOBILE_CARD_REST_VH de folga): o cartão sticky continua preenchendo a
+    // tela inteira o tempo todo, sem gap nenhum (é ele, não o contêiner, que
+    // pinta o fundo preto), só que agora precisa de mais rolagem parada
+    // nesse projeto antes que o PRÓXIMO cartão alcance o topo e comece a
+    // subir por cima dele. Mesmo efeito de sempre, só com mais respiro entre
+    // um projeto e o outro.
+    <div style={{ height: `${100 + MOBILE_CARD_REST_VH}svh` }}>
+      <div
+        ref={cardRef}
+        className="sticky top-0 h-svh w-full overflow-hidden bg-black text-white"
       >
-        <motion.div
-          className="absolute inset-0 scale-125"
-          style={reduceMotion ? undefined : { y: mediaY }}
-        >
-          {isNear ? (
-            <MediaView
-              media={caseStudy.cover}
-              locale={locale}
-              className="absolute inset-0 h-full w-full object-cover"
-            />
-          ) : (
-            <div className="absolute inset-0 bg-surface" />
-          )}
-        </motion.div>
-        <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/10 to-black/45" />
+        {/* Não é mais o cartão inteiro clicável: dois botões de verdade no
+            rodapé (detalhamento + repositório, ver abaixo) no lugar de um
+            <Link> só cobrindo tudo. */}
+        <div className="absolute inset-0">
+          <motion.div
+            className="absolute inset-0 scale-125"
+            style={reduceMotion ? undefined : { y: mediaY }}
+          >
+            {isNear ? (
+              <MediaView
+                media={caseStudy.cover}
+                locale={locale}
+                className="absolute inset-0 h-full w-full object-cover"
+              />
+            ) : (
+              <div className="absolute inset-0 bg-surface" />
+            )}
+          </motion.div>
+          <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/10 to-black/45" />
 
-        {/* pt-16, não py-10 nos dois lados: o cabeçalho é fixed e flutua por
-            cima da pilha inteira (z-40, mais alto que qualquer cartão
-            sticky aqui embaixo), então sem esse respiro extra a linha de
-            índice do cartão TRAVADO no topo (ver `sticky` acima) nascia
-            parcialmente atrás da barra, mesmo antes do próximo cartão
-            chegar pra cobri-la de verdade. pt-16 desconta a altura da barra
-            (3.5rem) e sobra um pouco de respiro, o mesmo raciocínio do
-            `pt-24` da hero (ver Hero.tsx); pb-10 embaixo não tem esse
-            problema (nada flutua ali) e continua o valor de sempre. Assim
-            a única coisa que chega a cobrir a informação de um cartão é o
-            PRÓXIMO cartão chegando por cima, nunca o cabeçalho. */}
-        <div className="gutter absolute inset-0 flex flex-col justify-between pb-10 pt-16">
-          <Reveal className="flex items-start justify-between gap-4">
-            <p className="type-mono text-white/70">
-              {pad(index + 1)} / {pad(totalCases)} · {caseStudy.year}
-            </p>
-            <p className="text-right">
-              <span className="type-serif-display block text-4xl">
-                {metric.value}
-              </span>
-              <span className="type-mono text-white/70">
-                {metric.label[locale]}
-              </span>
-            </p>
-          </Reveal>
+          {/* pt-16, não py-10 nos dois lados: o cabeçalho é fixed e flutua
+              por cima da pilha inteira (z-40, mais alto que qualquer cartão
+              sticky aqui embaixo), então sem esse respiro extra a linha de
+              índice do cartão TRAVADO no topo (ver `sticky` acima) nascia
+              parcialmente atrás da barra, mesmo antes do próximo cartão
+              chegar pra cobri-la de verdade. pt-16 desconta a altura da
+              barra (3.5rem) e sobra um pouco de respiro, o mesmo raciocínio
+              do `pt-24` da hero (ver Hero.tsx); pb-10 embaixo não tem esse
+              problema (nada flutua ali) e continua o valor de sempre. Assim
+              a única coisa que chega a cobrir a informação de um cartão é o
+              PRÓXIMO cartão chegando por cima, nunca o cabeçalho. */}
+          <div className="gutter absolute inset-0 flex flex-col justify-between pb-10 pt-16">
+            <Reveal className="flex items-start justify-between gap-4">
+              <p className="type-mono text-white/70">
+                {pad(index + 1)} / {pad(totalCases)} · {caseStudy.year}
+              </p>
+              <p className="text-right">
+                <span className="type-serif-display block text-4xl">
+                  {metric.value}
+                </span>
+                <span className="type-mono text-white/70">
+                  {metric.label[locale]}
+                </span>
+              </p>
+            </Reveal>
 
-          <Reveal delay={0.08}>
-            <h3 className="type-display type-inktrap pt-[0.16em] text-[11vw] leading-[0.9]">
-              {caseStudy.title[locale]}
-            </h3>
-            <p className="type-mono mt-3 text-white/70">
-              {caseStudy.tags[locale].join(" • ")}
-            </p>
-            <span className="type-mono mt-6 inline-flex items-center gap-3 border border-white/40 px-6 py-3">
-              {caseStudy.comingSoon ? dict.cases.comingSoon : dict.cases.viewCase}
-              <span aria-hidden>→</span>
-            </span>
-          </Reveal>
+            <Reveal delay={0.08}>
+              <h3 className="type-display type-inktrap pt-[0.16em] text-[11vw] leading-[0.9]">
+                {caseStudy.title[locale]}
+              </h3>
+              <p className="type-mono mt-3 text-white/70">
+                {caseStudy.tags[locale].join(" • ")}
+              </p>
+              <div className="mt-6 flex flex-wrap items-center gap-3">
+                <MotionLink
+                  href={`/${locale}/work/${caseStudy.slug}/`}
+                  whileTap={{ scale: 0.98 }}
+                  className="type-mono inline-flex items-center gap-3 border border-white/40 px-6 py-3"
+                >
+                  {caseStudy.comingSoon ? dict.cases.comingSoon : dict.cases.viewCase}
+                  <span aria-hidden>→</span>
+                </MotionLink>
+
+                {caseStudy.repoUrl && (
+                  <motion.a
+                    href={caseStudy.repoUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    whileTap={{ scale: 0.98 }}
+                    aria-label={`${dict.cases.repo} · ${caseStudy.title[locale]}`}
+                    className="type-mono inline-flex items-center gap-2 border border-white/40 px-4 py-3 text-white/70"
+                  >
+                    <GitHubIcon className="h-3.5 w-3.5" />
+                    {dict.cases.repo}
+                  </motion.a>
+                )}
+              </div>
+            </Reveal>
+          </div>
         </div>
-      </MotionLink>
+      </div>
     </div>
   );
 }
@@ -1121,50 +1177,22 @@ function DesktopCasesGrid({
           </div>
 
           {/* Selo "ver caso": segue o cursor deslocado bem à direita e um
-              pouco abaixo dele. Só desktop (hover real existe). O texto
-              roda num letreiro horizontal contínuo, como uma placa
-              luminosa antiga, na mesma mono dos fatos da hero ("UX/UI ·
-              Webapps · Design Systems"): a pílula é uma janela de largura
-              fixa (overflow-hidden), menor que o conteúdo, e a faixa lá
-              dentro tem DUAS cópias do texto uma atrás da outra, separadas
-              por um bullet com padding igual dos dois lados (não espaço
-              literal, refém da fonte), andando de 0% a -50% pra sempre.
-              Como as duas cópias são idênticas, o instante em que a
-              primeira sai pela esquerda é exatamente o instante em que a
-              segunda chega no início, o loop não tem costura. */}
-          <motion.div
-            aria-hidden
-            style={{ x: labelX, y: labelY }}
-            className="pointer-events-none absolute left-0 top-0 z-40 hidden sm:block"
-          >
-            <motion.div
-              animate={{
-                opacity: hoveredCase ? 1 : 0,
-                scale: hoveredCase ? 1 : 0.6,
-              }}
-              transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-              className="w-44 overflow-hidden bg-white py-2.5 text-black"
-            >
-              <motion.div
-                className="type-mono flex w-max items-center whitespace-nowrap"
-                animate={{ x: ["0%", "-50%"] }}
-                transition={{ duration: 6, ease: "linear", repeat: Infinity }}
-              >
-                {[0, 1].map((copy) => (
-                  <span key={copy} className="flex shrink-0 items-center">
-                    <span aria-hidden className="px-3">
-                      •
-                    </span>
-                    {hoveredCase
-                      ? hoveredCase.comingSoon
-                        ? dict.cases.comingSoon
-                        : dict.cases.viewCase
-                      : ""}
-                  </span>
-                ))}
-              </motion.div>
-            </motion.div>
-          </motion.div>
+              pouco abaixo dele. Só desktop (hover real existe). O estilo e o
+              comportamento de letreiro (janela fixa, duas cópias do texto
+              andando de 0% a -50% pra sempre, sem costura no loop) moram em
+              CursorLabel, a mesma pílula usada em ExperimentCard. */}
+          <CursorLabel
+            x={labelX}
+            y={labelY}
+            visible={Boolean(hoveredCase)}
+            text={
+              hoveredCase
+                ? hoveredCase.comingSoon
+                  ? dict.cases.comingSoon
+                  : dict.cases.viewCase
+                : ""
+            }
+          />
         </div>
       </div>
 

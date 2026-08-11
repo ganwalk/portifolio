@@ -70,9 +70,9 @@ export const pt = {
     scrollHint: "Role para navegar",
     viewCase: "Ver case",
     comingSoon: "Case completo em breve",
+    repo: "Repositório",
     metricsDisclaimer:
       "Métricas ilustrativas, números finais em fase de consolidação.",
-    fullCase: "Ver página completa",
   },
   brands: {
     title: "Acreditam no meu trabalho",

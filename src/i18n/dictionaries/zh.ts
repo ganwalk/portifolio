@@ -59,8 +59,8 @@ export const zh: Dictionary = {
     scrollHint: "滚动浏览",
     viewCase: "查看案例",
     comingSoon: "完整案例即将呈现",
+    repo: "仓库",
     metricsDisclaimer: "示意性数据，最终数字仍在整理中。",
-    fullCase: "查看完整页面",
   },
   brands: {
     title: "认可我的作品",
