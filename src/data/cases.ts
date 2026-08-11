@@ -79,6 +79,7 @@ export const cases: CaseStudy[] = [
       },
     },
     comingSoon: true,
+    // repoUrl: "https://github.com/...", repositório público ainda não informado: o botão "ver repositório" do card só nasce quando este campo existir.
   },
   {
     slug: "ecossistema-auvp",
@@ -93,10 +94,10 @@ export const cases: CaseStudy[] = [
       zh: "落地页",
     },
     statement: {
-      pt: "Desenho e mantenho o ecossistema de webpages da AUVP Capital, guiado por métricas, SEO e performance.",
-      en: "I design and maintain AUVP Capital's webpage ecosystem, guided by metrics, SEO and performance.",
-      es: "Diseño y mantengo el ecosistema de webpages de AUVP Capital, guiado por métricas, SEO y performance.",
-      zh: "设计并维护 AUVP Capital 的网页生态系统，以数据指标、SEO 和性能为导向。",
+      pt: "Desenho e mantenho o ecossistema de webpages da AUVP Capital: todas as LPs com no mínimo 90/100 de performance, alta conversão e bom rankeamento nos mecanismos de busca e em IA.",
+      en: "I design and maintain AUVP Capital's webpage ecosystem: every LP scores at least 90/100 on performance, with high conversion and strong ranking on search engines and AI.",
+      es: "Diseño y mantengo el ecosistema de webpages de AUVP Capital: todas las LPs con al menos 90/100 de rendimiento, alta conversión y buen posicionamiento en buscadores y en IA.",
+      zh: "设计并维护 AUVP Capital 的网页生态系统：所有落地页性能评分至少 90/100，转化率高，且在搜索引擎和人工智能中排名良好。",
     },
     tags: {
       pt: ["Webpages", "SEO", "Conversão", "Clarity & GA"],
@@ -104,7 +105,30 @@ export const cases: CaseStudy[] = [
       es: ["Webpages", "SEO", "Conversión", "Clarity & GA"],
       zh: ["Webpages", "SEO", "转化率", "Clarity & GA"],
     },
+    // Acessos e performance são números reais (não placeholder): a conversão
+    // ainda não tem um percentual calibrado, então continua ilustrativa até
+    // a métrica exata chegar.
     metrics: [
+      {
+        value: "20 mil+",
+        label: {
+          pt: "acessos diários",
+          en: "daily visits",
+          es: "visitas diarias",
+          zh: "每日访问量",
+        },
+        illustrative: false,
+      },
+      {
+        value: "90+/100",
+        label: {
+          pt: "performance mínima",
+          en: "minimum performance",
+          es: "rendimiento mínimo",
+          zh: "最低性能",
+        },
+        illustrative: false,
+      },
       {
         value: "+XX%",
         label: {
@@ -112,16 +136,6 @@ export const cases: CaseStudy[] = [
           en: "conversion",
           es: "conversión",
           zh: "转化率",
-        },
-        illustrative: true,
-      },
-      {
-        value: "-XXs",
-        label: {
-          pt: "tempo de carregamento",
-          en: "loading time",
-          es: "tiempo de carga",
-          zh: "加载时间",
         },
         illustrative: true,
       },
@@ -141,6 +155,7 @@ export const cases: CaseStudy[] = [
       },
     },
     comingSoon: true,
+    // repoUrl: "https://github.com/...", repositório público ainda não informado: o botão "ver repositório" do card só nasce quando este campo existir.
   },
   {
     slug: "ganwalk",
@@ -198,6 +213,7 @@ export const cases: CaseStudy[] = [
       },
     },
     comingSoon: true,
+    // repoUrl: "https://github.com/...", repositório público ainda não informado: o botão "ver repositório" do card só nasce quando este campo existir.
   },
   {
     slug: "dezert-horse",
@@ -249,6 +265,7 @@ export const cases: CaseStudy[] = [
       },
     },
     comingSoon: true,
+    // repoUrl: "https://github.com/...", repositório público ainda não informado: o botão "ver repositório" do card só nasce quando este campo existir.
   },
   {
     slug: "pink-opala",
@@ -300,6 +317,7 @@ export const cases: CaseStudy[] = [
       },
     },
     comingSoon: true,
+    // repoUrl: "https://github.com/...", repositório público ainda não informado: o botão "ver repositório" do card só nasce quando este campo existir.
   },
 ];
 

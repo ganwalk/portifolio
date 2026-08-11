@@ -42,6 +42,11 @@ export interface CaseStudy {
   comingSoon: boolean;
   year: string;
   /**
+   * URL do repositório público no GitHub. Opcional: o botão "ver
+   * repositório" do card só aparece quando o campo existe (ver CasesGrid).
+   */
+  repoUrl?: string;
+  /**
    * Cases adjacentes com o mesmo `group` viram uma fatia só do carrossel da
    * home, lado a lado em vez de empilhados (ver CasesGrid). Não afeta a
    * página própria do case nem nenhum outro lugar que leia `cases`.

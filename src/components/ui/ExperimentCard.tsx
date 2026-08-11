@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { useReducedMotion } from "framer-motion";
+import { useMotionValue, useReducedMotion, useSpring, useTransform } from "framer-motion";
+import { CursorLabel } from "@/components/ui/CursorLabel";
 import { MediaView } from "@/components/ui/MediaView";
 import type { Experiment } from "@/data/types";
 import type { Locale } from "@/i18n/config";
@@ -13,12 +14,19 @@ import type { Locale } from "@/i18n/config";
 //   sem nenhum aparato a mais.
 // - `process` (bastidores reais, ex.: o teste de animação): a vitrine
 //   normal continua até o hover, que troca pelos stills do processo em
-//   ciclo (crossfade) com uma legenda em texto acompanhando o cursor.
+//   ciclo (crossfade) com uma legenda em texto acompanhando o cursor, no
+//   mesmo letreiro (janela fixa, texto correndo) do selo "ver caso" de
+//   CasesGrid.
 // - `gallery` (uma série de peças, ex.: as ilustrações): entra em ciclo
 //   sozinha, com ou sem hover, no lugar da vitrine normal; o hover só
 //   acrescenta uma ascii art de uma linha (a peça de cada quadro) que
-//   acompanha o cursor, no mesmo idioma "letreiro preso ao mouse" do
-//   SkillsOrbit.
+//   acompanha o cursor. Mesma pílula do letreiro acima, mas sem o texto
+//   correndo: a ascii já é curta, girar só atrapalharia a leitura, então
+//   fica fixa na peça atual da galeria.
+//
+// As duas legendas (`CursorLabel`) moram fora do overflow-hidden da vitrine,
+// direto no <figure>: podem transbordar o cartão inteiro, não só a imagem,
+// senão a legenda corta perto da borda toda vez que o cursor chega lá.
 const PROCESS_CYCLE_MS = 1600;
 const GALLERY_CYCLE_MS = 2800;
 const TOOLTIP_OFFSET_X = 16;
@@ -42,7 +50,6 @@ export function ExperimentCard({
   const hasGallery = Boolean(gallery && gallery.length > 0);
 
   const mediaBoxRef = useRef<HTMLDivElement>(null);
-  const tooltipRef = useRef<HTMLDivElement>(null);
   const [hovering, setHovering] = useState(false);
   const [processIndex, setProcessIndex] = useState(0);
   const [galleryIndex, setGalleryIndex] = useState(0);
@@ -50,6 +57,16 @@ export function ExperimentCard({
   const showProcess = hasProcess && hovering;
   const showAsciiTooltip = hasGallery && !reduceMotion && hovering;
   const showTooltip = showProcess || showAsciiTooltip;
+
+  // Mesma mola do selo "ver caso" de CasesGrid: a posição bruta do cursor
+  // vira a posição da legenda só depois de passar por uma spring, então ela
+  // persegue o cursor com um atraso curto em vez de grudar nele.
+  const pointerRawX = useMotionValue(0);
+  const pointerRawY = useMotionValue(0);
+  const leadX = useSpring(pointerRawX, { stiffness: 400, damping: 35, mass: 0.5 });
+  const leadY = useSpring(pointerRawY, { stiffness: 400, damping: 35, mass: 0.5 });
+  const labelX = useTransform(leadX, (v) => v + TOOLTIP_OFFSET_X);
+  const labelY = useTransform(leadY, (v) => v + TOOLTIP_OFFSET_Y);
 
   useEffect(() => {
     if (!showProcess || !process) return;
@@ -73,13 +90,12 @@ export function ExperimentCard({
     if (!box) return;
     function onMove(event: MouseEvent) {
       const rect = box!.getBoundingClientRect();
-      const el = tooltipRef.current;
-      if (!el) return;
-      el.style.transform = `translate(${event.clientX - rect.left + TOOLTIP_OFFSET_X}px, ${event.clientY - rect.top + TOOLTIP_OFFSET_Y}px)`;
+      pointerRawX.set(event.clientX - rect.left);
+      pointerRawY.set(event.clientY - rect.top);
     }
     box.addEventListener("mousemove", onMove);
     return () => box.removeEventListener("mousemove", onMove);
-  }, [showTooltip]);
+  }, [showTooltip, pointerRawX, pointerRawY]);
 
   return (
     <figure
@@ -127,19 +143,27 @@ export function ExperimentCard({
               style={{ opacity: showProcess && i === processIndex ? 1 : 0 }}
             />
           ))}
-
-        {showTooltip && (
-          <div
-            ref={tooltipRef}
-            aria-hidden
-            className={`pointer-events-none absolute left-0 top-0 z-10 max-w-[75%] whitespace-normal border border-line bg-background px-3 py-1.5 font-mono tracking-wide ${
-              showAsciiTooltip ? "text-sm" : "text-xs"
-            }`}
-          >
-            {showProcess && process ? process[processIndex].caption[locale] : gallery![galleryIndex].asciiArt}
-          </div>
-        )}
       </div>
+
+      {/* Fora do overflow-hidden da vitrine, de propósito: a legenda pode
+          transbordar o cartão inteiro conforme o cursor se aproxima da
+          borda, em vez de cortar junto com a imagem. */}
+      {(hasProcess || hasGallery) && (
+        <CursorLabel
+          x={labelX}
+          y={labelY}
+          visible={showTooltip}
+          scroll={showProcess}
+          width="w-56"
+          text={
+            showProcess && process
+              ? process[processIndex].caption[locale]
+              : hasGallery && gallery
+                ? gallery[galleryIndex].asciiArt
+                : ""
+          }
+        />
+      )}
 
       <figcaption className="border-t border-line p-4">
         <span className="block font-medium">{experiment.title[locale]}</span>

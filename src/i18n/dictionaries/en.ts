@@ -58,9 +58,9 @@ export const en: Dictionary = {
     scrollHint: "Scroll to navigate",
     viewCase: "View case",
     comingSoon: "Full case study coming soon",
+    repo: "Repository",
     metricsDisclaimer:
       "Illustrative metrics, final numbers being consolidated.",
-    fullCase: "View full page",
   },
   brands: {
     title: "They believe in my work",

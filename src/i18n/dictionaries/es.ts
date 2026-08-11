@@ -59,9 +59,9 @@ export const es: Dictionary = {
     scrollHint: "Desliza para navegar",
     viewCase: "Ver case",
     comingSoon: "Case study completo próximamente",
+    repo: "Repositorio",
     metricsDisclaimer:
       "Métricas ilustrativas, números finales en consolidación.",
-    fullCase: "Ver página completa",
   },
   brands: {
     title: "Confían en mi trabajo",
