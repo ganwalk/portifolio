@@ -144,9 +144,22 @@ export function SiteMenu({
                   // ela separa a vinheta de UM item da vinheta do vizinho no
                   // hover, mas hover de verdade não existe em touch, então no
                   // mobile a régua não delimita nada, só risca a tela à toa.
+                  //
+                  // lg:flex-1 no próprio item (não só no <nav> em volta): cada
+                  // seção ocupa uma fração igual da altura cheia da tela,
+                  // adaptando ao viewport em vez de deixar sobra em branco
+                  // acima/abaixo do bloco (o que acontecia com justify-center
+                  // sozinho no <nav>, item com altura só do próprio conteúdo).
+                  // lg:justify-center no mesmo item centraliza o rótulo
+                  // DENTRO dessa fração agora mais alta que o texto, o que
+                  // também centraliza a vinheta de hover (a barra usa
+                  // inset-y-0 contra este mesmo elemento) e mantém rótulo e
+                  // descrição alinhados: os dois seguem filhos do mesmo Link
+                  // com items-center, só que agora esse Link inteiro fica no
+                  // centro vertical da seção, não mais preso ao topo dela.
                   <div
                     key={item.id}
-                    className={`group relative ${index > 0 ? "lg:border-t lg:border-line" : ""}`}
+                    className={`group relative lg:flex lg:flex-1 lg:flex-col lg:justify-center ${index > 0 ? "lg:border-t lg:border-line" : ""}`}
                     onMouseEnter={() => setHoveredId(item.id)}
                     onMouseLeave={() => setHoveredId((current) => (current === item.id ? null : current))}
                   >
