@@ -134,22 +134,42 @@ function pad(n: number) {
   return String(n).padStart(2, "0");
 }
 
-/** Fração da janela de uma fatia gasta subindo. O resto é a pausa em que ela
- *  fica assentada em cena, recebendo a próxima por cima. */
-const ENTER_FRACTION = 0.45;
+/** Quanto uma fatia gasta subindo, em "telas" (a mesma unidade de
+ *  `PAUSE_SCREENS` e `total` abaixo), não mais fração da própria janela: o
+ *  tempo de subida fica fixo mesmo quando `PAUSE_SCREENS` muda, então
+ *  ajustar o respiro entre projetos (abaixo) não mexe na velocidade da
+ *  própria transição. */
+const ENTER_SCREENS = 0.45;
 
-/** Peso da PRIMEIRA fatia na altura da seção, contra 1 das demais.
+/** Quanto uma fatia gasta parada em cena, já assentada, recebendo a
+ *  próxima por cima: o respiro entre um projeto e o outro. Maior que
+ *  `ENTER_SCREENS` de propósito, o pouco a mais pedido depois de as fatias
+ *  lerem curtas demais (era 0.55, o que sobrava de `1 - ENTER_SCREENS`
+ *  quando as duas dividiam uma tela só). */
+const PAUSE_SCREENS = 0.75;
+
+/** Peso de uma fatia comum na altura da seção: a subida mais a pausa. */
+const SLIDE_WEIGHT = ENTER_SCREENS + PAUSE_SCREENS;
+
+/** Fração da janela de uma fatia comum gasta subindo, derivada de
+ *  `ENTER_SCREENS`/`SLIDE_WEIGHT` (não mais um número solto): é o que
+ *  `enterRange` usa pra saber onde, dentro da janela [start, end] de cada
+ *  fatia, a subida termina e a pausa começa. */
+const ENTER_FRACTION = ENTER_SCREENS / SLIDE_WEIGHT;
+
+/** Peso da PRIMEIRA fatia na altura da seção, contra `SLIDE_WEIGHT` das
+ *  demais.
  *
  *  Ela é a única sem fase de entrada: já nasce no lugar, porque não existe
- *  nada antes dela pra subir de. Com todas as fatias recebendo a mesma altura
- *  de scroll, essa diferença virava uma tela inteira de rolagem sem NADA
- *  acontecendo antes da primeira transição, contra 55% de uma tela de pausa
- *  em cada fatia seguinte. Na prática a seção parecia travada logo na
- *  entrada, e a mão de quem rola aprendia um ritmo que a seção não cumpria
- *  depois. Dando à primeira só o peso da pausa (o que sobra depois da subida
- *  que ela não tem), a espera entre uma transição e a próxima fica igual do
- *  começo ao fim. */
-const FIRST_SLIDE_WEIGHT = 1 - ENTER_FRACTION;
+ *  nada antes dela pra subir de. Com todas as fatias recebendo o mesmo peso,
+ *  essa diferença virava uma tela quase inteira de rolagem sem NADA
+ *  acontecendo antes da primeira transição, contra só a pausa em cada fatia
+ *  seguinte. Na prática a seção parecia travada logo na entrada, e a mão de
+ *  quem rola aprendia um ritmo que a seção não cumpria depois. Dando à
+ *  primeira só o peso da pausa (`PAUSE_SCREENS`, o que sobra depois da
+ *  subida que ela não tem), a espera entre uma transição e a próxima fica
+ *  igual do começo ao fim. */
+const FIRST_SLIDE_WEIGHT = PAUSE_SCREENS;
 
 interface SlideWindow {
   /** Início e fim desta fatia em scrollYProgress (0 a 1 da seção). */
@@ -162,7 +182,7 @@ interface SlideWindow {
  *  telas: não é mais `count`, já que as fatias não valem todas o mesmo. */
 function slideWindows(count: number): { windows: SlideWindow[]; total: number } {
   const weights = Array.from({ length: count }, (_, index) =>
-    index === 0 ? FIRST_SLIDE_WEIGHT : 1,
+    index === 0 ? FIRST_SLIDE_WEIGHT : SLIDE_WEIGHT,
   );
   const total = weights.reduce((sum, weight) => sum + weight, 0);
   const windows: SlideWindow[] = [];
