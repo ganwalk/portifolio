@@ -2,7 +2,7 @@
 
 import dynamic from "next/dynamic";
 import { useRef, useState } from "react";
-import { ExperimentCaption } from "@/components/ui/ExperimentCaption";
+import { SkeuoCaption } from "@/components/ui/skeuo/SkeuoCaption";
 import type { Experiment } from "@/data/types";
 import type { Locale } from "@/i18n/config";
 import type { Dictionary } from "@/i18n/dictionaries";
@@ -77,15 +77,19 @@ export function VinylCrate({
   }
 
   return (
-    <figure className="group relative border border-line bg-background">
+    // Sem moldura (nem borda, nem fundo): o objeto em si é o card, não um
+    // retrato contido numa caixa. aspect-[4/5], não aspect-square: dá
+    // respiro vertical de sobra pra caixa e os discos que sobem acima dela
+    // não rasparem no teto do card.
+    <div className="group relative flex flex-col items-center">
       <div
         ref={stageRef}
-        className="relative aspect-square cursor-grab touch-pan-y overflow-hidden bg-surface active:cursor-grabbing"
+        className="relative aspect-[4/5] w-full cursor-grab touch-pan-y border-b border-line active:cursor-grabbing"
         onPointerDown={onPointerDownDrag}
       >
         {isNear && <VinylCrateScene frames={gallery} active={active} />}
 
-        <span className="type-mono pointer-events-none absolute left-3 top-3 z-20 border border-line bg-background/80 px-2 py-1 text-xs backdrop-blur-sm">
+        <span className="type-mono pointer-events-none absolute left-0 top-0 z-20 text-xs text-muted">
           {gallery[active].asciiArt}
         </span>
 
@@ -93,7 +97,7 @@ export function VinylCrate({
           type="button"
           onClick={() => go(-1)}
           aria-label={dict.playground.prevRecord}
-          className="type-mono absolute bottom-3 left-3 z-20 flex h-8 w-8 items-center justify-center border border-line bg-background/80 backdrop-blur-sm transition-colors hover:bg-surface"
+          className="type-mono absolute bottom-0 left-0 z-20 flex h-8 w-8 items-center justify-center text-muted transition-colors hover:text-foreground"
         >
           ‹
         </button>
@@ -101,13 +105,13 @@ export function VinylCrate({
           type="button"
           onClick={() => go(1)}
           aria-label={dict.playground.nextRecord}
-          className="type-mono absolute bottom-3 right-3 z-20 flex h-8 w-8 items-center justify-center border border-line bg-background/80 backdrop-blur-sm transition-colors hover:bg-surface"
+          className="type-mono absolute bottom-0 right-0 z-20 flex h-8 w-8 items-center justify-center text-muted transition-colors hover:text-foreground"
         >
           ›
         </button>
       </div>
 
-      <ExperimentCaption experiment={experiment} locale={locale} />
-    </figure>
+      <SkeuoCaption experiment={experiment} locale={locale} />
+    </div>
   );
 }

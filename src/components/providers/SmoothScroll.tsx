@@ -65,6 +65,26 @@ export function scrollToTop() {
   }
 }
 
+// Salto instantâneo pra uma posição arbitrária, sem animação: usado só pra
+// restaurar a rolagem da home ao voltar da página de um projeto (ver
+// home-scroll-position.ts), onde o visitante precisa reaparecer exatamente
+// onde estava, não deslizar até lá.
+//
+// resize() antes do scrollTo: a Lenis mede a altura do documento por um
+// ResizeObserver assíncrono, então logo após a home remontar (ainda no
+// mesmo instante em que este efeito roda) o limite interno dela pode
+// continuar com o valor de uma medição anterior, mais curto que a altura
+// real já pintada no DOM, e o salto clampava aquém do alvo. Forçar a
+// remedição antes garante que o clamp use a altura de verdade.
+export function scrollToPosition(y: number) {
+  if (activeLenis) {
+    activeLenis.resize();
+    activeLenis.scrollTo(y, { immediate: true });
+  } else {
+    window.scrollTo({ top: y });
+  }
+}
+
 export function SmoothScroll() {
   const { isBoringMode } = useBoringMode();
   const [prefersReduced, setPrefersReduced] = useState(false);

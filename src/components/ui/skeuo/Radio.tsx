@@ -2,23 +2,23 @@
 
 import dynamic from "next/dynamic";
 import { useRef, useState } from "react";
-import { ExperimentCaption } from "@/components/ui/ExperimentCaption";
+import { SkeuoCaption } from "@/components/ui/skeuo/SkeuoCaption";
 import type { Experiment } from "@/data/types";
 import type { Locale } from "@/i18n/config";
 import type { Dictionary } from "@/i18n/dictionaries";
 import { useNearViewport } from "@/lib/use-near-viewport";
 
 // Substitui o ExperimentCard só no desktop (ver Playground.tsx) para o
-// experimento sem `gallery` nem `process` (produção musical, um vídeo só):
-// um gravador de rolo, em WebGL de verdade (ver three/TapeDeckScene.tsx),
-// parado por padrão. O play liga o mesmo vídeo de estúdio de sempre (mudo)
-// numa telinha do console, e só então os rolos giram. Import disparado só
-// perto da viewport (ver mesmo comentário em VinylCrate.tsx).
-const TapeDeckScene = dynamic(() => import("@/components/ui/skeuo/three/TapeDeckScene"), {
+// experimento sem `gallery` nem `process` (produção musical): um rádio
+// vintage, em WebGL de verdade (ver three/RadioScene.tsx), parado por
+// padrão. O play só liga um balanço leve nele e um equalizador de barras ao
+// lado (o modelo não tem carretel nem tela pra animar de verdade). Import
+// disparado só perto da viewport (ver mesmo comentário em VinylCrate.tsx).
+const RadioScene = dynamic(() => import("@/components/ui/skeuo/three/RadioScene"), {
   ssr: false,
 });
 
-export function TapeDeck({
+export function Radio({
   experiment,
   locale,
   dict,
@@ -32,21 +32,17 @@ export function TapeDeck({
   const isNear = useNearViewport(stageRef);
 
   return (
-    <figure className="group relative border border-line bg-background">
-      <div ref={stageRef} className="relative aspect-square overflow-hidden bg-surface">
-        {isNear && (
-          <TapeDeckScene
-            src={experiment.media.src}
-            poster={experiment.media.poster ?? ""}
-            isPlaying={isPlaying}
-          />
-        )}
+    // Sem moldura (nem borda, nem fundo): o objeto em si é o card, não um
+    // retrato contido numa caixa.
+    <div className="group relative flex flex-col items-center">
+      <div ref={stageRef} className="relative aspect-[4/5] w-full border-b border-line">
+        {isNear && <RadioScene isPlaying={isPlaying} />}
 
         <button
           type="button"
           onClick={() => setIsPlaying((p) => !p)}
           aria-label={isPlaying ? dict.playground.pause : dict.playground.play}
-          className="absolute bottom-3 right-3 z-20 flex h-8 w-8 items-center justify-center rounded-full border border-line bg-background/80 backdrop-blur-sm transition-colors hover:bg-surface"
+          className="absolute bottom-0 right-0 z-20 flex h-8 w-8 items-center justify-center text-muted transition-colors hover:text-foreground"
         >
           {isPlaying ? (
             <span aria-hidden className="flex gap-[3px]">
@@ -62,7 +58,7 @@ export function TapeDeck({
         </button>
       </div>
 
-      <ExperimentCaption experiment={experiment} locale={locale} />
-    </figure>
+      <SkeuoCaption experiment={experiment} locale={locale} />
+    </div>
   );
 }

@@ -23,6 +23,7 @@ import { cases } from "@/data/cases";
 import type { CaseStudy } from "@/data/types";
 import type { Locale } from "@/i18n/config";
 import type { Dictionary } from "@/i18n/dictionaries";
+import { saveHomeScrollPosition } from "@/lib/home-scroll-position";
 import { useMediaQuery } from "@/lib/use-media-query";
 import { useNearViewport } from "@/lib/use-near-viewport";
 
@@ -919,6 +920,7 @@ function MobileCaseCard({
             <div className="mt-6 flex flex-wrap items-center gap-3">
               <MotionLink
                 href={`/${locale}/work/${caseStudy.slug}/`}
+                onClick={saveHomeScrollPosition}
                 whileTap={{ scale: 0.98 }}
                 className="type-mono inline-flex items-center gap-3 border border-white/40 px-6 py-3"
               >

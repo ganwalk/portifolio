@@ -108,8 +108,16 @@ export function SiteMenu({
             exit={{ clipPath: "inset(0 0 100% 0)" }}
             transition={{ duration: 0.55, ease: [0.76, 0, 0.24, 1] }}
           >
-            <div className="gutter flex h-full flex-col py-3">
-              <div className="flex items-center justify-end">
+            <div className="gutter flex h-full flex-col py-3 lg:py-0">
+              {/* Botão de fechar: só no mobile. O comportamento do menu
+                  mobile já estava certo antes desta rodada de ajustes (botão
+                  de fechar, margem no topo) e continua assim, sem mudança.
+                  No desktop (lg:) o botão some: Escape e clicar num item
+                  (toggle(false) no onClick do Link, mais abaixo) já fecham o
+                  overlay, e sem esse botão nem a margem que ele pedia no
+                  topo, os próprios itens do menu podem ocupar a tela
+                  inteira lá. */}
+              <div className="flex items-center justify-end lg:hidden">
                 <button
                   type="button"
                   className="type-mono cursor-pointer text-foreground transition-opacity hover:opacity-60"
@@ -143,7 +151,8 @@ export function SiteMenu({
                   // A régua entre itens (border-t) só existe do lg: pra cima:
                   // ela separa a vinheta de UM item da vinheta do vizinho no
                   // hover, mas hover de verdade não existe em touch, então no
-                  // mobile a régua não delimita nada, só risca a tela à toa.
+                  // mobile a régua não delimita nada, só risca a tela à toa
+                  // (comportamento de sempre, sem mudança nesta rodada).
                   //
                   // lg:flex-1 no próprio item (não só no <nav> em volta): cada
                   // seção ocupa uma fração igual da altura cheia da tela,
@@ -157,6 +166,10 @@ export function SiteMenu({
                   // descrição alinhados: os dois seguem filhos do mesmo Link
                   // com items-center, só que agora esse Link inteiro fica no
                   // centro vertical da seção, não mais preso ao topo dela.
+                  // Só no lg:: no mobile o item continua do tamanho do
+                  // próprio conteúdo, centralizado como grupo pelo
+                  // justify-center do <nav> em volta, o comportamento de
+                  // sempre.
                   <div
                     key={item.id}
                     className={`group relative lg:flex lg:flex-1 lg:flex-col lg:justify-center ${index > 0 ? "lg:border-t lg:border-line" : ""}`}
@@ -180,9 +193,10 @@ export function SiteMenu({
                     {/* py-[0.4em] aqui, não no Link (que já centraliza numeral
                         e rótulo entre si via items-center, um ajuste ali
                         mexeria nessa centralização relativa): o rótulo é
-                        deslocado pra baixo por translate-y-[0.35em] mais
-                        adiante (nudge óptico, ver comentário no próprio
-                        rótulo), um valor em em que cresce junto do
+                        deslocado pra baixo por translate-y-[0.35em]
+                        (lg:translate-y-[0.2em] no desktop) mais adiante
+                        (nudge óptico, ver comentário no próprio rótulo), um
+                        valor em em que cresce junto do
                         text-[Xvw] do rótulo. transform é só pintura, não
                         muda a altura que este overflow-hidden reserva pro
                         filho, e em telas bem largas (7vw vira uma fonte
@@ -217,19 +231,22 @@ export function SiteMenu({
                               translate-y-[0.35em]: a caixa de linha (leading-
                               none) reserva espaço pra descendentes que um
                               rótulo só de caixa alta nunca usa, então a
-                              tinta das letras se assenta um bom tanto acima
-                              do centro geométrico da própria caixa. Medido
-                              direto contra o centro real da linha que contém
+                              tinta das letras se assenta um pouco acima do
+                              centro geométrico da própria caixa. Medido
+                              direto contra o centro real da tarja que contém
                               cada item (a régua entre um item e o próximo,
                               não a caixa CSS do próprio rótulo, que é maior
-                              que a tinta): sem esse nudge a tinta sobrava
-                              perceptivelmente alta dentro da própria linha.
-                              Um valor bem menor (~0,07em) tinha sido usado
-                              antes, medido só contra a caixa CSS do rótulo em
-                              vez do centro visual da linha (que é o que o
-                              olho realmente compara), e por isso não dava
-                              conta do desvio de verdade. */}
-                          <span className="type-display type-inktrap relative z-10 translate-y-[0.35em] text-[11vw] leading-none text-foreground transition-colors duration-500 ease-out group-hover:text-background sm:text-[7vw] lg:text-[5vw] xl:text-[4vw]">
+                              que a tinta): sem esse nudge a tinta sobra
+                              perceptivelmente alta dentro da própria tarja.
+                              Esse valor segue certo pro mobile, onde a tarja
+                              continua do tamanho do próprio conteúdo (sem
+                              flex-1, comportamento inalterado). No desktop
+                              (lg:translate-y-[0.2em]) a tarja passa a ser uma
+                              fração inteira da tela (ver lg:flex-1 no item,
+                              acima), bem mais alta que o texto, e 0,35em
+                              empurrava demais contra ESSA referência maior:
+                              0,2em é a medida certa só lá. */}
+                          <span className="type-display type-inktrap relative z-10 translate-y-[0.35em] text-[11vw] leading-none text-foreground transition-colors duration-500 ease-out group-hover:text-background sm:text-[7vw] lg:translate-y-[0.2em] lg:text-[5vw] xl:text-[4vw]">
                             {item.label}
                           </span>
                           {/* Frase curta contando do que a seção trata,

@@ -3,7 +3,7 @@
 import dynamic from "next/dynamic";
 import { useRef, useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
-import { ExperimentCaption } from "@/components/ui/ExperimentCaption";
+import { SkeuoCaption } from "@/components/ui/skeuo/SkeuoCaption";
 import type { Experiment } from "@/data/types";
 import type { Locale } from "@/i18n/config";
 import type { Dictionary } from "@/i18n/dictionaries";
@@ -51,8 +51,11 @@ export function VintageTV({
   }
 
   return (
-    <figure className="group relative border border-line bg-background">
-      <div ref={stageRef} className="relative aspect-square overflow-hidden bg-surface">
+    // Sem moldura (nem borda, nem fundo): o objeto em si é o card, não um
+    // retrato contido numa caixa. aspect-[4/5], não aspect-square: dá
+    // respiro vertical de sobra pra antena não rasparem no teto do card.
+    <div className="group relative flex flex-col items-center">
+      <div ref={stageRef} className="relative aspect-[4/5] w-full border-b border-line">
         {isNear && (
           <VintageTVScene channel={channels[channel]} knobAngle={knobTurns * -0.9} />
         )}
@@ -63,13 +66,9 @@ export function VintageTV({
             initial={{ opacity: 0.95 }}
             animate={{ opacity: 0 }}
             transition={{ duration: 0.22 }}
-            className="skeuo-static pointer-events-none absolute left-[10%] top-[16%] z-10 h-[46%] w-[46%]"
+            className="skeuo-static pointer-events-none absolute left-[28%] top-[30%] z-10 h-[30%] w-[38%]"
           />
         )}
-
-        <span className="type-mono pointer-events-none absolute bottom-3 left-[12%] z-10 border border-white/30 bg-black/60 px-1.5 py-0.5 text-[10px] text-white/80">
-          {dict.playground.channelLabel} {channel + 1}/{channels.length}
-        </span>
 
         <button
           type="button"
@@ -79,7 +78,11 @@ export function VintageTV({
         />
       </div>
 
-      <ExperimentCaption experiment={experiment} locale={locale} />
-    </figure>
+      <p className="type-mono mt-2 text-xs text-muted">
+        {dict.playground.channelLabel} {channel + 1}/{channels.length}
+      </p>
+
+      <SkeuoCaption experiment={experiment} locale={locale} />
+    </div>
   );
 }
