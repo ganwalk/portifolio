@@ -79,7 +79,7 @@ export const cases: CaseStudy[] = [
       },
     },
     comingSoon: true,
-    // repoUrl: "https://github.com/...", repositório público ainda não informado: o botão "ver repositório" do card só nasce quando este campo existir.
+    repoUrl: "#", // placeholder até a URL real do repositório: só pra testar o botão "ver repositório" aparecendo, troque por um link de verdade antes de publicar.
   },
   {
     slug: "ecossistema-auvp",
@@ -155,7 +155,7 @@ export const cases: CaseStudy[] = [
       },
     },
     comingSoon: true,
-    // repoUrl: "https://github.com/...", repositório público ainda não informado: o botão "ver repositório" do card só nasce quando este campo existir.
+    repoUrl: "#", // placeholder até a URL real do repositório: só pra testar o botão "ver repositório" aparecendo, troque por um link de verdade antes de publicar.
   },
   {
     slug: "ganwalk",
@@ -213,7 +213,7 @@ export const cases: CaseStudy[] = [
       },
     },
     comingSoon: true,
-    // repoUrl: "https://github.com/...", repositório público ainda não informado: o botão "ver repositório" do card só nasce quando este campo existir.
+    repoUrl: "#", // placeholder até a URL real do repositório: só pra testar o botão "ver repositório" aparecendo, troque por um link de verdade antes de publicar.
   },
   {
     slug: "dezert-horse",
@@ -265,7 +265,7 @@ export const cases: CaseStudy[] = [
       },
     },
     comingSoon: true,
-    // repoUrl: "https://github.com/...", repositório público ainda não informado: o botão "ver repositório" do card só nasce quando este campo existir.
+    repoUrl: "#", // placeholder até a URL real do repositório: só pra testar o botão "ver repositório" aparecendo, troque por um link de verdade antes de publicar.
   },
   {
     slug: "pink-opala",
@@ -317,7 +317,7 @@ export const cases: CaseStudy[] = [
       },
     },
     comingSoon: true,
-    // repoUrl: "https://github.com/...", repositório público ainda não informado: o botão "ver repositório" do card só nasce quando este campo existir.
+    repoUrl: "#", // placeholder até a URL real do repositório: só pra testar o botão "ver repositório" aparecendo, troque por um link de verdade antes de publicar.
   },
 ];
 

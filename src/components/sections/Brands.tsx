@@ -25,7 +25,14 @@ export function Brands({ locale, dict }: { locale: Locale; dict: Dictionary }) {
     <div>
       <h3 className="type-mono mb-4 text-muted">{dict.brands.title}</h3>
 
-      <Marquee durationSeconds={32}>
+      {/* -mx cancelando o padding-inline do `.gutter` do próprio About (ver
+          globals.css, os mesmos três valores: 1.5rem/3rem/5rem), não um
+          `w-screen`: o `.gutter` não tem max-width, só padding, então a
+          margem negativa já basta pra empurrar o letreiro até a borda da
+          viewport nos dois lados, sem o glitch de barra de rolagem que
+          `100vw` traria. Só o LETREIRO sai do gutter, o rótulo "Confiam..."
+          acima continua alinhado com o resto de About. */}
+      <Marquee durationSeconds={32} className="-mx-6 sm:-mx-12 xl:-mx-20">
         <ul className="flex items-center">
           {brands.map((brand, index) => (
             <li key={index} className="flex shrink-0 items-center">
