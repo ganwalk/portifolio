@@ -3,22 +3,28 @@
 import { useEffect, useRef } from "react";
 import type { MotionValue } from "framer-motion";
 
-// O nome da hero atravessado por uma lente que segue o cursor: onde o
-// ponteiro passa, "ARMANDO CUSTODIO" entorta como se houvesse um vidro
-// convexo pousado em cima dele. Único uso de WebGL do site, escopo mínimo de
-// sempre (um triângulo cheio de tela e um fragment shader, sem three.js nem
-// nenhuma biblioteca).
+// O nome da hero incha sob o cursor: onde o ponteiro passa, "ARMANDO
+// CUSTODIO" engorda, como se o peso da fonte subisse por um instante, sem
+// mudar de lugar. Único uso de WebGL do site, escopo mínimo de sempre (um
+// triângulo cheio de tela e um fragment shader, sem three.js nem nenhuma
+// biblioteca).
 //
 // A deformação já morou no fundo da hero, numa grade de colunas. O efeito era
 // bom e o suporte era o errado: fio de um pixel a 14% de opacidade não tem
 // massa suficiente pra uma lente valer a pena, e a grade em si acabou lida
-// como papel quadriculado. Aqui a lente tem o que deformar: a manchete é o
+// como papel quadriculado. Aqui a lente tem o que inchar: a manchete é o
 // maior objeto da página e a coisa mais preta dela.
+//
+// Uma versão anterior empurrava a POSIÇÃO do texto (um vidro convexo
+// deslocando pixels), mas isso deixava as letras tortas, não gordas. O
+// pedido era peso, não posição: o shader troca o empurrão por uma dilatação
+// de alpha (ver comentário no shader abaixo), que engrossa o traço da letra
+// sem mexer em onde ela está.
 //
 // A amplitude e o alcance vêm do MESMO raio que já rege a lente de inversão
 // (`lensRadius`, uma mola em Hero.tsx), então tudo acontece de graça: em tela
 // de toque o raio nunca sai de zero (nenhum mousemove dispara), e perto do
-// CTA, onde o raio encolhe pra ceder o palco ao clique, a deformação encolhe
+// CTA, onde o raio encolhe pra ceder o palco ao clique, o inchaço encolhe
 // junto. Nenhuma regra nova, nenhum segundo estado de cursor.
 //
 // O texto não é redesenhado a cada quadro: vai UMA vez pra uma textura (canvas
@@ -53,38 +59,53 @@ void main() {
   vec2 device = gl_FragCoord.xy / uDpr;
   vec2 p = vec2(device.x, uSize.y - device.y);
 
-  // A lente empurra o desenho pra FORA do cursor. Como o shader é amostrado
-  // por pixel, o empurrão se faz LENDO a textura num ponto puxado na direção
-  // contrária: o que aparece em p é o que o texto tem em q.
+  // Inchar sem mover: em vez de ler a textura num ponto deslocado (o que
+  // arrasta a letra pro lado), cada pixel também espia uma roda de pontos ao
+  // redor de si mesmo e assume a maior opacidade encontrada nela. Um pixel
+  // que estava vazio, mas tem um traço de letra a poucos px de distância,
+  // passa a herdar aquele traço: a borda da letra cresce PRA FORA em todas
+  // as direções, inclusive fechando um pouco os vãos internos (o buraco do
+  // "A", do "O"), exatamente o que um peso de fonte mais pesado faz. O pixel
+  // em si nunca sai do lugar, só a fronteira entre tinta e vazio se move.
   //
-  // O perfil precisa zerar NO cursor, não ser máximo ali: com uma gaussiana
-  // pura (máxima no centro) todos os pixels em volta do ponteiro são
-  // deslocados pela mesma distância em direções opostas, então muitos leem o
-  // mesmo ponto da textura e o desenho colapsa numa estrela no meio,
-  // artefato de amostragem, não de ótica. A distância vezes a gaussiana zera
-  // no centro, sobe até o pico e decai: é o perfil de uma lente convexa de
-  // verdade, que não desloca nada no eixo ótico e desloca mais no meio do
-  // caminho até a borda.
+  // A gaussiana aqui é máxima NO cursor, não zero: ao contrário do empurrão
+  // (onde uma gaussiana pura colapsava tudo numa estrela, porque pixels
+  // opostos liam o mesmo ponto da textura), a dilatação não tem esse
+  // artefato de amostragem, então o perfil pode ser o mais simples possível,
+  // pico exatamente sob o ponteiro e decaindo pra fora.
   //
-  // A amplitude e o alcance saem os dois do raio, então a deformação some
-  // sozinha quando o raio vai a zero (cursor fora da hero, ou tela de toque,
-  // onde ele nunca sai de zero).
+  // O alcance da roda de amostragem sai do raio da lente, então o inchaço
+  // some sozinho quando o raio vai a zero (cursor fora da hero, ou tela de
+  // toque, onde ele nunca sai de zero) e encolhe perto do CTA junto com o
+  // resto da lente.
   //
-  // A amplitude é contida de propósito. Numa grade de fios finos dava pra
-  // exagerar sem custo; aqui o alvo é a única coisa que a página PRECISA que
-  // se leia, e passar do ponto transforma o nome em borrão. A régua foi
-  // essa: a letra sob o cursor entorta o suficiente pra ficar claro que tem
-  // um vidro ali, e continua sendo aquela letra.
+  // 0.035 é a régua do "levemente": o suficiente pra ficar claro que o peso
+  // mudou sob o cursor, pequeno o bastante pra nunca virar borrão nem fechar
+  // de vez os vãos da letra. A roda tem DOIS raios, não um só: um raio único
+  // cresce o traço em degrau (o círculo de amostragem inteiro conta do mesmo
+  // jeito), a segunda roda, mais curta, preenche o miolo desse degrau e a
+  // borda engrossa em gradiente em vez de vinco.
   vec2 toMouse = p - uMouse;
   float dist = length(toMouse);
   float sigma = max(uRadius, 1.0) * 0.7;
   float falloff = exp(-(dist * dist) / (2.0 * sigma * sigma));
-  float push = (dist / sigma) * falloff;
-  vec2 dir = dist > 0.001 ? toMouse / dist : vec2(0.0);
-  vec2 q = p - dir * push * uRadius * 0.3;
+  float growth = falloff * uRadius * 0.035;
 
-  vec4 texel = texture2D(uTexture, q / uSize);
-  gl_FragColor = vec4(texel.rgb * texel.a, texel.a);
+  vec4 best = texture2D(uTexture, p / uSize);
+
+  if (growth > 0.05) {
+    const int SAMPLES = 16;
+    for (int i = 0; i < SAMPLES; i++) {
+      float angle = (6.28318530718 * float(i)) / float(SAMPLES);
+      vec2 dir = vec2(cos(angle), sin(angle));
+      vec4 outer = texture2D(uTexture, (p + dir * growth) / uSize);
+      vec4 inner = texture2D(uTexture, (p + dir * growth * 0.5) / uSize);
+      if (outer.a > best.a) best = outer;
+      if (inner.a > best.a) best = inner;
+    }
+  }
+
+  gl_FragColor = vec4(best.rgb * best.a, best.a);
 }
 `;
 

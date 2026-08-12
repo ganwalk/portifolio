@@ -292,9 +292,9 @@ decorativa. O que dá vida é movimento e tipografia, não ornamento.
   (`src/lib/engraving.ts`, ver SEO), que são paradas por definição e não
   disputam com movimento nenhum.
 
-  **O nome é atravessado por uma lente que segue o cursor** (`HeroTitleGL`,
-  o único uso de WebGL do site). Onde o ponteiro passa, "ARMANDO CUSTODIO"
-  entorta, como se houvesse um vidro convexo pousado em cima dele.
+  **O nome incha sob uma lente que segue o cursor** (`HeroTitleGL`, o único
+  uso de WebGL do site). Onde o ponteiro passa, "ARMANDO CUSTODIO" engorda,
+  como se o peso da fonte subisse por um instante, sem mudar de lugar.
 
   A deformação já morou no fundo, numa grade de colunas do próprio layout
   desenhada em fio de um pixel. O efeito era bom e o suporte era o errado:
