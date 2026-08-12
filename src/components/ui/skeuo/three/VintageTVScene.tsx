@@ -2,14 +2,32 @@
 
 import { Suspense, useRef } from "react";
 import { Canvas, useFrame, useLoader } from "@react-three/fiber";
-import { RoundedBox } from "@react-three/drei";
 import * as THREE from "three";
 import { useSkeuoVideoTexture } from "@/components/ui/skeuo/three/useSkeuoVideoTexture";
+import { useCenteredGLTF } from "@/components/ui/skeuo/three/useCenteredGLTF";
 
-// Cena WebGL da tevê vintage (ver VinylCrateScene.tsx pro raciocínio geral
-// de renderizar só no cliente, via next/dynamic em VintageTV.tsx). O botão
-// giratório mora em HTML por cima (VintageTV.tsx): esta cena só recebe o
-// canal atual e o ângulo alvo do botão, e anima os dois a cada quadro.
+// Cena WebGL da tevê vintage: modelo pronto (não mais geometria feita à mão
+// aqui dentro), da "Furniture Kit" da Kenney (CC0, ver public/models/
+// kenney-furniture-kit/LICENSE.txt), o mesmo pacote da caixa de vinis e do
+// rádio (ver VinylCrateScene.tsx e RadioScene.tsx), pra manter as três peças
+// no mesmo estilo low poly. Renderizada só no cliente, via next/dynamic em
+// VintageTV.tsx. O botão giratório mora em HTML por cima: esta cena só
+// recebe o canal atual e o ângulo alvo do botão, e anima os dois a cada
+// quadro.
+//
+// A origem de cada modelo da Kenney fica no canto inferior frontal (assim
+// as peças de um kit encaixam umas nas outras pela própria origem, sem
+// recentralizar nada): X cresce da esquerda pra direita, Y sobe do chão, Z
+// vai de 0 (face da frente) até -profundidade (o fundo). Tela, antena e
+// botão são posicionados nesse MESMO referencial cru; só o grupo de fora
+// centraliza e escala o conjunto inteiro pra câmera.
+const basePath = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
+const TV_URL = `${basePath}/models/kenney-furniture-kit/televisionVintage.glb`;
+const ANTENNA_URL = `${basePath}/models/kenney-furniture-kit/televisionAntenna.glb`;
+// Altura da antena como fração da altura da tevê, medida uma vez nos dois
+// modelos (0.103 / 0.27): mantém a antena encaixada no topo mesmo que o
+// tamanho de referência mude.
+const ANTENNA_HEIGHT_RATIO = 0.38;
 
 type Channel =
   | { kind: "video"; src: string; poster: string }
@@ -30,35 +48,7 @@ function ImageScreen({ src }: { src: string }) {
   return <meshBasicMaterial map={texture} toneMapped={false} />;
 }
 
-// Meio-corpo da carcaça, args[2]/2 = 0.7: RoundedBox arredonda as quinas por
-// dentro do tamanho nominal, então a face frontal de verdade (achatada) fica
-// um pouco atrás do que esses 0.7 sugerem. Tudo que precisa aparecer NA
-// frente (moldura, tela, botões) fica em z bem além disso (0.78+), de
-// propósito, pra nunca correr o risco de nascer embutido na carcaça.
-const BODY_HALF_DEPTH = 0.7;
-const FRONT_Z = BODY_HALF_DEPTH + 0.1;
-
-function Screen({ channel }: { channel: Channel }) {
-  // A moldura (mesh logo abaixo, em TVBody) tem 0.1 de espessura centrada em
-  // FRONT_Z, ou seja, sua própria face frontal já está em FRONT_Z + 0.05: a
-  // tela precisa nascer ALÉM disso, senão fica embutida dentro da moldura e
-  // some atrás dela, o mesmo bug que FRONT_Z já resolveu entre a moldura e a
-  // carcaça (ver comentário ali em cima).
-  return (
-    <mesh position={[-0.55, 0.15, FRONT_Z + 0.08]}>
-      <planeGeometry args={[1.7, 1.7]} />
-      <Suspense fallback={<meshStandardMaterial color="#111111" />}>
-        {channel.kind === "video" ? (
-          <VideoScreen src={channel.src} poster={channel.poster} />
-        ) : (
-          <ImageScreen src={channel.src} />
-        )}
-      </Suspense>
-    </mesh>
-  );
-}
-
-function Knob({ targetAngle }: { targetAngle: number }) {
+function Knob({ targetAngle, tvSize }: { targetAngle: number; tvSize: THREE.Vector3 }) {
   const ref = useRef<THREE.Group>(null);
   useFrame((_, delta) => {
     const g = ref.current;
@@ -67,68 +57,73 @@ function Knob({ targetAngle }: { targetAngle: number }) {
     g.rotation.z += (targetAngle - g.rotation.z) * lerp;
   });
   return (
-    <group ref={ref} position={[0.95, 0.55, FRONT_Z + 0.08]}>
+    <group ref={ref} position={[tvSize.x * 0.82, tvSize.y * 0.35, tvSize.x * 0.03]}>
       <mesh rotation={[Math.PI / 2, 0, 0]}>
-        <cylinderGeometry args={[0.22, 0.22, 0.16, 24]} />
+        <cylinderGeometry args={[tvSize.x * 0.05, tvSize.x * 0.05, tvSize.x * 0.04, 24]} />
         <meshStandardMaterial color="#4a4a4a" roughness={0.4} metalness={0.3} />
       </mesh>
-      <mesh position={[0, 0.13, 0.12]}>
-        <boxGeometry args={[0.04, 0.02, 0.2]} />
+      <mesh position={[0, tvSize.x * 0.035, tvSize.x * 0.03]}>
+        <boxGeometry args={[tvSize.x * 0.012, tvSize.x * 0.006, tvSize.x * 0.05]} />
         <meshStandardMaterial color="#e8e8e8" />
       </mesh>
     </group>
   );
 }
 
-function TVBody() {
+function TVAssembly({ channel, knobAngle }: { channel: Channel; knobAngle: number }) {
+  const { scene, size } = useCenteredGLTF(TV_URL);
+  const { scene: antennaScene } = useCenteredGLTF(ANTENNA_URL);
+
+  const combinedTop = size.y * (1 + ANTENNA_HEIGHT_RATIO);
+  const centerX = size.x / 2;
+  const centerY = combinedTop / 2;
+  const centerZ = -size.z / 2;
+  // Normaliza pela maior dimensão (largura, altura com antena, ou
+  // profundidade): o mesmo critério da caixa de vinis e do rádio (ver
+  // VinylCrateScene.tsx e RadioScene.tsx), pra as três cenas caberem no
+  // mesmo enquadramento de câmera sem ajuste manual por objeto.
+  const scale = 1 / Math.max(size.x, combinedTop, size.z);
+
   return (
-    <>
-      <RoundedBox args={[3, 2.6, 1.4]} radius={0.22} smoothness={4} castShadow receiveShadow>
-        <meshStandardMaterial color="#e7ddc4" roughness={0.55} />
-      </RoundedBox>
+    <group scale={scale}>
+      <group position={[-centerX, -centerY, -centerZ]}>
+        <primitive object={scene} castShadow receiveShadow />
 
-      {/* Moldura escura da tela, um pouco à frente da carcaça. */}
-      <mesh position={[-0.55, 0.15, FRONT_Z]}>
-        <boxGeometry args={[1.9, 1.9, 0.1]} />
-        <meshStandardMaterial color="#141414" roughness={0.4} />
-      </mesh>
+        {/* Antena: a própria Kenney desenha com a origem centralizada em X e
+            apoiada no próprio chão (Y=0), então encaixa no topo da tevê só
+            alinhando X ao centro da carcaça, Y à altura dela, Z em direção
+            ao fundo (valores negativos). */}
+        <primitive object={antennaScene} position={[centerX, size.y, -size.z * 0.35]} />
 
-      {/* Antena em V. */}
-      <mesh position={[-0.35, 1.65, 0]} rotation={[0, 0, 0.5]}>
-        <cylinderGeometry args={[0.015, 0.015, 1.3, 8]} />
-        <meshStandardMaterial color="#8a8a8a" metalness={0.6} roughness={0.3} />
-      </mesh>
-      <mesh position={[0.05, 1.65, 0]} rotation={[0, 0, -0.5]}>
-        <cylinderGeometry args={[0.015, 0.015, 1.3, 8]} />
-        <meshStandardMaterial color="#8a8a8a" metalness={0.6} roughness={0.3} />
-      </mesh>
+        {/* Tela: sem nó próprio no modelo (a Kenney desenha tudo como UMA
+            malha só), então é uma segunda peça, plana, encostada na frente
+            da carcaça (Z perto de 0, a face da frente) onde o recorte da
+            tela está desenhado. Frações do tamanho real do modelo, não
+            pixels fixos: calibradas olhando o resultado renderizado. */}
+        <mesh position={[size.x * 0.32, size.y * 0.58, size.x * 0.03]}>
+          <planeGeometry args={[size.x * 0.44, size.y * 0.62]} />
+          <Suspense fallback={<meshStandardMaterial color="#111111" />}>
+            {channel.kind === "video" ? (
+              <VideoScreen src={channel.src} poster={channel.poster} />
+            ) : (
+              <ImageScreen src={channel.src} />
+            )}
+          </Suspense>
+        </mesh>
 
-      {/* Pezinhos */}
-      <mesh position={[-1.1, -1.42, 0.3]}>
-        <boxGeometry args={[0.35, 0.16, 0.35]} />
-        <meshStandardMaterial color="#3a3226" />
-      </mesh>
-      <mesh position={[1.1, -1.42, 0.3]}>
-        <boxGeometry args={[0.35, 0.16, 0.35]} />
-        <meshStandardMaterial color="#3a3226" />
-      </mesh>
-    </>
+        <Knob targetAngle={knobAngle} tvSize={size} />
+      </group>
+    </group>
   );
 }
 
 function Scene({ channel, knobAngle }: { channel: Channel; knobAngle: number }) {
   return (
     <>
-      <ambientLight intensity={0.75} />
+      <ambientLight intensity={0.8} />
       <directionalLight position={[3, 4, 4]} intensity={1.1} castShadow />
       <directionalLight position={[-3, 1, -2]} intensity={0.3} />
-      <TVBody />
-      <Screen key={`${channel.kind}-${channel.src}`} channel={channel} />
-      <Knob targetAngle={knobAngle} />
-      <mesh position={[0.95, -0.15, FRONT_Z + 0.08]}>
-        <boxGeometry args={[0.5, 0.18, 0.1]} />
-        <meshStandardMaterial color="#4a4a4a" roughness={0.4} />
-      </mesh>
+      <TVAssembly key={`${channel.kind}-${channel.src}`} channel={channel} knobAngle={knobAngle} />
     </>
   );
 }
@@ -144,7 +139,7 @@ export default function VintageTVScene({
     <Canvas
       shadows
       dpr={[1, 2]}
-      camera={{ position: [0, 0.2, 5.2], fov: 34 }}
+      camera={{ position: [0, 0.1, 3], fov: 30 }}
       gl={{ antialias: true, alpha: true }}
       style={{ pointerEvents: "none" }}
     >
