@@ -81,6 +81,16 @@ export const pt = {
     title: "Extras",
     subtitle:
       "Ilustração, animação e produção musical, os experimentos que alimentam o trabalho.",
+    // Rótulos dos objetos skeumórficos de desktop (ver components/ui/skeuo):
+    // a caixa de vinis, a tevê vintage e a deck de fita, só em telas grandes
+    // (ver Playground.tsx). No mobile os cards continuam simples
+    // (ExperimentCard), sem esses controles.
+    prevRecord: "Disco anterior",
+    nextRecord: "Próximo disco",
+    changeChannel: "Trocar de canal",
+    channelLabel: "Canal",
+    play: "Tocar",
+    pause: "Pausar",
   },
   about: {
     title: "Sobre",

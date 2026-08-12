@@ -24,6 +24,7 @@ import type { CaseStudy } from "@/data/types";
 import type { Locale } from "@/i18n/config";
 import type { Dictionary } from "@/i18n/dictionaries";
 import { useMediaQuery } from "@/lib/use-media-query";
+import { useNearViewport } from "@/lib/use-near-viewport";
 
 // motion.create, não motion(Link): a API atual do framer-motion (v11+) pra
 // dar superpoderes de motion (whileTap, aqui) a um componente que já
@@ -790,33 +791,10 @@ function ExpandedCase({
 // página do case direto, sem o overlay expandido em FLIP que a versão de
 // desktop usa.
 
-/** true assim que o elemento entra numa margem generosa da viewport (25% de
- *  antecedência): controla o mount da mídia de cada cartão (ver MediaView),
- *  pra vídeo autoplay não ligar todos de uma vez fora de tela. Uma vez
- *  perto, fica true pra sempre: não faz sentido desmontar e recarregar a
- *  mídia de um cartão que já foi visitado. */
-function useNearViewport<T extends HTMLElement>(ref: React.RefObject<T | null>) {
-  const [isNear, setIsNear] = useState(false);
-  useEffect(() => {
-    if (isNear) return;
-    const el = ref.current;
-    if (!el) return;
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) setIsNear(true);
-      },
-      { rootMargin: "25% 0px" },
-    );
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, [isNear, ref]);
-  return isNear;
-}
-
 // Folga extra (em svh) que cada cartão mobile ganha além da própria altura
-// de tela antes que o próximo alcance o topo e comece a subir por cima: mais
-// tempo parado em cada projeto, sem mexer no efeito de sticky em si (ver
-// comentário dentro de MobileCaseCard, abaixo).
+// de tela: mais rolagem dentro do MESMO cartão antes que o próximo alcance o
+// topo e comece a subir por cima dele (ver comentário dentro de
+// MobileCaseCard, abaixo).
 const MOBILE_CARD_REST_VH = 18;
 
 function MobileCaseCard({
@@ -861,97 +839,108 @@ function MobileCaseCard({
   const metric = caseStudy.metrics[0];
 
   return (
-    // Contêiner de flow mais alto que a própria tela (100svh do cartão +
-    // MOBILE_CARD_REST_VH de folga): o cartão sticky continua preenchendo a
-    // tela inteira o tempo todo, sem gap nenhum (é ele, não o contêiner, que
-    // pinta o fundo preto), só que agora precisa de mais rolagem parada
-    // nesse projeto antes que o PRÓXIMO cartão alcance o topo e comece a
-    // subir por cima dele. Mesmo efeito de sempre, só com mais respiro entre
-    // um projeto e o outro.
-    <div style={{ height: `${100 + MOBILE_CARD_REST_VH}svh` }}>
-      <div
-        ref={cardRef}
-        className="sticky top-0 h-svh w-full overflow-hidden bg-black text-white"
-      >
-        {/* Não é mais o cartão inteiro clicável: dois botões de verdade no
-            rodapé (detalhamento + repositório, ver abaixo) no lugar de um
-            <Link> só cobrindo tudo. */}
-        <div className="absolute inset-0">
-          <motion.div
-            className="absolute inset-0 scale-125"
-            style={reduceMotion ? undefined : { y: mediaY }}
-          >
-            {isNear ? (
-              <MediaView
-                media={caseStudy.cover}
-                locale={locale}
-                className="absolute inset-0 h-full w-full object-cover"
-              />
-            ) : (
-              <div className="absolute inset-0 bg-surface" />
-            )}
-          </motion.div>
-          <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/10 to-black/45" />
+    // O CARTÃO em si é que é mais alto que a tela (h-svh + MOBILE_CARD_REST_VH
+    // de folga), não um contêiner por fora dele: continua sendo uma única
+    // caixa sticky, pintada por inteiro (fundo preto ou mídia, nunca vazio),
+    // então não existe onde um vão do fundo da página possa aparecer durante
+    // a rolagem. A folga só significa mais rolagem "gasta" dentro do MESMO
+    // cartão antes que o próximo alcance o topo e comece a subir por cima
+    // dele: mais tempo parado em cada projeto, mesmo efeito de sempre.
+    //
+    // Um wrapper por fora, mais alto, com este sticky div (só h-svh) dentro,
+    // foi a primeira tentativa e SE PROVOU ERRADA: perto do fim da folga, o
+    // cartão descola do topo do wrapper e passa a colar no fundo dele pra
+    // continuar acompanhando o scroll, abrindo um vão do tamanho da folga no
+    // topo, exatamente a tira de fundo que este comentário queria evitar.
+    // Cartão único e mais alto não tem esse vão: não existe wrapper com
+    // sobra de espaço em lugar nenhum, é tudo a mesma caixa.
+    <div
+      ref={cardRef}
+      style={{ height: `${100 + MOBILE_CARD_REST_VH}svh` }}
+      className="sticky top-0 w-full overflow-hidden bg-black text-white"
+    >
+      {/* Não é mais o cartão inteiro clicável: dois botões de verdade no
+          rodapé (detalhamento + repositório, ver abaixo) no lugar de um
+          <Link> só cobrindo tudo. */}
+      <div className="absolute inset-0">
+        <motion.div
+          className="absolute inset-0 scale-125"
+          style={reduceMotion ? undefined : { y: mediaY }}
+        >
+          {isNear ? (
+            <MediaView
+              media={caseStudy.cover}
+              locale={locale}
+              className="absolute inset-0 h-full w-full object-cover"
+            />
+          ) : (
+            <div className="absolute inset-0 bg-surface" />
+          )}
+        </motion.div>
+        <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/10 to-black/45" />
 
-          {/* pt-16, não py-10 nos dois lados: o cabeçalho é fixed e flutua
-              por cima da pilha inteira (z-40, mais alto que qualquer cartão
-              sticky aqui embaixo), então sem esse respiro extra a linha de
-              índice do cartão TRAVADO no topo (ver `sticky` acima) nascia
-              parcialmente atrás da barra, mesmo antes do próximo cartão
-              chegar pra cobri-la de verdade. pt-16 desconta a altura da
-              barra (3.5rem) e sobra um pouco de respiro, o mesmo raciocínio
-              do `pt-24` da hero (ver Hero.tsx); pb-10 embaixo não tem esse
-              problema (nada flutua ali) e continua o valor de sempre. Assim
-              a única coisa que chega a cobrir a informação de um cartão é o
-              PRÓXIMO cartão chegando por cima, nunca o cabeçalho. */}
-          <div className="gutter absolute inset-0 flex flex-col justify-between pb-10 pt-16">
-            <Reveal className="flex items-start justify-between gap-4">
-              <p className="type-mono text-white/70">
-                {pad(index + 1)} / {pad(totalCases)} · {caseStudy.year}
-              </p>
-              <p className="text-right">
-                <span className="type-serif-display block text-4xl">
-                  {metric.value}
-                </span>
-                <span className="type-mono text-white/70">
-                  {metric.label[locale]}
-                </span>
-              </p>
-            </Reveal>
+        {/* h-svh, não inset-0: as informações precisam caber na TELA, não
+            no cartão inteiro (que agora é mais alto que ela). Ancorado no
+            topo (top-0), a mesma janela que fica visível o tempo todo
+            enquanto o cartão está grudado ali. pt-16, não py-10 nos dois
+            lados: o cabeçalho é fixed e flutua por cima da pilha inteira
+            (z-40, mais alto que qualquer cartão sticky aqui embaixo), então
+            sem esse respiro extra a linha de índice do cartão TRAVADO no
+            topo (ver `sticky` acima) nascia parcialmente atrás da barra,
+            mesmo antes do próximo cartão chegar pra cobri-la de verdade.
+            pt-16 desconta a altura da barra (3.5rem) e sobra um pouco de
+            respiro, o mesmo raciocínio do `pt-24` da hero (ver Hero.tsx);
+            pb-10 embaixo não tem esse problema (nada flutua ali) e continua
+            o valor de sempre. Assim a única coisa que chega a cobrir a
+            informação de um cartão é o PRÓXIMO cartão chegando por cima,
+            nunca o cabeçalho. */}
+        <div className="gutter absolute inset-x-0 top-0 flex h-svh flex-col justify-between pb-10 pt-16">
+          <Reveal className="flex items-start justify-between gap-4">
+            <p className="type-mono text-white/70">
+              {pad(index + 1)} / {pad(totalCases)} · {caseStudy.year}
+            </p>
+            <p className="text-right">
+              <span className="type-serif-display block text-4xl">
+                {metric.value}
+              </span>
+              <span className="type-mono text-white/70">
+                {metric.label[locale]}
+              </span>
+            </p>
+          </Reveal>
 
-            <Reveal delay={0.08}>
-              <h3 className="type-display type-inktrap pt-[0.16em] text-[11vw] leading-[0.9]">
-                {caseStudy.title[locale]}
-              </h3>
-              <p className="type-mono mt-3 text-white/70">
-                {caseStudy.tags[locale].join(" • ")}
-              </p>
-              <div className="mt-6 flex flex-wrap items-center gap-3">
-                <MotionLink
-                  href={`/${locale}/work/${caseStudy.slug}/`}
+          <Reveal delay={0.08}>
+            <h3 className="type-display type-inktrap pt-[0.16em] text-[11vw] leading-[0.9]">
+              {caseStudy.title[locale]}
+            </h3>
+            <p className="type-mono mt-3 text-white/70">
+              {caseStudy.tags[locale].join(" • ")}
+            </p>
+            <div className="mt-6 flex flex-wrap items-center gap-3">
+              <MotionLink
+                href={`/${locale}/work/${caseStudy.slug}/`}
+                whileTap={{ scale: 0.98 }}
+                className="type-mono inline-flex items-center gap-3 border border-white/40 px-6 py-3"
+              >
+                {caseStudy.comingSoon ? dict.cases.comingSoon : dict.cases.viewCase}
+                <span aria-hidden>→</span>
+              </MotionLink>
+
+              {caseStudy.repoUrl && (
+                <motion.a
+                  href={caseStudy.repoUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   whileTap={{ scale: 0.98 }}
-                  className="type-mono inline-flex items-center gap-3 border border-white/40 px-6 py-3"
+                  aria-label={`${dict.cases.repo} · ${caseStudy.title[locale]}`}
+                  className="type-mono inline-flex items-center gap-2 border border-white/40 px-4 py-3 text-white/70"
                 >
-                  {caseStudy.comingSoon ? dict.cases.comingSoon : dict.cases.viewCase}
-                  <span aria-hidden>→</span>
-                </MotionLink>
-
-                {caseStudy.repoUrl && (
-                  <motion.a
-                    href={caseStudy.repoUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    whileTap={{ scale: 0.98 }}
-                    aria-label={`${dict.cases.repo} · ${caseStudy.title[locale]}`}
-                    className="type-mono inline-flex items-center gap-2 border border-white/40 px-4 py-3 text-white/70"
-                  >
-                    <GitHubIcon className="h-3.5 w-3.5" />
-                    {dict.cases.repo}
-                  </motion.a>
-                )}
-              </div>
-            </Reveal>
-          </div>
+                  <GitHubIcon className="h-3.5 w-3.5" />
+                  {dict.cases.repo}
+                </motion.a>
+              )}
+            </div>
+          </Reveal>
         </div>
       </div>
     </div>
