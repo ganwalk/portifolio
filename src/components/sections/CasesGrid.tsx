@@ -895,19 +895,23 @@ function MobileCaseCard({
         {/* h-svh, não inset-0: as informações precisam caber na TELA, não
             no cartão inteiro (que agora é mais alto que ela). Ancorado no
             topo (top-0), a mesma janela que fica visível o tempo todo
-            enquanto o cartão está grudado ali. pt-16, não py-10 nos dois
+            enquanto o cartão está grudado ali. pt-24, não py-10 nos dois
             lados: o cabeçalho é fixed e flutua por cima da pilha inteira
             (z-40, mais alto que qualquer cartão sticky aqui embaixo), então
             sem esse respiro extra a linha de índice do cartão TRAVADO no
             topo (ver `sticky` acima) nascia parcialmente atrás da barra,
             mesmo antes do próximo cartão chegar pra cobri-la de verdade.
-            pt-16 desconta a altura da barra (3.5rem) e sobra um pouco de
-            respiro, o mesmo raciocínio do `pt-24` da hero (ver Hero.tsx);
-            pb-10 embaixo não tem esse problema (nada flutua ali) e continua
-            o valor de sempre. Assim a única coisa que chega a cobrir a
-            informação de um cartão é o PRÓXIMO cartão chegando por cima,
-            nunca o cabeçalho. */}
-        <div className="gutter absolute inset-x-0 top-0 flex h-svh flex-col justify-between pb-10 pt-16">
+            pt-24 desconta a altura da barra (3.5rem) e sobra o mesmo 2,5rem
+            de respiro que o pb-10 dá embaixo, o mesmo raciocínio do
+            `pt-24` da hero (ver Hero.tsx). Antes era pt-16 aqui: sobravam só
+            0,5rem no topo contra os 2,5rem inteiros do pb-10 embaixo (nada
+            flutua ali, esse lado não tem desconto nenhum), então o índice lá
+            em cima e o bloco de título embaixo liam desalinhados, mais perto
+            do topo do que do fundo, durante quase todo o tempo em que o
+            cartão fica parado (sticky) na tela. Assim a única coisa que
+            chega a cobrir a informação de um cartão é o PRÓXIMO cartão
+            chegando por cima, nunca o cabeçalho. */}
+        <div className="gutter absolute inset-x-0 top-0 flex h-svh flex-col justify-between pb-10 pt-24">
           <Reveal className="flex items-start justify-between gap-4">
             <p className="type-mono text-white/70">
               {pad(index + 1)} / {pad(totalCases)} · {caseStudy.year}
