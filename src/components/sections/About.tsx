@@ -28,6 +28,15 @@ import type { Dictionary } from "@/i18n/dictionaries";
 // último credencial de "quem sou eu" do que como uma seção à parte com
 // título próprio. `border-t` aqui, não na seção inteira: fecha só esse
 // bloco, o mesmo traço fino que separava as duas dobras antes.
+//
+// O respiro abaixo de Brands até a linha que fecha a dobra (o `border-t` do
+// Playground logo depois) repete de propósito o mesmo pt-10/sm:pt-12 que
+// Brands já tem acima dela, contra a própria linha divisória: em vez do
+// `section-y-tight` padrão (padding-block simétrico, mas MUITO maior que
+// esse respiro curto) regendo os dois lados, só o topo da seção usa a
+// escala cheia (pt-24/sm:pt-32/xl:pt-40); o fundo é pb-10/sm:pb-12, sem
+// salto a mais no xl: a mesma medida dos dois lados de Brands, pra ela ficar
+// centralizada entre a própria linha divisória e a linha que fecha a dobra.
 export function About({ locale, dict }: { locale: Locale; dict: Dictionary }) {
   const sectionRef = useRef<HTMLElement>(null);
   const allSkills = [
@@ -40,7 +49,7 @@ export function About({ locale, dict }: { locale: Locale; dict: Dictionary }) {
     <section
       id="about"
       ref={sectionRef}
-      className="gutter section-y-tight border-t border-line"
+      className="gutter border-t border-line pt-24 pb-10 sm:pt-32 sm:pb-12 xl:pt-40"
     >
       <Reveal>
         <h2 className="type-mono mb-16">{dict.about.title}</h2>
