@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import { useBoringMode } from "@/contexts/BoringModeContext";
 import { BoringView } from "@/components/boring/BoringView";
 import { Hero } from "@/components/sections/Hero";
@@ -7,6 +8,8 @@ import { CasesGrid } from "@/components/sections/CasesGrid";
 import { Playground } from "@/components/sections/Playground";
 import { About } from "@/components/sections/About";
 import { Contact } from "@/components/sections/Contact";
+import { scrollToPosition } from "@/components/providers/SmoothScroll";
+import { consumeHomeScrollPosition } from "@/lib/home-scroll-position";
 import type { Locale } from "@/i18n/config";
 import type { Dictionary } from "@/i18n/dictionaries";
 
@@ -21,6 +24,19 @@ export function HomeView({
   dict: Dictionary;
 }) {
   const { isBoringMode } = useBoringMode();
+
+  // Volta da página de um projeto (/work/[slug], botão "voltar" em
+  // CaseDetail): salto instantâneo, sem animação, pra posição de rolagem
+  // salva antes de sair da home (ver saveHomeScrollPosition em CasesGrid,
+  // no botão "ver caso" mobile). Sem posição salva (visita direta à home,
+  // ou vinda de qualquer outro lugar), não faz nada. Só faz sentido no Modo
+  // Criativo: é onde esse botão mora.
+  useEffect(() => {
+    if (isBoringMode) return;
+    const savedY = consumeHomeScrollPosition();
+    if (savedY === null) return;
+    scrollToPosition(savedY);
+  }, [isBoringMode]);
 
   if (isBoringMode) {
     return <BoringView locale={locale} dict={dict} />;
