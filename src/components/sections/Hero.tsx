@@ -48,7 +48,7 @@ function HeroContent({
   /** Cópia dentro da lente: entra pronta, sem repetir a animação de entrada. */
   mirrored?: boolean;
   ctaRef?: React.RefObject<HTMLAnchorElement | null>;
-  /** As três molas da lente, repassadas à lente do nome: ela deforma o <h1>
+  /** As três molas da lente, repassadas à lente do nome: ela incha o <h1>
    *  com o mesmo raio que rege a inversão do texto (ver HeroTitleGL). */
   pointerX: MotionValue<number>;
   pointerY: MotionValue<number>;
@@ -130,7 +130,7 @@ function HeroContent({
   return (
     <div className="gutter relative flex flex-1 flex-col items-center justify-between pb-10 pt-24 sm:items-stretch sm:pb-14 sm:pt-32">
       {/* Dentro do HeroContent, e não solto no <section>: assim a cópia
-          espelhada também recebe o canvas, e o nome deformado inverte junto
+          espelhada também recebe o canvas, e o nome inchado inverte junto
           com o resto em vez de sumir atrás do disco de tinta da lente. */}
       {titleLens && (
         <HeroTitleGL
@@ -356,7 +356,7 @@ export function Hero({ dict }: { dict: Dictionary }) {
   const titleRef = useRef<HTMLHeadingElement>(null);
   const mirroredTitleRef = useRef<HTMLHeadingElement>(null);
 
-  // O nome deformado pela lente roda em WebGL sobre uma cópia do <h1> (ver
+  // O nome incha sob a lente, que roda em WebGL sobre uma cópia do <h1> (ver
   // HeroTitleGL). Enquanto o canvas não confirma que desenhou, e nos casos em
   // que ele nunca vai desenhar (sem WebGL, sem fonte, ou com menos movimento
   // pedido no sistema), o <h1> continua visível e a hero é a de sempre.
@@ -364,7 +364,7 @@ export function Hero({ dict }: { dict: Dictionary }) {
   const [titleOnCanvas, setTitleOnCanvas] = useState(false);
   // Sem cursor de verdade não existe lente: em toque o raio nunca sai de zero
   // (nenhum mousemove dispara), então o canvas desenharia uma cópia do <h1>
-  // que nunca se deforma, trocando texto selecionável por pixels à toa.
+  // que nunca incha, trocando texto selecionável por pixels à toa.
   // Começa desligado, e não com a medida já lida, porque no HTML do servidor
   // não existe ponteiro pra consultar: o canvas é melhoria progressiva.
   const [hasPointer, setHasPointer] = useState(false);
