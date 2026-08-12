@@ -70,6 +70,12 @@ export const es: Dictionary = {
     title: "Extras",
     subtitle:
       "Ilustración, animación y producción musical, los experimentos que alimentan el trabajo.",
+    prevRecord: "Disco anterior",
+    nextRecord: "Próximo disco",
+    changeChannel: "Cambiar de canal",
+    channelLabel: "Canal",
+    play: "Reproducir",
+    pause: "Pausar",
   },
   about: {
     title: "Sobre mí",

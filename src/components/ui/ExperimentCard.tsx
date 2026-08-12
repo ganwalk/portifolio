@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useMotionValue, useReducedMotion, useSpring, useTransform } from "framer-motion";
 import { CursorLabel } from "@/components/ui/CursorLabel";
+import { ExperimentCaption } from "@/components/ui/ExperimentCaption";
 import { MediaView } from "@/components/ui/MediaView";
 import type { Experiment } from "@/data/types";
 import type { Locale } from "@/i18n/config";
@@ -165,10 +166,7 @@ export function ExperimentCard({
         />
       )}
 
-      <figcaption className="border-t border-line p-4">
-        <span className="block font-medium">{experiment.title[locale]}</span>
-        <span className="type-mono text-muted">{experiment.medium[locale]}</span>
-      </figcaption>
+      <ExperimentCaption experiment={experiment} locale={locale} />
     </figure>
   );
 }

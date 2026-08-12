@@ -24,6 +24,7 @@ import type { CaseStudy } from "@/data/types";
 import type { Locale } from "@/i18n/config";
 import type { Dictionary } from "@/i18n/dictionaries";
 import { useMediaQuery } from "@/lib/use-media-query";
+import { useNearViewport } from "@/lib/use-near-viewport";
 
 // motion.create, não motion(Link): a API atual do framer-motion (v11+) pra
 // dar superpoderes de motion (whileTap, aqui) a um componente que já
@@ -789,29 +790,6 @@ function ExpandedCase({
 // selo que segue o cursor (não existe hover de verdade em touch): abre a
 // página do case direto, sem o overlay expandido em FLIP que a versão de
 // desktop usa.
-
-/** true assim que o elemento entra numa margem generosa da viewport (25% de
- *  antecedência): controla o mount da mídia de cada cartão (ver MediaView),
- *  pra vídeo autoplay não ligar todos de uma vez fora de tela. Uma vez
- *  perto, fica true pra sempre: não faz sentido desmontar e recarregar a
- *  mídia de um cartão que já foi visitado. */
-function useNearViewport<T extends HTMLElement>(ref: React.RefObject<T | null>) {
-  const [isNear, setIsNear] = useState(false);
-  useEffect(() => {
-    if (isNear) return;
-    const el = ref.current;
-    if (!el) return;
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) setIsNear(true);
-      },
-      { rootMargin: "25% 0px" },
-    );
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, [isNear, ref]);
-  return isNear;
-}
 
 // Folga extra (em svh) que cada cartão mobile ganha além da própria altura
 // de tela: mais rolagem dentro do MESMO cartão antes que o próximo alcance o
