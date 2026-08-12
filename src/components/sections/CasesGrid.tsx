@@ -927,10 +927,27 @@ function MobileCaseCard({
           </Reveal>
 
           <Reveal delay={0.08}>
-            <h3 className="type-display type-inktrap pt-[0.16em] text-[11vw] leading-[0.9]">
+            {/* min-h nos dois: título (uma linha em "Ganwalk", "Pink Opala"…
+                duas em "Intranet completa", "Landing Pages") e tags (uma ou
+                duas linhas dependendo do idioma e do case) variam de altura
+                sozinhos, e como esse bloco inteiro fica ANCORADO embaixo
+                (justify-between no pai, ver acima), um título de uma linha só
+                deixava o bloco mais curto começar mais TARDE (mais perto do
+                fundo), abrindo um vão maior até o índice lá em cima do que em
+                cases com título e tags de duas linhas cada. 2lh reserva a
+                altura de DUAS linhas sempre (a unidade `lh` acompanha o
+                line-height do próprio elemento, não depende de recalcular à
+                mão o tamanho da fonte): com uma linha só, sobra espaço
+                reservado (invisível) por cima dela, mas o bloco como um todo
+                sempre começa no mesmo lugar, o mesmo efeito que "Intranet
+                completa" já tinha de graça por o texto ocupar as duas linhas
+                de verdade. calc(2lh+0.16em) no título soma de volta o
+                pt-[0.16em] que já é sempre contado (existe com uma linha ou
+                duas), senão a reserva ficaria 0,16em curta. */}
+            <h3 className="type-display type-inktrap min-h-[calc(2lh+0.16em)] pt-[0.16em] text-[11vw] leading-[0.9]">
               {caseStudy.title[locale]}
             </h3>
-            <p className="type-mono mt-3 text-white/70">
+            <p className="type-mono mt-3 min-h-[2lh] text-white/70">
               {caseStudy.tags[locale].join(" • ")}
             </p>
             <div className="mt-6 flex flex-wrap items-center gap-3">
