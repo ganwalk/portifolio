@@ -434,9 +434,22 @@ function CaseColumn({
       ref={panelRef}
       data-case-slug={caseStudy.slug}
       aria-hidden={!isActive}
+      // O cartão inteiro clica como o botão "ver case": mesmo onExpand, mesmo
+      // FLIP. O selo que segue o cursor (ver CasesGrid) já prometia isso
+      // visualmente em qualquer ponto do cartão; só faltava o clique cumprir
+      // a promessa em vez de exigir acertar o botão pequeno no rodapé. Os
+      // dois links de verdade (o próprio botão e o do repositório) continuam
+      // funcionando como sempre: cada um para a propagação do próprio clique
+      // (ver abaixo) antes de chegar aqui, então nenhum clique dispara os
+      // dois comportamentos de uma vez.
+      onClick={() =>
+        isActive &&
+        panelRef.current &&
+        onExpand(caseStudy, panelRef.current.getBoundingClientRect())
+      }
       className={`relative block h-full w-full flex-1 bg-black text-left ${
         dividerLeft ? "border-t border-white/15 lg:border-l lg:border-t-0" : ""
-      } ${isActive ? "" : "pointer-events-none"}`}
+      } ${isActive ? "cursor-pointer" : "pointer-events-none"}`}
     >
       {/* Tudo que precisa de corte (zoom da mídia, máscara do texto) vive
           aqui dentro; o selo que segue o cursor não mora mais aqui (ver
@@ -527,19 +540,17 @@ function CaseColumn({
             <div
               className={`overflow-hidden ${multi ? "mt-2 lg:mt-8" : "mt-8"}`}
             >
-              {/* Dois botões de verdade, não mais o cartão inteiro
-                  clicável: um pro detalhamento (mesmo FLIP de sempre pro
-                  overlay, ver ExpandedCase) e um pro repositório, só quando
-                  o case tiver um (ver repoUrl em data/cases.ts). A logo do
-                  GitHub entra discreta, do tamanho do texto ao redor. */}
+              {/* O botão de detalhamento não tem onClick próprio: o cartão
+                  inteiro já chama onExpand (ver o motion.div lá em cima), e
+                  o clique aqui dentro sobe até ele por bubbling, o mesmo
+                  FLIP de sempre pro overlay (ver ExpandedCase). Só o do
+                  repositório precisa de tratamento à parte: ele navega pra
+                  fora (aba nova), então para a propagação pra não expandir o
+                  case JUNTO com abrir o repositório. A logo do GitHub entra
+                  discreta, do tamanho do texto ao redor. */}
               <motion.div style={{ y: ctaY }} className="flex flex-wrap items-center gap-3">
                 <motion.button
                   type="button"
-                  onClick={() =>
-                    isActive &&
-                    panelRef.current &&
-                    onExpand(caseStudy, panelRef.current.getBoundingClientRect())
-                  }
                   // Feedback tátil no clique: um leve encolhimento antes do
                   // FLIP assumir (ver ExpandedCase), pra o gesto já responder
                   // no instante do toque, não só quando o overlay termina de
@@ -560,6 +571,7 @@ function CaseColumn({
                     href={caseStudy.repoUrl}
                     target="_blank"
                     rel="noopener noreferrer"
+                    onClick={(event) => event.stopPropagation()}
                     whileTap={{ scale: 0.98 }}
                     tabIndex={isActive ? 0 : -1}
                     aria-label={`${dict.cases.repo} · ${caseStudy.title[locale]}`}

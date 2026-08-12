@@ -92,7 +92,13 @@ export function About({ locale, dict }: { locale: Locale; dict: Dictionary }) {
         </Reveal>
       </div>
 
-      <Reveal delay={0.2} className="mt-16 border-t border-line pt-10 sm:mt-20 sm:pt-12">
+      {/* mt-24/sm:mt-28, não mais mt-16/sm:mt-20: mais respiro entre a
+          grade de habilidades/idiomas e a linha que introduz "Acreditam no
+          meu trabalho", pra ela não nascer colada no que vem antes. Só essa
+          margem ACIMA da linha mudou; o pt-10/sm:pt-12 abaixo dela continua
+          o mesmo, e o comentário no topo do arquivo sobre ele espelhar o pb
+          de Brands ainda vale. */}
+      <Reveal delay={0.2} className="mt-24 border-t border-line pt-10 sm:mt-28 sm:pt-12">
         <Brands locale={locale} dict={dict} />
       </Reveal>
     </section>
