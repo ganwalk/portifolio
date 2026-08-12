@@ -69,12 +69,6 @@ export const en: Dictionary = {
     title: "Extras",
     subtitle:
       "Illustration, animation and music production, the experiments that feed the work.",
-    prevRecord: "Previous record",
-    nextRecord: "Next record",
-    changeChannel: "Change channel",
-    channelLabel: "Channel",
-    play: "Play",
-    pause: "Pause",
   },
   about: {
     title: "About",

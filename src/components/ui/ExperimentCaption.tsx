@@ -2,10 +2,8 @@ import type { Experiment } from "@/data/types";
 import type { Locale } from "@/i18n/config";
 
 // Legenda dos cards do Playground: título + meio, sempre no mesmo lugar
-// (rodapé, com fio em cima) não importa se o card acima é a vitrine simples
-// (ExperimentCard) ou um dos objetos skeumórficos de desktop (VinylCrate,
-// VintageTV, TapeDeck): o mesmo rodapé de sempre ancora as quatro versões no
-// mesmo sistema tipográfico do site.
+// (rodapé, com fio em cima), ancorando o card no mesmo sistema tipográfico
+// do site.
 export function ExperimentCaption({
   experiment,
   locale,

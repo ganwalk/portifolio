@@ -68,12 +68,6 @@ export const zh: Dictionary = {
   playground: {
     title: "花絮",
     subtitle: "插画、动画和音乐制作，滋养着我的创作的实验。",
-    prevRecord: "上一张唱片",
-    nextRecord: "下一张唱片",
-    changeChannel: "切换频道",
-    channelLabel: "频道",
-    play: "播放",
-    pause: "暂停",
   },
   about: {
     title: "关于",
