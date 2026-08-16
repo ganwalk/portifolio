@@ -308,20 +308,29 @@ html[data-boring="true"] .portrait-frames {
    mesmo motivo do retrato: o basePath do GitHub Pages não chega a url()
    dentro do CSS. Cai pro Modo Boring com o cursor do sistema, mesmo
    critério de "informação, não vitrine" do retrato e da imagem interativa
-   do contato. */
+   do contato.
+
+   .cursor-pointer entra na lista ao lado de a/button/[role="button"]:
+   alguns cliques do site (o cartão inteiro de um projeto em destaque, por
+   exemplo) vivem num <div> comum com essa classe do Tailwind, não numa tag
+   semântica nem com role="button". Sem essa classe aqui, esses pontos
+   caíam pro cursor de seta comum do navegador, quebrando a mãozinha bem no
+   lugar em que ela mais precisa aparecer. */
 html:not([data-boring="true"]) {
   cursor: var(--cursor-repouso);
 }
 
 html:not([data-boring="true"]) a,
 html:not([data-boring="true"]) button,
-html:not([data-boring="true"]) [role="button"] {
+html:not([data-boring="true"]) [role="button"],
+html:not([data-boring="true"]) .cursor-pointer {
   cursor: var(--cursor-hover);
 }
 
 html:not([data-boring="true"]) a:active,
 html:not([data-boring="true"]) button:active,
-html:not([data-boring="true"]) [role="button"]:active {
+html:not([data-boring="true"]) [role="button"]:active,
+html:not([data-boring="true"]) .cursor-pointer:active {
   cursor: var(--cursor-clique);
 }
 

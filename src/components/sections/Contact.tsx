@@ -13,11 +13,13 @@ import type { Dictionary } from "@/i18n/dictionaries";
 const basePath = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
 const CONTACT_IMAGE = `${basePath}/photos/armando-contato.webp`;
 
-// Além dos quatro idiomas do site, mais oito só pra esta grade: o recado é
-// "disponível pro mundo todo" (mesmo espírito do globo em hero.availability),
-// então outros alfabetos são bem-vindos aqui mesmo sem página traduzida
-// pra eles. Não é o sistema de i18n do site (por isso mora aqui, não em
-// dictionaries/): é tempero visual, sem rota, sem SEO, sem menu próprio.
+// Além dos quatro idiomas do site, mais trinta e dois só pra esta grade: o
+// recado é "disponível pro mundo todo" (mesmo espírito do globo em
+// hero.availability), então outros alfabetos são bem-vindos aqui mesmo sem
+// página traduzida pra eles. Não é o sistema de i18n do site (por isso mora
+// aqui, não em dictionaries/): é tempero visual, sem rota, sem SEO, sem menu
+// próprio. 4 + 32 = 36, um idioma por quadro da grade 6×6 (ver COLS/ROWS em
+// InteractiveGridImage), sem repetir nenhum.
 const EXTRA_GRID_PHRASES = [
   ["Parle", "moi !"], // francês
   ["Sprich", "mit mir!"], // alemão
@@ -27,6 +29,30 @@ const EXTRA_GRID_PHRASES = [
   ["Поговори", "со мной!"], // russo
   ["تحدث", "معي!"], // árabe
   ["मुझसे", "बात करो"], // hindi
+  ["Praat", "met mij!"], // holandês
+  ["Prata", "med mig!"], // sueco
+  ["Pogadaj", "ze mną!"], // polonês
+  ["Benimle", "konuş!"], // turco
+  ["Μίλα", "μου!"], // grego
+  ["דבר", "איתי!"], // hebraico
+  ["คุย", "กับฉัน!"], // tailandês
+  ["Nói chuyện", "với tôi!"], // vietnamita
+  ["Ngobrol", "denganku!"], // indonésio
+  ["Ongea", "nami!"], // suaíli
+  ["با من", "صحبت کن!"], // persa
+  ["Поговори", "зі мною!"], // ucraniano
+  ["Mluv", "se mnou!"], // tcheco
+  ["Vorbește", "cu mine!"], // romeno
+  ["Beszélj", "velem!"], // húngaro
+  ["আমার সাথে", "কথা বলো!"], // bengali
+  ["مجھ سے", "بات کرو!"], // urdu
+  ["என்னிடம்", "பேசு!"], // tâmil
+  ["Bercakap", "dengan saya!"], // malaio
+  ["Khuluma", "nami!"], // zulu
+  ["Bá mi", "sọ̀rọ̀!"], // iorubá
+  ["ከእኔ ጋር", "ተነጋገር!"], // amárico
+  ["Надтай", "ярь!"], // mongol
+  ["Talaðu", "við mig!"], // islandês
 ];
 
 // Um quadro por idioma na grade interativa, não repetindo o do visitante:
