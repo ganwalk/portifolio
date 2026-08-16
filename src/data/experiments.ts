@@ -137,9 +137,8 @@ export const experiments: Experiment[] = [
     },
     // "Cagumela": teste de animação de um personagem e cenário autorais.
     // O vídeo é o resultado final, em loop mudo; o hover troca a vitrine
-    // pelos stills do processo (ver ExperimentCard.tsx), em ordem: concept
-    // art do cenário, depois model sheet do personagem. Sai do hover, volta
-    // pro vídeo.
+    // pelo still do processo (ver ExperimentCard.tsx): concept art do
+    // cenário. Sai do hover, volta pro vídeo.
     media: {
       kind: "video",
       src: `${basePath}/videos/cagumela-ceu.mp4`,
@@ -159,15 +158,6 @@ export const experiments: Experiment[] = [
           en: "Concept art for the set, the color before the scene",
           es: "Concept art del escenario, el color antes de la escena",
           zh: "场景概念图，先定色再进场景",
-        },
-      },
-      {
-        src: `${basePath}/photos/cagumela-modelsheet.webp`,
-        caption: {
-          pt: "Model sheet do personagem, o traço antes de animar",
-          en: "Character model sheet, the linework before animating",
-          es: "Model sheet del personaje, el trazo antes de animar",
-          zh: "角色设定表，动画前先定好的线稿",
         },
       },
     ],

@@ -17,6 +17,7 @@ import {
 import { CaseMetrics } from "@/components/ui/CaseMetrics";
 import { CursorLabel } from "@/components/ui/CursorLabel";
 import { GitHubIcon } from "@/components/ui/icons/GitHubIcon";
+import { LiveEmbed } from "@/components/ui/LiveEmbed";
 import { MediaView } from "@/components/ui/MediaView";
 import { Reveal } from "@/components/ui/Reveal";
 import { cases } from "@/data/cases";
@@ -737,10 +738,19 @@ function ExpandedCase({
           {caseStudy.tags[locale].join(" • ")}
         </p>
 
-        <div className="mt-12 grid grid-cols-1 gap-6 sm:grid-cols-2">
-          <div className="texture-noise aspect-4/3 bg-surface" />
-          <div className="texture-noise aspect-4/3 bg-surface" />
-        </div>
+        {caseStudy.demoUrl ? (
+          <LiveEmbed
+            url={caseStudy.demoUrl}
+            title={caseStudy.title[locale]}
+            dict={dict}
+            className="mt-12"
+          />
+        ) : (
+          <div className="mt-12 grid grid-cols-1 gap-6 sm:grid-cols-2">
+            <div className="texture-noise aspect-4/3 bg-surface" />
+            <div className="texture-noise aspect-4/3 bg-surface" />
+          </div>
+        )}
 
         {caseStudy.metrics.some((m) => m.illustrative) && (
           <p className="type-mono mt-8 text-muted">

@@ -60,6 +60,7 @@ export const zh: Dictionary = {
     viewCase: "查看案例",
     comingSoon: "完整案例即将呈现",
     repo: "仓库",
+    openDemo: "在新标签页打开",
     metricsDisclaimer: "示意性数据，最终数字仍在整理中。",
   },
   brands: {

@@ -71,6 +71,7 @@ export const pt = {
     viewCase: "Ver case",
     comingSoon: "Case completo em breve",
     repo: "Repositório",
+    openDemo: "Abrir em nova aba",
     metricsDisclaimer:
       "Métricas ilustrativas, números finais em fase de consolidação.",
   },

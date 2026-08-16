@@ -3,12 +3,19 @@ import type { CaseStudy } from "./types";
 // Lineup de lançamento: 2 cases de Banking + 3 de Música. Os três artistas
 // (Ganwalk, Dezert Horse, Pink Opala) são projetos individuais, cada um com
 // a própria página e o próprio lugar no carrossel da home, não um case
-// guarda chuva só.
+// guarda chuva só. Os três já estão no ar (site publicado, repositório
+// público): `repoUrl` aponta pro código no GitHub e `demoUrl` pro site
+// publicado, que aparece embutido em iframe de verdade no corpo do case
+// (ver LiveEmbed.tsx), navegável ali mesmo dentro do portfólio.
 // Métricas com value "+XX%" são placeholders explícitos até calibração com números reais.
 // Telas dos cases de Banking serão recriadas/anonimizadas até autorização formal de uso.
 //
-// Capas: todas em vídeo (nenhuma foto estática), placeholders do Pexels
-// escolhidos pelo clima de cada case. Para trocar pela mídia real, basta
+// Capas: a maioria em vídeo, placeholders do Pexels escolhidos pelo clima de
+// cada case (Ganwalk e Dezert Horse ainda esperam captura de tela real dos
+// próprios sites: os dois usam WebGL/Three.js, então até lá o clima visual
+// mais próximo já escolhido, terminal/código e duna de areia, continua no
+// lugar). Pink Opala já usa a foto de capa real do próprio site (ver
+// comentário no bloco cover dele). Para trocar pela mídia real, basta
 // substituir src (e poster) no bloco cover.
 //
 // Critério de cor: colorido sim, saturado não. A primeira leva de
@@ -171,16 +178,16 @@ export const cases: CaseStudy[] = [
       zh: "Ganwalk",
     },
     statement: {
-      pt: "Criei a experiência interativa do Ganwalk, onde a identidade visual do artista ganha vida na tela.",
-      en: "I created Ganwalk's interactive experience, where the artist's visual identity comes alive on screen.",
-      es: "Creé la experiencia interactiva de Ganwalk, donde la identidad visual del artista cobra vida en la pantalla.",
-      zh: "打造了 Ganwalk 的互动体验，让这位音乐人的视觉形象在屏幕上活了起来。",
+      pt: "Desenhei a identidade visual interativa do Ganwalk: um logotipo de partículas em WebGL que reage ao toque e um painel de mixagem ao vivo, com looper e gravação, direto no navegador.",
+      en: "I designed Ganwalk's interactive visual identity: a WebGL particle logo that reacts to touch, plus a live mixing panel with a looper and recording, straight in the browser.",
+      es: "Diseñé la identidad visual interactiva de Ganwalk: un logotipo de partículas en WebGL que reacciona al toque y un panel de mezcla en vivo, con looper y grabación, directo en el navegador.",
+      zh: "打造了 Ganwalk 的互动视觉形象：一个会随触摸反应的 WebGL 粒子标志，还有一个内置循环采样和录音功能的实时混音面板，全部在浏览器里运行。",
     },
     tags: {
-      pt: ["Música", "Webapp", "Direção de arte", "Interatividade"],
-      en: ["Music", "Webapp", "Art direction", "Interactivity"],
-      es: ["Música", "Webapp", "Dirección de arte", "Interactividad"],
-      zh: ["音乐", "Webapp", "艺术指导", "互动设计"],
+      pt: ["Música", "WebGL", "Three.js", "Interatividade"],
+      en: ["Music", "WebGL", "Three.js", "Interactivity"],
+      es: ["Música", "WebGL", "Three.js", "Interactividad"],
+      zh: ["音乐", "WebGL", "Three.js", "互动设计"],
     },
     metrics: [
       {
@@ -194,12 +201,11 @@ export const cases: CaseStudy[] = [
         illustrative: true,
       },
     ],
-    // Sugestão de mídia real: screencast navegando pela experiência, com o
-    // áudio do artista tocando ao fundo. O placeholder antigo (estúdio de
-    // gravação) foi pro case de produção musical (ver experiments.ts), que
-    // combina melhor com ele; este aqui é código/terminal rolando na tela,
-    // mais afinado com o "a identidade visual do artista ganha vida na
-    // tela" do statement acima.
+    // O site real já está no ar (ver demoUrl, embutido em LiveEmbed no
+    // corpo do case), mas a CAPA aqui embaixo continua o placeholder de
+    // vídeo: código/terminal rolando na tela, o clima mais próximo do que
+    // o site de verdade entrega (visual "code editor" com glitch). Pendente:
+    // trocar por uma captura de tela real do próprio site.
     cover: {
       kind: "video",
       src: "https://videos.pexels.com/video-files/852292/852292-hd_1728_1080_25fps.mp4",
@@ -212,8 +218,9 @@ export const cases: CaseStudy[] = [
         zh: "深色屏幕上滚动的代码，如同运行中的终端",
       },
     },
-    comingSoon: true,
-    repoUrl: "#", // placeholder até a URL real do repositório: só pra testar o botão "ver repositório" aparecendo, troque por um link de verdade antes de publicar.
+    comingSoon: false,
+    repoUrl: "https://github.com/ganwalk/2026",
+    demoUrl: "https://ganwalk.github.io/2026/",
   },
   {
     slug: "dezert-horse",
@@ -227,16 +234,16 @@ export const cases: CaseStudy[] = [
       zh: "Dezert Horse",
     },
     statement: {
-      pt: "Projetei a experiência interativa do Dezert Horse, um universo visual construído em torno do som da banda.",
-      en: "I designed Dezert Horse's interactive experience, a visual universe built around the band's sound.",
-      es: "Diseñé la experiencia interactiva de Dezert Horse, un universo visual construido alrededor del sonido de la banda.",
-      zh: "设计了 Dezert Horse 的互动体验，围绕乐队的音乐打造出一个完整的视觉世界。",
+      pt: "Projetei o universo interativo do Dezert Horse: um deserto em Three.js com um painel de controle retrô que toca o álbum inteiro, faixa a faixa, direto no site.",
+      en: "I designed Dezert Horse's interactive universe: a Three.js desert with a retro control panel that plays the whole album, track by track, right on the site.",
+      es: "Diseñé el universo interactivo de Dezert Horse: un desierto en Three.js con un panel de control retro que reproduce el álbum entero, pista a pista, directo en el sitio.",
+      zh: "打造了 Dezert Horse 的互动世界：一片用 Three.js 呈现的沙漠场景，配上一个复古控制面板，可以直接在网站上逐首播放整张专辑。",
     },
     tags: {
-      pt: ["Música", "Webapp", "Direção de arte", "Interatividade"],
-      en: ["Music", "Webapp", "Art direction", "Interactivity"],
-      es: ["Música", "Webapp", "Dirección de arte", "Interactividad"],
-      zh: ["音乐", "Webapp", "艺术指导", "互动设计"],
+      pt: ["Música", "WebGL", "Three.js", "Player embutido"],
+      en: ["Music", "WebGL", "Three.js", "Embedded player"],
+      es: ["Música", "WebGL", "Three.js", "Reproductor integrado"],
+      zh: ["音乐", "WebGL", "Three.js", "内置播放器"],
     },
     metrics: [
       {
@@ -250,8 +257,10 @@ export const cases: CaseStudy[] = [
         illustrative: true,
       },
     ],
-    // Sugestão de mídia real: screencast navegando pela experiência, com o
-    // áudio da banda tocando ao fundo.
+    // O site real já está no ar (ver demoUrl, embutido em LiveEmbed no
+    // corpo do case), mas a CAPA aqui embaixo continua o placeholder de
+    // vídeo: já batia com o tema (deserto de verdade em Three.js). Pendente:
+    // trocar por uma captura de tela real do próprio site.
     cover: {
       kind: "video",
       src: "https://videos.pexels.com/video-files/5442713/5442713-hd_1920_1080_25fps.mp4",
@@ -264,8 +273,9 @@ export const cases: CaseStudy[] = [
         zh: "晴空下沙丘上的波纹",
       },
     },
-    comingSoon: true,
-    repoUrl: "#", // placeholder até a URL real do repositório: só pra testar o botão "ver repositório" aparecendo, troque por um link de verdade antes de publicar.
+    comingSoon: false,
+    repoUrl: "https://github.com/ganwalk/cavalo",
+    demoUrl: "https://ganwalk.github.io/cavalo/",
   },
   {
     slug: "pink-opala",
@@ -279,16 +289,16 @@ export const cases: CaseStudy[] = [
       zh: "Pink Opala",
     },
     statement: {
-      pt: "Desenvolvi a experiência interativa do Pink Opala, em que cada rolagem responde ao clima sonoro do artista.",
-      en: "I developed Pink Opala's interactive experience, where every scroll responds to the artist's sonic mood.",
-      es: "Desarrollé la experiencia interactiva de Pink Opala, donde cada desplazamiento responde al clima sonoro del artista.",
-      zh: "开发了 Pink Opala 的互动体验，每一次滚动都呼应着音乐人的声音氛围。",
+      pt: "Desenvolvi o site oficial do Pink Opala, duo indie pop de Goiânia: partículas com física de mola formam o nome da banda, e discografia, galeria e contato moram numa página só, sem build nem framework.",
+      en: "I built Pink Opala's official site, an indie pop duo from Goiânia, Brazil: spring-physics particles form the band's name, and the discography, gallery and contact all live in one single page, no build step or framework.",
+      es: "Desarrollé el sitio oficial de Pink Opala, dúo de indie pop de Goiânia: partículas con física de resorte forman el nombre de la banda, y discografía, galería y contacto viven en una sola página, sin build ni framework.",
+      zh: "打造了巴西戈亚尼亚独立流行二人组 Pink Opala 的官方网站：带弹簧物理效果的粒子拼出乐队名字，唱片、相册和联系方式全部集中在一个单页面里，无需构建工具或框架。",
     },
     tags: {
-      pt: ["Música", "Webapp", "Direção de arte", "Interatividade"],
-      en: ["Music", "Webapp", "Art direction", "Interactivity"],
-      es: ["Música", "Webapp", "Dirección de arte", "Interactividad"],
-      zh: ["音乐", "Webapp", "艺术指导", "互动设计"],
+      pt: ["Música", "Canvas 2D", "Tailwind CSS", "Interatividade"],
+      en: ["Music", "Canvas 2D", "Tailwind CSS", "Interactivity"],
+      es: ["Música", "Canvas 2D", "Tailwind CSS", "Interactividad"],
+      zh: ["音乐", "Canvas 2D", "Tailwind CSS", "互动设计"],
     },
     metrics: [
       {
@@ -302,22 +312,23 @@ export const cases: CaseStudy[] = [
         illustrative: true,
       },
     ],
-    // Sugestão de mídia real: screencast navegando pela experiência, com o
-    // áudio do artista tocando ao fundo.
+    // Mídia real: a própria foto de capa do site (`principal.webp`), servida
+    // direto do repositório via raw.githubusercontent.com, o mesmo CDN
+    // caseiro que o site oficial da banda já usa pra todas as imagens (ver
+    // README do repositório). Sem stock: é a dupla de verdade.
     cover: {
-      kind: "video",
-      src: "https://videos.pexels.com/video-files/12137476/12137476-hd_1920_1080_50fps.mp4",
-      poster:
-        "https://images.pexels.com/videos/12137476/4k-above-clouds-canon-r6-dramatic-sky-12137476.jpeg?auto=compress&w=1280",
+      kind: "image",
+      src: "https://raw.githubusercontent.com/ganwalk/pinkopala/main/principal.webp",
       alt: {
-        pt: "Nuvens rosadas sobre um céu de fim de tarde",
-        en: "Pink clouds against a late afternoon sky",
-        es: "Nubes rosadas sobre un cielo de atardecer",
-        zh: "傍晚天空中的粉色云层",
+        pt: "A dupla do Pink Opala, costas com costas, com maquiagem glitter, no visual do site oficial",
+        en: "Pink Opala's duo, back to back, wearing glitter makeup, in the official site's visual",
+        es: "El dúo de Pink Opala, espalda con espalda, con maquillaje glitter, en el visual del sitio oficial",
+        zh: "Pink Opala 二人组背靠背合影，妆容带有闪粉质感，出自官方网站的视觉设计",
       },
     },
-    comingSoon: true,
-    repoUrl: "#", // placeholder até a URL real do repositório: só pra testar o botão "ver repositório" aparecendo, troque por um link de verdade antes de publicar.
+    comingSoon: false,
+    repoUrl: "https://github.com/ganwalk/pinkopala",
+    demoUrl: "https://ganwalk.github.io/pinkopala/",
   },
 ];
 

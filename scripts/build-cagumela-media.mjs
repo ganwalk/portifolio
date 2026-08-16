@@ -1,9 +1,8 @@
 // Converte os assets brutos da pasta "cagumela" (arte de um projeto de
-// animação: cenário, model sheet e um clipe de teste) pro que o card
-// "Estudos de movimento" do Playground realmente usa: um vídeo leve (só os
-// primeiros 4s do clipe fonte, ida e volta em loop) para a vitrine em
-// repouso, e duas imagens estáticas para o ciclo que aparece no hover (ver
-// ExperimentCard.tsx).
+// animação: cenário e um clipe de teste) pro que o card "Estudos de
+// movimento" do Playground realmente usa: um vídeo leve (só os primeiros 4s
+// do clipe fonte, ida e volta em loop) para a vitrine em repouso, e uma
+// imagem estática para o still que aparece no hover (ver ExperimentCard.tsx).
 //
 // Uso (sharp e o binário de ffmpeg não ficam no package.json, são
 // ferramenta de bancada, não do site):
@@ -11,9 +10,9 @@
 //   npm install --no-save sharp @ffmpeg-installer/ffmpeg
 //   node scripts/build-cagumela-media.mjs
 //
-// As ilustrações (cenário e model sheet) ficam em cor cheia, ao contrário do
-// tratamento de gravura do retrato da hero e da foto do Contato: aqui a cor
-// É o assunto, não ruído de alta frequência pra evitar.
+// A ilustração do cenário fica em cor cheia, ao contrário do tratamento de
+// gravura do retrato da hero e da foto do Contato: aqui a cor É o assunto,
+// não ruído de alta frequência pra evitar.
 
 import sharp from "sharp";
 import ffmpegPath from "@ffmpeg-installer/ffmpeg";
@@ -46,7 +45,6 @@ await mkdir(PHOTOS_OUT, { recursive: true });
 await mkdir(VIDEOS_OUT, { recursive: true });
 
 await toWebp(`${SRC_DIR}/CAGUQUARTO.png`, `${PHOTOS_OUT}/cagumela-quarto.webp`, 1000);
-await toWebp(`${SRC_DIR}/modelsheet.png`, `${PHOTOS_OUT}/cagumela-modelsheet.webp`, 800);
 
 const videoSrc = `${SRC_DIR}/céu 14.mp4`;
 const videoOut = `${VIDEOS_OUT}/cagumela-ceu.mp4`;

@@ -60,6 +60,7 @@ export const es: Dictionary = {
     viewCase: "Ver case",
     comingSoon: "Case study completo próximamente",
     repo: "Repositorio",
+    openDemo: "Abrir en pestaña nueva",
     metricsDisclaimer:
       "Métricas ilustrativas, números finales en consolidación.",
   },
