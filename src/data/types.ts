@@ -47,6 +47,14 @@ export interface CaseStudy {
    */
   repoUrl?: string;
   /**
+   * URL do projeto publicado e ao vivo (GitHub Pages, Vercel etc). Opcional:
+   * quando existe, o corpo do case (CaseDetail e ExpandedCase) embute essa
+   * URL num iframe de verdade, navegável, no lugar das duas caixas de
+   * still ainda vazias (ver LiveEmbed.tsx). Só faz sentido pra projeto que já
+   * está no ar; cases sem hospedagem própria continuam com as caixas.
+   */
+  demoUrl?: string;
+  /**
    * Cases adjacentes com o mesmo `group` viram uma fatia só do carrossel da
    * home, lado a lado em vez de empilhados (ver CasesGrid). Não afeta a
    * página própria do case nem nenhum outro lugar que leia `cases`.

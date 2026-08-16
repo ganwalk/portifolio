@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { CaseMetrics } from "@/components/ui/CaseMetrics";
+import { LiveEmbed } from "@/components/ui/LiveEmbed";
 import { MediaView } from "@/components/ui/MediaView";
 import { Reveal } from "@/components/ui/Reveal";
 import type { CaseStudy } from "@/data/types";
@@ -105,13 +106,23 @@ export function CaseDetail({
           </p>
         </Reveal>
 
-        <Reveal
-          delay={0.16}
-          className="mt-12 grid grid-cols-1 gap-6 sm:grid-cols-2"
-        >
-          <div className="texture-noise aspect-4/3 bg-surface" />
-          <div className="texture-noise aspect-4/3 bg-surface" />
-        </Reveal>
+        {caseStudy.demoUrl ? (
+          <Reveal delay={0.16} className="mt-12">
+            <LiveEmbed
+              url={caseStudy.demoUrl}
+              title={caseStudy.title[locale]}
+              dict={dict}
+            />
+          </Reveal>
+        ) : (
+          <Reveal
+            delay={0.16}
+            className="mt-12 grid grid-cols-1 gap-6 sm:grid-cols-2"
+          >
+            <div className="texture-noise aspect-4/3 bg-surface" />
+            <div className="texture-noise aspect-4/3 bg-surface" />
+          </Reveal>
+        )}
 
         {caseStudy.metrics.some((m) => m.illustrative) && (
           <p className="type-mono mt-8 text-muted">
