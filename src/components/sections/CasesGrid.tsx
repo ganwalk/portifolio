@@ -14,7 +14,7 @@ import {
   useTransform,
   type MotionValue,
 } from "framer-motion";
-import { CardLivePreview } from "@/components/ui/CardLivePreview";
+import { ArtistPreview } from "@/components/ui/ArtistPreview";
 import { CaseMetrics } from "@/components/ui/CaseMetrics";
 import { CaseStatement } from "@/components/ui/CaseStatement";
 import { CursorLabel } from "@/components/ui/CursorLabel";
@@ -473,16 +473,12 @@ function CaseColumn({
           >
             {caseStudy.demoUrl ? (
               // Sem gate de isNearActive: monta de cara, mesmo fora de
-              // cena. É a mesma folga que a tela de carregamento do
-              // próprio portfólio (ver SiteLoader.tsx) existe pra cobrir,
-              // o trio já chega pronto quando o scroll alcança ele, em
-              // vez de começar a carregar só naquele instante.
-              <CardLivePreview
-                demoUrl={caseStudy.demoUrl}
-                title={caseStudy.title[locale]}
-                slug={caseStudy.slug}
-                className="h-full w-full"
-              />
+              // cena. Reconstrução local e leve (Canvas 2D, ver
+              // ArtistPreview.tsx), não o site de verdade embutido num
+              // iframe: o trio inteiro já chega pronto quando o scroll
+              // alcança ele, sem o custo de três WebGL/Three.js/áudio
+              // simultâneos só pra prévia.
+              <ArtistPreview slug={caseStudy.slug} className="h-full w-full" />
             ) : isNearActive ? (
               <MediaView
                 media={caseStudy.cover}
@@ -905,12 +901,7 @@ function MobileCaseCard({
         >
           {caseStudy.demoUrl ? (
             isNear && (
-              <CardLivePreview
-                demoUrl={caseStudy.demoUrl}
-                title={caseStudy.title[locale]}
-                slug={caseStudy.slug}
-                className="absolute inset-0 h-full w-full"
-              />
+              <ArtistPreview slug={caseStudy.slug} className="absolute inset-0 h-full w-full" />
             )
           ) : isNear ? (
             <MediaView

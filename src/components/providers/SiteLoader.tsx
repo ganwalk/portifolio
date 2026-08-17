@@ -8,20 +8,11 @@ import { moonPath, MOON_CENTER, MOON_R } from "@/lib/moon-path";
 import { MODE_TRANSITION_MS } from "./ModeTransitionOverlay";
 
 // Tela de entrada do próprio portfólio: cobre a página até as fontes
-// carregarem e uma folga mínima passar, e SÓ ENTÃO revela o site. Existe
-// por causa dos cartões de projeto que embutem os sites dos artistas ao
-// vivo (Ganwalk, Dezert Horse, Pink Opala, ver CardLivePreview.tsx): eles
-// montam de cara, mesmo fora de tela, então essa cortina inicial é o que
-// dá a eles a folga de carregar em paralelo, por trás da tela de entrada,
-// em vez de aparecerem pela metade conforme o visitante rola até ali.
-//
-// Não trava a página esperando os três iframes terminarem: não dá pra
-// saber quando "terminaram" de verdade (sites de terceiros, cada um com
-// o próprio ritmo de carregamento, um deles poderia travar a entrada
-// inteira do portfólio por um problema de rede que não é nem daqui). A
-// folga mínima (MIN_MS) já dá a eles um empurrão sem virar refém de
-// nenhum. document.fonts.ready é o único critério de verdade: sem isso,
-// o primeiro quadro visível troca de fonte embaixo do visitante.
+// carregarem e uma folga mínima passar, e SÓ ENTÃO revela o site.
+// document.fonts.ready é o único critério de verdade: sem isso, o
+// primeiro quadro visível troca de fonte embaixo do visitante. A folga
+// mínima (MIN_MS) garante que a entrada nunca pareça um pisca instantâneo
+// em conexões rápidas, mesmo quando as fontes já estavam em cache.
 //
 // Estética: o mesmo tratamento da hero (nome em Whyte Inktrap, grão de
 // filme animado por baixo) em vez de um texto pequeno solto. O indicador
@@ -52,7 +43,15 @@ const PROGRESS_CAP = 92;
 const UNMOUNT_MS = Math.max(FADE_MS, MODE_TRANSITION_MS);
 
 const MOON_THRESHOLDS = [15, 30, 45, 60, 75];
-const MOON_CYCLE_SPAN = 18;
+// Progresso por volta completa de fase, depois que a lua surge. Precisa
+// ser BEM maior que o espaçamento entre limiares (15 pontos): com um
+// valor perto disso (ex.: 18), o deslocamento de fase entre duas luas
+// vizinhas bate quase uma volta inteira (15/18 ≈ 0,83 de 1), e luas quase
+// opostas no ciclo parecem posições aleatórias, não uma "andando" atrás
+// da outra. Com 120, o deslocamento fica pequeno (15/120 = 0,125 de
+// volta, um oitavo de fase), a diferença de uma lua pra próxima vira só
+// mais um passo da mesma caminhada.
+const MOON_CYCLE_SPAN = 120;
 
 function moonPhaseAt(progress: number, threshold: number): number {
   const elapsed = progress - threshold;
