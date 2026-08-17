@@ -35,7 +35,7 @@ export async function generateMetadata({
   }
 
   const title = `${caseStudy.title[locale]} · Armando Custodio`;
-  const description = caseStudy.statement[locale];
+  const description = `${caseStudy.statement.headline[locale]} ${caseStudy.statement.detail[locale]}`;
 
   return {
     title,

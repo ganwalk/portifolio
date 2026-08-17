@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { cleanupArtistPreview } from "@/lib/artist-preview-cleanup";
 import { useMediaQuery } from "@/lib/use-media-query";
 import type { Media } from "@/data/types";
 import type { Locale } from "@/i18n/config";
@@ -9,7 +10,7 @@ import type { Locale } from "@/i18n/config";
 // `active` (ver abaixo), então cada ativação começa com `loaded` limpo de
 // novo, sem precisar de um efeito só pra resetar estado entre uma troca e
 // outra.
-function LiveFrame({ demoUrl, title }: { demoUrl: string; title: string }) {
+function LiveFrame({ demoUrl, title, slug }: { demoUrl: string; title: string; slug: string }) {
   const [loaded, setLoaded] = useState(false);
   return (
     <iframe
@@ -18,7 +19,14 @@ function LiveFrame({ demoUrl, title }: { demoUrl: string; title: string }) {
       tabIndex={-1}
       aria-hidden
       loading="lazy"
-      onLoad={() => setLoaded(true)}
+      onLoad={(event) => {
+        setLoaded(true);
+        // Só destrava (clica na tela de carregamento) e esconde a UI do
+        // site pra quem tem esse ajuste configurado (ver
+        // artist-preview-cleanup.ts); os demais seguem exatamente como
+        // sempre, sem nenhum efeito colateral.
+        cleanupArtistPreview(event.currentTarget, slug);
+      }}
       className={`pointer-events-none absolute inset-0 h-full w-full transition-opacity duration-500 ${
         loaded ? "opacity-100" : "opacity-0"
       }`}
@@ -46,6 +54,7 @@ export function CardLivePreview({
   cover,
   demoUrl,
   title,
+  slug,
   locale,
   active,
   preferMobile = false,
@@ -54,6 +63,9 @@ export function CardLivePreview({
   cover: Media;
   demoUrl: string;
   title: string;
+  /** Slug do case: chave de artist-preview-cleanup.ts pros sites que
+   *  precisam de um ajuste (dispensar tela de carregamento, esconder UI). */
+  slug: string;
   locale: Locale;
   active: boolean;
   /** Mesmo raciocínio de MediaView: força a variante vertical mesmo em
@@ -76,7 +88,7 @@ export function CardLivePreview({
           className="absolute inset-0 h-full w-full object-cover"
         />
       )}
-      {active && <LiveFrame demoUrl={demoUrl} title={title} />}
+      {active && <LiveFrame demoUrl={demoUrl} title={title} slug={slug} />}
     </div>
   );
 }

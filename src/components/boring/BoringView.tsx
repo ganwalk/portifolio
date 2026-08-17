@@ -85,7 +85,7 @@ export function BoringView({
                 </td>
                 <td className="py-2 pr-4">{areaLabel[caseStudy.area]}</td>
                 <td className="py-2">
-                  {caseStudy.statement[locale]}
+                  {caseStudy.statement.headline[locale]} {caseStudy.statement.detail[locale]}
                   <span className="block text-muted">
                     {caseStudy.metrics
                       .map((m) => `${m.value} ${m.label[locale]}`)
