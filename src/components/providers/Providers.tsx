@@ -5,6 +5,7 @@ import { MotionConfig } from "framer-motion";
 import type { ReactNode } from "react";
 import { BoringModeProvider, useBoringMode } from "@/contexts/BoringModeContext";
 import { ModeTransitionOverlay } from "@/components/providers/ModeTransitionOverlay";
+import { SiteLoader } from "@/components/providers/SiteLoader";
 import { SmoothScroll } from "@/components/providers/SmoothScroll";
 
 // Ordem importa: BoringMode envolve tudo, pois a animação depende dele.
@@ -24,6 +25,7 @@ export function Providers({ children }: { children: ReactNode }) {
   return (
     <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
       <BoringModeProvider>
+        <SiteLoader />
         <ModeTransitionOverlay />
         <SmoothScroll />
         <MotionGate>{children}</MotionGate>
