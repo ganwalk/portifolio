@@ -5,6 +5,7 @@ import { useScroll, useMotionValueEvent } from "framer-motion";
 import { useTheme } from "next-themes";
 import { useBoringMode } from "@/contexts/BoringModeContext";
 import { useHydrated } from "@/lib/use-hydrated";
+import { MOON_CENTER as CENTER, MOON_R as R, moonPath } from "@/lib/moon-path";
 
 // A lua ao lado da assinatura: atravessa as fases conforme o scroll da página.
 // Começa cheia (totalmente clara) no topo e termina nova (totalmente escura)
@@ -24,27 +25,6 @@ import { useHydrated } from "@/lib/use-hydrated";
 const START_PHASE = 0.5;
 const LOOPS = 3;
 const TOTAL_TURNS = LOOPS + 0.5;
-
-const R = 9;
-const CENTER = 10;
-
-// f em [0,1): 0 é lua nova, 0.5 cheia, 1 nova de novo. A parte iluminada é a
-// interseção entre o semicírculo do lado aceso e a elipse do terminador.
-function moonPath(f: number): string {
-  const k = Math.cos(2 * Math.PI * f);
-  const rx = Math.abs(k) * R;
-  const waxing = f < 0.5;
-  const side = waxing ? 1 : 0;
-  const bulge = waxing ? (k > 0 ? 0 : 1) : k > 0 ? 1 : 0;
-  const top = CENTER - R;
-  const bottom = CENTER + R;
-  return [
-    `M ${CENTER} ${top}`,
-    `A ${R} ${R} 0 0 ${side} ${CENTER} ${bottom}`,
-    `A ${rx} ${R} 0 0 ${bulge} ${CENTER} ${top}`,
-    "Z",
-  ].join(" ");
-}
 
 export function MoonPhase({
   className = "",

@@ -495,7 +495,7 @@ function CaseColumn({
             )}
           </motion.div>
         </motion.div>
-        <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/10 to-black/45" />
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/75 via-black/10 to-black/45" />
 
         <motion.div
           style={{ opacity: contentOpacity }}
@@ -922,7 +922,7 @@ function MobileCaseCard({
             <div className="absolute inset-0 bg-surface" />
           )}
         </motion.div>
-        <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/10 to-black/45" />
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/75 via-black/10 to-black/45" />
 
         {/* h-svh, não inset-0: as informações precisam caber na TELA, não
             no cartão inteiro (que agora é mais alto que ela). Ancorado no

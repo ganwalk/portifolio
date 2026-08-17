@@ -27,6 +27,15 @@ interface PreviewCleanup {
   /** Enquanto false, o elemento ainda não está pronto (um clique real
    *  também não teria efeito nele ainda). Ignorado sem `startSelector`. */
   isReady?: (el: Element) => boolean;
+  /**
+   * Roda logo depois do clique sintético em `startSelector`, com a
+   * `window` de dentro do iframe em mãos. Só o Ganwalk usa: o clique em
+   * si já dispara a Experiência I por conta própria (é o site que decide
+   * isso, não dá pra evitar), então esse hook troca pra Experiência II
+   * na sequência, no mesmo instante, sem o visitante nunca ver a I
+   * sequer piscar na tela.
+   */
+  afterStart?: (win: Window) => void;
   /** Escondidos assim que a limpeza roda: nav, controles, textos de
    *  instrução — tudo que não é o elemento gráfico reativo em si. */
   hideSelectors: string[];
@@ -47,14 +56,26 @@ const CLEANUPS: Record<string, PreviewCleanup> = {
   ganwalk: {
     startSelector: "#click-to-start-text",
     isReady: (el) => el.classList.contains("ready"),
+    // O clique dispensa a tela de carregamento E dispara a Experiência I
+    // por conta própria (comportamento fixo do próprio site). Este hook
+    // troca pra Experiência II ("Nav.goToExperience2()", o mesmo código
+    // que o botão "Exp II" do site roda) logo em seguida: a câmera/vídeo
+    // virando arte de partículas com "GANWALK" em texto é o elemento
+    // gráfico mais reativo dos dois, é o pedido explícito no lugar da I
+    // (logo de partículas com o mixer de áudio).
+    afterStart: (win) => {
+      const nav = (win as unknown as { Nav?: { goToExperience2?: () => void } }).Nav;
+      nav?.goToExperience2?.();
+    },
     hideSelectors: [
       "#top-nav",
       "#top-marquee",
       "#mobile-exp-bar",
       "#mobile-menu-overlay",
-      "#p1-interaction-tooltip",
-      "#p1-controls-bar",
-      "#p1-toggle-button",
+      "#p2-controls-bar",
+      "#p2-toggle-button",
+      "#p2-create-prompt",
+      "#p2-camera-tooltip",
     ],
     // Sem mouseMoveSelector de propósito: só Pink Opala repassa o mouse
     // pra dentro do card (ver comentário em forwardMouseMove).
@@ -97,7 +118,7 @@ export function cleanupArtistPreview(iframe: HTMLIFrameElement, slug: string) {
     doc.head.appendChild(style);
 
     if (!cleanup.startSelector || !cleanup.isReady) return;
-    const { startSelector, isReady } = cleanup;
+    const { startSelector, isReady, afterStart } = cleanup;
 
     let attempts = 0;
     const tryStart = () => {
@@ -105,6 +126,8 @@ export function cleanupArtistPreview(iframe: HTMLIFrameElement, slug: string) {
       const el = doc.querySelector(startSelector);
       if (el && isReady(el)) {
         (el as HTMLElement).click();
+        const win = doc.defaultView;
+        if (afterStart && win) afterStart(win);
         return;
       }
       if (attempts < MAX_ATTEMPTS) {
