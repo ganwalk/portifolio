@@ -36,12 +36,31 @@ export interface CaseMetric {
   illustrative: boolean;
 }
 
+/**
+ * Statement de um case, em duas partes: `headline` é o "grito" curto, em
+ * primeira pessoa, que carrega o peso tipográfico grande; `detail` é a
+ * elaboração (o que exatamente, com o quê), numa coluna mais larga mas com
+ * tipografia bem menor (ver CaseStatement.tsx). Duas frases separadas, não
+ * uma só cortada ao meio: cada idioma pode reorganizar a ênfase como for
+ * mais natural nele, sem depender de achar o mesmo ponto de corte.
+ */
+export interface CaseStatement {
+  headline: Localized;
+  detail: Localized;
+}
+
 export interface CaseStudy {
   slug: string;
   area: CaseArea;
   title: Localized;
-  /** Uma frase de resultado, em primeira pessoa, o "grito" da capa. */
-  statement: Localized;
+  statement: CaseStatement;
+  /**
+   * Texto do selo que segue o cursor no hover (ver CasesGrid): reflete o
+   * conteúdo específico do case ("Tocar nas partículas"), não um rótulo
+   * genérico. Opcional: sem ele, o selo cai pro texto padrão de
+   * dict.cases.viewCase (ou comingSoon, se o case ainda não tiver página).
+   */
+  hoverLabel?: Localized;
   tags: Localized<readonly string[]>;
   metrics: CaseMetric[];
   /** Mídia de fundo do painel full bleed na home e da capa do case. */

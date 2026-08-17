@@ -61,12 +61,34 @@ const VIEWPORT = { width: 1600, height: 1000 };
 // rodada). `waitFor`, quando existe, espera esse sinal (best effort: se o
 // site mudar de marcação e o seletor sumir, a captura não trava pra
 // sempre, só cai direto pro warmup padrão).
+//
+// `cleanup`, quando existe, clica no elemento que dispensa a tela de
+// carregamento (o `waitFor` só espera ficar pronto, não clica sozinho) e
+// esconde a UI do próprio site (nav, controles, tooltips), deixando só o
+// elemento gráfico reativo na captura: mesmos seletores de
+// src/lib/artist-preview-cleanup.ts, que faz a mesma limpeza na prévia ao
+// vivo do card (lá dentro de um iframe em produção; aqui, a página
+// carregada direto, sem essa complicação). Duplicado de propósito: um é
+// Node/Playwright, o outro é DOM de navegador dentro de um iframe
+// mesma-origem, os dois runtimes não compartilham módulo. Mudou um lado,
+// mude o outro.
 const SITES = [
   {
     slug: "ganwalk",
     url: "https://ganwalk.github.io/2026/",
     waitFor: (page) =>
       page.waitForSelector("#click-to-start-text.ready", { timeout: 20_000 }),
+    cleanup: (page) =>
+      page.evaluate(() => {
+        document.querySelector("#click-to-start-text")?.click();
+        const style = document.createElement("style");
+        style.textContent = `
+          #top-nav, #top-marquee, #mobile-exp-bar, #mobile-menu-overlay,
+          #p1-interaction-tooltip, #p1-controls-bar, #p1-toggle-button
+          { display: none !important; }
+        `;
+        document.head.appendChild(style);
+      }),
   },
   {
     slug: "dezert-horse",
@@ -76,6 +98,16 @@ const SITES = [
         () => document.getElementById("loading-text")?.innerText === "SISTEMA PRONTO",
         { timeout: 20_000 },
       ),
+    cleanup: (page) =>
+      page.evaluate(() => {
+        document.querySelector("#start-btn")?.click();
+        const style = document.createElement("style");
+        style.textContent = `
+          #main-nav, #hud, #hud-toggle-btn, #cam-tooltip, #presave-popup
+          { display: none !important; }
+        `;
+        document.head.appendChild(style);
+      }),
   },
   { slug: "pink-opala", url: "https://ganwalk.github.io/pinkopala/" },
 ];
@@ -85,7 +117,7 @@ async function logSize(path) {
   console.log(`${path.split("/").pop()}: ${(size / 1024).toFixed(0)} KB`);
 }
 
-async function captureRawVideo(url, outDir, waitFor) {
+async function captureRawVideo(url, outDir, waitFor, cleanup) {
   const browser = await chromium.launch();
   const context = await browser.newContext({
     viewport: VIEWPORT,
@@ -98,6 +130,14 @@ async function captureRawVideo(url, outDir, waitFor) {
       console.warn(`  aviso: waitFor não resolveu (${error.message.split("\n")[0]}), seguindo com o warmup padrão`),
     );
   }
+  if (cleanup) {
+    await cleanup(page).catch((error) =>
+      console.warn(`  aviso: cleanup falhou (${error.message.split("\n")[0]})`),
+    );
+  }
+  // O warmup, aqui, também cobre a transição de saída da tela de
+  // carregamento (fade de ~1 a 1,5s em ambos os sites): sem essa folga a
+  // gravação começaria no meio do fade em vez do repouso já assentado.
   await page.waitForTimeout(WARMUP_MS);
   await page.waitForTimeout(RECORD_MS);
   await context.close();
@@ -145,12 +185,12 @@ async function main() {
   await mkdir(VIDEOS_OUT, { recursive: true });
   await mkdir(TMP_DIR, { recursive: true });
 
-  for (const { slug, url, waitFor } of SITES) {
+  for (const { slug, url, waitFor, cleanup } of SITES) {
     console.log(`\n== ${slug} (${url}) ==`);
     const siteTmp = `${TMP_DIR}/${slug}`;
     await mkdir(siteTmp, { recursive: true });
 
-    const rawVideo = await captureRawVideo(url, siteTmp, waitFor);
+    const rawVideo = await captureRawVideo(url, siteTmp, waitFor, cleanup);
 
     const videoOut = `${VIDEOS_OUT}/${slug}-live.mp4`;
     const posterOut = `${PHOTOS_OUT}/${slug}-live-poster.webp`;

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { CaseMetrics } from "@/components/ui/CaseMetrics";
+import { CaseStatement } from "@/components/ui/CaseStatement";
 import { LiveEmbed } from "@/components/ui/LiveEmbed";
 import { MediaView } from "@/components/ui/MediaView";
 import { Reveal } from "@/components/ui/Reveal";
@@ -91,9 +92,7 @@ export function CaseDetail({
 
       <div className="gutter py-16 sm:py-20">
         <Reveal>
-          <p className="type-serif-display max-w-3xl text-3xl sm:text-5xl">
-            {caseStudy.statement[locale]}
-          </p>
+          <CaseStatement caseStudy={caseStudy} locale={locale} />
         </Reveal>
 
         <Reveal delay={0.08}>

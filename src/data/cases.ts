@@ -44,10 +44,24 @@ export const cases: CaseStudy[] = [
       zh: "完整内网系统",
     },
     statement: {
-      pt: "Construí uma intranet robusta com Design System completo e manual de tom e voz para todo o ecossistema.",
-      en: "I built a robust intranet with a complete Design System and tone of voice manual for the whole ecosystem.",
-      es: "Construí una intranet robusta con un Design System completo y manual de tono y voz para todo el ecosistema.",
-      zh: "为整个生态系统搭建了一套完善的内部网站，包含完整的设计系统和语气语调手册。",
+      headline: {
+        pt: "Construí uma intranet robusta para todo o ecossistema.",
+        en: "I built a robust intranet for the whole ecosystem.",
+        es: "Construí una intranet robusta para todo el ecosistema.",
+        zh: "为整个生态系统搭建了一套完善的内部网站。",
+      },
+      detail: {
+        pt: "Com Design System completo e manual de tom e voz.",
+        en: "With a complete Design System and tone of voice manual.",
+        es: "Con un Design System completo y manual de tono y voz.",
+        zh: "包含完整的设计系统和语气语调手册。",
+      },
+    },
+    hoverLabel: {
+      pt: "Ver o Design System",
+      en: "See the Design System",
+      es: "Ver el Design System",
+      zh: "查看设计系统",
     },
     tags: {
       pt: ["Design System", "Intranet", "Tom e voz", "Banking"],
@@ -107,10 +121,24 @@ export const cases: CaseStudy[] = [
       zh: "落地页",
     },
     statement: {
-      pt: "Desenho e mantenho o ecossistema de webpages da AUVP Capital: todas as LPs com no mínimo 90/100 de performance, alta conversão e bom rankeamento nos mecanismos de busca e em IA.",
-      en: "I design and maintain AUVP Capital's webpage ecosystem: every LP scores at least 90/100 on performance, with high conversion and strong ranking on search engines and AI.",
-      es: "Diseño y mantengo el ecosistema de webpages de AUVP Capital: todas las LPs con al menos 90/100 de rendimiento, alta conversión y buen posicionamiento en buscadores y en IA.",
-      zh: "设计并维护 AUVP Capital 的网页生态系统：所有落地页性能评分至少 90/100，转化率高，且在搜索引擎和人工智能中排名良好。",
+      headline: {
+        pt: "Desenho e mantenho o ecossistema de webpages da AUVP Capital.",
+        en: "I design and maintain AUVP Capital's webpage ecosystem.",
+        es: "Diseño y mantengo el ecosistema de webpages de AUVP Capital.",
+        zh: "设计并维护 AUVP Capital 的网页生态系统。",
+      },
+      detail: {
+        pt: "Todas as LPs com no mínimo 90/100 de performance, alta conversão e bom rankeamento nos mecanismos de busca e em IA.",
+        en: "Every LP scores at least 90/100 on performance, with high conversion and strong ranking on search engines and AI.",
+        es: "Todas las LPs con al menos 90/100 de rendimiento, alta conversión y buen posicionamiento en buscadores y en IA.",
+        zh: "所有落地页性能评分至少 90/100，转化率高，且在搜索引擎和人工智能中排名良好。",
+      },
+    },
+    hoverLabel: {
+      pt: "Ver as landing pages",
+      en: "See the landing pages",
+      es: "Ver las landing pages",
+      zh: "查看落地页",
     },
     tags: {
       pt: ["Webpages", "SEO", "Conversão", "Clarity & GA"],
@@ -184,10 +212,24 @@ export const cases: CaseStudy[] = [
       zh: "Ganwalk",
     },
     statement: {
-      pt: "Desenhei a identidade visual interativa do Ganwalk: um logotipo de partículas em WebGL que reage ao toque e um painel de mixagem ao vivo, com looper e gravação, direto no navegador.",
-      en: "I designed Ganwalk's interactive visual identity: a WebGL particle logo that reacts to touch, plus a live mixing panel with a looper and recording, straight in the browser.",
-      es: "Diseñé la identidad visual interactiva de Ganwalk: un logotipo de partículas en WebGL que reacciona al toque y un panel de mezcla en vivo, con looper y grabación, directo en el navegador.",
-      zh: "打造了 Ganwalk 的互动视觉形象：一个会随触摸反应的 WebGL 粒子标志，还有一个内置循环采样和录音功能的实时混音面板，全部在浏览器里运行。",
+      headline: {
+        pt: "Desenhei a identidade visual interativa do Ganwalk.",
+        en: "I designed Ganwalk's interactive visual identity.",
+        es: "Diseñé la identidad visual interactiva de Ganwalk.",
+        zh: "打造了 Ganwalk 的互动视觉形象。",
+      },
+      detail: {
+        pt: "Um logotipo de partículas em WebGL que reage ao toque, e um painel de mixagem ao vivo, com looper e gravação, direto no navegador.",
+        en: "A WebGL particle logo that reacts to touch, plus a live mixing panel with a looper and recording, straight in the browser.",
+        es: "Un logotipo de partículas en WebGL que reacciona al toque, y un panel de mezcla en vivo, con looper y grabación, directo en el navegador.",
+        zh: "一个会随触摸反应的 WebGL 粒子标志，还有一个内置循环采样和录音功能的实时混音面板，全部在浏览器里运行。",
+      },
+    },
+    hoverLabel: {
+      pt: "Tocar nas partículas",
+      en: "Touch the particles",
+      es: "Tocar las partículas",
+      zh: "触碰粒子",
     },
     tags: {
       pt: ["Música", "WebGL", "Three.js", "Interatividade"],
@@ -240,10 +282,24 @@ export const cases: CaseStudy[] = [
       zh: "Dezert Horse",
     },
     statement: {
-      pt: "Projetei o universo interativo do Dezert Horse: um deserto em Three.js com um painel de controle retrô que toca o álbum inteiro, faixa a faixa, direto no site.",
-      en: "I designed Dezert Horse's interactive universe: a Three.js desert with a retro control panel that plays the whole album, track by track, right on the site.",
-      es: "Diseñé el universo interactivo de Dezert Horse: un desierto en Three.js con un panel de control retro que reproduce el álbum entero, pista a pista, directo en el sitio.",
-      zh: "打造了 Dezert Horse 的互动世界：一片用 Three.js 呈现的沙漠场景，配上一个复古控制面板，可以直接在网站上逐首播放整张专辑。",
+      headline: {
+        pt: "Projetei o universo interativo do Dezert Horse.",
+        en: "I designed Dezert Horse's interactive universe.",
+        es: "Diseñé el universo interactivo de Dezert Horse.",
+        zh: "打造了 Dezert Horse 的互动世界。",
+      },
+      detail: {
+        pt: "Um deserto em Three.js com um painel de controle retrô que toca o álbum inteiro, faixa a faixa, direto no site.",
+        en: "A Three.js desert with a retro control panel that plays the whole album, track by track, right on the site.",
+        es: "Un desierto en Three.js con un panel de control retro que reproduce el álbum entero, pista a pista, directo en el sitio.",
+        zh: "一片用 Three.js 呈现的沙漠场景，配上一个复古控制面板，可以直接在网站上逐首播放整张专辑。",
+      },
+    },
+    hoverLabel: {
+      pt: "Ouvir o álbum",
+      en: "Listen to the album",
+      es: "Escuchar el álbum",
+      zh: "聆听专辑",
     },
     tags: {
       pt: ["Música", "WebGL", "Three.js", "Player embutido"],
@@ -295,10 +351,24 @@ export const cases: CaseStudy[] = [
       zh: "Pink Opala",
     },
     statement: {
-      pt: "Desenvolvi o site oficial do Pink Opala, duo indie pop de Goiânia: partículas com física de mola formam o nome da banda, e discografia, galeria e contato moram numa página só, sem build nem framework.",
-      en: "I built Pink Opala's official site, an indie pop duo from Goiânia, Brazil: spring-physics particles form the band's name, and the discography, gallery and contact all live in one single page, no build step or framework.",
-      es: "Desarrollé el sitio oficial de Pink Opala, dúo de indie pop de Goiânia: partículas con física de resorte forman el nombre de la banda, y discografía, galería y contacto viven en una sola página, sin build ni framework.",
-      zh: "打造了巴西戈亚尼亚独立流行二人组 Pink Opala 的官方网站：带弹簧物理效果的粒子拼出乐队名字，唱片、相册和联系方式全部集中在一个单页面里，无需构建工具或框架。",
+      headline: {
+        pt: "Desenvolvi o site oficial do Pink Opala, duo indie pop de Goiânia.",
+        en: "I built Pink Opala's official site, an indie pop duo from Goiânia, Brazil.",
+        es: "Desarrollé el sitio oficial de Pink Opala, dúo de indie pop de Goiânia.",
+        zh: "打造了巴西戈亚尼亚独立流行二人组 Pink Opala 的官方网站。",
+      },
+      detail: {
+        pt: "Partículas com física de mola formam o nome da banda, e discografia, galeria e contato moram numa página só, sem build nem framework.",
+        en: "Spring-physics particles form the band's name, and the discography, gallery and contact all live in one single page, no build step or framework.",
+        es: "Partículas con física de resorte forman el nombre de la banda, y discografía, galería y contacto viven en una sola página, sin build ni framework.",
+        zh: "带弹簧物理效果的粒子拼出乐队名字，唱片、相册和联系方式全部集中在一个单页面里，无需构建工具或框架。",
+      },
+    },
+    hoverLabel: {
+      pt: "Ver o nome reagir",
+      en: "Watch the name react",
+      es: "Ver el nombre reaccionar",
+      zh: "看名字随手而动",
     },
     tags: {
       pt: ["Música", "Canvas 2D", "Tailwind CSS", "Interatividade"],

@@ -16,6 +16,7 @@ import {
 } from "framer-motion";
 import { CardLivePreview } from "@/components/ui/CardLivePreview";
 import { CaseMetrics } from "@/components/ui/CaseMetrics";
+import { CaseStatement } from "@/components/ui/CaseStatement";
 import { CursorLabel } from "@/components/ui/CursorLabel";
 import { GitHubIcon } from "@/components/ui/icons/GitHubIcon";
 import { LiveEmbed } from "@/components/ui/LiveEmbed";
@@ -481,6 +482,7 @@ function CaseColumn({
                   cover={caseStudy.cover}
                   demoUrl={caseStudy.demoUrl}
                   title={caseStudy.title[locale]}
+                  slug={caseStudy.slug}
                   locale={locale}
                   active={isHovered && !reduceMotion}
                   preferMobile
@@ -747,9 +749,7 @@ function ExpandedCase({
       </div>
 
       <div className="gutter py-16 sm:py-20">
-        <p className="type-serif-display max-w-3xl text-3xl sm:text-5xl">
-          {caseStudy.statement[locale]}
-        </p>
+        <CaseStatement caseStudy={caseStudy} locale={locale} />
 
         <CaseMetrics caseStudy={caseStudy} locale={locale} className="mt-12" />
 
@@ -921,6 +921,7 @@ function MobileCaseCard({
                 cover={caseStudy.cover}
                 demoUrl={caseStudy.demoUrl}
                 title={caseStudy.title[locale]}
+                slug={caseStudy.slug}
                 locale={locale}
                 active={revealed}
                 className="absolute inset-0 h-full w-full"
@@ -1269,7 +1270,7 @@ function DesktopCasesGrid({
               hoveredCase
                 ? hoveredCase.comingSoon
                   ? dict.cases.comingSoon
-                  : dict.cases.viewCase
+                  : (hoveredCase.hoverLabel?.[locale] ?? dict.cases.viewCase)
                 : ""
             }
           />
