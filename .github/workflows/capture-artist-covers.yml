@@ -21,8 +21,8 @@ jobs:
         with:
           node-version: 22
 
-      - name: Instalar Playwright e sharp (ferramenta de bancada, fora do package.json)
-        run: npm install --no-save playwright sharp
+      - name: Instalar Playwright, sharp e ffmpeg (ferramenta de bancada, fora do package.json)
+        run: npm install --no-save playwright sharp @ffmpeg-installer/ffmpeg
 
       - name: Instalar o Chromium do Playwright
         run: npx playwright install --with-deps chromium
