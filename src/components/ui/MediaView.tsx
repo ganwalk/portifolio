@@ -13,18 +13,32 @@ export function MediaView({
   media,
   locale,
   className = "",
+  preferMobile = false,
 }: {
   media: Media;
   locale: Locale;
   className?: string;
+  /**
+   * Força a variante vertical (srcMobile/posterMobile) mesmo em tela larga:
+   * usado pelo cartão compacto do carrossel de desktop (CaseColumn em
+   * CasesGrid), que é uma coluna estreita e alta mesmo com a janela
+   * inteira sendo grande (o trio de artistas divide a largura em três).
+   * Sem isso, o vídeo horizontal ficava espremido numa faixa vertical ali.
+   * A versão expandida (ExpandedCase) e a página própria do case
+   * (CaseDetail) continuam decidindo só pela largura real da tela: as duas
+   * ocupam a tela inteira, então a horizontal cabe bem a partir do mesmo
+   * breakpoint de sempre.
+   */
+  preferMobile?: boolean;
 }) {
   // Mesmo breakpoint que decide a versão mobile/desktop de CasesGrid (ver
   // useMediaQuery("(min-width: 640px)") lá): abaixo dele, troca pela
   // variante vertical (srcMobile/posterMobile), quando existe, em vez de
   // espremer um vídeo horizontal numa tela de pé.
   const isDesktop = useMediaQuery("(min-width: 640px)");
-  const src = (!isDesktop && media.srcMobile) || media.src;
-  const poster = (!isDesktop && media.posterMobile) || media.poster;
+  const useMobileVariant = preferMobile || !isDesktop;
+  const src = (useMobileVariant && media.srcMobile) || media.src;
+  const poster = (useMobileVariant && media.posterMobile) || media.poster;
 
   if (media.kind === "video") {
     // O poster também vive como camada de fundo: se o vídeo demorar ou falhar,
