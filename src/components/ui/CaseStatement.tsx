@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import type { CaseStudy } from "@/data/types";
 import type { Locale } from "@/i18n/config";
 
@@ -19,10 +20,16 @@ import type { Locale } from "@/i18n/config";
 export function CaseStatement({
   caseStudy,
   locale,
+  metricsSlot,
   className = "",
 }: {
   caseStudy: CaseStudy;
   locale: Locale;
+  /** Renderizado na coluna direita, acima da descrição: só a página
+   *  dedicada (/work/[slug]) passa isso, pra encaixar as métricas ali em
+   *  vez de num bloco à parte (ver CaseDetail.tsx). Sem uso, a coluna
+   *  direita continua só a descrição, como sempre foi. */
+  metricsSlot?: ReactNode;
   className?: string;
 }) {
   return (
@@ -30,9 +37,12 @@ export function CaseStatement({
       <p className="type-serif-display text-3xl sm:text-5xl">
         {caseStudy.statement.headline[locale]}
       </p>
-      <p className="text-lg text-muted sm:pt-2 sm:text-xl">
-        {caseStudy.statement.detail[locale]}
-      </p>
+      <div>
+        {metricsSlot}
+        <p className="text-lg text-muted sm:pt-2 sm:text-xl">
+          {caseStudy.statement.detail[locale]}
+        </p>
+      </div>
     </div>
   );
 }

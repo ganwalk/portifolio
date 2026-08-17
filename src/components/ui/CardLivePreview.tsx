@@ -37,6 +37,18 @@ const RECENTER_TRANSLATE: Record<string, string> = {
 // (pointer-events-none de propósito), então tentar destravar som aqui só
 // dava falsa expectativa sem entregar áudio de verdade.
 //
+// allow="autoplay 'none'" é o que faz essa promessa valer de verdade: o
+// portfólio e os três sites de artista moram no mesmo host
+// (ganwalk.github.io), então o navegador já vê o host como "engajado" (o
+// próprio Armando visitou e ouviu som nele antes) e libera autoplay COM
+// som pra qualquer página desse host, iframe embutido incluso, mesmo sem
+// gesto nenhum aqui dentro. Foi assim que Ganwalk e Dezert Horse
+// passaram a tocar áudio sozinhos ao carregar a home, sem clique nenhum.
+// A Permissions Policy do atributo `allow` desliga autoplay de verdade
+// pra esse iframe específico, por cima de qualquer heurística de
+// engajamento do navegador: única forma confiável de garantir silêncio
+// aqui, já que "sem gesto confiável" sozinho se provou insuficiente.
+//
 // tabIndex/aria-hidden tiram o iframe da navegação por teclado e leitor
 // de tela: é decorativo aqui, o link de verdade pro site mora em
 // LiveEmbed, no corpo do case.
@@ -72,6 +84,7 @@ export function CardLivePreview({
         tabIndex={-1}
         aria-hidden
         loading="lazy"
+        allow="autoplay 'none'"
         onLoad={(event) => cleanupArtistPreview(event.currentTarget, slug)}
         className="pointer-events-none absolute inset-0 h-full w-full"
         style={{ border: 0, transform: RECENTER_TRANSLATE[slug] }}

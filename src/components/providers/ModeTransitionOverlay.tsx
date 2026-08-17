@@ -39,7 +39,10 @@ const STAGGER_MS = 26;
 const HOLD_MS = 90;
 const COVER_MS = STRIPE_MS + (STRIPE_COUNT - 1) * STAGGER_MS;
 const REVEAL_MS = COVER_MS;
-const TOTAL_MS = COVER_MS + HOLD_MS + REVEAL_MS;
+// Exportada: SiteLoader.tsx reaproveita essa mesma duração pro fade da tela
+// branca que revela o site pela primeira vez, "na mesma velocidade" da
+// troca de modo de verdade (pedido explícito), sem duplicar o número solto.
+export const MODE_TRANSITION_MS = COVER_MS + HOLD_MS + REVEAL_MS;
 
 function easeOutCubic(t: number): number {
   return 1 - Math.pow(1 - t, 3);
@@ -113,7 +116,7 @@ export function ModeTransitionOverlay() {
           scale = easeOutCubic(stripeProgress(elapsed, i));
         } else if (elapsed < COVER_MS + HOLD_MS) {
           scale = 1;
-        } else if (elapsed < TOTAL_MS) {
+        } else if (elapsed < MODE_TRANSITION_MS) {
           const t = stripeProgress(elapsed - COVER_MS - HOLD_MS, i);
           scale = 1 - easeInCubic(t);
         } else {
@@ -123,7 +126,7 @@ export function ModeTransitionOverlay() {
         el.style.transform = `scaleY(${scale})`;
       });
 
-      if (elapsed < TOTAL_MS) {
+      if (elapsed < MODE_TRANSITION_MS) {
         rafRef.current = requestAnimationFrame(frame);
       } else {
         overlayEl.style.pointerEvents = "none";
