@@ -12,19 +12,22 @@
 // fetch. Um runner do GitHub Actions tem internet normal, sem proxy no meio,
 // e resolve isso de graça.
 //
-// Uso local (fora de CI, numa máquina com internet direta; sharp e
-// playwright não ficam no package.json, são ferramenta de bancada, não do
-// site):
+// Uso local (fora de CI, numa máquina com internet direta; sharp, playwright
+// e @ffmpeg-installer não ficam no package.json, são ferramenta de bancada,
+// não do site):
 //
-//   npm install --no-save playwright sharp
+//   npm install --no-save playwright sharp @ffmpeg-installer/ffmpeg
 //   npx playwright install --with-deps chromium
 //   node scripts/capture-artist-covers.mjs
 //
-// Assume `ffmpeg` já no PATH (os runners padrão do GitHub Actions já vêm
-// com ele; numa máquina local sem ffmpeg, instale via apt/brew antes).
+// @ffmpeg-installer, não o binário do PATH: o runner padrão do GitHub
+// Actions não vem com ffmpeg instalado (só um ffmpeg PRÓPRIO do Playwright,
+// de uso interno, não exposto no PATH), e essa dependência já é como
+// build-cagumela-media.mjs resolve o mesmo problema.
 
 import { chromium } from "playwright";
 import sharp from "sharp";
+import ffmpegPath from "@ffmpeg-installer/ffmpeg";
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 import { mkdir, readdir, rm, stat } from "node:fs/promises";
@@ -81,7 +84,7 @@ async function toLoopMp4(rawVideo, outFile) {
   // reduzida (a vitrine mostra em aspect-square, object-cover, nunca a
   // resolução original), faststart pro navegador começar a tocar antes do
   // download terminar.
-  await run("ffmpeg", [
+  await run(ffmpegPath.path, [
     "-y",
     "-i",
     rawVideo,
@@ -104,7 +107,7 @@ async function toLoopMp4(rawVideo, outFile) {
 
 async function toPosterWebp(rawVideo, outFile) {
   const rawPng = `${outFile}.raw.png`;
-  await run("ffmpeg", ["-y", "-ss", "1", "-i", rawVideo, "-frames:v", "1", rawPng]);
+  await run(ffmpegPath.path, ["-y", "-ss", "1", "-i", rawVideo, "-frames:v", "1", rawPng]);
   await sharp(rawPng).resize({ width: 720 }).webp({ quality: 82 }).toFile(outFile);
   await rm(rawPng);
 }
