@@ -2,7 +2,7 @@ import type { CaseStudy } from "./types";
 
 // basePath não é aplicado a src montado à mão em JS (só a next/image e links
 // internos do próprio Next): o mesmo motivo de experiments.ts. Só entra em
-// jogo pras poucas mídias locais deste arquivo (hoje, só a capa do Pink
+// jogo pras mídias locais deste arquivo (hoje, as capas de Ganwalk e Pink
 // Opala); o resto continua apontando pra URL externa (Pexels, ou o próprio
 // GitHub do artista) sem precisar dele.
 const basePath = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
@@ -17,13 +17,12 @@ const basePath = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
 // Métricas com value "+XX%" são placeholders explícitos até calibração com números reais.
 // Telas dos cases de Banking serão recriadas/anonimizadas até autorização formal de uso.
 //
-// Capas: a maioria em vídeo, placeholders do Pexels escolhidos pelo clima de
-// cada case (Ganwalk e Dezert Horse ainda esperam captura de tela real dos
-// próprios sites: os dois usam WebGL/Three.js, então até lá o clima visual
-// mais próximo já escolhido, terminal/código e duna de areia, continua no
-// lugar). Pink Opala já usa uma captura real do próprio site, servida
-// localmente (ver comentário no bloco cover dele). Para trocar pela mídia
-// real, basta substituir src (e poster) no bloco cover.
+// Capas: a maioria em vídeo. Dezert Horse ainda espera captura de tela real
+// do próprio site (usa WebGL/Three.js, então até lá o clima visual mais
+// próximo já escolhido, duna de areia, continua no lugar, placeholder do
+// Pexels). Ganwalk e Pink Opala já usam preview real do próprio projeto,
+// servido localmente (ver comentário no bloco cover de cada um). Para
+// trocar pela mídia real, basta substituir src (e poster) no bloco cover.
 //
 // Critério de cor: colorido sim, saturado não. A primeira leva de
 // placeholders era de gradiente neon e show de clube com luz roxa estourada,
@@ -208,21 +207,21 @@ export const cases: CaseStudy[] = [
         illustrative: true,
       },
     ],
-    // O site real já está no ar (ver demoUrl, embutido em LiveEmbed no
-    // corpo do case), mas a CAPA aqui embaixo continua o placeholder de
-    // vídeo: código/terminal rolando na tela, o clima mais próximo do que
-    // o site de verdade entrega (visual "code editor" com glitch). Pendente:
-    // trocar por uma captura de tela real do próprio site.
+    // Mídia real: vídeo de preview do próprio projeto (ver ganwalk-preview/
+    // e scripts/build-ganwalk-preview.mjs), a palavra "ganwalk" repetida
+    // formando um retrato em silhueta, âmbar sobre preto, no mesmo clima
+    // "code editor" do site de verdade. Uma versão só (sem srcMobile): o
+    // efeito é abstrato o bastante pra funcionar recortado em qualquer
+    // proporção, ao contrário do still específico do Pink Opala.
     cover: {
       kind: "video",
-      src: "https://videos.pexels.com/video-files/852292/852292-hd_1728_1080_25fps.mp4",
-      poster:
-        "https://images.pexels.com/videos/852292/free-video-852292.jpg?auto=compress&w=1260&h=750&dpr=1",
+      src: `${basePath}/videos/ganwalk-preview.mp4`,
+      poster: `${basePath}/photos/ganwalk-preview.webp`,
       alt: {
-        pt: "Código rolando em tela escura, como um terminal em execução",
-        en: "Code scrolling on a dark screen, like a running terminal",
-        es: "Código desplazándose en una pantalla oscura, como una terminal en ejecución",
-        zh: "深色屏幕上滚动的代码，如同运行中的终端",
+        pt: "Retrato em silhueta formado pela palavra \"ganwalk\" repetida em âmbar sobre fundo preto",
+        en: "Portrait silhouette formed by the word \"ganwalk\" repeated in amber over a black background",
+        es: "Retrato en silueta formado por la palabra \"ganwalk\" repetida en ámbar sobre fondo negro",
+        zh: "由 \"ganwalk\" 一词反复排列形成的琥珀色剪影肖像，黑色背景",
       },
     },
     comingSoon: false,
