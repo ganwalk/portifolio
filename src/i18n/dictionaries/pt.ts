@@ -72,6 +72,7 @@ export const pt = {
     comingSoon: "Case completo em breve",
     repo: "Repositório",
     openDemo: "Abrir em nova aba",
+    livePreview: "Ver ao vivo",
     metricsDisclaimer:
       "Métricas ilustrativas, números finais em fase de consolidação.",
   },

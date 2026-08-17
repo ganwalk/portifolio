@@ -61,6 +61,7 @@ export const es: Dictionary = {
     comingSoon: "Case study completo próximamente",
     repo: "Repositorio",
     openDemo: "Abrir en pestaña nueva",
+    livePreview: "Ver en vivo",
     metricsDisclaimer:
       "Métricas ilustrativas, números finales en consolidación.",
   },
