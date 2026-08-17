@@ -1,7 +1,21 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useRef } from "react";
 import { cleanupArtistPreview, forwardMouseMove } from "@/lib/artist-preview-cleanup";
+
+// Ajuste fino de enquadramento: a cena do Dezert Horse foi composta pro
+// aspecto de uma janela de navegador comum, não pra coluna estreita e alta
+// que o card do trio de artistas força (ver CaseColumn em CasesGrid.tsx).
+// Nessa proporção mais vertical, a câmera do site (Three.js, com um
+// pequeno deslocamento de foco fixo no world space) deixa o cavalo puxado
+// pra esquerda do quadro. Sem acesso pra recompor a câmera de dentro do
+// site, o jeito é deslocar o iframe inteiro pra direita por cima do
+// fundo escuro da própria cena (a lacuna que abre na borda esquerda some
+// nele, ver bg-black no wrapper): puramente estimado, sem como medir o
+// valor exato sem ver o render de verdade.
+const RECENTER_TRANSLATE: Record<string, string> = {
+  "dezert-horse": "translateX(6%)",
+};
 
 // Prévia "ao vivo" de um card: o site publicado de verdade, embutido num
 // iframe, direto, sem imagem estática por baixo esperando um gesto pra
@@ -10,19 +24,18 @@ import { cleanupArtistPreview, forwardMouseMove } from "@/lib/artist-preview-cle
 // de quem só queria continuar rolando a seção por cima dele. O mousemove
 // de verdade É repassado pro gráfico lá dentro (ver forwardMouseMove, no
 // wrapper, que recebe o evento de verdade e reenvia pro iframe nas
-// coordenadas certas), então quem reage à posição do cursor (Ganwalk,
-// Pink Opala) continua reagindo — só o scroll é que nunca é sequestrado.
+// coordenadas certas) só pros cases com essa reação configurada em
+// artist-preview-cleanup.ts (hoje só Pink Opala) — nos demais o repasse
+// não tem efeito nenhum, o site simplesmente não escuta.
 //
-// `soundRequested` tenta destravar o áudio do site embutido (hoje só
-// Ganwalk e Dezert Horse têm) no gesto que o disparar (hover no desktop,
-// toque no mobile — ver CaseColumn/MobileCaseCard). Ressalva técnica
-// importante: a política de autoplay dos navegadores só libera áudio COM
-// SOM depois de um gesto confiável recebido pelo PRÓPRIO frame do site
-// (clique ou toque de verdade, não hover, e não um clique disparado por
-// script, mesmo que sincronizado com um clique de verdade na nossa
-// página). Isto aqui é melhor esforço: tenta mesmo assim (às vezes o
-// navegador já libera sozinho, se o visitante tiver "engajado" com aquele
-// domínio antes), mas não é garantia de som em toda visita.
+// Sem tentativa de som aqui: o áudio dos sites (Ganwalk, Dezert Horse)
+// só toca quando o case é aberto de verdade (ExpandedCase/CaseDetail, via
+// LiveEmbed), onde o visitante clica no próprio botão de "iniciar" do
+// site com um gesto de verdade — a única forma que a política de
+// autoplay dos navegadores realmente libera áudio com som. Um gesto no
+// CARTÃO (hover, toque) nunca chega a ser um gesto DENTRO do iframe
+// (pointer-events-none de propósito), então tentar destravar som aqui só
+// dava falsa expectativa sem entregar áudio de verdade.
 //
 // tabIndex/aria-hidden tiram o iframe da navegação por teclado e leitor
 // de tela: é decorativo aqui, o link de verdade pro site mora em
@@ -31,7 +44,6 @@ export function CardLivePreview({
   demoUrl,
   title,
   slug,
-  soundRequested = false,
   className = "",
 }: {
   demoUrl: string;
@@ -40,22 +52,9 @@ export function CardLivePreview({
    *  precisam de ajuste (dispensar tela de carregamento, esconder UI,
    *  repassar mousemove). */
   slug: string;
-  /** Tenta (melhor esforço, ver comentário acima) destravar o áudio do
-   *  site embutido, quando ele tem. */
-  soundRequested?: boolean;
   className?: string;
 }) {
   const iframeRef = useRef<HTMLIFrameElement>(null);
-
-  useEffect(() => {
-    if (!soundRequested) return;
-    const iframe = iframeRef.current;
-    // Reaproveita a mesma limpeza que já roda no onLoad: idempotente (os
-    // sites guardam contra dispensar a tela de carregamento duas vezes),
-    // só vale a pena tentar de novo aqui porque este gesto está mais perto
-    // de um gesto de verdade do visitante do que o onLoad automático.
-    if (iframe) cleanupArtistPreview(iframe, slug);
-  }, [soundRequested, slug]);
 
   function handleMouseMove(event: React.MouseEvent<HTMLDivElement>) {
     const iframe = iframeRef.current;
@@ -75,7 +74,7 @@ export function CardLivePreview({
         loading="lazy"
         onLoad={(event) => cleanupArtistPreview(event.currentTarget, slug)}
         className="pointer-events-none absolute inset-0 h-full w-full"
-        style={{ border: 0 }}
+        style={{ border: 0, transform: RECENTER_TRANSLATE[slug] }}
       />
     </div>
   );
