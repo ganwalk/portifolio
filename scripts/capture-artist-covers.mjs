@@ -51,9 +51,32 @@ const WARMUP_MS = 4000;
 const RECORD_MS = 6000;
 const VIEWPORT = { width: 1600, height: 1000 };
 
+// Ganwalk e Dezert Horse têm preloader PRÓPRIO por cima do "networkidle" do
+// Playwright: uma tela de carregamento que só sai do caminho quando o JS do
+// site termina de montar a cena (e, no caso do cavalo, termina de baixar um
+// modelo 3D externo), texto que muda pra um convite de clique quando fica
+// pronta. Sem esperar por isso, a captura vazou a tela de "carregando..." em
+// vez do repouso de verdade (foi o que aconteceu na primeira captura real:
+// ver public/photos/{ganwalk,dezert-horse}-live-poster.webp daquela
+// rodada). `waitFor`, quando existe, espera esse sinal (best effort: se o
+// site mudar de marcação e o seletor sumir, a captura não trava pra
+// sempre, só cai direto pro warmup padrão).
 const SITES = [
-  { slug: "ganwalk", url: "https://ganwalk.github.io/2026/" },
-  { slug: "dezert-horse", url: "https://ganwalk.github.io/cavalo/" },
+  {
+    slug: "ganwalk",
+    url: "https://ganwalk.github.io/2026/",
+    waitFor: (page) =>
+      page.waitForSelector("#click-to-start-text.ready", { timeout: 20_000 }),
+  },
+  {
+    slug: "dezert-horse",
+    url: "https://ganwalk.github.io/cavalo/",
+    waitFor: (page) =>
+      page.waitForFunction(
+        () => document.getElementById("loading-text")?.innerText === "SISTEMA PRONTO",
+        { timeout: 20_000 },
+      ),
+  },
   { slug: "pink-opala", url: "https://ganwalk.github.io/pinkopala/" },
 ];
 
@@ -62,7 +85,7 @@ async function logSize(path) {
   console.log(`${path.split("/").pop()}: ${(size / 1024).toFixed(0)} KB`);
 }
 
-async function captureRawVideo(url, outDir) {
+async function captureRawVideo(url, outDir, waitFor) {
   const browser = await chromium.launch();
   const context = await browser.newContext({
     viewport: VIEWPORT,
@@ -70,6 +93,11 @@ async function captureRawVideo(url, outDir) {
   });
   const page = await context.newPage();
   await page.goto(url, { waitUntil: "networkidle", timeout: 60_000 });
+  if (waitFor) {
+    await waitFor(page).catch((error) =>
+      console.warn(`  aviso: waitFor não resolveu (${error.message.split("\n")[0]}), seguindo com o warmup padrão`),
+    );
+  }
   await page.waitForTimeout(WARMUP_MS);
   await page.waitForTimeout(RECORD_MS);
   await context.close();
@@ -117,12 +145,12 @@ async function main() {
   await mkdir(VIDEOS_OUT, { recursive: true });
   await mkdir(TMP_DIR, { recursive: true });
 
-  for (const { slug, url } of SITES) {
+  for (const { slug, url, waitFor } of SITES) {
     console.log(`\n== ${slug} (${url}) ==`);
     const siteTmp = `${TMP_DIR}/${slug}`;
     await mkdir(siteTmp, { recursive: true });
 
-    const rawVideo = await captureRawVideo(url, siteTmp);
+    const rawVideo = await captureRawVideo(url, siteTmp, waitFor);
 
     const videoOut = `${VIDEOS_OUT}/${slug}-live.mp4`;
     const posterOut = `${PHOTOS_OUT}/${slug}-live-poster.webp`;
