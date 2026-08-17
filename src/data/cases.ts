@@ -1,5 +1,12 @@
 import type { CaseStudy } from "./types";
 
+// basePath não é aplicado a src montado à mão em JS (só a next/image e links
+// internos do próprio Next): o mesmo motivo de experiments.ts. Só entra em
+// jogo pras poucas mídias locais deste arquivo (hoje, só a capa do Pink
+// Opala); o resto continua apontando pra URL externa (Pexels, ou o próprio
+// GitHub do artista) sem precisar dele.
+const basePath = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
+
 // Lineup de lançamento: 2 cases de Banking + 3 de Música. Os três artistas
 // (Ganwalk, Dezert Horse, Pink Opala) são projetos individuais, cada um com
 // a própria página e o próprio lugar no carrossel da home, não um case
@@ -14,9 +21,9 @@ import type { CaseStudy } from "./types";
 // cada case (Ganwalk e Dezert Horse ainda esperam captura de tela real dos
 // próprios sites: os dois usam WebGL/Three.js, então até lá o clima visual
 // mais próximo já escolhido, terminal/código e duna de areia, continua no
-// lugar). Pink Opala já usa a foto de capa real do próprio site (ver
-// comentário no bloco cover dele). Para trocar pela mídia real, basta
-// substituir src (e poster) no bloco cover.
+// lugar). Pink Opala já usa uma captura real do próprio site, servida
+// localmente (ver comentário no bloco cover dele). Para trocar pela mídia
+// real, basta substituir src (e poster) no bloco cover.
 //
 // Critério de cor: colorido sim, saturado não. A primeira leva de
 // placeholders era de gradiente neon e show de clube com luz roxa estourada,
@@ -312,18 +319,18 @@ export const cases: CaseStudy[] = [
         illustrative: true,
       },
     ],
-    // Mídia real: a própria foto de capa do site (`principal.webp`), servida
-    // direto do repositório via raw.githubusercontent.com, o mesmo CDN
-    // caseiro que o site oficial da banda já usa pra todas as imagens (ver
-    // README do repositório). Sem stock: é a dupla de verdade.
+    // Mídia real: captura de tela do próprio hero do site (ver
+    // scripts/capture-artist-covers.mjs), a tela inicial de verdade que
+    // recebe o visitante, com o nome da banda formado por partículas de
+    // areia (física de mola, reage ao mouse/toque) assentadas no lugar.
     cover: {
       kind: "image",
-      src: "https://raw.githubusercontent.com/ganwalk/pinkopala/main/principal.webp",
+      src: `${basePath}/photos/pink-opala-hero.webp`,
       alt: {
-        pt: "A dupla do Pink Opala, costas com costas, com maquiagem glitter, no visual do site oficial",
-        en: "Pink Opala's duo, back to back, wearing glitter makeup, in the official site's visual",
-        es: "El dúo de Pink Opala, espalda con espalda, con maquillaje glitter, en el visual del sitio oficial",
-        zh: "Pink Opala 二人组背靠背合影，妆容带有闪粉质感，出自官方网站的视觉设计",
+        pt: "Tela inicial do site do Pink Opala, com o nome da banda formado por partículas de areia sobre fundo preto",
+        en: "Pink Opala's site landing screen, the band's name formed by sand particles over a black background",
+        es: "Pantalla inicial del sitio de Pink Opala, con el nombre de la banda formado por partículas de arena sobre fondo negro",
+        zh: "Pink Opala 网站的初始画面：黑色背景上由沙粒效果拼出的乐队名字",
       },
     },
     comingSoon: false,
