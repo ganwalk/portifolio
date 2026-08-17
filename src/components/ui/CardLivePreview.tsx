@@ -1,94 +1,82 @@
 "use client";
 
-import { useState } from "react";
-import { cleanupArtistPreview } from "@/lib/artist-preview-cleanup";
-import { useMediaQuery } from "@/lib/use-media-query";
-import type { Media } from "@/data/types";
-import type { Locale } from "@/i18n/config";
+import { useEffect, useRef } from "react";
+import { cleanupArtistPreview, forwardMouseMove } from "@/lib/artist-preview-cleanup";
 
-// Dona do próprio estado de "carregou": monta e desmonta inteira junto com
-// `active` (ver abaixo), então cada ativação começa com `loaded` limpo de
-// novo, sem precisar de um efeito só pra resetar estado entre uma troca e
-// outra.
-function LiveFrame({ demoUrl, title, slug }: { demoUrl: string; title: string; slug: string }) {
-  const [loaded, setLoaded] = useState(false);
-  return (
-    <iframe
-      src={demoUrl}
-      title={title}
-      tabIndex={-1}
-      aria-hidden
-      loading="lazy"
-      onLoad={(event) => {
-        setLoaded(true);
-        // Só destrava (clica na tela de carregamento) e esconde a UI do
-        // site pra quem tem esse ajuste configurado (ver
-        // artist-preview-cleanup.ts); os demais seguem exatamente como
-        // sempre, sem nenhum efeito colateral.
-        cleanupArtistPreview(event.currentTarget, slug);
-      }}
-      className={`pointer-events-none absolute inset-0 h-full w-full transition-opacity duration-500 ${
-        loaded ? "opacity-100" : "opacity-0"
-      }`}
-      style={{ border: 0 }}
-    />
-  );
-}
-
-// Prévia "ao vivo" de um card: mostra a capa (still) por padrão e troca
-// pelo site publicado de verdade, embutido num iframe, quando `active`
-// (hover no desktop, toque no mobile — ver CaseColumn/MobileCaseCard em
-// CasesGrid.tsx). O iframe é pointer-events-none: a página embutida
-// continua rodando e animando por conta própria, mas nunca captura o
-// mouse/toque de quem só queria continuar rolando a seção por cima dele.
-// tabIndex/aria-hidden tiram ele da navegação por teclado e leitor de
-// tela: é decorativo aqui, o link de verdade pro site mora em LiveEmbed,
-// no corpo do case.
+// Prévia "ao vivo" de um card: o site publicado de verdade, embutido num
+// iframe, direto, sem imagem estática por baixo esperando um gesto pra
+// revelar. O iframe é pointer-events-none: a página embutida continua
+// rodando e animando por conta própria, mas nunca captura o mouse/toque
+// de quem só queria continuar rolando a seção por cima dele. O mousemove
+// de verdade É repassado pro gráfico lá dentro (ver forwardMouseMove, no
+// wrapper, que recebe o evento de verdade e reenvia pro iframe nas
+// coordenadas certas), então quem reage à posição do cursor (Ganwalk,
+// Pink Opala) continua reagindo — só o scroll é que nunca é sequestrado.
 //
-// Existe porque vídeo pré-gravado, comprimido pra caber num cartão que
-// carrega sozinho, perde qualidade rápido demais em conteúdo com textura
-// fina (partículas, ruído de tela). A prévia ao vivo é a página de
-// verdade, sem nenhuma perda de compressão, e mais interessante que um
-// loop qualquer, já que reage de verdade a quem estiver vendo.
+// `soundRequested` tenta destravar o áudio do site embutido (hoje só
+// Ganwalk e Dezert Horse têm) no gesto que o disparar (hover no desktop,
+// toque no mobile — ver CaseColumn/MobileCaseCard). Ressalva técnica
+// importante: a política de autoplay dos navegadores só libera áudio COM
+// SOM depois de um gesto confiável recebido pelo PRÓPRIO frame do site
+// (clique ou toque de verdade, não hover, e não um clique disparado por
+// script, mesmo que sincronizado com um clique de verdade na nossa
+// página). Isto aqui é melhor esforço: tenta mesmo assim (às vezes o
+// navegador já libera sozinho, se o visitante tiver "engajado" com aquele
+// domínio antes), mas não é garantia de som em toda visita.
+//
+// tabIndex/aria-hidden tiram o iframe da navegação por teclado e leitor
+// de tela: é decorativo aqui, o link de verdade pro site mora em
+// LiveEmbed, no corpo do case.
 export function CardLivePreview({
-  cover,
   demoUrl,
   title,
   slug,
-  locale,
-  active,
-  preferMobile = false,
+  soundRequested = false,
   className = "",
 }: {
-  cover: Media;
   demoUrl: string;
   title: string;
   /** Slug do case: chave de artist-preview-cleanup.ts pros sites que
-   *  precisam de um ajuste (dispensar tela de carregamento, esconder UI). */
+   *  precisam de ajuste (dispensar tela de carregamento, esconder UI,
+   *  repassar mousemove). */
   slug: string;
-  locale: Locale;
-  active: boolean;
-  /** Mesmo raciocínio de MediaView: força a variante vertical mesmo em
-   *  tela larga, pro cartão compacto do carrossel de desktop. */
-  preferMobile?: boolean;
+  /** Tenta (melhor esforço, ver comentário acima) destravar o áudio do
+   *  site embutido, quando ele tem. */
+  soundRequested?: boolean;
   className?: string;
 }) {
-  const isDesktop = useMediaQuery("(min-width: 640px)");
-  const useMobileVariant = preferMobile || !isDesktop;
-  const poster =
-    cover.kind === "video" ? (useMobileVariant && cover.posterMobile) || cover.poster : cover.src;
+  const iframeRef = useRef<HTMLIFrameElement>(null);
+
+  useEffect(() => {
+    if (!soundRequested) return;
+    const iframe = iframeRef.current;
+    // Reaproveita a mesma limpeza que já roda no onLoad: idempotente (os
+    // sites guardam contra dispensar a tela de carregamento duas vezes),
+    // só vale a pena tentar de novo aqui porque este gesto está mais perto
+    // de um gesto de verdade do visitante do que o onLoad automático.
+    if (iframe) cleanupArtistPreview(iframe, slug);
+  }, [soundRequested, slug]);
+
+  function handleMouseMove(event: React.MouseEvent<HTMLDivElement>) {
+    const iframe = iframeRef.current;
+    if (!iframe) return;
+    const rect = iframe.getBoundingClientRect();
+    forwardMouseMove(iframe, slug, event.clientX - rect.left, event.clientY - rect.top);
+  }
 
   return (
-    <div className={`relative overflow-hidden ${className}`}>
-      {poster && (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
-          src={poster}
-          alt={cover.alt[locale]}
-          className="absolute inset-0 h-full w-full object-cover"
-        />
-      )}
-      {active && <LiveFrame demoUrl={demoUrl} title={title} slug={slug} />}
+    <div className={`relative overflow-hidden bg-black ${className}`} onMouseMove={handleMouseMove}>
+      <iframe
+        ref={iframeRef}
+        src={demoUrl}
+        title={title}
+        tabIndex={-1}
+        aria-hidden
+        loading="lazy"
+        onLoad={(event) => cleanupArtistPreview(event.currentTarget, slug)}
+        className="pointer-events-none absolute inset-0 h-full w-full"
+        style={{ border: 0 }}
+      />
     </div>
   );
 }

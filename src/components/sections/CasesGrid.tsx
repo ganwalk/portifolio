@@ -476,26 +476,26 @@ function CaseColumn({
             transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
             className="absolute inset-0"
           >
-            {isNearActive ? (
-              caseStudy.demoUrl ? (
-                <CardLivePreview
-                  cover={caseStudy.cover}
-                  demoUrl={caseStudy.demoUrl}
-                  title={caseStudy.title[locale]}
-                  slug={caseStudy.slug}
-                  locale={locale}
-                  active={isHovered && !reduceMotion}
-                  preferMobile
-                  className="h-full w-full"
-                />
-              ) : (
-                <MediaView
-                  media={caseStudy.cover}
-                  locale={locale}
-                  className="h-full w-full object-cover"
-                  preferMobile
-                />
-              )
+            {caseStudy.demoUrl ? (
+              // Sem gate de isNearActive: monta de cara, mesmo fora de
+              // cena. É a mesma folga que a tela de carregamento do
+              // próprio portfólio (ver SiteLoader.tsx) existe pra cobrir,
+              // o trio já chega pronto quando o scroll alcança ele, em
+              // vez de começar a carregar só naquele instante.
+              <CardLivePreview
+                demoUrl={caseStudy.demoUrl}
+                title={caseStudy.title[locale]}
+                slug={caseStudy.slug}
+                soundRequested={isHovered && !reduceMotion}
+                className="h-full w-full"
+              />
+            ) : isNearActive ? (
+              <MediaView
+                media={caseStudy.cover}
+                locale={locale}
+                className="h-full w-full object-cover"
+                preferMobile
+              />
             ) : (
               <div className="h-full w-full bg-surface" />
             )}
@@ -879,12 +879,12 @@ function MobileCaseCard({
   // nenhuma pro fundo da página.
   const mediaY = useTransform(progress, [0, 1], ["-8%", "8%"]);
   const metric = caseStudy.metrics[0];
-  // Sem hover de verdade em toque: a prévia ao vivo (ver CardLivePreview)
-  // fica atrás de um toque deliberado no selo abaixo, em vez de ligar
-  // sozinha ao entrar na tela (aí sim custaria bateria/dado à toa em cada
-  // cartão que o visitante só passou rolando). Uma vez revelada, fica
-  // revelada: não existe gesto de "esconder de novo" aqui.
-  const [revealed, setRevealed] = useState(false);
+  // Sem hover de verdade em toque: o selo de som (ver botão abaixo) é o
+  // gesto equivalente ao hover do desktop, pra tentar destravar áudio (ver
+  // comentário em CardLivePreview sobre os limites dessa tentativa). A
+  // prévia em si já roda sozinha assim que o cartão fica perto da tela
+  // (isNear), sem esperar esse toque.
+  const [soundEnabled, setSoundEnabled] = useState(false);
 
   return (
     // O CARTÃO em si é que é mais alto que a tela (h-svh + MOBILE_CARD_REST_VH
@@ -915,37 +915,40 @@ function MobileCaseCard({
           className="absolute inset-0 scale-125"
           style={reduceMotion ? undefined : { y: mediaY }}
         >
-          {isNear ? (
-            caseStudy.demoUrl ? (
+          {caseStudy.demoUrl ? (
+            isNear && (
               <CardLivePreview
-                cover={caseStudy.cover}
                 demoUrl={caseStudy.demoUrl}
                 title={caseStudy.title[locale]}
                 slug={caseStudy.slug}
-                locale={locale}
-                active={revealed}
+                soundRequested={soundEnabled}
                 className="absolute inset-0 h-full w-full"
               />
-            ) : (
-              <MediaView
-                media={caseStudy.cover}
-                locale={locale}
-                className="absolute inset-0 h-full w-full object-cover"
-              />
             )
+          ) : isNear ? (
+            <MediaView
+              media={caseStudy.cover}
+              locale={locale}
+              className="absolute inset-0 h-full w-full object-cover"
+            />
           ) : (
             <div className="absolute inset-0 bg-surface" />
           )}
         </motion.div>
         <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/10 to-black/45" />
 
-        {caseStudy.demoUrl && !revealed && (
+        {caseStudy.demoUrl && !soundEnabled && (
+          // top-1/2: zona morta do layout, nem o bloco de índice (ancorado
+          // no topo) nem o de título/tags/CTA (ancorado embaixo) passam
+          // por ali, então o selo nunca disputa espaço com texto de
+          // verdade em nenhum tamanho de tela.
           <button
             type="button"
-            onClick={() => setRevealed(true)}
-            className="type-mono absolute left-1/2 top-1/2 z-10 -translate-x-1/2 -translate-y-1/2 border border-white/40 bg-black/40 px-4 py-2 text-white backdrop-blur-sm"
+            onClick={() => setSoundEnabled(true)}
+            aria-label={dict.cases.livePreview}
+            className="absolute right-5 top-1/2 z-10 flex h-11 w-11 -translate-y-1/2 items-center justify-center border border-white/40 bg-black/40 text-white backdrop-blur-sm"
           >
-            {dict.cases.livePreview} <span aria-hidden>▶</span>
+            <span aria-hidden>🔊</span>
           </button>
         )}
 
