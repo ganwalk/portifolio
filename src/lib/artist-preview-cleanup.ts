@@ -33,9 +33,12 @@ interface PreviewCleanup {
   /**
    * Seletor do elemento que recebe o mousemove repassado do cartão (ver
    * forwardMouseMove abaixo): o iframe é pointer-events-none, então o
-   * gráfico nunca veria o mouse de verdade sem isso. Ausente quando o
-   * gráfico não reage à posição do cursor (Dezert Horse: câmera anima
-   * sozinha, sem essa interação).
+   * gráfico nunca veria o mouse de verdade sem isso. Só Pink Opala usa:
+   * é o único dos três cases com prévia ao vivo em que a interação por
+   * hover foi pedida de propósito. Ganwalk e Dezert Horse ficam de fora
+   * (Ganwalk tem interação por arraste, não só posição do mouse, e
+   * repassar só a posição sem o clique associado ficaria pela metade;
+   * Dezert Horse não reage à posição do cursor, a câmera anima sozinha).
    */
   mouseMoveSelector?: string;
 }
@@ -53,9 +56,8 @@ const CLEANUPS: Record<string, PreviewCleanup> = {
       "#p1-controls-bar",
       "#p1-toggle-button",
     ],
-    // Escuta mousemove no próprio canvas (cvs.addEventListener), não na
-    // window: precisa ser o alvo exato do dispatch pra disparar o listener.
-    mouseMoveSelector: "#p1-canvas",
+    // Sem mouseMoveSelector de propósito: só Pink Opala repassa o mouse
+    // pra dentro do card (ver comentário em forwardMouseMove).
   },
   "dezert-horse": {
     startSelector: "#start-btn",

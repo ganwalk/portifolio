@@ -431,11 +431,6 @@ function CaseColumn({
   );
   const mediaScale = parallax ? 1 + (parallax * 2) / 100 + 0.02 : 1;
   const panelRef = useRef<HTMLDivElement>(null);
-  // Prévia ao vivo (ver CardLivePreview) só liga com hover de verdade E
-  // pra quem não pediu menos movimento: é uma troca ambiente, disparada só
-  // por passar o mouse por cima, não um clique deliberado, então segue o
-  // mesmo critério do resto do site pra motion passivo.
-  const reduceMotion = useReducedMotion();
 
   return (
     <motion.div
@@ -486,7 +481,6 @@ function CaseColumn({
                 demoUrl={caseStudy.demoUrl}
                 title={caseStudy.title[locale]}
                 slug={caseStudy.slug}
-                soundRequested={isHovered && !reduceMotion}
                 className="h-full w-full"
               />
             ) : isNearActive ? (
@@ -879,12 +873,6 @@ function MobileCaseCard({
   // nenhuma pro fundo da página.
   const mediaY = useTransform(progress, [0, 1], ["-8%", "8%"]);
   const metric = caseStudy.metrics[0];
-  // Sem hover de verdade em toque: o selo de som (ver botão abaixo) é o
-  // gesto equivalente ao hover do desktop, pra tentar destravar áudio (ver
-  // comentário em CardLivePreview sobre os limites dessa tentativa). A
-  // prévia em si já roda sozinha assim que o cartão fica perto da tela
-  // (isNear), sem esperar esse toque.
-  const [soundEnabled, setSoundEnabled] = useState(false);
 
   return (
     // O CARTÃO em si é que é mais alto que a tela (h-svh + MOBILE_CARD_REST_VH
@@ -921,7 +909,6 @@ function MobileCaseCard({
                 demoUrl={caseStudy.demoUrl}
                 title={caseStudy.title[locale]}
                 slug={caseStudy.slug}
-                soundRequested={soundEnabled}
                 className="absolute inset-0 h-full w-full"
               />
             )
@@ -936,21 +923,6 @@ function MobileCaseCard({
           )}
         </motion.div>
         <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/10 to-black/45" />
-
-        {caseStudy.demoUrl && !soundEnabled && (
-          // top-1/2: zona morta do layout, nem o bloco de índice (ancorado
-          // no topo) nem o de título/tags/CTA (ancorado embaixo) passam
-          // por ali, então o selo nunca disputa espaço com texto de
-          // verdade em nenhum tamanho de tela.
-          <button
-            type="button"
-            onClick={() => setSoundEnabled(true)}
-            aria-label={dict.cases.livePreview}
-            className="absolute right-5 top-1/2 z-10 flex h-11 w-11 -translate-y-1/2 items-center justify-center border border-white/40 bg-black/40 text-white backdrop-blur-sm"
-          >
-            <span aria-hidden>🔊</span>
-          </button>
-        )}
 
         {/* h-svh, não inset-0: as informações precisam caber na TELA, não
             no cartão inteiro (que agora é mais alto que ela). Ancorado no
