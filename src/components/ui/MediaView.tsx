@@ -1,3 +1,6 @@
+"use client";
+
+import { useMediaQuery } from "@/lib/use-media-query";
 import type { Media } from "@/data/types";
 import type { Locale } from "@/i18n/config";
 
@@ -15,24 +18,37 @@ export function MediaView({
   locale: Locale;
   className?: string;
 }) {
+  // Mesmo breakpoint que decide a versão mobile/desktop de CasesGrid (ver
+  // useMediaQuery("(min-width: 640px)") lá): abaixo dele, troca pela
+  // variante vertical (srcMobile/posterMobile), quando existe, em vez de
+  // espremer um vídeo horizontal numa tela de pé.
+  const isDesktop = useMediaQuery("(min-width: 640px)");
+  const src = (!isDesktop && media.srcMobile) || media.src;
+  const poster = (!isDesktop && media.posterMobile) || media.poster;
+
   if (media.kind === "video") {
     // O poster também vive como camada de fundo: se o vídeo demorar ou falhar,
     // a área nunca fica vazia.
     return (
       <div className={`relative ${className}`}>
-        {media.poster && (
+        {poster && (
           // eslint-disable-next-line @next/next/no-img-element
           <img
-            src={media.poster}
+            src={poster}
             alt=""
             aria-hidden
             className="absolute inset-0 h-full w-full object-cover"
           />
         )}
         <video
+          // key força o navegador a recarregar a fonte quando a variante
+          // troca (ex.: hidratação corrigindo o palpite mobile-first do
+          // servidor pra desktop, ver useMediaQuery), em vez de manter o
+          // <video> antigo com o atributo src desatualizado.
+          key={src}
           className="absolute inset-0 h-full w-full object-cover"
-          src={media.src}
-          poster={media.poster}
+          src={src}
+          poster={poster}
           autoPlay
           muted
           loop

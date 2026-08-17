@@ -17,6 +17,14 @@ export interface Media {
   src: string;
   /** Quadro de capa exibido enquanto o vídeo carrega. Só para kind "video". */
   poster?: string;
+  /**
+   * Variante vertical, só para kind "video": troca `src`/`poster` por essa
+   * a partir do mesmo breakpoint que decide mobile/desktop no resto do
+   * site (ver MediaView.tsx). Opcional: mídia sem variante própria mostra a
+   * mesma em qualquer tela, o comportamento de sempre.
+   */
+  srcMobile?: string;
+  posterMobile?: string;
   alt: Localized;
 }
 

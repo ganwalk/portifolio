@@ -319,18 +319,24 @@ export const cases: CaseStudy[] = [
         illustrative: true,
       },
     ],
-    // Mídia real: captura de tela do próprio hero do site (ver
-    // scripts/capture-artist-covers.mjs), a tela inicial de verdade que
-    // recebe o visitante, com o nome da banda formado por partículas de
-    // areia (física de mola, reage ao mouse/toque) assentadas no lugar.
+    // Mídia real: gravação de tela do próprio hero do site (ver
+    // pink-opala-preview/ e scripts/build-pink-opala-preview.mjs), o nome
+    // da banda em partículas de areia reagindo ao mouse de verdade, não só
+    // um still parado. Duas versões (a fonte já veio das duas): horizontal
+    // pro painel widescreen do desktop, vertical pra tela de celular em pé
+    // (ver srcMobile/posterMobile, MediaView.tsx escolhe pelo mesmo
+    // breakpoint que decide mobile/desktop no resto do site).
     cover: {
-      kind: "image",
-      src: `${basePath}/photos/pink-opala-hero.webp`,
+      kind: "video",
+      src: `${basePath}/videos/pink-opala-preview-horizontal.mp4`,
+      poster: `${basePath}/photos/pink-opala-preview-horizontal.webp`,
+      srcMobile: `${basePath}/videos/pink-opala-preview-vertical.mp4`,
+      posterMobile: `${basePath}/photos/pink-opala-preview-vertical.webp`,
       alt: {
-        pt: "Tela inicial do site do Pink Opala, com o nome da banda formado por partículas de areia sobre fundo preto",
-        en: "Pink Opala's site landing screen, the band's name formed by sand particles over a black background",
-        es: "Pantalla inicial del sitio de Pink Opala, con el nombre de la banda formado por partículas de arena sobre fondo negro",
-        zh: "Pink Opala 网站的初始画面：黑色背景上由沙粒效果拼出的乐队名字",
+        pt: "Tela inicial do site do Pink Opala, nome da banda em partículas de areia reagindo ao movimento do mouse",
+        en: "Pink Opala's site landing screen, the band's name in sand particles reacting to mouse movement",
+        es: "Pantalla inicial del sitio de Pink Opala, nombre de la banda en partículas de arena reaccionando al movimiento del mouse",
+        zh: "Pink Opala 网站的初始画面：由沙粒效果拼出的乐队名字随鼠标移动而变化",
       },
     },
     comingSoon: false,
