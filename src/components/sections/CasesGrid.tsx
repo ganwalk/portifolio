@@ -474,6 +474,7 @@ function CaseColumn({
                 media={caseStudy.cover}
                 locale={locale}
                 className="h-full w-full object-cover"
+                preferMobile
               />
             ) : (
               <div className="h-full w-full bg-surface" />
