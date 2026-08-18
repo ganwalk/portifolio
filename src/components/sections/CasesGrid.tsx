@@ -14,7 +14,7 @@ import {
   useTransform,
   type MotionValue,
 } from "framer-motion";
-import { ArtistPreview } from "@/components/ui/ArtistPreview";
+import { ARTIST_PREVIEW_SLUGS, ArtistPreview } from "@/components/ui/ArtistPreview";
 import { CaseMetrics } from "@/components/ui/CaseMetrics";
 import { CaseStatement } from "@/components/ui/CaseStatement";
 import { CursorLabel } from "@/components/ui/CursorLabel";
@@ -475,13 +475,15 @@ function CaseColumn({
             transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
             className="absolute inset-0"
           >
-            {caseStudy.demoUrl ? (
+            {ARTIST_PREVIEW_SLUGS.has(caseStudy.slug) && caseStudy.demoUrl ? (
               // Sem gate de isNearActive: monta de cara, mesmo fora de
               // cena. Reconstrução local e leve (Canvas 2D, ver
               // ArtistPreview.tsx), não o site de verdade embutido num
               // iframe: o trio inteiro já chega pronto quando o scroll
               // alcança ele, sem o custo de três WebGL/Three.js/áudio
-              // simultâneos só pra prévia.
+              // simultâneos só pra prévia. Só o trio de artistas: outro
+              // case com demoUrl próprio (ex.: a Intranet) não tem
+              // reconstrução bespoke aqui, cai pro MediaView normal abaixo.
               <ArtistPreview
                 slug={caseStudy.slug}
                 demoUrl={caseStudy.demoUrl}
@@ -940,7 +942,7 @@ function MobileCaseCard({
           className="absolute inset-0 scale-125"
           style={reduceMotion ? undefined : { y: mediaY }}
         >
-          {caseStudy.demoUrl ? (
+          {ARTIST_PREVIEW_SLUGS.has(caseStudy.slug) && caseStudy.demoUrl ? (
             isNear && (
               <ArtistPreview
                 slug={caseStudy.slug}
