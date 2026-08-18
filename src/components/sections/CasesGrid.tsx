@@ -478,7 +478,12 @@ function CaseColumn({
               // iframe: o trio inteiro já chega pronto quando o scroll
               // alcança ele, sem o custo de três WebGL/Three.js/áudio
               // simultâneos só pra prévia.
-              <ArtistPreview slug={caseStudy.slug} className="h-full w-full" />
+              <ArtistPreview
+                slug={caseStudy.slug}
+                demoUrl={caseStudy.demoUrl}
+                title={caseStudy.title[locale]}
+                className="h-full w-full"
+              />
             ) : isNearActive ? (
               <MediaView
                 media={caseStudy.cover}
@@ -493,9 +498,16 @@ function CaseColumn({
         </motion.div>
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/75 via-black/10 to-black/45" />
 
+        {/* pointer-events-none: mesmo com o texto só ocupando topo e
+            rodapé (justify-between), a CAIXA deste wrapper cobre o cartão
+            inteiro (h-full), e sem isso ela capturava todo mousemove antes
+            dele alcançar a prévia por baixo (ver ArtistPreview.tsx) — o
+            hover do Pink Opala nunca chegava no canvas por causa disso.
+            Os dois elementos clicáveis de verdade (botão de ver case e
+            link do repositório) recuperam pointer-events-auto abaixo. */}
         <motion.div
           style={{ opacity: contentOpacity }}
-          className={`gutter relative flex h-full flex-col text-white ${
+          className={`gutter relative flex h-full flex-col pointer-events-none text-white ${
             multi
               ? "justify-end gap-2 py-4 sm:py-5 lg:justify-between lg:gap-0 lg:py-24"
               : "justify-between py-24 sm:py-28"
@@ -570,7 +582,7 @@ function CaseColumn({
                   whileTap={isActive ? { scale: 0.98 } : undefined}
                   tabIndex={isActive ? 0 : -1}
                   aria-label={caseStudy.title[locale]}
-                  className={`type-mono inline-flex items-center gap-3 border border-white/40 backdrop-blur-sm ${
+                  className={`pointer-events-auto type-mono inline-flex items-center gap-3 border border-white/40 backdrop-blur-sm ${
                     multi ? "px-3 py-1.5 lg:px-6 lg:py-3" : "px-6 py-3"
                   }`}
                 >
@@ -587,7 +599,7 @@ function CaseColumn({
                     whileTap={{ scale: 0.98 }}
                     tabIndex={isActive ? 0 : -1}
                     aria-label={`${dict.cases.repo} · ${caseStudy.title[locale]}`}
-                    className={`type-mono inline-flex items-center gap-2 border border-white/40 text-white/70 backdrop-blur-sm transition-colors hover:text-white ${
+                    className={`pointer-events-auto type-mono inline-flex items-center gap-2 border border-white/40 text-white/70 backdrop-blur-sm transition-colors hover:text-white ${
                       multi ? "px-3 py-1.5 lg:px-4 lg:py-3" : "px-4 py-3"
                     }`}
                   >
@@ -699,49 +711,30 @@ function ExpandedCase({
       transition={{ type: "spring", stiffness: 210, damping: 28 }}
       className="fixed inset-0 z-50 overflow-y-auto bg-background"
     >
-      <div className="relative h-svh w-full overflow-hidden bg-black">
-        {/* Zoom lento e contínuo na mídia, por cima do FLIP de entrada. */}
-        <motion.div
-          animate={{ scale: [1, 1.06] }}
-          transition={{
-            duration: 12,
-            repeat: Infinity,
-            repeatType: "mirror",
-            ease: "easeInOut",
-          }}
-          className="h-full w-full"
-        >
-          <MediaView
-            media={caseStudy.cover}
+      <button
+        type="button"
+        onClick={onClose}
+        aria-label={dict.nav.close}
+        className="fixed right-5 top-5 z-10 flex h-11 w-11 items-center justify-center border border-line bg-background text-foreground backdrop-blur-sm transition-colors hover:bg-surface sm:right-8 sm:top-8"
+      >
+        <span aria-hidden>✕</span>
+      </button>
+
+      <div className="gutter pb-16 pt-16 sm:pb-20 sm:pt-20">
+        <p className="type-mono text-muted">{caseStudy.year}</p>
+        <h2 className="type-display type-inktrap mt-6 pt-[0.16em] text-[11vw] leading-[0.92] sm:text-[6vw]">
+          {caseStudy.title[locale]}
+        </h2>
+
+        <div className="mt-16">
+          <CaseStatement
+            caseStudy={caseStudy}
             locale={locale}
-            className="h-full w-full object-cover"
+            metricsSlot={
+              <CaseMetrics caseStudy={caseStudy} locale={locale} compact className="mb-8" />
+            }
           />
-        </motion.div>
-        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-black/30" />
-
-        <div className="gutter absolute inset-x-0 bottom-10 text-white sm:bottom-16">
-          <p className="type-mono mb-4 text-white/70">
-            {caseStudy.title[locale]} · {caseStudy.year}
-          </p>
-          <h2 className="type-display type-inktrap text-[11vw] leading-[0.92] sm:text-[6vw]">
-            {caseStudy.title[locale]}
-          </h2>
         </div>
-
-        <button
-          type="button"
-          onClick={onClose}
-          aria-label={dict.nav.close}
-          className="absolute right-5 top-5 z-10 flex h-11 w-11 items-center justify-center border border-white/30 text-white backdrop-blur-sm transition-colors hover:bg-white/10 sm:right-8 sm:top-8"
-        >
-          <span aria-hidden>✕</span>
-        </button>
-      </div>
-
-      <div className="gutter py-16 sm:py-20">
-        <CaseStatement caseStudy={caseStudy} locale={locale} />
-
-        <CaseMetrics caseStudy={caseStudy} locale={locale} className="mt-12" />
 
         <p className="type-mono mt-10 text-muted">
           {caseStudy.tags[locale].join(" • ")}
@@ -901,7 +894,12 @@ function MobileCaseCard({
         >
           {caseStudy.demoUrl ? (
             isNear && (
-              <ArtistPreview slug={caseStudy.slug} className="absolute inset-0 h-full w-full" />
+              <ArtistPreview
+                slug={caseStudy.slug}
+                demoUrl={caseStudy.demoUrl}
+                title={caseStudy.title[locale]}
+                className="absolute inset-0 h-full w-full"
+              />
             )
           ) : isNear ? (
             <MediaView
@@ -934,7 +932,11 @@ function MobileCaseCard({
             cartão fica parado (sticky) na tela. Assim a única coisa que
             chega a cobrir a informação de um cartão é o PRÓXIMO cartão
             chegando por cima, nunca o cabeçalho. */}
-        <div className="gutter absolute inset-x-0 top-0 flex h-svh flex-col justify-between pb-10 pt-24">
+        {/* pointer-events-none pelo mesmo motivo do trio de desktop (ver
+            CaseColumn): a caixa deste wrapper cobre o cartão inteiro
+            mesmo com o conteúdo ancorado nas pontas (justify-between), e
+            sem isso bloqueava o toque/hover na prévia por baixo. */}
+        <div className="pointer-events-none gutter absolute inset-x-0 top-0 flex h-svh flex-col justify-between pb-10 pt-24">
           <Reveal className="flex items-start justify-between gap-4">
             <p className="type-mono text-white/70">
               {pad(index + 1)} / {pad(totalCases)} · {caseStudy.year}
@@ -978,7 +980,7 @@ function MobileCaseCard({
                 href={`/${locale}/work/${caseStudy.slug}/`}
                 onClick={saveHomeScrollPosition}
                 whileTap={{ scale: 0.98 }}
-                className="type-mono inline-flex items-center gap-3 border border-white/40 px-6 py-3"
+                className="pointer-events-auto type-mono inline-flex items-center gap-3 border border-white/40 px-6 py-3"
               >
                 {caseStudy.comingSoon ? dict.cases.comingSoon : dict.cases.viewCase}
                 <span aria-hidden>→</span>
@@ -991,7 +993,7 @@ function MobileCaseCard({
                   rel="noopener noreferrer"
                   whileTap={{ scale: 0.98 }}
                   aria-label={`${dict.cases.repo} · ${caseStudy.title[locale]}`}
-                  className="type-mono inline-flex items-center gap-2 border border-white/40 px-4 py-3 text-white/70"
+                  className="pointer-events-auto type-mono inline-flex items-center gap-2 border border-white/40 px-4 py-3 text-white/70"
                 >
                   <GitHubIcon className="h-3.5 w-3.5" />
                   {dict.cases.repo}
