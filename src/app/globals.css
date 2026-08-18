@@ -403,6 +403,98 @@ html[data-boring="true"] .texture-noise::after {
   }
 }
 
+/* Luas da tela de entrada (LoaderMoons, em SiteLoader.tsx): o giro precisa
+   ser CSS estático aqui, não um <style> inline montado pelo componente.
+   React 19 hasteia e deduplica tags <style> renderizadas dentro de
+   componentes (o mecanismo de "resource" pra CSS-in-JS), o que descasa a
+   posição real no DOM contra o que o servidor mandou e quebra a
+   hidratação (React error #418) logo na entrada do site. CSS de verdade,
+   morando aqui, não tem esse problema.
+
+   site-loader-moon-phase é a mesma fórmula de moonPath() (ver
+   src/lib/moon-path.ts) com os parâmetros numéricos computados de
+   antemão, a cada 1/48 de volta: `d` (o caminho do SVG) é uma propriedade
+   animável contanto que a estrutura do caminho não mude entre quadros
+   (moonPath sempre devolve o mesmo formato de comandos M/A/A/Z, só os
+   números mudam), exatamente o caso aqui. Girar isso no compositor, fora
+   do fio principal, é o que garante que as luas continuem girando mesmo
+   com a página de verdade ocupada montando por baixo do loader
+   (WebGL/Three.js/Canvas dos cases): um giro em JS competia por esse
+   mesmo fio e engasgava bem no instante em que a entrada estava prestes a
+   terminar, lendo como "trava no final". */
+@keyframes site-loader-moon-phase {
+  0% { d: path("M 10 1 A 9 9 0 0 1 10 19 A 9 9 0 0 0 10 1 Z"); }
+  2.08% { d: path("M 10 1 A 9 9 0 0 1 10 19 A 8.923 9 0 0 0 10 1 Z"); }
+  4.17% { d: path("M 10 1 A 9 9 0 0 1 10 19 A 8.693 9 0 0 0 10 1 Z"); }
+  6.25% { d: path("M 10 1 A 9 9 0 0 1 10 19 A 8.315 9 0 0 0 10 1 Z"); }
+  8.33% { d: path("M 10 1 A 9 9 0 0 1 10 19 A 7.794 9 0 0 0 10 1 Z"); }
+  10.42% { d: path("M 10 1 A 9 9 0 0 1 10 19 A 7.14 9 0 0 0 10 1 Z"); }
+  12.5% { d: path("M 10 1 A 9 9 0 0 1 10 19 A 6.364 9 0 0 0 10 1 Z"); }
+  14.58% { d: path("M 10 1 A 9 9 0 0 1 10 19 A 5.479 9 0 0 0 10 1 Z"); }
+  16.67% { d: path("M 10 1 A 9 9 0 0 1 10 19 A 4.5 9 0 0 0 10 1 Z"); }
+  18.75% { d: path("M 10 1 A 9 9 0 0 1 10 19 A 3.444 9 0 0 0 10 1 Z"); }
+  20.83% { d: path("M 10 1 A 9 9 0 0 1 10 19 A 2.329 9 0 0 0 10 1 Z"); }
+  22.92% { d: path("M 10 1 A 9 9 0 0 1 10 19 A 1.175 9 0 0 0 10 1 Z"); }
+  25% { d: path("M 10 1 A 9 9 0 0 1 10 19 A 0 9 0 0 0 10 1 Z"); }
+  27.08% { d: path("M 10 1 A 9 9 0 0 1 10 19 A 1.175 9 0 0 1 10 1 Z"); }
+  29.17% { d: path("M 10 1 A 9 9 0 0 1 10 19 A 2.329 9 0 0 1 10 1 Z"); }
+  31.25% { d: path("M 10 1 A 9 9 0 0 1 10 19 A 3.444 9 0 0 1 10 1 Z"); }
+  33.33% { d: path("M 10 1 A 9 9 0 0 1 10 19 A 4.5 9 0 0 1 10 1 Z"); }
+  35.42% { d: path("M 10 1 A 9 9 0 0 1 10 19 A 5.479 9 0 0 1 10 1 Z"); }
+  37.5% { d: path("M 10 1 A 9 9 0 0 1 10 19 A 6.364 9 0 0 1 10 1 Z"); }
+  39.58% { d: path("M 10 1 A 9 9 0 0 1 10 19 A 7.14 9 0 0 1 10 1 Z"); }
+  41.67% { d: path("M 10 1 A 9 9 0 0 1 10 19 A 7.794 9 0 0 1 10 1 Z"); }
+  43.75% { d: path("M 10 1 A 9 9 0 0 1 10 19 A 8.315 9 0 0 1 10 1 Z"); }
+  45.83% { d: path("M 10 1 A 9 9 0 0 1 10 19 A 8.693 9 0 0 1 10 1 Z"); }
+  47.92% { d: path("M 10 1 A 9 9 0 0 1 10 19 A 8.923 9 0 0 1 10 1 Z"); }
+  50% { d: path("M 10 1 A 9 9 0 0 0 10 19 A 9 9 0 0 0 10 1 Z"); }
+  52.08% { d: path("M 10 1 A 9 9 0 0 0 10 19 A 8.923 9 0 0 0 10 1 Z"); }
+  54.17% { d: path("M 10 1 A 9 9 0 0 0 10 19 A 8.693 9 0 0 0 10 1 Z"); }
+  56.25% { d: path("M 10 1 A 9 9 0 0 0 10 19 A 8.315 9 0 0 0 10 1 Z"); }
+  58.33% { d: path("M 10 1 A 9 9 0 0 0 10 19 A 7.794 9 0 0 0 10 1 Z"); }
+  60.42% { d: path("M 10 1 A 9 9 0 0 0 10 19 A 7.14 9 0 0 0 10 1 Z"); }
+  62.5% { d: path("M 10 1 A 9 9 0 0 0 10 19 A 6.364 9 0 0 0 10 1 Z"); }
+  64.58% { d: path("M 10 1 A 9 9 0 0 0 10 19 A 5.479 9 0 0 0 10 1 Z"); }
+  66.67% { d: path("M 10 1 A 9 9 0 0 0 10 19 A 4.5 9 0 0 0 10 1 Z"); }
+  68.75% { d: path("M 10 1 A 9 9 0 0 0 10 19 A 3.444 9 0 0 0 10 1 Z"); }
+  70.83% { d: path("M 10 1 A 9 9 0 0 0 10 19 A 2.329 9 0 0 0 10 1 Z"); }
+  72.92% { d: path("M 10 1 A 9 9 0 0 0 10 19 A 1.175 9 0 0 0 10 1 Z"); }
+  75% { d: path("M 10 1 A 9 9 0 0 0 10 19 A 0 9 0 0 0 10 1 Z"); }
+  77.08% { d: path("M 10 1 A 9 9 0 0 0 10 19 A 1.175 9 0 0 1 10 1 Z"); }
+  79.17% { d: path("M 10 1 A 9 9 0 0 0 10 19 A 2.329 9 0 0 1 10 1 Z"); }
+  81.25% { d: path("M 10 1 A 9 9 0 0 0 10 19 A 3.444 9 0 0 1 10 1 Z"); }
+  83.33% { d: path("M 10 1 A 9 9 0 0 0 10 19 A 4.5 9 0 0 1 10 1 Z"); }
+  85.42% { d: path("M 10 1 A 9 9 0 0 0 10 19 A 5.479 9 0 0 1 10 1 Z"); }
+  87.5% { d: path("M 10 1 A 9 9 0 0 0 10 19 A 6.364 9 0 0 1 10 1 Z"); }
+  89.58% { d: path("M 10 1 A 9 9 0 0 0 10 19 A 7.14 9 0 0 1 10 1 Z"); }
+  91.67% { d: path("M 10 1 A 9 9 0 0 0 10 19 A 7.794 9 0 0 1 10 1 Z"); }
+  93.75% { d: path("M 10 1 A 9 9 0 0 0 10 19 A 8.315 9 0 0 1 10 1 Z"); }
+  95.83% { d: path("M 10 1 A 9 9 0 0 0 10 19 A 8.693 9 0 0 1 10 1 Z"); }
+  97.92% { d: path("M 10 1 A 9 9 0 0 0 10 19 A 8.923 9 0 0 1 10 1 Z"); }
+  100% { d: path("M 10 1 A 9 9 0 0 1 10 19 A 9 9 0 0 0 10 1 Z"); }
+}
+
+@keyframes site-loader-moon-reveal {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* --moon-delay (ms), por lua: escalonamento real, ver MOON_REVEAL_DELAYS_MS
+   em SiteLoader.tsx. Duração e contagem de repetição vivem aqui (não no
+   componente) porque não há mais nenhum estado JS regendo o giro. */
+.site-loader-moon {
+  animation: site-loader-moon-reveal 300ms cubic-bezier(0.16, 1, 0.3, 1) var(--moon-delay, 0ms) 1
+    both;
+}
+
+.site-loader-moon-path {
+  animation: site-loader-moon-phase 2600ms linear var(--moon-delay, 0ms) infinite backwards;
+}
+
 /* Respeito ao sistema: se a pessoa pediu menos movimento, o site obedece
    mesmo fora do Modo Boring. */
 @media (prefers-reduced-motion: reduce) {

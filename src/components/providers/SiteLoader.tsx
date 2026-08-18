@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { useReducedMotion } from "framer-motion";
 import { useBoringMode } from "@/contexts/BoringModeContext";
 import { usePageLoadingPendingCount } from "@/contexts/PageLoadingContext";
@@ -18,12 +18,18 @@ import { MODE_TRANSITION_MS } from "./ModeTransitionOverlay";
 // Estética: o mesmo tratamento da hero (nome em Whyte Inktrap, grão de
 // filme animado por baixo) em vez de um texto pequeno solto. O indicador
 // de progresso é a própria lua do cabeçalho do site (ver MoonPhase.tsx),
-// repetida 5 vezes logo abaixo do nome: cada uma surge conforme o
-// progresso avança (a 15/30/45/60/75%, a última com folga até 100% pra
-// dar tempo de girar antes do site aparecer) e, assim que surge, entra
-// num ciclo de fases próprio regido pelo mesmo `progress`. Como cada lua
-// começa a girar num instante diferente, a qualquer momento elas estão em
-// fases diferentes umas das outras: é isso que dá a impressão de "andar".
+// repetida 5 vezes logo abaixo do nome: cada uma surge num instante real
+// escalonado depois do mount (MOON_REVEAL_DELAYS_MS) e, assim que surge,
+// entra num ciclo de fases contínuo regido pelo tempo real decorrido, não
+// por uma porcentagem de progresso. Isso importa porque a espera hoje não
+// tem duração fixa (pode travar bem além de MIN_MS esperando telas de
+// carregamento aninhadas, ver NESTED_LOADING_MAX_MS): um progresso falso
+// que sobe rápido e capa continuaria girando as luas só até o teto, depois
+// congeladas enquanto a espera de verdade seguia por trás. Presas ao
+// relógio, elas giram pelo tempo que a espera de fato durar, curta ou
+// longa. Como cada lua começa a girar num instante diferente, a qualquer
+// momento elas estão em fases diferentes umas das outras: é isso que dá a
+// impressão de "andar".
 //
 // No instante em que o site aparece (ready), dispara o mesmo tipo de
 // entrada que a troca Boring/Criativo usa: uma tela branca cobrindo tudo,
@@ -37,7 +43,6 @@ import { MODE_TRANSITION_MS } from "./ModeTransitionOverlay";
 const MIN_MS = 900;
 const MAX_MS = 3000;
 const FADE_MS = 400;
-const PROGRESS_CAP = 92;
 // Teto absoluto pra esperar telas de carregamento aninhadas (hoje, só a
 // prévia ao vivo do Dezert Horse, ver PageLoadingContext.tsx) terminarem
 // antes de revelar o site de qualquer jeito: bem maior que MAX_MS (o teto
@@ -50,49 +55,43 @@ const NESTED_LOADING_MAX_MS = 6000;
 // no meio do próprio fade ao desmontar o componente.
 const UNMOUNT_MS = Math.max(FADE_MS, MODE_TRANSITION_MS);
 
-const MOON_THRESHOLDS = [15, 30, 45, 60, 75];
-// Progresso por volta completa de fase, depois que a lua surge. Precisa
-// ser BEM maior que o espaçamento entre limiares (15 pontos): com um
-// valor perto disso (ex.: 18), o deslocamento de fase entre duas luas
-// vizinhas bate quase uma volta inteira (15/18 ≈ 0,83 de 1), e luas quase
-// opostas no ciclo parecem posições aleatórias, não uma "andando" atrás
-// da outra. Com 120, o deslocamento fica pequeno (15/120 = 0,125 de
-// volta, um oitavo de fase), a diferença de uma lua pra próxima vira só
-// mais um passo da mesma caminhada.
-const MOON_CYCLE_SPAN = 120;
+// Instante real (ms desde o mount) em que cada lua surge: escalonado, não
+// uma fração de progresso, pra continuar fazendo sentido não importa
+// quanto a espera de verdade acabar durando. O giro em si (fase contínua,
+// infinita) e o aparecimento (opacidade) são @keyframes CSS estáticos —
+// ver globals.css, seção "Luas da tela de entrada" — não algo montado por
+// este componente: o giro roda no compositor, fora do fio principal, e
+// continua girando mesmo com a página de verdade ocupada montando por
+// baixo do loader (WebGL/Three.js/Canvas dos cases), em vez de engasgar
+// bem no instante em que a entrada está prestes a terminar (lia como
+// "trava no final" quando isso rodava em JS, via requestAnimationFrame).
+// Só o atraso de cada lua (--moon-delay) é passado daqui.
+const MOON_REVEAL_DELAYS_MS = [0, 220, 440, 660, 880];
 
-function moonPhaseAt(progress: number, threshold: number): number {
-  const elapsed = progress - threshold;
-  if (elapsed <= 0) return 0;
-  return (elapsed / MOON_CYCLE_SPAN) % 1;
-}
-
-function LoaderMoons({ progress }: { progress: number }) {
+function LoaderMoons() {
   return (
     <div className="flex items-center gap-3 sm:gap-4" aria-hidden>
-      {MOON_THRESHOLDS.map((threshold, i) => {
-        const visible = progress >= threshold;
-        return (
-          <svg
-            key={i}
-            viewBox="0 0 20 20"
-            className="h-4 w-4 transition-opacity duration-300 sm:h-5 sm:w-5"
-            style={{ opacity: visible ? 1 : 0 }}
-          >
-            <circle
-              cx={MOON_CENTER}
-              cy={MOON_CENTER}
-              r={MOON_R}
-              className="fill-transparent stroke-line"
-              strokeWidth={1}
-            />
-            <path
-              d={moonPath(visible ? moonPhaseAt(progress, threshold) : 0)}
-              className="fill-foreground"
-            />
-          </svg>
-        );
-      })}
+      {MOON_REVEAL_DELAYS_MS.map((delay, i) => (
+        <svg
+          key={i}
+          viewBox="0 0 20 20"
+          className="site-loader-moon h-4 w-4 sm:h-5 sm:w-5"
+          style={{ "--moon-delay": `${delay}ms` } as CSSProperties}
+        >
+          <circle
+            cx={MOON_CENTER}
+            cy={MOON_CENTER}
+            r={MOON_R}
+            className="fill-transparent stroke-line"
+            strokeWidth={1}
+          />
+          <path
+            d={moonPath(0)}
+            className="site-loader-moon-path fill-foreground"
+            style={{ "--moon-delay": `${delay}ms` } as CSSProperties}
+          />
+        </svg>
+      ))}
     </div>
   );
 }
@@ -105,8 +104,6 @@ export function SiteLoader() {
   const [mounted, setMounted] = useState(true);
   const [flashOut, setFlashOut] = useState(false);
   const [fontsSettled, setFontsSettled] = useState(false);
-  const [progress, setProgress] = useState(0);
-  const rafRef = useRef<number | null>(null);
   // Só pode ler performance.now() dentro de efeito (chamar função impura
   // durante a renderização quebra a regra de pureza dos hooks): nasce nulo
   // e ganha o instante real no primeiro efeito abaixo, que roda antes de
@@ -118,30 +115,6 @@ export function SiteLoader() {
   useEffect(() => {
     startRef.current = performance.now();
   }, []);
-
-  useEffect(() => {
-    if (isBoringMode || reduceMotion) return;
-    let cancelled = false;
-    const start = performance.now();
-
-    function tick(now: number) {
-      if (cancelled) return;
-      const elapsed = now - start;
-      // easeOutCubic até o teto: sobe rápido no início, desacelera sem
-      // nunca fechar sozinho (só `ready` fecha em 100, ver useEffect
-      // seguinte).
-      const t = Math.min(elapsed / MIN_MS, 1);
-      const eased = 1 - Math.pow(1 - t, 3);
-      setProgress(Math.min(PROGRESS_CAP, Math.round(eased * PROGRESS_CAP)));
-      rafRef.current = requestAnimationFrame(tick);
-    }
-    rafRef.current = requestAnimationFrame(tick);
-
-    return () => {
-      cancelled = true;
-      if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
-    };
-  }, [isBoringMode, reduceMotion]);
 
   // Fontes carregadas (ou o teto MAX_MS, o que vier primeiro) é só metade
   // do critério agora: vira estado (fontsSettled) em vez de chamar `finish`
@@ -187,7 +160,6 @@ export function SiteLoader() {
       finishScheduledRef.current = true;
       const elapsed = performance.now() - start;
       window.setTimeout(() => {
-        setProgress(100);
         setReady(true);
       }, Math.max(0, MIN_MS - elapsed));
     }
@@ -247,7 +219,7 @@ export function SiteLoader() {
         <span className="type-display type-inktrap text-[9vw] leading-none sm:text-[4vw]">
           {profile.name}
         </span>
-        {!reduceMotion && <LoaderMoons progress={progress} />}
+        {!reduceMotion && <LoaderMoons />}
       </div>
       {!reduceMotion && ready && (
         <div

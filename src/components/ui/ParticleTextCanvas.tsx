@@ -50,6 +50,14 @@ export function ParticleTextCanvas({
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const particlesRef = useRef<Particle[]>([]);
+  // Posição do ponteiro em coordenadas de VIEWPORT (clientX/clientY crus),
+  // não relativas ao container: o container pode se mover por baixo de um
+  // cursor parado (paralaxe de scroll em CasesGrid, ver mediaY), e uma
+  // posição relativa guardada no momento do pointermove ficaria PRESA à
+  // rect de então, saindo do eixo do cursor de verdade assim que o
+  // container terminasse de se mexer sem nenhum movimento novo do mouse
+  // pra corrigir. Convertida pra espaço local só no momento de pintar (ver
+  // paint, abaixo), contra a rect ATUAL, sempre.
   const pointerRef = useRef({ x: -9999, y: -9999 });
   const reduceMotion = useReducedMotion();
 
@@ -82,12 +90,32 @@ export function ParticleTextCanvas({
       const offCtx = off.getContext("2d", { willReadFrequently: true });
       if (!offCtx) return;
 
+      // Cabe de verdade, medido, não chutado: a largura real de cada linha
+      // varia por fonte e por peso (glifos largos como "M" e estreitos
+      // como "I" não rendem numa razão fixa de caractere-por-pixel), e um
+      // fator fixo (0.62, valor antigo) cortava a última letra de "PINK"
+      // pra fora do canvas sempre que a fonte de verdade ficava mais larga
+      // que a estimativa. Desenha uma vez num tamanho de partida, mede a
+      // linha mais larga de verdade (measureText), e escala o tamanho da
+      // fonte pela razão entre o espaço disponível e essa largura medida.
       const longest = Math.max(...lines.map((l) => l.length), 1);
-      const fontSize = Math.max(8, Math.round(width / (longest * 0.62)));
+      let fontSize = Math.max(8, Math.round(width / (longest * 0.62)));
       offCtx.fillStyle = "#fff";
-      offCtx.font = `900 ${fontSize}px "Archivo Black", "Inter", sans-serif`;
       offCtx.textAlign = "center";
       offCtx.textBaseline = "middle";
+
+      const widthBudget = width * 0.92;
+      const heightBudget = height * 0.85;
+      offCtx.font = `900 ${fontSize}px "Archivo Black", "Inter", sans-serif`;
+      const measuredWidth = Math.max(
+        ...lines.map((line) => offCtx.measureText(line).width),
+        1,
+      );
+      const widthScale = widthBudget / measuredWidth;
+      const heightScale = heightBudget / (fontSize * 1.05 * lines.length);
+      fontSize = Math.max(8, Math.floor(fontSize * Math.min(widthScale, heightScale)));
+      offCtx.font = `900 ${fontSize}px "Archivo Black", "Inter", sans-serif`;
+
       const lineHeight = fontSize * 1.05;
       const startY = height / 2 - ((lines.length - 1) * lineHeight) / 2;
       lines.forEach((line, i) => offCtx.fillText(line, width / 2, startY + i * lineHeight));
@@ -117,8 +145,7 @@ export function ParticleTextCanvas({
     resizeObserver.observe(container);
 
     function handlePointerMove(event: PointerEvent) {
-      const rect = container!.getBoundingClientRect();
-      pointerRef.current = { x: event.clientX - rect.left, y: event.clientY - rect.top };
+      pointerRef.current = { x: event.clientX, y: event.clientY };
     }
     function handlePointerLeave() {
       pointerRef.current = { x: -9999, y: -9999 };
@@ -135,7 +162,18 @@ export function ParticleTextCanvas({
       ctx!.fillStyle = color;
 
       const t = now / 1000;
-      const { x: px, y: py } = pointerRef.current;
+      // Convertido pra espaço local aqui, contra a rect ATUAL do container,
+      // não a de quando o pointermove disparou (ver comentário em
+      // pointerRef): o eixo da repulsão fica preso na ponta do cursor de
+      // verdade mesmo se o container se mover por baixo dele (paralaxe de
+      // scroll, ver mediaY em CasesGrid) sem nenhum movimento novo do mouse.
+      let px = -9999;
+      let py = -9999;
+      if (interactive && pointerRef.current.x !== -9999) {
+        const rect = container!.getBoundingClientRect();
+        px = pointerRef.current.x - rect.left;
+        py = pointerRef.current.y - rect.top;
+      }
 
       for (const p of particlesRef.current) {
         let tx = p.ox;
