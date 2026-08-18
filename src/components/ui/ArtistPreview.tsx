@@ -16,6 +16,25 @@ import { ParticleTextCanvas } from "./ParticleTextCanvas";
 // Horse: o cenário 3D de verdade embutido ao vivo (DezertHorseLive.tsx),
 // não uma reconstrução — pedido explícito depois de uma silhueta
 // desenhada não bater com o cavalo do programa original.
+/**
+ * Slugs com prévia bespoke própria (ver switch abaixo). Fonte única pra
+ * quem precisa decidir ENTRE renderizar `ArtistPreview` ou cair pra
+ * `MediaView`/`cover` (ver CasesGrid.tsx): checar isso, e não a presença de
+ * `demoUrl`, porque outros cases (ex.: a Intranet) também têm site
+ * publicado e demoUrl próprio sem ganhar uma reconstrução bespoke aqui.
+ */
+export const ARTIST_PREVIEW_SLUGS = new Set(["ganwalk", "pink-opala", "dezert-horse"]);
+
+// Referência estável: um array literal escrito direto no JSX (`lines={["PINK",
+// "OPALA"]}`) nasce de novo a cada render de ArtistPreview, e como `lines`
+// entra na dependência do `useEffect` de ParticleTextCanvas, uma referência
+// nova ali reinicia o efeito inteiro (limpa e reconstrói as partículas do
+// zero) mesmo com o mesmo conteúdo. ArtistPreview re-renderiza a cada troca
+// de `isHovered` (repassado por CaseColumn), então sem essa constante todo
+// hover na prévia do Pink Opala reconstruía o canvas à toa, lido como uma
+// piscada preta.
+const PINK_OPALA_LINES = ["PINK", "OPALA"];
+
 export function ArtistPreview({
   slug,
   demoUrl,
@@ -33,7 +52,7 @@ export function ArtistPreview({
     case "pink-opala":
       return (
         <ParticleTextCanvas
-          lines={["PINK", "OPALA"]}
+          lines={PINK_OPALA_LINES}
           color="#ffffff"
           background="#000000"
           interactive

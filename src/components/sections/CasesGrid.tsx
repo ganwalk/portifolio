@@ -14,7 +14,7 @@ import {
   useTransform,
   type MotionValue,
 } from "framer-motion";
-import { ArtistPreview } from "@/components/ui/ArtistPreview";
+import { ARTIST_PREVIEW_SLUGS, ArtistPreview } from "@/components/ui/ArtistPreview";
 import { CaseMetrics } from "@/components/ui/CaseMetrics";
 import { CaseStatement } from "@/components/ui/CaseStatement";
 import { CursorLabel } from "@/components/ui/CursorLabel";
@@ -467,21 +467,26 @@ function CaseColumn({
           className="absolute inset-0"
         >
           <motion.div
-            // Pink Opala fica de fora do zoom: a interação dele já é a
-            // própria prévia reagindo ao mouse (partículas se afastando do
-            // cursor de verdade, ver ParticleTextCanvas.tsx), um zoom por
-            // cima brigava com esse movimento em vez de somar a ele.
-            animate={{ scale: isHovered && caseStudy.slug !== "pink-opala" ? 1.06 : 1 }}
+            // O trio de artistas fica de fora do zoom: cada prévia bespoke
+            // já tem a própria linguagem de interação (Ganwalk reage à
+            // passagem do texto em ASCII, Pink Opala solta partículas perto
+            // do cursor, Dezert Horse é o site de verdade embutido ao
+            // vivo), um zoom por cima brigava com esses movimentos em vez
+            // de somar a eles. Só os cases com MediaView normal (vídeo/still
+            // estático) ganham o zoom sutil de sempre.
+            animate={{ scale: isHovered && !ARTIST_PREVIEW_SLUGS.has(caseStudy.slug) ? 1.06 : 1 }}
             transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
             className="absolute inset-0"
           >
-            {caseStudy.demoUrl ? (
+            {ARTIST_PREVIEW_SLUGS.has(caseStudy.slug) && caseStudy.demoUrl ? (
               // Sem gate de isNearActive: monta de cara, mesmo fora de
               // cena. Reconstrução local e leve (Canvas 2D, ver
               // ArtistPreview.tsx), não o site de verdade embutido num
               // iframe: o trio inteiro já chega pronto quando o scroll
               // alcança ele, sem o custo de três WebGL/Three.js/áudio
-              // simultâneos só pra prévia.
+              // simultâneos só pra prévia. Só o trio de artistas: outro
+              // case com demoUrl próprio (ex.: a Intranet) não tem
+              // reconstrução bespoke aqui, cai pro MediaView normal abaixo.
               <ArtistPreview
                 slug={caseStudy.slug}
                 demoUrl={caseStudy.demoUrl}
@@ -940,7 +945,7 @@ function MobileCaseCard({
           className="absolute inset-0 scale-125"
           style={reduceMotion ? undefined : { y: mediaY }}
         >
-          {caseStudy.demoUrl ? (
+          {ARTIST_PREVIEW_SLUGS.has(caseStudy.slug) && caseStudy.demoUrl ? (
             isNear && (
               <ArtistPreview
                 slug={caseStudy.slug}
