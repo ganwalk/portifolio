@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useReducedMotion } from "framer-motion";
 import { useBoringMode } from "@/contexts/BoringModeContext";
+import { usePageLoadingPendingCount } from "@/contexts/PageLoadingContext";
 import { profile } from "@/data/profile";
 import { moonPath, MOON_CENTER, MOON_R } from "@/lib/moon-path";
 import { MODE_TRANSITION_MS } from "./ModeTransitionOverlay";
@@ -37,6 +38,13 @@ const MIN_MS = 900;
 const MAX_MS = 3000;
 const FADE_MS = 400;
 const PROGRESS_CAP = 92;
+// Teto absoluto pra esperar telas de carregamento aninhadas (hoje, só a
+// prévia ao vivo do Dezert Horse, ver PageLoadingContext.tsx) terminarem
+// antes de revelar o site de qualquer jeito: bem maior que MAX_MS (o teto
+// só das fontes) porque uma prévia embutida pode legitimamente levar mais
+// alguns segundos, mas ainda finito, pra nunca prender a entrada do site
+// esperando por uma prévia que nunca chega perto da viewport.
+const NESTED_LOADING_MAX_MS = 6000;
 // Maior das duas durações de saída: garante que nem a cortina (FADE_MS)
 // nem o flash branco (MODE_TRANSITION_MS, bem mais longo) sejam cortados
 // no meio do próprio fade ao desmontar o componente.
@@ -92,11 +100,24 @@ function LoaderMoons({ progress }: { progress: number }) {
 export function SiteLoader() {
   const { isBoringMode } = useBoringMode();
   const reduceMotion = useReducedMotion();
+  const pendingNestedLoaders = usePageLoadingPendingCount();
   const [ready, setReady] = useState(false);
   const [mounted, setMounted] = useState(true);
   const [flashOut, setFlashOut] = useState(false);
+  const [fontsSettled, setFontsSettled] = useState(false);
   const [progress, setProgress] = useState(0);
   const rafRef = useRef<number | null>(null);
+  // Só pode ler performance.now() dentro de efeito (chamar função impura
+  // durante a renderização quebra a regra de pureza dos hooks): nasce nulo
+  // e ganha o instante real no primeiro efeito abaixo, que roda antes de
+  // qualquer um dos outros que dependem dele (ordem de declaração é ordem
+  // de execução no mount).
+  const startRef = useRef<number | null>(null);
+  const finishScheduledRef = useRef(false);
+
+  useEffect(() => {
+    startRef.current = performance.now();
+  }, []);
 
   useEffect(() => {
     if (isBoringMode || reduceMotion) return;
@@ -122,13 +143,48 @@ export function SiteLoader() {
     };
   }, [isBoringMode, reduceMotion]);
 
+  // Fontes carregadas (ou o teto MAX_MS, o que vier primeiro) é só metade
+  // do critério agora: vira estado (fontsSettled) em vez de chamar `finish`
+  // direto, porque a decisão de revelar o site também depende de quantas
+  // telas de carregamento aninhadas ainda estão pendentes (ver o efeito
+  // seguinte), e só um valor em estado consegue disparar aquele efeito de
+  // novo quando o resto do critério muda.
   useEffect(() => {
     if (isBoringMode) return;
     let cancelled = false;
-    const start = performance.now();
+
+    const fontsReady = document.fonts?.ready ?? Promise.resolve();
+    fontsReady.then(() => {
+      if (!cancelled) setFontsSettled(true);
+    });
+    const fallback = window.setTimeout(() => setFontsSettled(true), MAX_MS);
+
+    return () => {
+      cancelled = true;
+      window.clearTimeout(fallback);
+    };
+  }, [isBoringMode]);
+
+  // O site só se dá como pronto quando as fontes tiverem chegado E toda
+  // tela de carregamento aninhada (usePageLoadingRegistration, ver
+  // PageLoadingContext.tsx) tiver terminado, sem exceção, respeitando o
+  // piso MIN_MS de qualquer jeito (contra `startRef`, o mesmo instante nos
+  // dois efeitos). NESTED_LOADING_MAX_MS é o teto absoluto contra esperar
+  // pra sempre por uma tela aninhada que nunca resolve (uma prévia que
+  // nunca chega perto da viewport, por exemplo): ancorado em `startRef`,
+  // não estica a cada nova rodada do efeito, só força a entrada quando o
+  // relógio bate, pendências ou não.
+  useEffect(() => {
+    if (isBoringMode || ready || !fontsSettled) return;
+
+    // Sempre já setado a esta altura: fontsSettled só vira true depois do
+    // efeito de mount (acima) já ter rodado, seja pela resolução real das
+    // fontes, seja pelo teto MAX_MS (3s), ambos bem depois do mount em si.
+    const start = startRef.current ?? performance.now();
 
     function finish() {
-      if (cancelled) return;
+      if (finishScheduledRef.current) return;
+      finishScheduledRef.current = true;
       const elapsed = performance.now() - start;
       window.setTimeout(() => {
         setProgress(100);
@@ -136,15 +192,15 @@ export function SiteLoader() {
       }, Math.max(0, MIN_MS - elapsed));
     }
 
-    const fontsReady = document.fonts?.ready ?? Promise.resolve();
-    fontsReady.then(finish);
-    const fallback = window.setTimeout(finish, MAX_MS);
+    if (pendingNestedLoaders === 0) {
+      finish();
+      return;
+    }
 
-    return () => {
-      cancelled = true;
-      window.clearTimeout(fallback);
-    };
-  }, [isBoringMode]);
+    const remaining = Math.max(0, start + NESTED_LOADING_MAX_MS - performance.now());
+    const hardFallback = window.setTimeout(finish, remaining);
+    return () => window.clearTimeout(hardFallback);
+  }, [isBoringMode, ready, fontsSettled, pendingNestedLoaders]);
 
   // Dispara o flash branco só depois que o navegador já pintou um quadro
   // com ele a opacidade 1: sem esse atraso de um frame, montar e já
