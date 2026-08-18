@@ -4,6 +4,7 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { CaseMetrics } from "@/components/ui/CaseMetrics";
 import { CaseStatement } from "@/components/ui/CaseStatement";
+import { IntranetShowcase } from "@/components/ui/IntranetShowcase";
 import { LiveEmbed } from "@/components/ui/LiveEmbed";
 import { Reveal } from "@/components/ui/Reveal";
 import type { CaseStudy } from "@/data/types";
@@ -78,7 +79,18 @@ export function CaseDetail({
         </p>
       </Reveal>
 
-      {caseStudy.demoUrl ? (
+      {caseStudy.slug === "intranet-auvp" && caseStudy.demoUrl ? (
+        // A Intranet é grande demais (Design System inteiro) pra caber
+        // navegável num iframe pequeno dentro do case: no lugar do
+        // LiveEmbed genérico, uma vitrine curada de componentes reais em
+        // still, cada um explicado (ver IntranetShowcase.tsx).
+        <IntranetShowcase
+          locale={locale}
+          dict={dict}
+          demoUrl={caseStudy.demoUrl}
+          className="mt-12"
+        />
+      ) : caseStudy.demoUrl ? (
         <Reveal delay={0.12} className="mt-12">
           <LiveEmbed
             url={caseStudy.demoUrl}
