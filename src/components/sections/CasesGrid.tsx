@@ -467,11 +467,14 @@ function CaseColumn({
           className="absolute inset-0"
         >
           <motion.div
-            // Pink Opala fica de fora do zoom: a interação dele já é a
-            // própria prévia reagindo ao mouse (partículas se afastando do
-            // cursor de verdade, ver ParticleTextCanvas.tsx), um zoom por
-            // cima brigava com esse movimento em vez de somar a ele.
-            animate={{ scale: isHovered && caseStudy.slug !== "pink-opala" ? 1.06 : 1 }}
+            // O trio de artistas fica de fora do zoom: cada prévia bespoke
+            // já tem a própria linguagem de interação (Ganwalk reage à
+            // passagem do texto em ASCII, Pink Opala solta partículas perto
+            // do cursor, Dezert Horse é o site de verdade embutido ao
+            // vivo), um zoom por cima brigava com esses movimentos em vez
+            // de somar a eles. Só os cases com MediaView normal (vídeo/still
+            // estático) ganham o zoom sutil de sempre.
+            animate={{ scale: isHovered && !ARTIST_PREVIEW_SLUGS.has(caseStudy.slug) ? 1.06 : 1 }}
             transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
             className="absolute inset-0"
           >

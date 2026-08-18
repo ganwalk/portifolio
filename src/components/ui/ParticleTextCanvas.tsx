@@ -75,9 +75,35 @@ export function ParticleTextCanvas({
     let dpr = 1;
 
     function buildParticles() {
-      const rect = container!.getBoundingClientRect();
-      width = Math.max(1, Math.round(rect.width));
-      height = Math.max(1, Math.round(rect.height));
+      // clientWidth/clientHeight, não getBoundingClientRect: o container
+      // pode morar dentro de um ancestral com `transform: scale()` (o
+      // paralaxe de scroll do card do trio, ver mediaScale em
+      // CasesGrid.tsx), e getBoundingClientRect devolve o tamanho VISUAL já
+      // escalado, não o de layout. Nesse card, o canvas herdava esse
+      // tamanho inflado como largura/altura EXPLÍCITAS (via style, que
+      // vence o h-full/w-full da classe), maior que a caixa de layout real
+      // do próprio container, e a mesma escala do ancestral esticava esse
+      // excesso de novo por cima: o texto acabava desenhado bem maior que
+      // a janela visível, cortando "OPALA" pra fora. clientWidth/Height é
+      // sempre o tamanho de LAYOUT (nunca afetado por transform, do
+      // elemento ou de qualquer ancestral), então o canvas sempre cabe
+      // exatamente no container, e a escala do ancestral (quando existe)
+      // amplia o conjunto inteiro de forma uniforme, sem cortar nada.
+      const nextWidth = Math.max(1, container!.clientWidth);
+      const nextHeight = Math.max(1, container!.clientHeight);
+      // ResizeObserver mede a content-box em subpixel, e ela oscila (ex.:
+      // 466 vira 465.67) por causa do paralaxe de scroll na mesma coluna
+      // (ver comentário acima), mesmo sem o tamanho ARREDONDADO mudar de
+      // verdade. Sem essa guarda, cada disparo reconstruía o canvas do
+      // zero, e reatribuir canvas.width/height LIMPA o bitmap na hora,
+      // mesmo pro mesmo valor de sempre: lido como uma piscada preta toda
+      // vez que o cursor entrava na prévia (o hover é o que mexe o
+      // paralaxe o bastante pra cruzar um limite de subpixel).
+      if (nextWidth === width && nextHeight === height && particlesRef.current.length > 0) {
+        return;
+      }
+      width = nextWidth;
+      height = nextHeight;
       dpr = Math.min(window.devicePixelRatio || 1, 2);
       canvas!.width = width * dpr;
       canvas!.height = height * dpr;
