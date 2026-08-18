@@ -4,6 +4,7 @@ import { ThemeProvider } from "next-themes";
 import { MotionConfig } from "framer-motion";
 import type { ReactNode } from "react";
 import { BoringModeProvider, useBoringMode } from "@/contexts/BoringModeContext";
+import { PageLoadingProvider } from "@/contexts/PageLoadingContext";
 import { ModeTransitionOverlay } from "@/components/providers/ModeTransitionOverlay";
 import { SiteLoader } from "@/components/providers/SiteLoader";
 import { SmoothScroll } from "@/components/providers/SmoothScroll";
@@ -25,10 +26,12 @@ export function Providers({ children }: { children: ReactNode }) {
   return (
     <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
       <BoringModeProvider>
-        <SiteLoader />
-        <ModeTransitionOverlay />
-        <SmoothScroll />
-        <MotionGate>{children}</MotionGate>
+        <PageLoadingProvider>
+          <SiteLoader />
+          <ModeTransitionOverlay />
+          <SmoothScroll />
+          <MotionGate>{children}</MotionGate>
+        </PageLoadingProvider>
       </BoringModeProvider>
     </ThemeProvider>
   );

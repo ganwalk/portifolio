@@ -109,96 +109,6 @@ export const cases: CaseStudy[] = [
     repoUrl: "#", // placeholder até a URL real do repositório: só pra testar o botão "ver repositório" aparecendo, troque por um link de verdade antes de publicar.
   },
   {
-    slug: "ecossistema-auvp",
-    area: "banking",
-    year: "2023/2026",
-    // "Landing Pages", não "Landing Pages AUVP": a lista vai crescer com
-    // páginas fora da AUVP, o rótulo não pode ficar preso a um cliente só.
-    title: {
-      pt: "Landing Pages",
-      en: "Landing Pages",
-      es: "Landing Pages",
-      zh: "落地页",
-    },
-    statement: {
-      headline: {
-        pt: "Desenho e mantenho o ecossistema de webpages da AUVP Capital.",
-        en: "I design and maintain AUVP Capital's webpage ecosystem.",
-        es: "Diseño y mantengo el ecosistema de webpages de AUVP Capital.",
-        zh: "设计并维护 AUVP Capital 的网页生态系统。",
-      },
-      detail: {
-        pt: "Todas as LPs com no mínimo 90/100 de performance, alta conversão e bom rankeamento nos mecanismos de busca e em IA.",
-        en: "Every LP scores at least 90/100 on performance, with high conversion and strong ranking on search engines and AI.",
-        es: "Todas las LPs con al menos 90/100 de rendimiento, alta conversión y buen posicionamiento en buscadores y en IA.",
-        zh: "所有落地页性能评分至少 90/100，转化率高，且在搜索引擎和人工智能中排名良好。",
-      },
-    },
-    hoverLabel: {
-      pt: "Ver as landing pages",
-      en: "See the landing pages",
-      es: "Ver las landing pages",
-      zh: "查看落地页",
-    },
-    tags: {
-      pt: ["Webpages", "SEO", "Conversão", "Clarity & GA"],
-      en: ["Webpages", "SEO", "Conversion", "Clarity & GA"],
-      es: ["Webpages", "SEO", "Conversión", "Clarity & GA"],
-      zh: ["Webpages", "SEO", "转化率", "Clarity & GA"],
-    },
-    // Acessos e performance são números reais (não placeholder): a conversão
-    // ainda não tem um percentual calibrado, então continua ilustrativa até
-    // a métrica exata chegar.
-    metrics: [
-      {
-        value: "20 mil+",
-        label: {
-          pt: "acessos diários",
-          en: "daily visits",
-          es: "visitas diarias",
-          zh: "每日访问量",
-        },
-        illustrative: false,
-      },
-      {
-        value: "90+/100",
-        label: {
-          pt: "performance mínima",
-          en: "minimum performance",
-          es: "rendimiento mínimo",
-          zh: "最低性能",
-        },
-        illustrative: false,
-      },
-      {
-        value: "+XX%",
-        label: {
-          pt: "conversão",
-          en: "conversion",
-          es: "conversión",
-          zh: "转化率",
-        },
-        illustrative: true,
-      },
-    ],
-    // Sugestão de mídia real: timelapse dos sites do ecossistema em telas
-    // diferentes, ou zoom out de um dashboard do Clarity/GA com dados reais.
-    cover: {
-      kind: "video",
-      src: "https://videos.pexels.com/video-files/7872722/7872722-uhd_1440_2732_25fps.mp4",
-      poster:
-        "https://images.pexels.com/videos/7872722/decorative-plants-laptop-pexels-photos-7872722.jpeg?auto=compress&w=1280",
-      alt: {
-        pt: "Mãos rolando a tela de um site em um laptop",
-        en: "Hands scrolling through a website on a laptop",
-        es: "Manos desplazándose por un sitio web en una laptop",
-        zh: "双手在笔记本电脑上滚动浏览网站",
-      },
-    },
-    comingSoon: true,
-    repoUrl: "#", // placeholder até a URL real do repositório: só pra testar o botão "ver repositório" aparecendo, troque por um link de verdade antes de publicar.
-  },
-  {
     slug: "ganwalk",
     area: "music",
     // Os três artistas ficam lado a lado no carrossel da home (desktop),
@@ -411,6 +321,96 @@ export const cases: CaseStudy[] = [
     comingSoon: false,
     repoUrl: "https://github.com/ganwalk/pinkopala",
     demoUrl: "https://ganwalk.github.io/pinkopala/",
+  },
+  {
+    slug: "ecossistema-auvp",
+    area: "banking",
+    year: "2023/2026",
+    // "Landing Pages", não "Landing Pages AUVP": a lista vai crescer com
+    // páginas fora da AUVP, o rótulo não pode ficar preso a um cliente só.
+    title: {
+      pt: "Landing Pages",
+      en: "Landing Pages",
+      es: "Landing Pages",
+      zh: "落地页",
+    },
+    statement: {
+      headline: {
+        pt: "Desenho e mantenho o ecossistema de webpages da AUVP Capital.",
+        en: "I design and maintain AUVP Capital's webpage ecosystem.",
+        es: "Diseño y mantengo el ecosistema de webpages de AUVP Capital.",
+        zh: "设计并维护 AUVP Capital 的网页生态系统。",
+      },
+      detail: {
+        pt: "Todas as LPs com no mínimo 90/100 de performance, alta conversão e bom rankeamento nos mecanismos de busca e em IA.",
+        en: "Every LP scores at least 90/100 on performance, with high conversion and strong ranking on search engines and AI.",
+        es: "Todas las LPs con al menos 90/100 de rendimiento, alta conversión y buen posicionamiento en buscadores y en IA.",
+        zh: "所有落地页性能评分至少 90/100，转化率高，且在搜索引擎和人工智能中排名良好。",
+      },
+    },
+    hoverLabel: {
+      pt: "Ver as landing pages",
+      en: "See the landing pages",
+      es: "Ver las landing pages",
+      zh: "查看落地页",
+    },
+    tags: {
+      pt: ["Webpages", "SEO", "Conversão", "Clarity & GA"],
+      en: ["Webpages", "SEO", "Conversion", "Clarity & GA"],
+      es: ["Webpages", "SEO", "Conversión", "Clarity & GA"],
+      zh: ["Webpages", "SEO", "转化率", "Clarity & GA"],
+    },
+    // Acessos e performance são números reais (não placeholder): a conversão
+    // ainda não tem um percentual calibrado, então continua ilustrativa até
+    // a métrica exata chegar.
+    metrics: [
+      {
+        value: "20 mil+",
+        label: {
+          pt: "acessos diários",
+          en: "daily visits",
+          es: "visitas diarias",
+          zh: "每日访问量",
+        },
+        illustrative: false,
+      },
+      {
+        value: "90+/100",
+        label: {
+          pt: "performance mínima",
+          en: "minimum performance",
+          es: "rendimiento mínimo",
+          zh: "最低性能",
+        },
+        illustrative: false,
+      },
+      {
+        value: "+XX%",
+        label: {
+          pt: "conversão",
+          en: "conversion",
+          es: "conversión",
+          zh: "转化率",
+        },
+        illustrative: true,
+      },
+    ],
+    // Sugestão de mídia real: timelapse dos sites do ecossistema em telas
+    // diferentes, ou zoom out de um dashboard do Clarity/GA com dados reais.
+    cover: {
+      kind: "video",
+      src: "https://videos.pexels.com/video-files/7872722/7872722-uhd_1440_2732_25fps.mp4",
+      poster:
+        "https://images.pexels.com/videos/7872722/decorative-plants-laptop-pexels-photos-7872722.jpeg?auto=compress&w=1280",
+      alt: {
+        pt: "Mãos rolando a tela de um site em um laptop",
+        en: "Hands scrolling through a website on a laptop",
+        es: "Manos desplazándose por un sitio web en una laptop",
+        zh: "双手在笔记本电脑上滚动浏览网站",
+      },
+    },
+    comingSoon: true,
+    repoUrl: "#", // placeholder até a URL real do repositório: só pra testar o botão "ver repositório" aparecendo, troque por um link de verdade antes de publicar.
   },
 ];
 
