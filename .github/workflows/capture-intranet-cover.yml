@@ -1,0 +1,51 @@
+name: Capturar capa da Intranet
+
+# Só sob demanda: o site da Intranet não muda com frequência, então não faz
+# sentido gastar minutos de CI num agendamento recorrente. Dispare
+# manualmente (aba Actions) sempre que https://ganwalk.github.io/intranet/
+# mudar visualmente e a capa merecer atualização.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  capture:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Instalar Playwright, sharp e ffmpeg (ferramenta de bancada, fora do package.json)
+        run: npm install --no-save playwright sharp @ffmpeg-installer/ffmpeg
+
+      - name: Instalar o Chromium do Playwright
+        run: npx playwright install --with-deps chromium
+
+      - name: Capturar e converter
+        run: node scripts/capture-intranet-cover.mjs
+
+      # Abre PR em vez de empurrar direto pra main: a rolagem gravada pode
+      # pegar um estado transitório estranho (hover, tooltip aberto), vale
+      # revisar antes de virar a capa de verdade do case.
+      - uses: peter-evans/create-pull-request@v7
+        with:
+          commit-message: "Atualiza a capa da Intranet com captura real do site"
+          title: "Capa real: Intranet"
+          body: |
+            Captura automática (ver `scripts/capture-intranet-cover.mjs`) de uma
+            rolagem pela home do Design System, direto do site publicado.
+
+            Antes de mergear, revise `public/videos/intranet-preview.mp4` e
+            `public/photos/intranet-preview.webp`: o campo `cover` do case em
+            `src/data/cases.ts` já aponta pra esses arquivos, então um merge
+            direto já troca a capa em produção.
+          branch: capture/intranet-cover
+          add-paths: |
+            public/videos/intranet-preview.mp4
+            public/photos/intranet-preview.webp

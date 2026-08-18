@@ -69,44 +69,61 @@ export const cases: CaseStudy[] = [
       es: ["Design System", "Intranet", "Tono y voz", "Banking"],
       zh: ["Design System", "内网系统", "语气语调", "Banking"],
     },
+    // Métricas reais, contadas direto no código do repositório (não
+    // estimativa): 70 é o tamanho de `sections` em
+    // src/data/designSystemSections.ts (uma entrada por componente/padrão
+    // com vitrine própria), 110 é 60 componentes autorais em
+    // src/components/widgets mais os 50 componentes base do shadcn/ui em
+    // src/components/ui, e 10 é a lista de áreas em src/data/areasEmpresa.ts.
     metrics: [
       {
-        value: "+XX%",
-        label: {
-          pt: "adoção interna",
-          en: "internal adoption",
-          es: "adopción interna",
-          zh: "内部采用率",
-        },
-        illustrative: true,
-      },
-      {
-        value: "XX",
+        value: "70",
         label: {
           pt: "componentes documentados",
           en: "documented components",
           es: "componentes documentados",
           zh: "已归档组件数",
         },
-        illustrative: true,
+        illustrative: false,
+      },
+      {
+        value: "110",
+        label: {
+          pt: "componentes React no total",
+          en: "React components in total",
+          es: "componentes React en total",
+          zh: "React 组件总数",
+        },
+        illustrative: false,
+      },
+      {
+        value: "10",
+        label: {
+          pt: "áreas mapeadas no tom de voz",
+          en: "areas mapped in the tone of voice",
+          es: "áreas mapeadas en el tono de voz",
+          zh: "语气语调手册覆盖的部门",
+        },
+        illustrative: false,
       },
     ],
-    // Sugestão de mídia real: screencast navegando pela intranet, ou motion
-    // reveal dos componentes do Design System em grid.
+    // Mídia real: screencast rolando pela home do Design System
+    // (ver scripts/capture-intranet-cover.mjs), capturado direto do site
+    // publicado em `demoUrl`.
     cover: {
       kind: "video",
-      src: "https://videos.pexels.com/video-files/37116270/15723407_1080_1920_25fps.mp4",
-      poster:
-        "https://images.pexels.com/videos/37116270/app-application-checkmark-concept-37116270.jpeg?auto=compress&w=1280",
+      src: `${basePath}/videos/intranet-preview.mp4`,
+      poster: `${basePath}/photos/intranet-preview.webp`,
       alt: {
-        pt: "Mão desenhando componentes de interface com caneta digital em um tablet",
-        en: "Hand sketching interface components with a digital pen on a tablet",
-        es: "Mano dibujando componentes de interfaz con lápiz digital en una tablet",
-        zh: "手持数位笔在平板上绘制界面组件",
+        pt: "Rolagem pela home do Design System, mostrando o símbolo da marca, paletas de cor e componentes documentados",
+        en: "Scrolling through the Design System home, showing the brand symbol, color palettes and documented components",
+        es: "Recorrido por la home del Design System, mostrando el símbolo de la marca, paletas de color y componentes documentados",
+        zh: "滚动浏览设计系统主页,展示品牌标志、色板与已归档的组件",
       },
     },
-    comingSoon: true,
-    repoUrl: "#", // placeholder até a URL real do repositório: só pra testar o botão "ver repositório" aparecendo, troque por um link de verdade antes de publicar.
+    comingSoon: false,
+    repoUrl: "https://github.com/ganwalk/intranet",
+    demoUrl: "https://ganwalk.github.io/intranet/",
   },
   {
     slug: "ganwalk",
