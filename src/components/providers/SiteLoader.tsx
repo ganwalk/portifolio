@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { useReducedMotion } from "framer-motion";
 import { useBoringMode } from "@/contexts/BoringModeContext";
 import { usePageLoadingPendingCount } from "@/contexts/PageLoadingContext";
@@ -57,47 +57,41 @@ const UNMOUNT_MS = Math.max(FADE_MS, MODE_TRANSITION_MS);
 
 // Instante real (ms desde o mount) em que cada lua surge: escalonado, não
 // uma fração de progresso, pra continuar fazendo sentido não importa
-// quanto a espera de verdade acabar durando.
+// quanto a espera de verdade acabar durando. O giro em si (fase contínua,
+// infinita) e o aparecimento (opacidade) são @keyframes CSS estáticos —
+// ver globals.css, seção "Luas da tela de entrada" — não algo montado por
+// este componente: o giro roda no compositor, fora do fio principal, e
+// continua girando mesmo com a página de verdade ocupada montando por
+// baixo do loader (WebGL/Three.js/Canvas dos cases), em vez de engasgar
+// bem no instante em que a entrada está prestes a terminar (lia como
+// "trava no final" quando isso rodava em JS, via requestAnimationFrame).
+// Só o atraso de cada lua (--moon-delay) é passado daqui.
 const MOON_REVEAL_DELAYS_MS = [0, 220, 440, 660, 880];
-// Duração de uma volta completa de fase, em tempo real, depois que a lua
-// surge. Só precisa ser bem maior que o espaçamento entre luas (220ms)
-// pra que o deslocamento de fase entre vizinhas fique pequeno (uma fração
-// de volta, não quase uma volta inteira): é esse deslocamento pequeno que
-// lê como "andando" em vez de posições aleatórias.
-const MOON_CYCLE_MS = 2600;
 
-function moonPhaseAt(elapsedMs: number, delayMs: number): number {
-  const elapsed = elapsedMs - delayMs;
-  if (elapsed <= 0) return 0;
-  return (elapsed / MOON_CYCLE_MS) % 1;
-}
-
-function LoaderMoons({ elapsedMs }: { elapsedMs: number }) {
+function LoaderMoons() {
   return (
     <div className="flex items-center gap-3 sm:gap-4" aria-hidden>
-      {MOON_REVEAL_DELAYS_MS.map((delay, i) => {
-        const visible = elapsedMs >= delay;
-        return (
-          <svg
-            key={i}
-            viewBox="0 0 20 20"
-            className="h-4 w-4 transition-opacity duration-300 sm:h-5 sm:w-5"
-            style={{ opacity: visible ? 1 : 0 }}
-          >
-            <circle
-              cx={MOON_CENTER}
-              cy={MOON_CENTER}
-              r={MOON_R}
-              className="fill-transparent stroke-line"
-              strokeWidth={1}
-            />
-            <path
-              d={moonPath(visible ? moonPhaseAt(elapsedMs, delay) : 0)}
-              className="fill-foreground"
-            />
-          </svg>
-        );
-      })}
+      {MOON_REVEAL_DELAYS_MS.map((delay, i) => (
+        <svg
+          key={i}
+          viewBox="0 0 20 20"
+          className="site-loader-moon h-4 w-4 sm:h-5 sm:w-5"
+          style={{ "--moon-delay": `${delay}ms` } as CSSProperties}
+        >
+          <circle
+            cx={MOON_CENTER}
+            cy={MOON_CENTER}
+            r={MOON_R}
+            className="fill-transparent stroke-line"
+            strokeWidth={1}
+          />
+          <path
+            d={moonPath(0)}
+            className="site-loader-moon-path fill-foreground"
+            style={{ "--moon-delay": `${delay}ms` } as CSSProperties}
+          />
+        </svg>
+      ))}
     </div>
   );
 }
@@ -110,8 +104,6 @@ export function SiteLoader() {
   const [mounted, setMounted] = useState(true);
   const [flashOut, setFlashOut] = useState(false);
   const [fontsSettled, setFontsSettled] = useState(false);
-  const [elapsedMs, setElapsedMs] = useState(0);
-  const rafRef = useRef<number | null>(null);
   // Só pode ler performance.now() dentro de efeito (chamar função impura
   // durante a renderização quebra a regra de pureza dos hooks): nasce nulo
   // e ganha o instante real no primeiro efeito abaixo, que roda antes de
@@ -123,29 +115,6 @@ export function SiteLoader() {
   useEffect(() => {
     startRef.current = performance.now();
   }, []);
-
-  // Relógio de verdade pras luas (LoaderMoons, acima): roda sem teto, sem
-  // easing, enquanto o loader estiver montado, pra elas continuarem
-  // aparecendo e girando pelo tempo que a espera de fato durar (ver
-  // comentário de MOON_REVEAL_DELAYS_MS), em vez de congelar quando uma
-  // porcentagem falsa capasse antes da espera de verdade terminar.
-  useEffect(() => {
-    if (isBoringMode || reduceMotion) return;
-    let cancelled = false;
-    const start = performance.now();
-
-    function tick(now: number) {
-      if (cancelled) return;
-      setElapsedMs(now - start);
-      rafRef.current = requestAnimationFrame(tick);
-    }
-    rafRef.current = requestAnimationFrame(tick);
-
-    return () => {
-      cancelled = true;
-      if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
-    };
-  }, [isBoringMode, reduceMotion]);
 
   // Fontes carregadas (ou o teto MAX_MS, o que vier primeiro) é só metade
   // do critério agora: vira estado (fontsSettled) em vez de chamar `finish`
@@ -250,7 +219,7 @@ export function SiteLoader() {
         <span className="type-display type-inktrap text-[9vw] leading-none sm:text-[4vw]">
           {profile.name}
         </span>
-        {!reduceMotion && <LoaderMoons elapsedMs={elapsedMs} />}
+        {!reduceMotion && <LoaderMoons />}
       </div>
       {!reduceMotion && ready && (
         <div

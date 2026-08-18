@@ -467,7 +467,11 @@ function CaseColumn({
           className="absolute inset-0"
         >
           <motion.div
-            animate={{ scale: isHovered ? 1.06 : 1 }}
+            // Pink Opala fica de fora do zoom: a interação dele já é a
+            // própria prévia reagindo ao mouse (partículas se afastando do
+            // cursor de verdade, ver ParticleTextCanvas.tsx), um zoom por
+            // cima brigava com esse movimento em vez de somar a ele.
+            animate={{ scale: isHovered && caseStudy.slug !== "pink-opala" ? 1.06 : 1 }}
             transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
             className="absolute inset-0"
           >
@@ -711,22 +715,60 @@ function ExpandedCase({
       transition={{ type: "spring", stiffness: 210, damping: 28 }}
       className="fixed inset-0 z-50 overflow-y-auto bg-background"
     >
-      <button
+      {/* Some um instante depois do resto (0.2s de atraso): nasce junto com
+          o FLIP, antes de o container assentar, o "x" mal dava tempo de
+          registrar antes do resto da tela ainda estar se movendo por
+          baixo dele. */}
+      <motion.button
         type="button"
         onClick={onClose}
         aria-label={dict.nav.close}
+        initial={{ opacity: 0, scale: 0.7 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1], delay: 0.2 }}
         className="fixed right-5 top-5 z-10 flex h-11 w-11 items-center justify-center border border-line bg-background text-foreground backdrop-blur-sm transition-colors hover:bg-surface sm:right-8 sm:top-8"
       >
         <span aria-hidden>✕</span>
-      </button>
+      </motion.button>
 
       <div className="gutter pb-16 pt-16 sm:pb-20 sm:pt-20">
-        <p className="type-mono text-muted">{caseStudy.year}</p>
-        <h2 className="type-display type-inktrap mt-6 pt-[0.16em] text-[11vw] leading-[0.92] sm:text-[6vw]">
-          {caseStudy.title[locale]}
-        </h2>
+        {/* Título em máscara escalonada, o mesmo golpe de assinatura do
+            trio de cases na home (kickerY/titleY em CaseColumn): a data
+            sobe primeiro, o título logo atrás, cada um do próprio zero por
+            baixo do overflow-hidden que o esconde, em vez de só aparecer
+            junto com o resto do painel. O atraso (delay) começa depois que
+            o FLIP do container já assentou (a mola acima leva uns 400ms
+            pra parar de se mexer), pra não competir com aquele movimento. */}
+        <div className="overflow-hidden">
+          <motion.p
+            className="type-mono text-muted"
+            initial={{ y: "100%" }}
+            animate={{ y: "0%" }}
+            transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1], delay: 0.28 }}
+          >
+            {caseStudy.year}
+          </motion.p>
+        </div>
+        <div className="mt-6 overflow-hidden">
+          <motion.h2
+            className="type-display type-inktrap pt-[0.16em] text-[11vw] leading-[0.92] sm:text-[6vw]"
+            initial={{ y: "100%" }}
+            animate={{ y: "0%" }}
+            transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1], delay: 0.34 }}
+          >
+            {caseStudy.title[locale]}
+          </motion.h2>
+        </div>
 
-        <div className="mt-16">
+        {/* Daqui pra baixo, Reveal (o mesmo componente de entrada do resto
+            do site): sobe e aparece na PRIMEIRA vez que entra na tela, seja
+            já visível na abertura (o corpo do case, logo abaixo do título)
+            ou só quando a rolagem alcançar (embed/galeria, mais raramente
+            visível de cara). O atraso maior nos primeiros blocos evita que
+            eles apareçam grudados no título; nos que dependem de rolagem
+            pra aparecer, o atraso soma ao momento em que a rolagem os
+            revela, não ao mount. */}
+        <Reveal delay={0.46} className="mt-16">
           <CaseStatement
             caseStudy={caseStudy}
             locale={locale}
@@ -734,30 +776,36 @@ function ExpandedCase({
               <CaseMetrics caseStudy={caseStudy} locale={locale} compact className="mb-8" />
             }
           />
-        </div>
+        </Reveal>
 
-        <p className="type-mono mt-10 text-muted">
-          {caseStudy.tags[locale].join(" • ")}
-        </p>
+        <Reveal delay={0.54}>
+          <p className="type-mono mt-10 text-muted">
+            {caseStudy.tags[locale].join(" • ")}
+          </p>
+        </Reveal>
 
-        {caseStudy.demoUrl ? (
-          <LiveEmbed
-            url={caseStudy.demoUrl}
-            title={caseStudy.title[locale]}
-            dict={dict}
-            className="mt-12"
-          />
-        ) : (
-          <div className="mt-12 grid grid-cols-1 gap-6 sm:grid-cols-2">
-            <div className="texture-noise aspect-4/3 bg-surface" />
-            <div className="texture-noise aspect-4/3 bg-surface" />
-          </div>
-        )}
+        <Reveal delay={0.6}>
+          {caseStudy.demoUrl ? (
+            <LiveEmbed
+              url={caseStudy.demoUrl}
+              title={caseStudy.title[locale]}
+              dict={dict}
+              className="mt-12"
+            />
+          ) : (
+            <div className="mt-12 grid grid-cols-1 gap-6 sm:grid-cols-2">
+              <div className="texture-noise aspect-4/3 bg-surface" />
+              <div className="texture-noise aspect-4/3 bg-surface" />
+            </div>
+          )}
+        </Reveal>
 
         {caseStudy.metrics.some((m) => m.illustrative) && (
-          <p className="type-mono mt-8 text-muted">
-            * {dict.cases.metricsDisclaimer}
-          </p>
+          <Reveal delay={0.66}>
+            <p className="type-mono mt-8 text-muted">
+              * {dict.cases.metricsDisclaimer}
+            </p>
+          </Reveal>
         )}
       </div>
     </motion.div>
