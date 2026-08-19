@@ -43,7 +43,20 @@ const TMP_DIR = here("../.tmp-capture-intranet");
 const SITE_URL = "https://ganwalk.github.io/intranet/";
 const VIEWPORT = { width: 1600, height: 1000 };
 const WARMUP_MS = 1500;
-const SCROLL_MS = 7000;
+const SCROLL_MS = 8000;
+// Distância fixa, não proporcional à altura da página: o Design System
+// tem uns 68 mil pixels de altura (70 seções documentadas), e rolar 55%
+// disso em 7s (a versão antiga) exigia mais de 200px por quadro no pico
+// da curva de easing. Playwright grava a 25fps sem nenhum motion blur
+// simulado, então cada quadro é um instante estático: deslocamento
+// grande vira ghosting/borrão de verdade (texto duplicado, não um efeito
+// de câmera), o "pixelado" que a captura antiga mostrava bem no meio do
+// vídeo, longe do quadro de pouso usado como still de capa (por isso
+// passava despercebido até reparar direto no vídeo rodando). Este valor
+// mantém a velocidade de pico abaixo de uns 40px/quadro, suave o
+// bastante pra não borrar, ao custo de percorrer uma fatia menor da
+// página (ainda passa por várias seções, só não chega tão longe).
+const SCROLL_DISTANCE_PX = 4500;
 
 async function captureRawVideo() {
   const browser = await chromium.launch(launchOptions);
@@ -63,24 +76,27 @@ async function captureRawVideo() {
   const preRollS = (Date.now() - recordingStart) / 1000;
 
   // Rolagem suave e contínua pela home do Design System, ease-in-out, do
-  // topo até um pouco mais da metade da página (o bastante pra passar por
-  // várias seções documentadas sem virar um scroll vertiginoso).
-  await page.evaluate((durationMs) => {
-    return new Promise((resolve) => {
-      const start = performance.now();
-      const distance = document.documentElement.scrollHeight * 0.55;
-      function ease(t) {
-        return t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
-      }
-      function step(now) {
-        const t = Math.min((now - start) / durationMs, 1);
-        window.scrollTo(0, distance * ease(t));
-        if (t < 1) requestAnimationFrame(step);
-        else resolve();
-      }
-      requestAnimationFrame(step);
-    });
-  }, SCROLL_MS);
+  // topo até uma distância fixa (ver SCROLL_DISTANCE_PX acima), o bastante
+  // pra passar por várias seções documentadas sem virar um scroll
+  // vertiginoso nem borrar de movimento.
+  await page.evaluate(
+    ({ durationMs, distance }) => {
+      return new Promise((resolve) => {
+        const start = performance.now();
+        function ease(t) {
+          return t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+        }
+        function step(now) {
+          const t = Math.min((now - start) / durationMs, 1);
+          window.scrollTo(0, distance * ease(t));
+          if (t < 1) requestAnimationFrame(step);
+          else resolve();
+        }
+        requestAnimationFrame(step);
+      });
+    },
+    { durationMs: SCROLL_MS, distance: SCROLL_DISTANCE_PX },
+  );
 
   await context.close();
   await browser.close();
@@ -102,20 +118,24 @@ async function toLoopMp4(rawVideo, preRollS, outFile) {
     // com bastante texto pequeno, e reduzir a largura só pra depois
     // reescalar de volta no navegador (o card mostra em vários tamanhos,
     // alguns maiores que 1280) empilhava desfoque de reamostragem em cima
-    // da compressão. crf 18 e preset slow (contra 28/medium de antes): 18
-    // é o patamar considerado "visualmente sem perdas" pro libx264, o que
-    // importa aqui porque a primeira leva saiu com blocagem visível em
-    // qualquer texto da tela, justamente o tipo de conteúdo (dashboard,
-    // não vídeo de ação) mais sensível a esse artefato.
+    // da compressão. crf 14 e preset veryslow (contra 28/medium da leva
+    // original): a primeira leva saiu com blocagem visível em qualquer
+    // texto da tela, justamente o tipo de conteúdo (dashboard, não vídeo
+    // de ação) mais sensível a esse artefato, e crf 18 (o patamar
+    // costumeiro de "visualmente sem perdas" do libx264) ainda deixava
+    // banding visível nos blocos de cor sólida (os cartões de paleta,
+    // por exemplo). 14 é bem mais perto de lossless de verdade; o custo
+    // maior de arquivo vale a pena aqui, é um asset de build, não algo
+    // recalculado em runtime.
     "-vf",
     "scale=1600:-2",
     "-an",
     "-c:v",
     "libx264",
     "-preset",
-    "slow",
+    "veryslow",
     "-crf",
-    "18",
+    "14",
     "-movflags",
     "+faststart",
     outFile,
@@ -125,7 +145,7 @@ async function toLoopMp4(rawVideo, preRollS, outFile) {
 async function toPosterWebp(rawVideo, preRollS, outFile) {
   const rawPng = `${outFile}.raw.png`;
   await run(ffmpegPath.path, ["-y", "-ss", `${preRollS}`, "-i", rawVideo, "-frames:v", "1", rawPng]);
-  await sharp(rawPng).resize({ width: 1600 }).webp({ quality: 92 }).toFile(outFile);
+  await sharp(rawPng).resize({ width: 1600 }).webp({ quality: 97 }).toFile(outFile);
   await rm(rawPng);
 }
 
