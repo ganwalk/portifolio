@@ -213,6 +213,15 @@ export function IntranetShowcase({
           inteira: numa seção desta altura no mobile, um Reveal só nunca
           satisfazia o limiar de 25% visível de uma vez, deixando um vão de
           tela em branco até rolar bem além dela. */}
+      {/* Larguras (lg:col-span-N) escolhidas pra somar 16 (4 linhas de 4
+          colunas) sem sobra: Roadmap 4 + (Novidades 2 + Rosca 2) + (Rate 2 +
+          Countdown 2) + Preços 4. O grid do CSS não reordena nem encolhe pra
+          caber (mesmo com grid-flow-dense): um card de 4 colunas que não
+          cabe no resto de uma linha pula pra próxima linha inteira, e o
+          resto da linha anterior fica em branco pra sempre. Rosca e Rate
+          eram col-span-1 antes, larguras que não fechavam conta com o resto
+          (4+2+1+1+2+4=14, não múltiplo de 4) e deixavam um vão de 2 colunas
+          vazio antes da Tabela de Preços. */}
       <div className="intranet-scope mt-6 grid grid-cols-1 items-start gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <BentoCard
           title={roadmapTitle[locale]}
@@ -233,10 +242,10 @@ export function IntranetShowcase({
             ))}
           </div>
         </BentoCard>
-        <BentoCard title={donutTitle[locale]} description={donutDesc[locale]} delay={0.08}>
+        <BentoCard title={donutTitle[locale]} description={donutDesc[locale]} delay={0.08} className="lg:col-span-2">
           <DonutChart />
         </BentoCard>
-        <BentoCard title={rateLabel[locale]} description={rateDesc[locale]} delay={0.1}>
+        <BentoCard title={rateLabel[locale]} description={rateDesc[locale]} delay={0.1} className="lg:col-span-2">
           <RateDemo />
         </BentoCard>
         <BentoCard
