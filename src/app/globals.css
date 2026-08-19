@@ -495,6 +495,127 @@ html[data-boring="true"] .texture-noise::after {
   animation: site-loader-moon-phase 2600ms linear var(--moon-delay, 0ms) infinite backwards;
 }
 
+/* ==========================================================================
+   CASE DA INTRANET: componentes portados
+   RoadmapTimeline, NovidadeCard e Tag (src/components/ui/intranet/) são o
+   código real de ganwalk/intranet, não uma reconstrução: só a casca de
+   classes mudou. Esses componentes leem tokens (--card, --primary...) que
+   não existem no resto deste site (preto e branco só, ver topo do
+   arquivo), então .intranet-scope define, num escopo próprio, os valores
+   reais da Marca A (claro) copiados de intranet/src/index.css. Fora dessa
+   classe, esses nomes de variável não existem e não vazam pro resto do
+   site.
+   ========================================================================== */
+
+.intranet-scope {
+  --background: 0 0% 100%;
+  --foreground: 42 70% 9%;
+  --card: 0 0% 100%;
+  --primary: 42 96% 46%;
+  --primary-foreground: 42 45% 11%;
+  --primary-emphasis: 40 95% 30%;
+  --muted: 42 10% 95%;
+  --muted-foreground: 42 10% 40%;
+  --success: 142 72% 29%;
+  --warning: 35 95% 42%;
+  --info: 210 90% 42%;
+  --error: 0 78% 50%;
+  --border: 42 10% 88%;
+  --ring: 42 96% 46%;
+  --brand-foreground: 42 45% 11%;
+  --brand-gradient-from: 42 96% 46%;
+  --brand-gradient-to: 42 60% 22%;
+  --chart-1: 42 75% 42%;
+  --chart-2: 270 60% 55%;
+  --chart-3: 38 92% 55%;
+  --chart-4: 199 89% 48%;
+  --chart-5: 150 55% 38%;
+  --chart-6: 300 55% 45%;
+  --chart-7: 90 55% 40%;
+  --chart-8: 220 30% 35%;
+  font-family: var(--font-sans);
+  color: hsl(var(--foreground));
+}
+
+.intranet-scope,
+.intranet-scope * {
+  border-color: hsl(var(--border));
+}
+
+/* Trilha do roadmap: pontilhado do que ainda vem, caminhando para a frente. */
+@keyframes roadmap-porvir {
+  from {
+    stroke-dashoffset: 0;
+  }
+  to {
+    stroke-dashoffset: -13px;
+  }
+}
+.roadmap-porvir {
+  animation: roadmap-porvir 1.8s linear infinite;
+}
+
+/* Respiro do brilho sob o trecho já entregue. */
+@keyframes roadmap-luz {
+  0%,
+  100% {
+    opacity: 0.22;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+.roadmap-luz {
+  animation: roadmap-luz 4.5s ease-in-out infinite;
+}
+
+/* Rolagem horizontal sem barra visível (régua de períodos da trilha). */
+.no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Barra de rolagem fina da trilha horizontal. */
+.timeline-scrollbar::-webkit-scrollbar {
+  height: 4px;
+}
+.timeline-scrollbar::-webkit-scrollbar-track {
+  background: hsl(var(--muted));
+  border-radius: 9999px;
+}
+.timeline-scrollbar::-webkit-scrollbar-thumb {
+  background: hsl(var(--primary) / 0.3);
+  border-radius: 9999px;
+}
+.timeline-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--primary) / 0.5);
+}
+.timeline-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: hsl(var(--primary) / 0.3) hsl(var(--muted));
+}
+
+/* Painel de detalhe do marco em foco: entra com um leve fade + subida
+   sempre que o marco ativo troca (ver `key={marcoAtivo.id}` no componente),
+   substituindo o plugin tailwindcss-animate que o projeto original usa e
+   que este site não instala. */
+@keyframes intranet-panel-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.intranet-panel-in {
+  animation: intranet-panel-in 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
 /* Respeito ao sistema: se a pessoa pediu menos movimento, o site obedece
    mesmo fora do Modo Boring. */
 @media (prefers-reduced-motion: reduce) {
