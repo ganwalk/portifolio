@@ -526,7 +526,7 @@ function CaseColumn({
           <div className="flex items-start justify-between gap-4">
             <div className="overflow-hidden">
               <motion.p style={{ y: kickerY }} className="type-mono text-white/70">
-                {pad(flatIndex + 1)} / {pad(totalCases)} · {caseStudy.year}
+                {pad(flatIndex + 1)} / {pad(totalCases)}
               </motion.p>
             </div>
             <div className="overflow-hidden text-right">
@@ -738,29 +738,18 @@ function ExpandedCase({
       </motion.button>
 
       <div className="gutter pb-16 pt-16 sm:pb-20 sm:pt-20">
-        {/* Título em máscara escalonada, o mesmo golpe de assinatura do
-            trio de cases na home (kickerY/titleY em CaseColumn): a data
-            sobe primeiro, o título logo atrás, cada um do próprio zero por
-            baixo do overflow-hidden que o esconde, em vez de só aparecer
-            junto com o resto do painel. O atraso (delay) começa depois que
-            o FLIP do container já assentou (a mola acima leva uns 400ms
-            pra parar de se mexer), pra não competir com aquele movimento. */}
+        {/* Título em máscara, o mesmo golpe de assinatura do trio de cases
+            na home (titleY em CaseColumn): sobe do próprio zero por baixo
+            do overflow-hidden que o esconde, em vez de só aparecer junto
+            com o resto do painel. O atraso (delay) começa depois que o
+            FLIP do container já assentou (a mola acima leva uns 400ms pra
+            parar de se mexer), pra não competir com aquele movimento. */}
         <div className="overflow-hidden">
-          <motion.p
-            className="type-mono text-muted"
-            initial={{ y: "100%" }}
-            animate={{ y: "0%" }}
-            transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1], delay: 0.28 }}
-          >
-            {caseStudy.year}
-          </motion.p>
-        </div>
-        <div className="mt-6 overflow-hidden">
           <motion.h2
             className="type-display type-inktrap pt-[0.16em] text-[11vw] leading-[0.92] sm:text-[6vw]"
             initial={{ y: "100%" }}
             animate={{ y: "0%" }}
-            transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1], delay: 0.34 }}
+            transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1], delay: 0.28 }}
           >
             {caseStudy.title[locale]}
           </motion.h2>
@@ -1008,7 +997,7 @@ function MobileCaseCard({
         <div className="pointer-events-none gutter absolute inset-x-0 top-0 flex h-svh flex-col justify-between pb-10 pt-24">
           <Reveal className="flex items-start justify-between gap-4">
             <p className="type-mono text-white/70">
-              {pad(index + 1)} / {pad(totalCases)} · {caseStudy.year}
+              {pad(index + 1)} / {pad(totalCases)}
             </p>
             <p className="text-right">
               <span className="type-serif-display block text-4xl">

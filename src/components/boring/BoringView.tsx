@@ -77,12 +77,7 @@ export function BoringView({
           <tbody>
             {cases.map((caseStudy) => (
               <tr key={caseStudy.slug} className="border-b border-line align-top">
-                <td className="py-2 pr-4 font-bold">
-                  {caseStudy.title[locale]}
-                  <span className="block font-normal text-muted">
-                    {caseStudy.year}
-                  </span>
-                </td>
+                <td className="py-2 pr-4 font-bold">{caseStudy.title[locale]}</td>
                 <td className="py-2 pr-4">{areaLabel[caseStudy.area]}</td>
                 <td className="py-2">
                   {caseStudy.statement.headline[locale]} {caseStudy.statement.detail[locale]}

@@ -67,7 +67,6 @@ export interface CaseStudy {
   cover: Media;
   /** Case ainda sem página completa publicada. */
   comingSoon: boolean;
-  year: string;
   /**
    * URL do repositório público no GitHub. Opcional: o botão "ver
    * repositório" do card só aparece quando o campo existe (ver CasesGrid).

@@ -36,7 +36,6 @@ export const cases: CaseStudy[] = [
   {
     slug: "intranet-auvp",
     area: "banking",
-    year: "2024/2026",
     title: {
       pt: "Intranet completa",
       en: "Complete intranet",
@@ -131,7 +130,6 @@ export const cases: CaseStudy[] = [
     // Os três artistas ficam lado a lado no carrossel da home (desktop),
     // ver CasesGrid: mesmo group, adjacentes no array.
     group: "artistas",
-    year: "2022/2026",
     title: {
       pt: "Ganwalk",
       en: "Ganwalk",
@@ -201,7 +199,6 @@ export const cases: CaseStudy[] = [
     slug: "dezert-horse",
     area: "music",
     group: "artistas",
-    year: "2022/2026",
     title: {
       pt: "Dezert Horse",
       en: "Dezert Horse",
@@ -270,7 +267,6 @@ export const cases: CaseStudy[] = [
     slug: "pink-opala",
     area: "music",
     group: "artistas",
-    year: "2022/2026",
     title: {
       pt: "Pink Opala",
       en: "Pink Opala",
@@ -342,7 +338,6 @@ export const cases: CaseStudy[] = [
   {
     slug: "ecossistema-auvp",
     area: "banking",
-    year: "2023/2026",
     // "Landing Pages", não "Landing Pages AUVP": a lista vai crescer com
     // páginas fora da AUVP, o rótulo não pode ficar preso a um cliente só.
     title: {

@@ -54,15 +54,6 @@ export function CaseDetail({
       >
         {caseStudy.title[locale]}
       </motion.h1>
-      <motion.p
-        initial={{ y: 24, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1], delay: 0.08 }}
-        className="type-mono mt-4 text-muted"
-      >
-        {caseStudy.year}
-      </motion.p>
-
       <Reveal className="mt-16">
         <CaseStatement
           caseStudy={caseStudy}
@@ -80,10 +71,10 @@ export function CaseDetail({
       </Reveal>
 
       {caseStudy.slug === "intranet-auvp" && caseStudy.demoUrl ? (
-        // A Intranet é grande demais (Design System inteiro) pra caber
-        // navegável num iframe pequeno dentro do case: no lugar do
-        // LiveEmbed genérico, uma vitrine curada de componentes reais em
-        // still, cada um explicado (ver IntranetShowcase.tsx).
+        // No lugar do LiveEmbed genérico (que carregaria o Design System
+        // inteiro num iframe): tokens de cor e dois componentes portados,
+        // rodando nativamente aqui, sem imagem nem iframe (ver
+        // IntranetShowcase.tsx).
         <IntranetShowcase
           locale={locale}
           dict={dict}

@@ -31,9 +31,9 @@ export default async function Image({
   return new ImageResponse(
     (
       // O cartão do case mostra o trabalho, não o retrato, então nada nele diz
-      // de quem é o portfólio: a assinatura entra no rótulo, junto do ano.
+      // de quem é o portfólio: a assinatura entra no rótulo.
       <OgCard
-        eyebrow={caseStudy ? `${profile.name} · ${caseStudy.year}` : profile.role}
+        eyebrow={caseStudy ? profile.name : profile.role}
         title={caseStudy ? caseStudy.title[locale] : profile.name}
         footer={caseStudy ? caseStudy.tags[locale].join(" · ") : ""}
       />
