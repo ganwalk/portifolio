@@ -6,7 +6,7 @@ import { useBoringMode } from "@/contexts/BoringModeContext";
 import { usePageLoadingPendingCount } from "@/contexts/PageLoadingContext";
 import { profile } from "@/data/profile";
 import { moonPath, MOON_CENTER, MOON_R } from "@/lib/moon-path";
-import { MODE_TRANSITION_MS } from "./ModeTransitionOverlay";
+import { CURTAIN_CYCLE_MS, StripeCurtain } from "./StripeCurtain";
 
 // Tela de entrada do próprio portfólio: cobre a página até as fontes
 // carregarem e uma folga mínima passar, e SÓ ENTÃO revela o site.
@@ -31,18 +31,18 @@ import { MODE_TRANSITION_MS } from "./ModeTransitionOverlay";
 // momento elas estão em fases diferentes umas das outras: é isso que dá a
 // impressão de "andar".
 //
-// No instante em que o site aparece (ready), dispara o mesmo tipo de
-// entrada que a troca Boring/Criativo usa: uma tela branca cobrindo tudo,
-// que se dissolve na mesma duração da animação real de troca de modo
-// (MODE_TRANSITION_MS, ver ModeTransitionOverlay.tsx) em vez de inventar
-// um tempo à parte.
+// No instante em que o site aparece (ready), dispara literalmente a mesma
+// cortina que a troca Boring/Criativo usa (StripeCurtain.tsx): as réguas
+// fecham sobre a tela de entrada (nome + luas), escondem a troca por um
+// instante (onCovered), e abrem revelando o site de verdade por baixo. Não é
+// mais um flash branco imitando a mesma duração, é o mesmo componente, o
+// mesmo gesto.
 //
 // Sem tela em Modo Boring (mesmo critério de "informação, não vitrine" do
 // resto do modo) nem pra quem pede menos movimento (troca instantânea,
-// sem fade, sem luas, sem flash).
+// sem cortina, sem luas).
 const MIN_MS = 900;
 const MAX_MS = 3000;
-const FADE_MS = 400;
 // Teto absoluto pra esperar telas de carregamento aninhadas (hoje, só a
 // prévia ao vivo do Dezert Horse, ver PageLoadingContext.tsx) terminarem
 // antes de revelar o site de qualquer jeito: bem maior que MAX_MS (o teto
@@ -50,10 +50,6 @@ const FADE_MS = 400;
 // alguns segundos, mas ainda finito, pra nunca prender a entrada do site
 // esperando por uma prévia que nunca chega perto da viewport.
 const NESTED_LOADING_MAX_MS = 6000;
-// Maior das duas durações de saída: garante que nem a cortina (FADE_MS)
-// nem o flash branco (MODE_TRANSITION_MS, bem mais longo) sejam cortados
-// no meio do próprio fade ao desmontar o componente.
-const UNMOUNT_MS = Math.max(FADE_MS, MODE_TRANSITION_MS);
 
 // Instante real (ms desde o mount) em que cada lua surge: escalonado, não
 // uma fração de progresso, pra continuar fazendo sentido não importa
@@ -102,7 +98,8 @@ export function SiteLoader() {
   const pendingNestedLoaders = usePageLoadingPendingCount();
   const [ready, setReady] = useState(false);
   const [mounted, setMounted] = useState(true);
-  const [flashOut, setFlashOut] = useState(false);
+  const [curtainKey, setCurtainKey] = useState(0);
+  const [contentHidden, setContentHidden] = useState(false);
   const [fontsSettled, setFontsSettled] = useState(false);
   // Só pode ler performance.now() dentro de efeito (chamar função impura
   // durante a renderização quebra a regra de pureza dos hooks): nasce nulo
@@ -111,6 +108,7 @@ export function SiteLoader() {
   // de execução no mount).
   const startRef = useRef<number | null>(null);
   const finishScheduledRef = useRef(false);
+  const readyRef = useRef(false);
 
   useEffect(() => {
     startRef.current = performance.now();
@@ -174,62 +172,55 @@ export function SiteLoader() {
     return () => window.clearTimeout(hardFallback);
   }, [isBoringMode, ready, fontsSettled, pendingNestedLoaders]);
 
-  // Dispara o flash branco só depois que o navegador já pintou um quadro
-  // com ele a opacidade 1: sem esse atraso de um frame, montar e já
-  // escrever opacity 0 no mesmo render não deixa nada pra transicionar,
-  // o flash nunca aparece de verdade.
+  // Assim que o site fica pronto, dispara um ciclo da cortina (fecha,
+  // esconde a troca, abre) em vez de um fade de opacidade próprio. Sem
+  // movimento reduzido, a cortina nem monta (ver a condição de render mais
+  // abaixo, que já esconde o conteúdo direto nesse caso).
   useEffect(() => {
-    if (!ready || reduceMotion) return;
-    const raf = requestAnimationFrame(() => setFlashOut(true));
-    return () => cancelAnimationFrame(raf);
+    if (!ready || reduceMotion || readyRef.current) return;
+    readyRef.current = true;
+    setCurtainKey((k) => k + 1);
   }, [ready, reduceMotion]);
 
   useEffect(() => {
     if (!ready) return;
-    const timeout = window.setTimeout(() => setMounted(false), reduceMotion ? 0 : UNMOUNT_MS);
+    const timeout = window.setTimeout(() => setMounted(false), reduceMotion ? 0 : CURTAIN_CYCLE_MS);
     return () => window.clearTimeout(timeout);
   }, [ready, reduceMotion]);
 
   if (isBoringMode || !mounted) return null;
 
+  const contentVisible = !contentHidden && !(reduceMotion && ready);
+
   return (
     <>
-      <div
-        aria-hidden
-        className={`fixed inset-0 z-[300] flex flex-col items-center justify-center gap-6 bg-background ${
-          reduceMotion ? "" : "transition-opacity"
-        }`}
-        style={{
-          transitionDuration: `${FADE_MS}ms`,
-          opacity: ready ? 0 : 1,
-          pointerEvents: ready ? "none" : "auto",
-        }}
-      >
-        {/* .texture-noise define position: relative como CSS sem layer, que
-            sempre vence qualquer utility de posicionamento do Tailwind
-            (layered) na mesma tag, mesmo "absolute": ou colapsa o wrapper
-            fixed pra altura do conteúdo, ou zera o tamanho desta div (sem
-            conteúdo próprio, relative não estica sozinha). O inline style
-            abaixo é a única coisa que bate um unlayered: garante absolute de
-            verdade, com o grão só como classe. */}
-        <div
-          className="texture-noise texture-noise-animate"
-          style={{ position: "absolute", inset: 0 }}
-        />
-        <span className="type-display type-inktrap px-6 text-center text-[9vw] leading-none sm:text-[4vw]">
-          {profile.name}
-        </span>
-        {!reduceMotion && <LoaderMoons />}
-      </div>
-      {!reduceMotion && ready && (
+      {contentVisible && (
         <div
           aria-hidden
-          className="fixed inset-0 z-[301] bg-white transition-opacity"
-          style={{
-            transitionDuration: `${MODE_TRANSITION_MS}ms`,
-            opacity: flashOut ? 0 : 1,
-            pointerEvents: "none",
-          }}
+          className="fixed inset-0 z-[300] flex flex-col items-center justify-center gap-6 bg-background"
+        >
+          {/* .texture-noise define position: relative como CSS sem layer, que
+              sempre vence qualquer utility de posicionamento do Tailwind
+              (layered) na mesma tag, mesmo "absolute": ou colapsa o wrapper
+              fixed pra altura do conteúdo, ou zera o tamanho desta div (sem
+              conteúdo próprio, relative não estica sozinha). O inline style
+              abaixo é a única coisa que bate um unlayered: garante absolute de
+              verdade, com o grão só como classe. */}
+          <div
+            className="texture-noise texture-noise-animate"
+            style={{ position: "absolute", inset: 0 }}
+          />
+          <span className="type-display type-inktrap px-6 text-center text-[9vw] leading-none sm:text-[4vw]">
+            {profile.name}
+          </span>
+          {!reduceMotion && <LoaderMoons />}
+        </div>
+      )}
+      {!reduceMotion && (
+        <StripeCurtain
+          triggerKey={curtainKey}
+          onCovered={() => setContentHidden(true)}
+          zIndexClassName="z-[301]"
         />
       )}
     </>

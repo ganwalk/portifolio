@@ -82,16 +82,20 @@ export const cases: CaseStudy[] = [
       zh: ["音乐", "WebGL", "Three.js", "互动设计"],
     },
     // Sem dado de impacto no site em si (não há analytics público do
-    // Ganwalk): a métrica vem do próprio repositório (git log --oneline),
-    // contada em 19/08/2026.
+    // Ganwalk): a métrica vem do próprio código do repositório, não de
+    // contagem de commits (pouco relevante pra quem visita o site). O painel
+    // de mixagem ao vivo (id="p1-...") expõe nove controles de efeito de
+    // verdade, ligados ao Web Audio API: delay, reverb, chorus, filter,
+    // pitch, overdrive e EQ de três bandas (low/mid/high). Contados direto
+    // em index.htm (github.com/ganwalk/2026) em 19/08/2026.
     metrics: [
       {
-        value: "67",
+        value: "9",
         label: {
-          pt: "commits no repositório",
-          en: "commits in the repository",
-          es: "commits en el repositorio",
-          zh: "仓库提交次数",
+          pt: "efeitos ao vivo no painel de mixagem",
+          en: "live effects in the mixing panel",
+          es: "efectos en vivo en el panel de mezcla",
+          zh: "混音面板中的实时效果",
         },
         illustrative: false,
       },
@@ -153,16 +157,17 @@ export const cases: CaseStudy[] = [
       es: ["Música", "WebGL", "Three.js", "Reproductor integrado"],
       zh: ["音乐", "WebGL", "Three.js", "内置播放器"],
     },
-    // Sem dado de impacto no site em si: a métrica vem do próprio
-    // repositório (git log --oneline), contada em 19/08/2026.
+    // Sem dado de impacto no site em si: a métrica vem do array `tracks` de
+    // index.htm (github.com/ganwalk/cavalo), o álbum de verdade que o painel
+    // retrô toca faixa a faixa, contada em 19/08/2026.
     metrics: [
       {
-        value: "8",
+        value: "10",
         label: {
-          pt: "commits no repositório",
-          en: "commits in the repository",
-          es: "commits en el repositorio",
-          zh: "仓库提交次数",
+          pt: "faixas do álbum tocadas no site",
+          en: "album tracks played on the site",
+          es: "pistas del álbum reproducidas en el sitio",
+          zh: "网站上播放的专辑曲目",
         },
         illustrative: false,
       },
@@ -223,16 +228,17 @@ export const cases: CaseStudy[] = [
       es: ["Música", "Canvas 2D", "Tailwind CSS", "Interactividad"],
       zh: ["音乐", "Canvas 2D", "Tailwind CSS", "互动设计"],
     },
-    // Sem dado de impacto no site em si: a métrica vem do próprio
-    // repositório (git log --oneline), contada em 19/08/2026.
+    // Sem dado de impacto no site em si: a métrica vem da seção de
+    // discografia de index.htm (github.com/ganwalk/pinkopala), contada em
+    // 19/08/2026.
     metrics: [
       {
-        value: "54",
+        value: "6",
         label: {
-          pt: "commits no repositório",
-          en: "commits in the repository",
-          es: "commits en el repositorio",
-          zh: "仓库提交次数",
+          pt: "lançamentos na discografia",
+          en: "releases in the discography",
+          es: "lanzamientos en la discografía",
+          zh: "唱片作品数量",
         },
         illustrative: false,
       },

@@ -1,4 +1,5 @@
 import { Reveal } from "./Reveal";
+import { BentoCard } from "./intranet/BentoCard";
 import { DesignTokens } from "./intranet/DesignTokens";
 import { RoadmapTimeline } from "./intranet/RoadmapTimeline";
 import { NovidadeCard } from "./intranet/NovidadeCard";
@@ -74,10 +75,49 @@ const componentsHeading: Localized = {
 };
 
 const componentsIntro: Localized = {
-  pt: "Seis componentes do Design System, portados de verdade (código real adaptado, não uma cópia visual nem uma descrição): arraste a trilha do roadmap, clique nas estrelas, troque o plano entre individual e pacote, passe o mouse no gráfico.",
-  en: "Six Design System components, genuinely ported (real code adapted, not a visual copy or a description): drag the roadmap trail, click the stars, switch the plan between individual and bundle, hover the chart.",
-  es: "Seis componentes del Design System, portados de verdad (código real adaptado, no una copia visual ni una descripción): arrastra la trilha del roadmap, haz clic en las estrellas, cambia el plan entre individual y paquete, pasa el mouse por el gráfico.",
-  zh: "六个真正移植的设计系统组件（改编的真实代码，而非视觉复制或文字描述）：拖动路线图轨道、点击星标、在单项与套餐之间切换、悬停查看图表。",
+  pt: "Seis componentes do Design System, portados de verdade (código real adaptado, não uma cópia visual nem uma descrição). Cada caixa é interativa: arraste, clique, passe o mouse, teste à vontade.",
+  en: "Six Design System components, genuinely ported (real code adapted, not a visual copy or a description). Every box is interactive: drag, click, hover, try it freely.",
+  es: "Seis componentes del Design System, portados de verdad (código real adaptado, no una copia visual ni una descripción). Cada caja es interactiva: arrastra, haz clic, pasa el mouse, pruébala libremente.",
+  zh: "六个真正移植的设计系统组件（改编的真实代码，而非视觉复制或文字描述）。每个卡片都可以互动：拖动、点击、悬停，随意尝试。",
+};
+
+const roadmapTitle: Localized = {
+  pt: "Trilha do roadmap",
+  en: "Roadmap trail",
+  es: "Trilha del roadmap",
+  zh: "路线图轨道",
+};
+const roadmapDesc: Localized = {
+  pt: "Arraste a trilha ou navegue pelas setas e pelo teclado. O marco de \"hoje\" é calculado de verdade, na hora.",
+  en: "Drag the trail or navigate with the arrows and the keyboard. The \"today\" marker is calculated for real, on the spot.",
+  es: "Arrastra la trilha o navega con las flechas y el teclado. El marcador de \"hoy\" se calcula de verdad, al instante.",
+  zh: "拖动轨道，或用箭头和键盘导航。「当前」标记是实时计算出来的。",
+};
+
+const novidadesTitle: Localized = {
+  pt: "Mural de novidades",
+  en: "Updates wall",
+  es: "Mural de novedades",
+  zh: "更新公告墙",
+};
+const novidadesDesc: Localized = {
+  pt: "Dois cards reais do mural, com antes e depois lado a lado e os resultados de cada entrega.",
+  en: "Two real cards from the wall, with before and after side by side and the results of each delivery.",
+  es: "Dos tarjetas reales del mural, con antes y después lado a lado y los resultados de cada entrega.",
+  zh: "公告墙上的两张真实卡片，前后对比并列展示，附带每次交付的成果。",
+};
+
+const donutTitle: Localized = {
+  pt: "Gráfico de rosca",
+  en: "Donut chart",
+  es: "Gráfico de rosca",
+  zh: "环形图",
+};
+const donutDesc: Localized = {
+  pt: "Passe o mouse numa fatia ou na legenda: as duas se destacam juntas, sincronizadas.",
+  en: "Hover a slice or the legend: the two highlight together, in sync.",
+  es: "Pasa el mouse por una porción o la leyenda: las dos se destacan juntas, sincronizadas.",
+  zh: "将鼠标悬停在扇区或图例上：两者会同步高亮。",
 };
 
 const rateLabel: Localized = {
@@ -86,6 +126,12 @@ const rateLabel: Localized = {
   es: "Valoración por estrellas",
   zh: "星级评分",
 };
+const rateDesc: Localized = {
+  pt: "Clique para votar, passe o mouse para pré-visualizar. Suporta meia estrela e um modo somente leitura.",
+  en: "Click to vote, hover to preview. Supports half stars and a read only mode.",
+  es: "Haz clic para votar, pasa el mouse para previsualizar. Admite media estrella y un modo de solo lectura.",
+  zh: "点击投票，悬停预览。支持半星和只读模式。",
+};
 
 const countdownLabel: Localized = {
   pt: "Contagem regressiva",
@@ -93,12 +139,24 @@ const countdownLabel: Localized = {
   es: "Cuenta regresiva",
   zh: "倒计时",
 };
+const countdownDesc: Localized = {
+  pt: "Relógio de verdade, ticando a cada segundo. Sem GIF, sem imagem parada.",
+  en: "A real clock, ticking every second. No GIF, no static image.",
+  es: "Reloj de verdad, marcando cada segundo. Sin GIF, sin imagen estática.",
+  zh: "真正的时钟，每秒跳动。没有 GIF，没有静态图片。",
+};
 
 const pricingLabel: Localized = {
   pt: "Tabela de preços",
   en: "Pricing table",
   es: "Tabla de precios",
   zh: "价目表",
+};
+const pricingDesc: Localized = {
+  pt: "Alterne entre plano individual e pacote: a grade de planos troca de verdade, com estado React.",
+  en: "Switch between the individual plan and the bundle: the plan grid actually swaps, with real React state.",
+  es: "Alterna entre plan individual y paquete: la grilla de planes cambia de verdad, con estado de React.",
+  zh: "在单项和套餐之间切换：方案网格会真实切换，由 React 状态驱动。",
 };
 
 const catalogHeading: Localized = {
@@ -150,28 +208,54 @@ export function IntranetShowcase({
       <Reveal delay={0.06} className="mt-14">
         <p className="type-mono text-muted">{componentsHeading[locale]}</p>
         <p className="mt-3 text-lg text-muted">{componentsIntro[locale]}</p>
-        <div className="intranet-scope mt-6 space-y-4">
+      </Reveal>
+      {/* Cada card tem o próprio Reveal (ver BentoCard.tsx), não a seção
+          inteira: numa seção desta altura no mobile, um Reveal só nunca
+          satisfazia o limiar de 25% visível de uma vez, deixando um vão de
+          tela em branco até rolar bem além dela. */}
+      <div className="intranet-scope mt-6 grid grid-cols-1 items-start gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <BentoCard
+          title={roadmapTitle[locale]}
+          description={roadmapDesc[locale]}
+          className="sm:col-span-2 lg:col-span-4"
+        >
           <RoadmapTimeline />
-          <div className="grid gap-3 sm:grid-cols-2">
+        </BentoCard>
+        <BentoCard
+          title={novidadesTitle[locale]}
+          description={novidadesDesc[locale]}
+          delay={0.04}
+          className="sm:col-span-2"
+        >
+          <div className="grid w-full gap-3 sm:grid-cols-2">
             {novidadesSample.map((item) => (
               <NovidadeCard key={item.titulo} item={item} />
             ))}
           </div>
+        </BentoCard>
+        <BentoCard title={donutTitle[locale]} description={donutDesc[locale]} delay={0.08}>
           <DonutChart />
-          <div>
-            <p className="mb-2 text-sm font-semibold text-[hsl(var(--foreground))]">{rateLabel[locale]}</p>
-            <RateDemo />
-          </div>
-          <div>
-            <p className="mb-2 text-sm font-semibold text-[hsl(var(--foreground))]">{countdownLabel[locale]}</p>
-            <CountdownDemo />
-          </div>
-          <div>
-            <p className="mb-2 text-sm font-semibold text-[hsl(var(--foreground))]">{pricingLabel[locale]}</p>
-            <PricingTable />
-          </div>
-        </div>
-      </Reveal>
+        </BentoCard>
+        <BentoCard title={rateLabel[locale]} description={rateDesc[locale]} delay={0.1}>
+          <RateDemo />
+        </BentoCard>
+        <BentoCard
+          title={countdownLabel[locale]}
+          description={countdownDesc[locale]}
+          delay={0.06}
+          className="sm:col-span-2"
+        >
+          <CountdownDemo />
+        </BentoCard>
+        <BentoCard
+          title={pricingLabel[locale]}
+          description={pricingDesc[locale]}
+          delay={0.1}
+          className="sm:col-span-2 lg:col-span-4"
+        >
+          <PricingTable />
+        </BentoCard>
+      </div>
 
       <Reveal delay={0.08} className="mt-14">
         <p className="type-mono text-muted">{catalogHeading[locale]}</p>
