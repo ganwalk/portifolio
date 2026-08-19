@@ -22,41 +22,41 @@ interface Plan {
 
 const individualPlans: Plan[] = [
   {
-    name: "Plano Essencial",
-    price: "R$ 797,00",
-    paymentInfo: "PIX, cartão em até 12x ou boleto à vista.",
-    features: ["Acesso vitalício à plataforma", "Comunidade exclusiva", "Certificado de conclusão"],
+    name: "Plano Lorem",
+    price: "R$ 000,00",
+    paymentInfo: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+    features: ["Lorem ipsum dolor sit", "Consectetur adipiscing elit", "Sed do eiusmod tempor"],
   },
   {
-    name: "Plano Analítico",
-    price: "R$ 997,00",
-    paymentInfo: "PIX, cartão em até 12x ou boleto à vista.",
-    features: ["Ferramenta de análise de dados", "Indicadores e comparativos", "Relatórios exclusivos"],
+    name: "Plano Ipsum",
+    price: "R$ 000,00",
+    paymentInfo: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+    features: ["Incididunt ut labore", "Dolore magna aliqua", "Ut enim ad minim veniam"],
   },
   {
-    name: "Plano Gestão",
-    price: "R$ 997,00",
-    paymentInfo: "PIX, cartão em até 12x ou boleto à vista.",
-    features: ["Gestão inteligente de portfólio", "Automação de rotinas", "Acompanhamento periódico"],
+    name: "Plano Dolor",
+    price: "R$ 000,00",
+    paymentInfo: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+    features: ["Quis nostrud exercitation", "Ullamco laboris nisi", "Aliquip ex ea commodo"],
   },
 ];
 
 const pacotePlans: Plan[] = [
   {
-    name: "Pacote Duplo",
-    price: "R$ 1.497,00",
-    paymentInfo: "Economia de R$ 297,00 em relação ao individual.",
-    discount: "15% OFF",
-    features: ["Plano Essencial incluso", "Plano Analítico incluso", "Acesso vitalício"],
+    name: "Pacote Lorem + Ipsum",
+    price: "R$ 000,00",
+    paymentInfo: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+    discount: "00% OFF",
+    features: ["Plano Lorem incluso", "Plano Ipsum incluso", "Duis aute irure dolor"],
   },
   {
     name: "Pacote Completo",
-    price: "R$ 2.199,00",
-    paymentInfo: "Economia de R$ 592,00. O melhor custo-benefício.",
-    discount: "21% OFF",
+    price: "R$ 000,00",
+    paymentInfo: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+    discount: "00% OFF",
     featured: true,
-    featuredLabel: "O mais completo",
-    features: ["Plano Essencial incluso", "Plano Analítico incluso", "Plano Gestão incluso"],
+    featuredLabel: "Lorem ipsum",
+    features: ["Plano Lorem incluso", "Plano Ipsum incluso", "Plano Dolor incluso"],
   },
 ];
 

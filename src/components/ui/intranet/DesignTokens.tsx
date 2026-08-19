@@ -1,6 +1,6 @@
 import type { Localized } from "@/data/types";
 import type { Locale } from "@/i18n/config";
-import { SimboloIcon } from "./simboloPath";
+import { Tag, type TagTone } from "./Tag";
 
 // Tokens de verdade do Design System de ganwalk/intranet (src/index.css),
 // não uma paleta inventada para a vitrine: os valores HSL abaixo são cópia
@@ -68,16 +68,42 @@ function PaletteRow({ label, tokens }: { label: string; tokens: TokenSwatch[] })
   );
 }
 
-function Monograma({ fill, bg, label }: { fill: string; bg: string; label: string }) {
-  return (
-    <div className="flex items-center gap-2">
-      <div className="flex h-10 w-10 shrink-0 items-center justify-center border border-line p-2" style={{ backgroundColor: bg }}>
-        <SimboloIcon fill={fill} className="h-full w-full" />
-      </div>
-      <p className="type-mono text-[10px] text-muted">{label}</p>
-    </div>
-  );
-}
+// Amostra do próprio Tag.tsx (ver src/components/ui/intranet/Tag.tsx): o
+// mesmo componente usado no card do Roadmap acima, agora sozinho, mostrando
+// as 14 combinações tom·token de uma vez. Rótulos em lorem ipsum: aqui o
+// texto é só conteúdo de exemplo pro tom da tag, não dado de caso real.
+const TAG_TONES: TagTone[] = [
+  "green",
+  "violet",
+  "amber",
+  "blue",
+  "magenta",
+  "brick",
+  "olive",
+  "graphite",
+  "success",
+  "warning",
+  "info",
+  "error",
+  "neutral",
+  "primary",
+];
+const TAG_LABELS: Record<TagTone, string> = {
+  green: "Lorem",
+  violet: "Ipsum",
+  amber: "Dolor",
+  blue: "Sit",
+  magenta: "Amet",
+  brick: "Consectetur",
+  olive: "Adipiscing",
+  graphite: "Elit",
+  success: "Sed do",
+  warning: "Eiusmod",
+  info: "Tempor",
+  error: "Incididunt",
+  neutral: "Labore",
+  primary: "Magna",
+};
 
 const heading: Localized = {
   pt: "Tokens de design",
@@ -93,11 +119,11 @@ const intro: Localized = {
   zh: "该产品是白标产品：两套语义令牌（黄色的 A 品牌和蓝色的 B 品牌）以及一套八色图表分类色板，均为 HSL 格式。这里直接渲染真实数值，没有图片，也没有 iframe。",
 };
 
-const brandLabel: Localized = {
-  pt: "Marca (o mesmo monograma, cor de acento própria por marca)",
-  en: "Brand mark (same monogram, own accent color per brand)",
-  es: "Marca (el mismo monograma, color de acento propio por marca)",
-  zh: "品牌标志（相同的字标，每个品牌各自的强调色）",
+const tagsLabel: Localized = {
+  pt: "Tag (mesmo componente do card do Roadmap, todos os tons)",
+  en: "Tag (same component from the Roadmap card, every tone)",
+  es: "Tag (mismo componente de la tarjeta del Roadmap, todos los tonos)",
+  zh: "标签（与路线图卡片相同的组件，全部色调）",
 };
 
 export function DesignTokens({ locale }: { locale: Locale }) {
@@ -109,12 +135,13 @@ export function DesignTokens({ locale }: { locale: Locale }) {
         <PaletteRow label={`${heading[locale]} · Marca B`} tokens={MARCA_B_TOKENS} />
         <PaletteRow label={`${heading[locale]} · dataviz`} tokens={CHART_TOKENS} />
         <div>
-          <p className="type-mono text-muted">{brandLabel[locale]}</p>
-          <div className="mt-3 flex flex-wrap gap-x-5 gap-y-3">
-            <Monograma fill="#111111" bg="#f4f4f4" label="preto" />
-            <Monograma fill="#ffffff" bg="#111111" label="branco" />
-            <Monograma fill="#E6A205" bg="#111111" label="acento · A" />
-            <Monograma fill="#2B76EE" bg="#111111" label="acento · B" />
+          <p className="type-mono text-muted">{tagsLabel[locale]}</p>
+          <div className="intranet-scope mt-3 flex flex-wrap gap-2">
+            {TAG_TONES.map((tone) => (
+              <Tag key={tone} tone={tone}>
+                {TAG_LABELS[tone]}
+              </Tag>
+            ))}
           </div>
         </div>
       </div>

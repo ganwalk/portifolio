@@ -115,6 +115,13 @@ const stillHeading: Localized = {
   zh: "语气语调手册与我们的解决方案",
 };
 
+const stillIntro: Localized = {
+  pt: "Um Design System que só cobre componentes visuais resolve metade do problema: a outra metade é o que a empresa diz, e como. Por isso o manual de tom e voz e o guia de soluções moram no mesmo sistema que os tokens e os componentes, não em documentos soltos. Três ganhos concretos disso: a voz da marca vira tão consistente quanto a cor do botão, com diretrizes versionadas e revisáveis do mesmo jeito que qualquer outro token; quem escreve descrição de produto usa o mesmo vocabulário e a mesma régua de tom que quem desenha a tela, então o discurso comercial nunca destoa da experiência real; e cada seção de produto no guia de soluções herda o acento de cor, a tipografia e os componentes documentados no Design System, então a página de vendas parece parte do mesmo produto, não um material paralelo montado por outro time com outras regras.",
+  en: "A Design System that only covers visual components solves half the problem: the other half is what the company says, and how. That is why the tone of voice manual and the solutions guide live inside the same system as the tokens and the components, not in loose documents. Three concrete gains from that: the brand voice becomes as consistent as a button's color, with guidelines versioned and reviewed the same way as any other token; whoever writes a product description uses the same vocabulary and the same tone scale as whoever designs the screen, so the sales pitch never drifts from the real experience; and every product section in the solutions guide inherits the color accent, typography and documented components from the Design System, so the sales page reads as part of the same product, not a parallel piece of collateral built by another team under different rules.",
+  es: "Un Design System que solo cubre componentes visuales resuelve la mitad del problema: la otra mitad es lo que la empresa dice, y cómo. Por eso el manual de tono y voz y la guía de soluciones viven dentro del mismo sistema que los tokens y los componentes, no en documentos sueltos. Tres ganancias concretas de eso: la voz de la marca se vuelve tan consistente como el color de un botón, con directrices versionadas y revisadas de la misma forma que cualquier otro token; quien escribe una descripción de producto usa el mismo vocabulario y la misma escala de tono que quien diseña la pantalla, así el discurso comercial nunca se aleja de la experiencia real; y cada sección de producto en la guía de soluciones hereda el acento de color, la tipografía y los componentes documentados en el Design System, así la página de ventas se siente parte del mismo producto, no un material paralelo armado por otro equipo con otras reglas.",
+  zh: "一个只涵盖视觉组件的设计系统只解决了一半的问题：另一半是公司说什么，以及怎么说。这就是为什么语气语调手册和解决方案指南与令牌和组件生活在同一个系统里，而不是散落的文档中。由此带来三个具体收益：品牌语气变得像按钮颜色一样一致，准则像任何其他令牌一样被版本化和审查；撰写产品描述的人使用与设计界面的人相同的词汇和语气尺度，因此销售话术永远不会偏离真实体验；解决方案指南中的每个产品板块都继承了设计系统中记录的强调色、排版和组件，因此销售页面读起来像是同一产品的一部分，而不是另一个团队按不同规则拼出来的平行材料。",
+};
+
 const seeFullSite: Localized = {
   pt: "Ver o site completo",
   en: "See the full site",
@@ -175,7 +182,8 @@ export function IntranetShowcase({
 
       <Reveal delay={0.1} className="mt-14">
         <p className="type-mono text-muted">{stillHeading[locale]}</p>
-        <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <p className="mt-3 text-lg text-muted">{stillIntro[locale]}</p>
+        <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
           {stillCards.map((card) => (
             <a
               key={card.id}
