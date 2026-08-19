@@ -1,3 +1,4 @@
+import { MarkRings, MarkPeaks, MarkFacet } from "@/components/ui/icons/PlaceholderMarks";
 import type { Brand } from "./types";
 
 // basePath não é aplicado a src montado à mão em JS (só a next/image e
@@ -6,10 +7,12 @@ import type { Brand } from "./types";
 const basePath = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
 
 // Marcas reais primeiro (logo de verdade, ver scripts/build-brand-logos.mjs
-// para a origem de cada arquivo), depois placeholders explícitos (sem logo,
-// só o nome), terminando no convite ("Sua marca"): quem rola o carrossel
-// até o fim vê que a lista está aberta, não fechada. Nomes próprios não
-// mudam de idioma; só o convite final traduz de verdade.
+// para a origem de cada arquivo), depois três marcas abstratas (`mark`, ver
+// PlaceholderMarks.tsx), terminando no convite ("Sua marca"): quem rola o
+// carrossel até o fim vê que a lista está aberta, não fechada. As marcas
+// abstratas não têm nome de empresa nenhum atrás, de propósito: um nome
+// fictício ao lado de logos reais lia como afirmação de cliente de verdade.
+// Nomes próprios não mudam de idioma; só o convite final traduz de verdade.
 
 export const brands: Brand[] = [
   {
@@ -36,13 +39,16 @@ export const brands: Brand[] = [
     logo: `${basePath}/logos/defensoria-goias.webp`,
   },
   {
-    name: { pt: "Estúdio Coletivo", en: "Estúdio Coletivo", es: "Estudio Colectivo", zh: "Estúdio Coletivo" },
+    name: { pt: "Marca reservada", en: "Reserved slot", es: "Marca reservada", zh: "预留位置" },
+    mark: MarkRings,
   },
   {
-    name: { pt: "Casa Verde", en: "Casa Verde", es: "Casa Verde", zh: "Casa Verde" },
+    name: { pt: "Marca reservada", en: "Reserved slot", es: "Marca reservada", zh: "预留位置" },
+    mark: MarkPeaks,
   },
   {
-    name: { pt: "Grupo Nortel", en: "Grupo Nortel", es: "Grupo Nortel", zh: "Grupo Nortel" },
+    name: { pt: "Marca reservada", en: "Reserved slot", es: "Marca reservada", zh: "预留位置" },
+    mark: MarkFacet,
   },
   {
     name: { pt: "Sua marca", en: "Your brand", es: "Tu marca", zh: "你的品牌" },

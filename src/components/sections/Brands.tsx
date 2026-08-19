@@ -13,26 +13,20 @@ import type { Dictionary } from "@/i18n/dictionaries";
 //
 // Marcas com logo de verdade (ver `logo` em data/brands.ts) mostram a logo,
 // já convertida pro preto e branco do site (scripts/build-brand-logos.mjs);
-// as sem logo (placeholders explícitos) mostram só o nome em texto.
-// dark:invert nas logos: são PNGs/SVGs rasterizados com o preto já fixo no
-// pixel, não currentColor, então não acompanhariam sozinhas a troca de tema
-// como o resto do site acompanha; a mesma lógica já usada no retrato da
-// hero dentro da lente (.lens-invert), aqui aplicada por marca. "Sua marca"
-// por último: uma caixa pontilhada em vez de nome sólido, o convite
-// explícito de que a lista está aberta.
+// as sem cliente real por trás mostram uma marca abstrata (`mark`, ver
+// PlaceholderMarks.tsx), em currentColor, sem precisar de dark:invert.
+// dark:invert só nas logos de verdade: são PNGs/SVGs rasterizados com o
+// preto já fixo no pixel, não currentColor, então não acompanhariam
+// sozinhas a troca de tema como o resto do site acompanha; a mesma lógica
+// já usada no retrato da hero dentro da lente (.lens-invert), aqui
+// aplicada por marca. "Sua marca" por último: uma caixa pontilhada em vez
+// de nome sólido, o convite explícito de que a lista está aberta.
 export function Brands({ locale, dict }: { locale: Locale; dict: Dictionary }) {
   return (
     <div>
       <h3 className="type-mono mb-4 text-muted">{dict.brands.title}</h3>
 
-      {/* -mx cancelando o padding-inline do `.gutter` do próprio About (ver
-          globals.css, os mesmos três valores: 1.5rem/3rem/5rem), não um
-          `w-screen`: o `.gutter` não tem max-width, só padding, então a
-          margem negativa já basta pra empurrar o letreiro até a borda da
-          viewport nos dois lados, sem o glitch de barra de rolagem que
-          `100vw` traria. Só o LETREIRO sai do gutter, o rótulo "Confiam..."
-          acima continua alinhado com o resto de About. */}
-      <Marquee durationSeconds={32} className="-mx-6 sm:-mx-12 xl:-mx-20">
+      <Marquee durationSeconds={32}>
         <ul className="flex items-center">
           {brands.map((brand, index) => (
             <li key={index} className="flex shrink-0 items-center">
@@ -49,6 +43,10 @@ export function Brands({ locale, dict }: { locale: Locale; dict: Dictionary }) {
                     brand.large ? "h-12 sm:h-14" : "h-8 sm:h-10"
                   }`}
                 />
+              ) : brand.mark ? (
+                <span role="img" aria-label={brand.name[locale]} className="mx-6 sm:mx-8">
+                  <brand.mark className="h-7 w-auto text-muted sm:h-8" />
+                </span>
               ) : (
                 <span className="type-serif-display mx-6 whitespace-nowrap text-2xl sm:mx-8 sm:text-3xl">
                   {brand.name[locale]}
