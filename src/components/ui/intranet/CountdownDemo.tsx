@@ -44,13 +44,13 @@ export function CountdownDemo() {
       <div className="absolute bottom-0 left-0 h-40 w-40 rounded-full bg-[hsl(var(--accent)/0.1)] blur-3xl" />
       <div className="relative rounded-xl border bg-[hsl(var(--card)/0.85)] p-6 backdrop-blur-xl sm:p-8">
         <span className="mb-3 inline-block rounded-lg border border-[hsl(var(--accent)/0.2)] bg-[hsl(var(--accent)/0.1)] px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider text-[hsl(var(--accent))]">
-          Inscrições abertas para a turma 55
+          Lorem ipsum dolor sit amet
         </span>
         <h3 className="m-0 mb-2 text-2xl font-black uppercase tracking-tight text-[hsl(var(--foreground))] sm:text-3xl">
-          Vagas limitadas
+          Consectetur adipiscing
         </h3>
         <p className="mb-6 max-w-md text-sm text-[hsl(var(--muted-foreground))]">
-          O cronômetro abaixo mostra o tempo exato até o fechamento da turma.
+          Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
         </p>
         <div className="grid max-w-md grid-cols-4 gap-2 sm:gap-3">
           {units.map(([key, label]) => (

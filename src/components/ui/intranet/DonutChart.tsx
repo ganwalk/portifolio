@@ -11,10 +11,10 @@ import { useState } from "react";
 // sincronizado entre fatia e legenda.
 
 const DATA = [
-  { name: "Convertidas", value: 42 },
-  { name: "Lead", value: 28 },
-  { name: "Clicou", value: 18 },
-  { name: "Expirada", value: 12 },
+  { name: "Lorem", value: 42 },
+  { name: "Ipsum", value: 28 },
+  { name: "Dolor", value: 18 },
+  { name: "Sit", value: 12 },
 ];
 
 const R = 60;
@@ -39,7 +39,7 @@ export function DonutChart() {
   return (
     <div className="mx-auto flex flex-col items-center gap-4 rounded-xl border bg-[hsl(var(--card)/0.6)] p-6 backdrop-blur-xl sm:max-w-sm">
       <div className="flex w-full items-center justify-between">
-        <p className="text-sm font-semibold text-[hsl(var(--foreground))]">Status das indicações</p>
+        <p className="text-sm font-semibold text-[hsl(var(--foreground))]">Lorem ipsum dolor sit</p>
       </div>
       <svg viewBox="0 0 160 160" className="h-40 w-40">
         <g transform="translate(80,80) rotate(-90)">
