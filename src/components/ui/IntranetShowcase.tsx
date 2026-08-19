@@ -3,6 +3,11 @@ import { DesignTokens } from "./intranet/DesignTokens";
 import { RoadmapTimeline } from "./intranet/RoadmapTimeline";
 import { NovidadeCard } from "./intranet/NovidadeCard";
 import { novidadesSample } from "./intranet/novidadesSample";
+import { CountdownDemo } from "./intranet/CountdownDemo";
+import { RateDemo } from "./intranet/RateDemo";
+import { PricingTable } from "./intranet/PricingTable";
+import { DonutChart } from "./intranet/DonutChart";
+import { Catalog } from "./intranet/Catalog";
 import type { Localized } from "@/data/types";
 import type { Locale } from "@/i18n/config";
 import type { Dictionary } from "@/i18n/dictionaries";
@@ -69,10 +74,38 @@ const componentsHeading: Localized = {
 };
 
 const componentsIntro: Localized = {
-  pt: "Dois componentes do Design System, portados de verdade (código real adaptado, não uma cópia visual): a trilha de roadmap arrastável, navegável por setas e teclado, e o card do Mural de Novidades, com os dados reais dessas duas entregas.",
-  en: "Two Design System components, genuinely ported (real code adapted, not a visual copy): the drag and keyboard navigable roadmap trail, and the Updates Board card, with the real data from those two releases.",
-  es: "Dos componentes del Design System, portados de verdad (código real adaptado, no una copia visual): la trilha de roadmap arrastrable y navegable por flechas y teclado, y la tarjeta del Mural de Novedades, con los datos reales de esas dos entregas.",
-  zh: "两个真正移植的设计系统组件（改编的真实代码，而非视觉复制）：可拖拽、可通过箭头和键盘导航的路线图轨道，以及动态公告墙卡片，均使用这两次发布的真实数据。",
+  pt: "Seis componentes do Design System, portados de verdade (código real adaptado, não uma cópia visual nem uma descrição): arraste a trilha do roadmap, clique nas estrelas, troque o plano entre individual e pacote, passe o mouse no gráfico.",
+  en: "Six Design System components, genuinely ported (real code adapted, not a visual copy or a description): drag the roadmap trail, click the stars, switch the plan between individual and bundle, hover the chart.",
+  es: "Seis componentes del Design System, portados de verdad (código real adaptado, no una copia visual ni una descripción): arrastra la trilha del roadmap, haz clic en las estrellas, cambia el plan entre individual y paquete, pasa el mouse por el gráfico.",
+  zh: "六个真正移植的设计系统组件（改编的真实代码，而非视觉复制或文字描述）：拖动路线图轨道、点击星标、在单项与套餐之间切换、悬停查看图表。",
+};
+
+const rateLabel: Localized = {
+  pt: "Avaliação por estrelas",
+  en: "Star rating",
+  es: "Valoración por estrellas",
+  zh: "星级评分",
+};
+
+const countdownLabel: Localized = {
+  pt: "Contagem regressiva",
+  en: "Countdown",
+  es: "Cuenta regresiva",
+  zh: "倒计时",
+};
+
+const pricingLabel: Localized = {
+  pt: "Tabela de preços",
+  en: "Pricing table",
+  es: "Tabla de precios",
+  zh: "价目表",
+};
+
+const catalogHeading: Localized = {
+  pt: "Índice do Design System",
+  en: "Design System index",
+  es: "Índice del Design System",
+  zh: "设计系统索引",
 };
 
 const stillHeading: Localized = {
@@ -117,6 +150,26 @@ export function IntranetShowcase({
               <NovidadeCard key={item.titulo} item={item} />
             ))}
           </div>
+          <DonutChart />
+          <div>
+            <p className="mb-2 text-sm font-semibold text-[hsl(var(--foreground))]">{rateLabel[locale]}</p>
+            <RateDemo />
+          </div>
+          <div>
+            <p className="mb-2 text-sm font-semibold text-[hsl(var(--foreground))]">{countdownLabel[locale]}</p>
+            <CountdownDemo />
+          </div>
+          <div>
+            <p className="mb-2 text-sm font-semibold text-[hsl(var(--foreground))]">{pricingLabel[locale]}</p>
+            <PricingTable />
+          </div>
+        </div>
+      </Reveal>
+
+      <Reveal delay={0.08} className="mt-14">
+        <p className="type-mono text-muted">{catalogHeading[locale]}</p>
+        <div className="mt-3">
+          <Catalog locale={locale} />
         </div>
       </Reveal>
 

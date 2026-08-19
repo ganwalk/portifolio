@@ -48,8 +48,8 @@ const CHART_TOKENS: TokenSwatch[] = [
 
 function Swatch({ token }: { token: TokenSwatch }) {
   return (
-    <div className="flex flex-col gap-2">
-      <div className="aspect-square w-full border border-line" style={{ backgroundColor: `hsl(${token.hsl})` }} />
+    <div className="flex items-center gap-2">
+      <div className="h-8 w-8 shrink-0 border border-line" style={{ backgroundColor: `hsl(${token.hsl})` }} />
       <p className="type-mono text-[10px] text-muted">{token.name}</p>
     </div>
   );
@@ -59,7 +59,7 @@ function PaletteRow({ label, tokens }: { label: string; tokens: TokenSwatch[] })
   return (
     <div>
       <p className="type-mono text-muted">{label}</p>
-      <div className="mt-3 grid grid-cols-4 gap-3 sm:grid-cols-7">
+      <div className="mt-3 flex flex-wrap gap-x-5 gap-y-3">
         {tokens.map((t) => (
           <Swatch key={`${label}-${t.name}`} token={t} />
         ))}
@@ -70,8 +70,8 @@ function PaletteRow({ label, tokens }: { label: string; tokens: TokenSwatch[] })
 
 function Monograma({ fill, bg, label }: { fill: string; bg: string; label: string }) {
   return (
-    <div className="flex flex-col gap-2">
-      <div className="flex aspect-square items-center justify-center border border-line p-4" style={{ backgroundColor: bg }}>
+    <div className="flex items-center gap-2">
+      <div className="flex h-10 w-10 shrink-0 items-center justify-center border border-line p-2" style={{ backgroundColor: bg }}>
         <SimboloIcon fill={fill} className="h-full w-full" />
       </div>
       <p className="type-mono text-[10px] text-muted">{label}</p>
@@ -104,13 +104,13 @@ export function DesignTokens({ locale }: { locale: Locale }) {
   return (
     <div>
       <p className="text-lg text-muted">{intro[locale]}</p>
-      <div className="mt-8 space-y-8">
+      <div className="mt-6 space-y-6">
         <PaletteRow label={`${heading[locale]} · Marca A`} tokens={MARCA_A_TOKENS} />
         <PaletteRow label={`${heading[locale]} · Marca B`} tokens={MARCA_B_TOKENS} />
         <PaletteRow label={`${heading[locale]} · dataviz`} tokens={CHART_TOKENS} />
         <div>
           <p className="type-mono text-muted">{brandLabel[locale]}</p>
-          <div className="mt-3 grid grid-cols-4 gap-3 sm:max-w-md">
+          <div className="mt-3 flex flex-wrap gap-x-5 gap-y-3">
             <Monograma fill="#111111" bg="#f4f4f4" label="preto" />
             <Monograma fill="#ffffff" bg="#111111" label="branco" />
             <Monograma fill="#E6A205" bg="#111111" label="acento · A" />
