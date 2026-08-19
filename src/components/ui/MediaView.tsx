@@ -39,6 +39,7 @@ export function MediaView({
   const useMobileVariant = preferMobile || !isDesktop;
   const src = (useMobileVariant && media.srcMobile) || media.src;
   const poster = (useMobileVariant && media.posterMobile) || media.poster;
+  const objectPosition = media.objectPosition ?? "center";
 
   if (media.kind === "video") {
     // O poster também vive como camada de fundo: se o vídeo demorar ou falhar,
@@ -52,6 +53,7 @@ export function MediaView({
             alt=""
             aria-hidden
             className="absolute inset-0 h-full w-full object-cover"
+            style={{ objectPosition }}
           />
         )}
         <video
@@ -61,6 +63,7 @@ export function MediaView({
           // <video> antigo com o atributo src desatualizado.
           key={src}
           className="absolute inset-0 h-full w-full object-cover"
+          style={{ objectPosition }}
           src={src}
           poster={poster}
           autoPlay
@@ -78,6 +81,7 @@ export function MediaView({
     // eslint-disable-next-line @next/next/no-img-element
     <img
       className={className}
+      style={{ objectPosition }}
       src={media.src}
       alt={media.alt[locale]}
       loading="lazy"
