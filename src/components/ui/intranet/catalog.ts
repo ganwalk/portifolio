@@ -2,6 +2,7 @@ import type { LucideIcon } from "lucide-react";
 import {
   Shapes,
   LayoutGrid,
+  Layers,
   MessageCircle,
   ChevronDown,
   Route,
@@ -19,7 +20,7 @@ import {
   BookOpen,
 } from "lucide-react";
 
-// Índice de outras 17 partes documentadas no Design System real (das 70
+// Índice de outras 18 partes documentadas no Design System real (das 70
 // listadas em cases.ts), com a descrição de verdade copiada de
 // ganwalk/intranet, src/pages/DesignSystem.tsx (prop `description` de cada
 // ComponentShowcase/SectionThemeToggle). Não são componentes portados como
@@ -53,6 +54,12 @@ export const catalogGroups: CatalogGroup[] = [
         name: "Layout & espaçamento",
         description: "Ritmo vertical e alinhamento baseados em múltiplos de 15px. Container max-width 1200px.",
         anchor: "layout",
+      },
+      {
+        icon: Layers,
+        name: "Sombras & elevação",
+        description: "Escala de sombras para hierarquia de profundidade, do mais sutil ao mais elevado.",
+        anchor: "elevation",
       },
     ],
   },
@@ -95,17 +102,17 @@ export const catalogGroups: CatalogGroup[] = [
         description: "Tooltip simples por hover, popover com conteúdo rico por clique, popup de destaque.",
         anchor: "tooltips",
       },
+    ],
+  },
+  {
+    label: "Plataforma de ensino",
+    items: [
       {
         icon: LayoutList,
         name: "Grade curricular",
         description: "Tabs com categorias e cards de módulos.",
         anchor: "grade",
       },
-    ],
-  },
-  {
-    label: "Plataforma de ensino",
-    items: [
       {
         icon: GraduationCap,
         name: "Visualização de cursos",

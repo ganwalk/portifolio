@@ -37,7 +37,7 @@ export function DonutChart() {
   );
 
   return (
-    <div className="flex flex-col items-center gap-4 rounded-xl border bg-[hsl(var(--card)/0.6)] p-6 backdrop-blur-xl sm:max-w-sm">
+    <div className="mx-auto flex flex-col items-center gap-4 rounded-xl border bg-[hsl(var(--card)/0.6)] p-6 backdrop-blur-xl sm:max-w-sm">
       <div className="flex w-full items-center justify-between">
         <p className="text-sm font-semibold text-[hsl(var(--foreground))]">Status das indicações</p>
       </div>

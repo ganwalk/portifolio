@@ -150,12 +150,10 @@ export function IntranetShowcase({
               <NovidadeCard key={item.titulo} item={item} />
             ))}
           </div>
-          <div className="grid gap-3 sm:grid-cols-2">
-            <DonutChart />
-            <div>
-              <p className="mb-2 text-sm font-semibold text-[hsl(var(--foreground))]">{rateLabel[locale]}</p>
-              <RateDemo />
-            </div>
+          <DonutChart />
+          <div>
+            <p className="mb-2 text-sm font-semibold text-[hsl(var(--foreground))]">{rateLabel[locale]}</p>
+            <RateDemo />
           </div>
           <div>
             <p className="mb-2 text-sm font-semibold text-[hsl(var(--foreground))]">{countdownLabel[locale]}</p>
