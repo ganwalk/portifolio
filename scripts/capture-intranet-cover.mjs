@@ -98,15 +98,24 @@ async function toLoopMp4(rawVideo, preRollS, outFile) {
     rawVideo,
     "-t",
     `${SCROLL_MS / 1000}`,
+    // Sem downscale (1600, o mesmo da viewport): a página é uma interface
+    // com bastante texto pequeno, e reduzir a largura só pra depois
+    // reescalar de volta no navegador (o card mostra em vários tamanhos,
+    // alguns maiores que 1280) empilhava desfoque de reamostragem em cima
+    // da compressão. crf 18 e preset slow (contra 28/medium de antes): 18
+    // é o patamar considerado "visualmente sem perdas" pro libx264, o que
+    // importa aqui porque a primeira leva saiu com blocagem visível em
+    // qualquer texto da tela, justamente o tipo de conteúdo (dashboard,
+    // não vídeo de ação) mais sensível a esse artefato.
     "-vf",
-    "scale=1280:-2",
+    "scale=1600:-2",
     "-an",
     "-c:v",
     "libx264",
     "-preset",
-    "medium",
+    "slow",
     "-crf",
-    "28",
+    "18",
     "-movflags",
     "+faststart",
     outFile,
@@ -116,7 +125,7 @@ async function toLoopMp4(rawVideo, preRollS, outFile) {
 async function toPosterWebp(rawVideo, preRollS, outFile) {
   const rawPng = `${outFile}.raw.png`;
   await run(ffmpegPath.path, ["-y", "-ss", `${preRollS}`, "-i", rawVideo, "-frames:v", "1", rawPng]);
-  await sharp(rawPng).resize({ width: 1280 }).webp({ quality: 82 }).toFile(outFile);
+  await sharp(rawPng).resize({ width: 1600 }).webp({ quality: 92 }).toFile(outFile);
   await rm(rawPng);
 }
 

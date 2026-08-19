@@ -19,6 +19,7 @@ import { CaseMetrics } from "@/components/ui/CaseMetrics";
 import { CaseStatement } from "@/components/ui/CaseStatement";
 import { CursorLabel } from "@/components/ui/CursorLabel";
 import { GitHubIcon } from "@/components/ui/icons/GitHubIcon";
+import { IntranetShowcase } from "@/components/ui/IntranetShowcase";
 import { LiveEmbed } from "@/components/ui/LiveEmbed";
 import { MediaView } from "@/components/ui/MediaView";
 import { Reveal } from "@/components/ui/Reveal";
@@ -789,21 +790,36 @@ function ExpandedCase({
           </p>
         </Reveal>
 
-        <Reveal delay={0.6}>
-          {caseStudy.demoUrl ? (
-            <LiveEmbed
-              url={caseStudy.demoUrl}
-              title={caseStudy.title[locale]}
-              dict={dict}
-              className="mt-12"
-            />
-          ) : (
-            <div className="mt-12 grid grid-cols-1 gap-6 sm:grid-cols-2">
-              <div className="texture-noise aspect-4/3 bg-surface" />
-              <div className="texture-noise aspect-4/3 bg-surface" />
-            </div>
-          )}
-        </Reveal>
+        {caseStudy.slug === "intranet-auvp" && caseStudy.demoUrl ? (
+          // Mesmo raciocínio de CaseDetail.tsx: a Intranet é grande demais
+          // pra caber navegável num iframe pequeno, então ganha a vitrine
+          // curada em vez do LiveEmbed genérico. Fora do <Reveal> abaixo
+          // (que só cobre as outras duas variantes): IntranetShowcase já
+          // rege a própria entrada com Reveals internos, aninhar duplicaria
+          // a animação de entrada num overlay que já nasce visível de vez.
+          <IntranetShowcase
+            locale={locale}
+            dict={dict}
+            demoUrl={caseStudy.demoUrl}
+            className="mt-12"
+          />
+        ) : (
+          <Reveal delay={0.6}>
+            {caseStudy.demoUrl ? (
+              <LiveEmbed
+                url={caseStudy.demoUrl}
+                title={caseStudy.title[locale]}
+                dict={dict}
+                className="mt-12"
+              />
+            ) : (
+              <div className="mt-12 grid grid-cols-1 gap-6 sm:grid-cols-2">
+                <div className="texture-noise aspect-4/3 bg-surface" />
+                <div className="texture-noise aspect-4/3 bg-surface" />
+              </div>
+            )}
+          </Reveal>
+        )}
 
         {caseStudy.metrics.some((m) => m.illustrative) && (
           <Reveal delay={0.66}>
