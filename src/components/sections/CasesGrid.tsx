@@ -873,6 +873,17 @@ function ExpandedCase({
 // selo que segue o cursor (não existe hover de verdade em touch): abre a
 // página do case direto, sem o overlay expandido em FLIP que a versão de
 // desktop usa.
+//
+// Exceção: o trio de artistas (ARTIST_PREVIEW_SLUGS) monta sem esperar
+// `isNear`, igual à versão de desktop (CaseColumn): o Dezert Horse
+// registra a própria tela de carregamento do portfólio como pendência
+// (usePageLoadingRegistration, ver DezertHorseLive.tsx), e essa espera só
+// funciona se o componente já estiver montado enquanto a tela de entrada
+// (SiteLoader) ainda está de pé. Escondido atrás do `isNear`, o registro
+// só chegava bem depois da entrada já ter revelado o site, e o visitante
+// via o cenário 3D aparecer com atraso, solto, ao rolar até o trio. Custo
+// aceito aqui: só um iframe (não seis vídeos), e só quando o trio existe
+// na página.
 
 // Folga extra (em svh) que cada cartão mobile ganha além da própria altura
 // de tela: mais rolagem dentro do MESMO cartão antes que o próximo alcance o
@@ -951,14 +962,12 @@ function MobileCaseCard({
           style={reduceMotion ? undefined : { y: mediaY }}
         >
           {ARTIST_PREVIEW_SLUGS.has(caseStudy.slug) && caseStudy.demoUrl ? (
-            isNear && (
-              <ArtistPreview
-                slug={caseStudy.slug}
-                demoUrl={caseStudy.demoUrl}
-                title={caseStudy.title[locale]}
-                className="absolute inset-0 h-full w-full"
-              />
-            )
+            <ArtistPreview
+              slug={caseStudy.slug}
+              demoUrl={caseStudy.demoUrl}
+              title={caseStudy.title[locale]}
+              className="absolute inset-0 h-full w-full"
+            />
           ) : isNear ? (
             <MediaView
               media={caseStudy.cover}

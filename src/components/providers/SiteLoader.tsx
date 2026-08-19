@@ -216,7 +216,7 @@ export function SiteLoader() {
           className="texture-noise texture-noise-animate"
           style={{ position: "absolute", inset: 0 }}
         />
-        <span className="type-display type-inktrap text-[9vw] leading-none sm:text-[4vw]">
+        <span className="type-display type-inktrap px-6 text-center text-[9vw] leading-none sm:text-[4vw]">
           {profile.name}
         </span>
         {!reduceMotion && <LoaderMoons />}

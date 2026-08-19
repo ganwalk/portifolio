@@ -43,7 +43,9 @@ export function ParticleTextCanvas({
   color: string;
   background: string;
   /** Repulsão de partículas perto do cursor de verdade, escutado direto
-   *  neste componente (sem repasse entre janelas: tudo mora aqui). */
+   *  neste componente (sem repasse entre janelas: tudo mora aqui). Em
+   *  aparelho sem hover de verdade (toque), o ponto de repulsão vira
+   *  sintético e varre a tela sozinho (ver `hoverCapable` no efeito). */
   interactive?: boolean;
   className?: string;
 }) {
@@ -176,7 +178,17 @@ export function ParticleTextCanvas({
     function handlePointerLeave() {
       pointerRef.current = { x: -9999, y: -9999 };
     }
-    if (interactive && !reduceMotion) {
+    // Toque não tem hover de verdade: sem isso, quem usa o celular nunca via
+    // as partículas se afastarem e assentarem de novo, o efeito inteiro que
+    // dá sentido a `interactive`, porque nenhum pointermove passivo chega a
+    // disparar. Em vez de esperar por um cursor que não existe, o próprio
+    // ponto de repulsão vira sintético e varre a tela sozinho num Lissajous
+    // (duas senoides com frequências primas entre si, sem período curto que
+    // se repita de forma óbvia), reaproveitando a mesma física de
+    // repulsão/retorno de sempre.
+    const hoverCapable =
+      typeof window.matchMedia === "function" && window.matchMedia("(hover: hover) and (pointer: fine)").matches;
+    if (interactive && !reduceMotion && hoverCapable) {
       container.addEventListener("pointermove", handlePointerMove);
       container.addEventListener("pointerleave", handlePointerLeave);
     }
@@ -195,10 +207,13 @@ export function ParticleTextCanvas({
       // scroll, ver mediaY em CasesGrid) sem nenhum movimento novo do mouse.
       let px = -9999;
       let py = -9999;
-      if (interactive && pointerRef.current.x !== -9999) {
+      if (interactive && hoverCapable && pointerRef.current.x !== -9999) {
         const rect = container!.getBoundingClientRect();
         px = pointerRef.current.x - rect.left;
         py = pointerRef.current.y - rect.top;
+      } else if (interactive && !hoverCapable) {
+        px = width / 2 + Math.sin(t * 0.31) * width * 0.42;
+        py = height / 2 + Math.sin(t * 0.23) * height * 0.38;
       }
 
       for (const p of particlesRef.current) {

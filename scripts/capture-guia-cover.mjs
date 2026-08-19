@@ -1,12 +1,11 @@
-// Captura a capa animada do case "Intranet completa" direto do site publicado
-// de verdade (https://ganwalk.github.io/intranet/): abre a home do Design
-// System num navegador headless, rola suavemente pela página mostrando os
-// componentes documentados e grava a tela, convertendo pro mesmo formato de
-// vitrine que o resto do site já usa (vídeo mudo, em loop, curto e leve, mais
-// um still de capa). Mesmo raciocínio de scripts/capture-artist-covers.mjs,
-// adaptado pra uma página de produto (sem preloader próprio pra esperar).
+// Captura a capa animada do case "Guia da música" direto do site publicado
+// de verdade (https://guiadelancamentos.com.br/): abre a home, rola
+// suavemente pelo dashboard (timeline de lançamentos, mapa por estado,
+// grid filtrável) e grava a tela, convertendo pro mesmo formato de vitrine
+// que o resto do site já usa (vídeo mudo, em loop, curto e leve, mais um
+// still de capa). Mesmo raciocínio de scripts/capture-intranet-cover.mjs.
 //
-// Uso local: node scripts/capture-intranet-cover.mjs
+// Uso local: node scripts/capture-guia-cover.mjs
 // (requer playwright, sharp e @ffmpeg-installer/ffmpeg instalados fora do
 // package.json: npm install --no-save playwright sharp @ffmpeg-installer/ffmpeg,
 // e o Chromium do Playwright: npx playwright install --with-deps chromium)
@@ -38,41 +37,21 @@ const launchOptions = existsSync(SANDBOX_CHROMIUM)
 
 const PHOTOS_OUT = here("../public/photos");
 const VIDEOS_OUT = here("../public/videos");
-const TMP_DIR = here("../.tmp-capture-intranet");
+const TMP_DIR = here("../.tmp-capture-guia");
 
-const SITE_URL = "https://ganwalk.github.io/intranet/";
+const SITE_URL = "https://guiadelancamentos.com.br/";
 // Viewport mobile, não desktop: este case agora sempre divide a fatia do
-// carrossel da home com o Guia da música (duas colunas lado a lado, ver
+// carrossel da home com a Intranet completa (duas colunas lado a lado, ver
 // `group: "web"` em cases.ts), e essa coluna é alta e estreita, muito mais
-// perto da proporção de um celular do que de um desktop widescreen. Um
-// still/vídeo capturado em 1600×1000 e encolhido pra caber ali cortava a
-// maior parte da tela; a versão responsiva móvel do próprio site já nasce
-// no formato certo. deviceScaleFactor 2 (retina): a viewport em si continua
-// 430px de CSS, o dobro só entra na hora de fotografar, pra não sair
-// borrado quando o card mostra maior que o tamanho nativo do celular.
+// perto da proporção de um celular do que de um desktop widescreen. Mesmo
+// raciocínio de capture-intranet-cover.mjs, ver os comentários lá.
 const VIEWPORT = { width: 430, height: 932 };
-const WARMUP_MS = 1500;
-const SCROLL_MS = 8000;
-// Distância fixa, não proporcional à altura da página: o Design System
-// tem uns 68 mil pixels de altura (70 seções documentadas), e rolar 55%
-// disso em 7s (a versão antiga) exigia mais de 200px por quadro no pico
-// da curva de easing. Playwright grava a 25fps sem nenhum motion blur
-// simulado, então cada quadro é um instante estático: deslocamento
-// grande vira ghosting/borrão de verdade (texto duplicado, não um efeito
-// de câmera), o "pixelado" que a captura antiga mostrava bem no meio do
-// vídeo, longe do quadro de pouso usado como still de capa (por isso
-// passava despercebido até reparar direto no vídeo rodando). Este valor
-// mantém a velocidade de pico abaixo de uns 40px/quadro, suave o
-// bastante pra não borrar, ao custo de percorrer uma fatia menor da
-// página (ainda passa por várias seções, só não chega tão longe).
-const SCROLL_DISTANCE_PX = 4500;
+const WARMUP_MS = 3500;
+const SCROLL_MS = 7000;
+const SCROLL_DISTANCE_PX = 3200;
 
 async function captureRawVideo() {
   const browser = await chromium.launch(launchOptions);
-  // A gravação começa na criação do contexto, antes da navegação: o trecho
-  // até a página ficar pronta (conexão + carregamento) sai em branco no
-  // vídeo bruto. Medido aqui (não um valor fixo chutado) pra cortar certo
-  // no ffmpeg depois, robusto à variação de latência da rede.
   const recordingStart = Date.now();
   const context = await browser.newContext({
     viewport: VIEWPORT,
@@ -82,15 +61,13 @@ async function captureRawVideo() {
     hasTouch: true,
   });
   const page = await context.newPage();
-  await page.goto(SITE_URL, { waitUntil: "networkidle", timeout: 60_000 });
+  // "load", não "networkidle": o site mantém um listener em tempo real do
+  // Firestore aberto (ver docs/ARQUITETURA.md do repositório), que nunca
+  // deixa a rede ficar de fato ociosa, e "networkidle" nunca resolveria.
+  await page.goto(SITE_URL, { waitUntil: "load", timeout: 60_000 });
   await page.waitForTimeout(WARMUP_MS);
-  // Date.now() aqui já inclui o warmup acima, não soma de novo.
   const preRollS = (Date.now() - recordingStart) / 1000;
 
-  // Rolagem suave e contínua pela home do Design System, ease-in-out, do
-  // topo até uma distância fixa (ver SCROLL_DISTANCE_PX acima), o bastante
-  // pra passar por várias seções documentadas sem virar um scroll
-  // vertiginoso nem borrar de movimento.
   await page.evaluate(
     ({ durationMs, distance }) => {
       return new Promise((resolve) => {
@@ -126,20 +103,6 @@ async function toLoopMp4(rawVideo, preRollS, outFile) {
     rawVideo,
     "-t",
     `${SCROLL_MS / 1000}`,
-    // Sem downscale (860, o mesmo da viewport física com
-    // deviceScaleFactor 2: 430 CSS px × 2): a página é uma interface com
-    // bastante texto pequeno, e reduzir a largura só pra depois reescalar
-    // de volta no navegador (o card mostra em vários tamanhos, alguns
-    // maiores que a viewport nativa) empilhava desfoque de reamostragem em
-    // cima da compressão. crf 14 e preset veryslow (contra 28/medium da
-    // leva original): a primeira leva saiu com blocagem visível em
-    // qualquer texto da tela, justamente o tipo de conteúdo (dashboard,
-    // não vídeo de ação) mais sensível a esse artefato, e crf 18 (o
-    // patamar costumeiro de "visualmente sem perdas" do libx264) ainda
-    // deixava banding visível nos blocos de cor sólida (os cartões de
-    // paleta, por exemplo). 14 é bem mais perto de lossless de verdade; o
-    // custo maior de arquivo vale a pena aqui, é um asset de build, não
-    // algo recalculado em runtime.
     "-vf",
     "scale=860:-2",
     "-an",
@@ -148,7 +111,7 @@ async function toLoopMp4(rawVideo, preRollS, outFile) {
     "-preset",
     "veryslow",
     "-crf",
-    "14",
+    "16",
     "-movflags",
     "+faststart",
     outFile,
@@ -158,7 +121,7 @@ async function toLoopMp4(rawVideo, preRollS, outFile) {
 async function toPosterWebp(rawVideo, preRollS, outFile) {
   const rawPng = `${outFile}.raw.png`;
   await run(ffmpegPath.path, ["-y", "-ss", `${preRollS}`, "-i", rawVideo, "-frames:v", "1", rawPng]);
-  await sharp(rawPng).resize({ width: 860 }).webp({ quality: 97 }).toFile(outFile);
+  await sharp(rawPng).resize({ width: 860 }).webp({ quality: 95 }).toFile(outFile);
   await rm(rawPng);
 }
 
@@ -176,8 +139,8 @@ async function main() {
   const { rawVideo, preRollS } = await captureRawVideo();
   console.log(`Pré-roll (carregamento) medido: ${preRollS.toFixed(2)}s`);
 
-  const videoOut = `${VIDEOS_OUT}/intranet-preview.mp4`;
-  const posterOut = `${PHOTOS_OUT}/intranet-preview.webp`;
+  const videoOut = `${VIDEOS_OUT}/guia-musica-preview.mp4`;
+  const posterOut = `${PHOTOS_OUT}/guia-musica-preview.webp`;
   await toLoopMp4(rawVideo, preRollS, videoOut);
   await toPosterWebp(rawVideo, preRollS, posterOut);
   await logSize(videoOut);
