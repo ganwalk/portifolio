@@ -220,6 +220,18 @@ export function SiteLoader() {
         <StripeCurtain
           triggerKey={curtainKey}
           onCovered={() => setContentHidden(true)}
+          // bg-background, não bg-foreground (o padrão, usado na troca de
+          // modo): ali a cortina cobre um flash preto de propósito, um corte
+          // dramático entre dois modos que podem até ter temas diferentes.
+          // Aqui embaixo os dois lados já são a MESMA cor (a tela de entrada
+          // já é bg-background, ver acima): cobrir com preto criava um
+          // flash preto solto no meio de uma transição clara-pra-clara, sem
+          // relação com nenhum dos dois lados, que lia como tela quebrada,
+          // não como cortina. Com a mesma cor dos dois lados, fechar não se
+          // vê (não tem o que ver, cor idêntica) e abrir revela o site de
+          // verdade por baixo: a réguas continuam fazendo o gesto, só sem o
+          // flash que não pertencia a lugar nenhum.
+          colorClassName="bg-background"
           zIndexClassName="z-[301]"
         />
       )}
