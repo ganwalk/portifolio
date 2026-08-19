@@ -8,6 +8,7 @@ import { IntranetShowcase } from "@/components/ui/IntranetShowcase";
 import { LandingPagesShowcase } from "@/components/ui/LandingPagesShowcase";
 import { LiveEmbed } from "@/components/ui/LiveEmbed";
 import { Reveal } from "@/components/ui/Reveal";
+import { RepoLink } from "@/components/ui/RepoLink";
 import type { CaseStudy } from "@/data/types";
 import type { Locale } from "@/i18n/config";
 import type { Dictionary } from "@/i18n/dictionaries";
@@ -69,6 +70,9 @@ export function CaseDetail({
         <p className="type-mono mt-10 text-muted">
           {caseStudy.tags[locale].join(" • ")}
         </p>
+        {caseStudy.repoUrl && (
+          <RepoLink repoUrl={caseStudy.repoUrl} title={caseStudy.title[locale]} dict={dict} className="mt-3" />
+        )}
       </Reveal>
 
       {caseStudy.slug === "intranet-auvp" && caseStudy.demoUrl ? (
