@@ -1,3 +1,4 @@
+import type { ComponentType } from "react";
 import type { Locale } from "@/i18n/config";
 
 /** Texto localizado, todo conteúdo visível ao visitante existe nos três idiomas. */
@@ -119,10 +120,16 @@ export interface Brand {
   name: Localized;
   /**
    * Logo real, em preto e branco (ver scripts/build-brand-logos.mjs).
-   * Opcional: placeholders sem logo real (e o convite final) mostram só o
-   * nome em texto.
+   * Opcional: os slots sem cliente real (e o convite final) usam `mark` em
+   * vez disso.
    */
   logo?: string;
+  /**
+   * Marca abstrata (ver src/components/ui/icons/PlaceholderMarks.tsx) pros
+   * slots sem logo real nem nome de empresa por trás: currentColor, SVG
+   * inline, não PNG/SVG rasterizado.
+   */
+  mark?: ComponentType<{ className?: string }>;
   /**
    * true só no convite final ("Sua marca"): ganha caixa pontilhada em vez de
    * nome sólido, a mesma linguagem de vaga aberta do resto do site.
