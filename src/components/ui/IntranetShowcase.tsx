@@ -1,23 +1,31 @@
 import { Reveal } from "./Reveal";
+import { IntranetLiveEmbed } from "./IntranetLiveEmbed";
 import { intranetHighlights, type IntranetHighlight } from "@/data/intranetHighlights";
 import type { Localized } from "@/data/types";
 import type { Locale } from "@/i18n/config";
 import type { Dictionary } from "@/i18n/dictionaries";
 
 // Corpo do case da Intranet, no lugar do LiveEmbed genérico (iframe do
-// Design System inteiro): uma vitrine curada de componentes reais,
-// capturados em still do próprio site publicado
-// (scripts/capture-intranet-highlights.mjs), cada um com uma frase
-// explicando como funciona, no lugar de deixar quem visita descobrir
-// sozinho navegando um site inteiro dentro de um iframe pequeno. Cada
-// card ainda linka pra âncora exata do componente no site de verdade,
-// pra quem quiser ver ao vivo.
+// Design System inteiro): uma bento grid de componentes AO VIVO (ver
+// IntranetLiveEmbed.tsx), cada um recortado exatamente na parte certa da
+// página real, arrastável/clicável/navegável por teclado de verdade em
+// produção (mesma origem que ganwalk.github.io/intranet), com uma frase
+// de como cada um funciona. Fora desse cenário (dev local, preview),
+// cada célula mostra o still de fallback, nunca um recorte errado.
+
+const PAGE_PATH: Record<IntranetHighlight["group"], string> = {
+  "design-system": "/design-system",
+  "tom-e-voz": "/tom-e-voz",
+  solucoes: "/solucoes",
+};
+
+const DEMO_ORIGIN = "https://ganwalk.github.io/intranet";
 
 const introText: Localized = {
-  pt: "Alguns componentes em destaque do Design System, cada um com o próprio still e uma frase de como funciona:",
-  en: "A few components from the Design System, each with its own still and a line on how it works:",
-  es: "Algunos componentes destacados del Design System, cada uno con su propio still y una frase de cómo funciona:",
-  zh: "设计系统中的几个精选组件，各配有实拍图和一句说明它是如何运作的：",
+  pt: "Alguns componentes em destaque do Design System, ao vivo (arraste, clique, use o teclado), cada um com uma frase de como funciona:",
+  en: "A few components from the Design System, live (drag, click, use the keyboard), each with a line on how it works:",
+  es: "Algunos componentes destacados del Design System, en vivo (arrastra, haz clic, usa el teclado), cada uno con una frase de cómo funciona:",
+  zh: "设计系统中的几个精选组件，实时可交互（拖拽、点击、键盘操作），各配一句说明它是如何运作的：",
 };
 
 const seeFullSite: Localized = {
@@ -27,7 +35,7 @@ const seeFullSite: Localized = {
   zh: "查看完整网站",
 };
 
-function HighlightCard({
+function HighlightCell({
   item,
   locale,
   dict,
@@ -36,32 +44,32 @@ function HighlightCard({
   locale: Locale;
   dict: Dictionary;
 }) {
+  const demoUrl = `${DEMO_ORIGIN}${PAGE_PATH[item.group]}#${item.anchor}`;
   return (
-    <a
-      href={item.href}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="group block border border-line"
-    >
-      <div className="overflow-hidden bg-surface">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={item.image}
-          alt=""
-          aria-hidden
-          loading="lazy"
-          className="h-auto w-full transition-opacity duration-300 group-hover:opacity-90"
+    <div className={`relative flex flex-col border border-line ${item.span}`}>
+      <div className="relative min-h-0 flex-1">
+        <IntranetLiveEmbed
+          demoUrl={demoUrl}
+          scrollToSelector={`#${item.anchor}`}
+          poster={item.image}
+          title={item.title[locale]}
+          className="absolute inset-0"
         />
       </div>
-      <div className="p-5 sm:p-6">
-        <p className="font-bold">{item.title[locale]}</p>
-        <p className="mt-2 text-sm text-muted">{item.description[locale]}</p>
-        <span className="type-mono mt-4 inline-flex items-center gap-2 text-muted transition-colors group-hover:text-foreground">
+      <div className="border-t border-line bg-surface p-3">
+        <p className="text-sm font-bold">{item.title[locale]}</p>
+        <p className="mt-1 text-xs text-muted">{item.description[locale]}</p>
+        <a
+          href={demoUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="type-mono mt-2 inline-flex items-center gap-1.5 text-[11px] text-muted transition-colors hover:text-foreground"
+        >
           {dict.cases.openDemo}
           <span aria-hidden>↗</span>
-        </span>
+        </a>
       </div>
-    </a>
+    </div>
   );
 }
 
@@ -76,29 +84,18 @@ export function IntranetShowcase({
   demoUrl: string;
   className?: string;
 }) {
-  const designSystemItems = intranetHighlights.filter((h) => h.group === "design-system");
-  const otherItems = intranetHighlights.filter((h) => h.group !== "design-system");
-
   return (
     <div className={className}>
       <Reveal>
         <p className="text-lg text-muted">{introText[locale]}</p>
-        <div className="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-2">
-          {designSystemItems.map((item) => (
-            <HighlightCard key={item.id} item={item} locale={locale} dict={dict} />
+        <div className="mt-6 grid auto-rows-[170px] grid-cols-2 gap-3 sm:auto-rows-[200px] sm:gap-4 md:grid-cols-4 md:auto-rows-[220px]">
+          {intranetHighlights.map((item) => (
+            <HighlightCell key={item.id} item={item} locale={locale} dict={dict} />
           ))}
         </div>
       </Reveal>
 
-      <Reveal delay={0.08} className="mt-6">
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-          {otherItems.map((item) => (
-            <HighlightCard key={item.id} item={item} locale={locale} dict={dict} />
-          ))}
-        </div>
-      </Reveal>
-
-      <Reveal delay={0.14} className="mt-10">
+      <Reveal delay={0.1} className="mt-10">
         <a
           href={demoUrl}
           target="_blank"
