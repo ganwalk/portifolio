@@ -31,99 +31,15 @@ const basePath = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
 // em vez do trabalho. A leva atual é toda de cor natural (concreto, telhado,
 // areia, luz âmbar de estúdio, nuvem de fim de tarde, papel), que convive
 // com o preto e branco em vez de gritar por cima dele.
+//
+// Ordem do carrossel: o trio de artistas abre a lista (três colunas lado a
+// lado no desktop, ver `group: "artistas"` abaixo), seguido do par Intranet
+// + Landing Pages (duas colunas, `group: "web"`). Cases adjacentes com o
+// mesmo `group` viram uma fatia só do carrossel (ver buildSlides em
+// CasesGrid.tsx): a ordem do array decide tanto a sequência quanto o
+// agrupamento, os dois de uma vez.
 
 export const cases: CaseStudy[] = [
-  {
-    slug: "intranet-auvp",
-    area: "banking",
-    title: {
-      pt: "Intranet completa",
-      en: "Complete intranet",
-      es: "Intranet completa",
-      zh: "完整内网系统",
-    },
-    statement: {
-      headline: {
-        pt: "Construí uma intranet robusta para todo o ecossistema.",
-        en: "I built a robust intranet for the whole ecosystem.",
-        es: "Construí una intranet robusta para todo el ecosistema.",
-        zh: "为整个生态系统搭建了一套完善的内部网站。",
-      },
-      detail: {
-        pt: "Com Design System completo e manual de tom e voz.",
-        en: "With a complete Design System and tone of voice manual.",
-        es: "Con un Design System completo y manual de tono y voz.",
-        zh: "包含完整的设计系统和语气语调手册。",
-      },
-    },
-    hoverLabel: {
-      pt: "Ver o Design System",
-      en: "See the Design System",
-      es: "Ver el Design System",
-      zh: "查看设计系统",
-    },
-    tags: {
-      pt: ["Design System", "Intranet", "Tom e voz", "Banking"],
-      en: ["Design System", "Intranet", "Tone of voice", "Banking"],
-      es: ["Design System", "Intranet", "Tono y voz", "Banking"],
-      zh: ["Design System", "内网系统", "语气语调", "Banking"],
-    },
-    // Métricas reais, contadas direto no código do repositório (não
-    // estimativa): 70 é o tamanho de `sections` em
-    // src/data/designSystemSections.ts (uma entrada por componente/padrão
-    // com vitrine própria), 110 é 60 componentes autorais em
-    // src/components/widgets mais os 50 componentes base do shadcn/ui em
-    // src/components/ui, e 10 é a lista de áreas em src/data/areasEmpresa.ts.
-    metrics: [
-      {
-        value: "70",
-        label: {
-          pt: "componentes documentados",
-          en: "documented components",
-          es: "componentes documentados",
-          zh: "已归档组件数",
-        },
-        illustrative: false,
-      },
-      {
-        value: "110",
-        label: {
-          pt: "componentes React no total",
-          en: "React components in total",
-          es: "componentes React en total",
-          zh: "React 组件总数",
-        },
-        illustrative: false,
-      },
-      {
-        value: "10",
-        label: {
-          pt: "áreas mapeadas no tom de voz",
-          en: "areas mapped in the tone of voice",
-          es: "áreas mapeadas en el tono de voz",
-          zh: "语气语调手册覆盖的部门",
-        },
-        illustrative: false,
-      },
-    ],
-    // Mídia real: screencast rolando pela home do Design System
-    // (ver scripts/capture-intranet-cover.mjs), capturado direto do site
-    // publicado em `demoUrl`.
-    cover: {
-      kind: "video",
-      src: `${basePath}/videos/intranet-preview.mp4`,
-      poster: `${basePath}/photos/intranet-preview.webp`,
-      alt: {
-        pt: "Rolagem pela home do Design System, mostrando o símbolo da marca, paletas de cor e componentes documentados",
-        en: "Scrolling through the Design System home, showing the brand symbol, color palettes and documented components",
-        es: "Recorrido por la home del Design System, mostrando el símbolo de la marca, paletas de color y componentes documentados",
-        zh: "滚动浏览设计系统主页,展示品牌标志、色板与已归档的组件",
-      },
-    },
-    comingSoon: false,
-    repoUrl: "https://github.com/ganwalk/intranet",
-    demoUrl: "https://ganwalk.github.io/intranet/",
-  },
   {
     slug: "ganwalk",
     area: "music",
@@ -336,8 +252,104 @@ export const cases: CaseStudy[] = [
     demoUrl: "https://ganwalk.github.io/pinkopala/",
   },
   {
+    slug: "intranet-auvp",
+    area: "banking",
+    // Intranet e Landing Pages ficam lado a lado no carrossel da home
+    // (desktop), duas colunas: mesmo group, adjacentes no array (mesmo
+    // raciocínio do trio de artistas acima).
+    group: "web",
+    title: {
+      pt: "Intranet completa",
+      en: "Complete intranet",
+      es: "Intranet completa",
+      zh: "完整内网系统",
+    },
+    statement: {
+      headline: {
+        pt: "Construí uma intranet robusta para todo o ecossistema.",
+        en: "I built a robust intranet for the whole ecosystem.",
+        es: "Construí una intranet robusta para todo el ecosistema.",
+        zh: "为整个生态系统搭建了一套完善的内部网站。",
+      },
+      detail: {
+        pt: "Com Design System completo e manual de tom e voz.",
+        en: "With a complete Design System and tone of voice manual.",
+        es: "Con un Design System completo y manual de tono y voz.",
+        zh: "包含完整的设计系统和语气语调手册。",
+      },
+    },
+    hoverLabel: {
+      pt: "Ver o Design System",
+      en: "See the Design System",
+      es: "Ver el Design System",
+      zh: "查看设计系统",
+    },
+    tags: {
+      pt: ["Design System", "Intranet", "Tom e voz", "Banking"],
+      en: ["Design System", "Intranet", "Tone of voice", "Banking"],
+      es: ["Design System", "Intranet", "Tono y voz", "Banking"],
+      zh: ["Design System", "内网系统", "语气语调", "Banking"],
+    },
+    // Métricas reais, contadas direto no código do repositório (não
+    // estimativa): 70 é o tamanho de `sections` em
+    // src/data/designSystemSections.ts (uma entrada por componente/padrão
+    // com vitrine própria), 110 é 60 componentes autorais em
+    // src/components/widgets mais os 50 componentes base do shadcn/ui em
+    // src/components/ui, e 10 é a lista de áreas em src/data/areasEmpresa.ts.
+    metrics: [
+      {
+        value: "70",
+        label: {
+          pt: "componentes documentados",
+          en: "documented components",
+          es: "componentes documentados",
+          zh: "已归档组件数",
+        },
+        illustrative: false,
+      },
+      {
+        value: "110",
+        label: {
+          pt: "componentes React no total",
+          en: "React components in total",
+          es: "componentes React en total",
+          zh: "React 组件总数",
+        },
+        illustrative: false,
+      },
+      {
+        value: "10",
+        label: {
+          pt: "áreas mapeadas no tom de voz",
+          en: "areas mapped in the tone of voice",
+          es: "áreas mapeadas en el tono de voz",
+          zh: "语气语调手册覆盖的部门",
+        },
+        illustrative: false,
+      },
+    ],
+    // Mídia real: screencast rolando pela home do Design System
+    // (ver scripts/capture-intranet-cover.mjs), capturado direto do site
+    // publicado em `demoUrl`.
+    cover: {
+      kind: "video",
+      src: `${basePath}/videos/intranet-preview.mp4`,
+      poster: `${basePath}/photos/intranet-preview.webp`,
+      alt: {
+        pt: "Rolagem pela home do Design System, mostrando o símbolo da marca, paletas de cor e componentes documentados",
+        en: "Scrolling through the Design System home, showing the brand symbol, color palettes and documented components",
+        es: "Recorrido por la home del Design System, mostrando el símbolo de la marca, paletas de color y componentes documentados",
+        zh: "滚动浏览设计系统主页,展示品牌标志、色板与已归档的组件",
+      },
+    },
+    comingSoon: false,
+    repoUrl: "https://github.com/ganwalk/intranet",
+    demoUrl: "https://ganwalk.github.io/intranet/",
+  },
+  {
     slug: "ecossistema-auvp",
     area: "banking",
+    group: "web",
     // "Landing Pages", não "Landing Pages AUVP": a lista vai crescer com
     // páginas fora da AUVP, o rótulo não pode ficar preso a um cliente só.
     title: {
