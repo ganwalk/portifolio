@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { CaseMetrics } from "@/components/ui/CaseMetrics";
 import { CaseStatement } from "@/components/ui/CaseStatement";
 import { IntranetShowcase } from "@/components/ui/IntranetShowcase";
+import { LandingPagesShowcase } from "@/components/ui/LandingPagesShowcase";
 import { LiveEmbed } from "@/components/ui/LiveEmbed";
 import { Reveal } from "@/components/ui/Reveal";
 import type { CaseStudy } from "@/data/types";
@@ -81,6 +82,11 @@ export function CaseDetail({
           demoUrl={caseStudy.demoUrl}
           className="mt-12"
         />
+      ) : caseStudy.slug === "ecossistema-auvp" ? (
+        // Sem demoUrl único (é uma coleção de páginas publicadas separadas,
+        // não um produto): cada uma mora na própria simulação de janela de
+        // navegador, com still e link direto (ver LandingPagesShowcase.tsx).
+        <LandingPagesShowcase locale={locale} dict={dict} className="mt-12" />
       ) : caseStudy.demoUrl ? (
         <Reveal delay={0.12} className="mt-12">
           <LiveEmbed

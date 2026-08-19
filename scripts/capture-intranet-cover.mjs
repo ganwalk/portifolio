@@ -41,16 +41,16 @@ const VIDEOS_OUT = here("../public/videos");
 const TMP_DIR = here("../.tmp-capture-intranet");
 
 const SITE_URL = "https://ganwalk.github.io/intranet/";
-// Viewport mobile, não desktop: este case agora sempre divide a fatia do
-// carrossel da home com o Guia da música (duas colunas lado a lado, ver
-// `group: "web"` em cases.ts), e essa coluna é alta e estreita, muito mais
-// perto da proporção de um celular do que de um desktop widescreen. Um
-// still/vídeo capturado em 1600×1000 e encolhido pra caber ali cortava a
-// maior parte da tela; a versão responsiva móvel do próprio site já nasce
-// no formato certo. deviceScaleFactor 2 (retina): a viewport em si continua
-// 430px de CSS, o dobro só entra na hora de fotografar, pra não sair
-// borrado quando o card mostra maior que o tamanho nativo do celular.
-const VIEWPORT = { width: 430, height: 932 };
+// Viewport desktop widescreen, não mobile: a versão em viewport de celular
+// (430×932) mostrava a interface responsiva do próprio site, que empilha
+// tudo numa coluna estreita, e um trecho fixo de rolagem nela cobre BEM
+// menos seções documentadas por segundo de vídeo do que a versão desktop
+// (o Design System deita os componentes lado a lado só a partir daí). O
+// resultado prático era um vídeo mais nítido só olhando de perto, mas que
+// cortava a maior parte da informação que a capa deveria mostrar: o zoom
+// "de volta" pra 1600×1000 troca nitidez de pixel por área de conteúdo
+// visível, a prioridade certa pra uma capa.
+const VIEWPORT = { width: 1600, height: 1000 };
 const WARMUP_MS = 1500;
 const SCROLL_MS = 8000;
 // Distância fixa, não proporcional à altura da página: o Design System
@@ -77,9 +77,6 @@ async function captureRawVideo() {
   const context = await browser.newContext({
     viewport: VIEWPORT,
     recordVideo: { dir: TMP_DIR, size: VIEWPORT },
-    deviceScaleFactor: 2,
-    isMobile: true,
-    hasTouch: true,
   });
   const page = await context.newPage();
   await page.goto(SITE_URL, { waitUntil: "networkidle", timeout: 60_000 });
@@ -126,22 +123,21 @@ async function toLoopMp4(rawVideo, preRollS, outFile) {
     rawVideo,
     "-t",
     `${SCROLL_MS / 1000}`,
-    // Sem downscale (860, o mesmo da viewport física com
-    // deviceScaleFactor 2: 430 CSS px × 2): a página é uma interface com
-    // bastante texto pequeno, e reduzir a largura só pra depois reescalar
-    // de volta no navegador (o card mostra em vários tamanhos, alguns
-    // maiores que a viewport nativa) empilhava desfoque de reamostragem em
-    // cima da compressão. crf 14 e preset veryslow (contra 28/medium da
-    // leva original): a primeira leva saiu com blocagem visível em
-    // qualquer texto da tela, justamente o tipo de conteúdo (dashboard,
-    // não vídeo de ação) mais sensível a esse artefato, e crf 18 (o
-    // patamar costumeiro de "visualmente sem perdas" do libx264) ainda
-    // deixava banding visível nos blocos de cor sólida (os cartões de
-    // paleta, por exemplo). 14 é bem mais perto de lossless de verdade; o
-    // custo maior de arquivo vale a pena aqui, é um asset de build, não
-    // algo recalculado em runtime.
+    // Sem downscale (1600, o mesmo da viewport): a página é uma interface
+    // com bastante texto pequeno, e reduzir a largura só pra depois
+    // reescalar de volta no navegador (o card mostra em vários tamanhos,
+    // alguns maiores que 1280) empilhava desfoque de reamostragem em cima
+    // da compressão. crf 14 e preset veryslow (contra 28/medium da leva
+    // original): a primeira leva saiu com blocagem visível em qualquer
+    // texto da tela, justamente o tipo de conteúdo (dashboard, não vídeo
+    // de ação) mais sensível a esse artefato, e crf 18 (o patamar
+    // costumeiro de "visualmente sem perdas" do libx264) ainda deixava
+    // banding visível nos blocos de cor sólida (os cartões de paleta, por
+    // exemplo). 14 é bem mais perto de lossless de verdade; o custo maior
+    // de arquivo vale a pena aqui, é um asset de build, não algo
+    // recalculado em runtime.
     "-vf",
-    "scale=860:-2",
+    "scale=1600:-2",
     "-an",
     "-c:v",
     "libx264",
@@ -158,7 +154,7 @@ async function toLoopMp4(rawVideo, preRollS, outFile) {
 async function toPosterWebp(rawVideo, preRollS, outFile) {
   const rawPng = `${outFile}.raw.png`;
   await run(ffmpegPath.path, ["-y", "-ss", `${preRollS}`, "-i", rawVideo, "-frames:v", "1", rawPng]);
-  await sharp(rawPng).resize({ width: 860 }).webp({ quality: 97 }).toFile(outFile);
+  await sharp(rawPng).resize({ width: 1600 }).webp({ quality: 97 }).toFile(outFile);
   await rm(rawPng);
 }
 

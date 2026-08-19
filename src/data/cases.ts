@@ -7,14 +7,16 @@ import type { CaseStudy } from "./types";
 // GitHub do artista) sem precisar dele.
 const basePath = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
 
-// Lineup de lançamento: 1 case de Banking (Intranet) + 4 de Música (o trio
-// de artistas e o Guia da música). Os três artistas (Ganwalk, Dezert Horse,
-// Pink Opala) e o Guia da música são projetos individuais, cada um com a
-// própria página e o próprio lugar no carrossel da home, não um case guarda
-// chuva só. Todos já estão no ar (site publicado, repositório público):
-// `repoUrl` aponta pro código no GitHub e `demoUrl` pro site publicado, que
-// aparece embutido em iframe de verdade no corpo do case (ver LiveEmbed.tsx),
-// navegável ali mesmo dentro do portfólio.
+// Lineup de lançamento: 2 cases de Banking (Intranet + Landing Pages) + 3 de
+// Música (o trio de artistas). Os três artistas (Ganwalk, Dezert Horse,
+// Pink Opala) são projetos individuais, cada um com a própria página e o
+// próprio lugar no carrossel da home, não um case guarda chuva só. Já estão
+// no ar (site publicado, repositório público): `repoUrl` aponta pro código
+// no GitHub e `demoUrl` pro site publicado, que aparece embutido em iframe
+// de verdade no corpo do case (ver LiveEmbed.tsx), navegável ali mesmo
+// dentro do portfólio. Landing Pages é diferente: não é um produto único
+// com uma URL só, é uma coleção de páginas publicadas separadamente, cada
+// uma com o próprio link (ver LandingPagesShowcase.tsx).
 // Métricas: reais sempre que houver dado de verdade (analytics, contagem no
 // próprio repositório ou no próprio site); `illustrative: true` só nos
 // placeholders explícitos ainda não calibrados.
@@ -37,7 +39,7 @@ const basePath = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
 //
 // Ordem do carrossel: o trio de artistas abre a lista (três colunas lado a
 // lado no desktop, ver `group: "artistas"` abaixo), seguido do par Intranet
-// + Guia da música (duas colunas, `group: "web"`). Cases adjacentes com o
+// + Landing Pages (duas colunas, `group: "web"`). Cases adjacentes com o
 // mesmo `group` viram uma fatia só do carrossel (ver buildSlides em
 // CasesGrid.tsx): a ordem do array decide tanto a sequência quanto o
 // agrupamento, os dois de uma vez.
@@ -82,16 +84,20 @@ export const cases: CaseStudy[] = [
       zh: ["音乐", "WebGL", "Three.js", "互动设计"],
     },
     // Sem dado de impacto no site em si (não há analytics público do
-    // Ganwalk): a métrica vem do próprio repositório (git log --oneline),
-    // contada em 19/08/2026.
+    // Ganwalk): a métrica vem do próprio código do repositório, não de
+    // contagem de commits (pouco relevante pra quem visita o site). O painel
+    // de mixagem ao vivo (id="p1-...") expõe nove controles de efeito de
+    // verdade, ligados ao Web Audio API: delay, reverb, chorus, filter,
+    // pitch, overdrive e EQ de três bandas (low/mid/high). Contados direto
+    // em index.htm (github.com/ganwalk/2026) em 19/08/2026.
     metrics: [
       {
-        value: "67",
+        value: "9",
         label: {
-          pt: "commits no repositório",
-          en: "commits in the repository",
-          es: "commits en el repositorio",
-          zh: "仓库提交次数",
+          pt: "efeitos ao vivo no painel de mixagem",
+          en: "live effects in the mixing panel",
+          es: "efectos en vivo en el panel de mezcla",
+          zh: "混音面板中的实时效果",
         },
         illustrative: false,
       },
@@ -153,16 +159,17 @@ export const cases: CaseStudy[] = [
       es: ["Música", "WebGL", "Three.js", "Reproductor integrado"],
       zh: ["音乐", "WebGL", "Three.js", "内置播放器"],
     },
-    // Sem dado de impacto no site em si: a métrica vem do próprio
-    // repositório (git log --oneline), contada em 19/08/2026.
+    // Sem dado de impacto no site em si: a métrica vem do array `tracks` de
+    // index.htm (github.com/ganwalk/cavalo), o álbum de verdade que o painel
+    // retrô toca faixa a faixa, contada em 19/08/2026.
     metrics: [
       {
-        value: "8",
+        value: "10",
         label: {
-          pt: "commits no repositório",
-          en: "commits in the repository",
-          es: "commits en el repositorio",
-          zh: "仓库提交次数",
+          pt: "faixas do álbum tocadas no site",
+          en: "album tracks played on the site",
+          es: "pistas del álbum reproducidas en el sitio",
+          zh: "网站上播放的专辑曲目",
         },
         illustrative: false,
       },
@@ -223,16 +230,17 @@ export const cases: CaseStudy[] = [
       es: ["Música", "Canvas 2D", "Tailwind CSS", "Interactividad"],
       zh: ["音乐", "Canvas 2D", "Tailwind CSS", "互动设计"],
     },
-    // Sem dado de impacto no site em si: a métrica vem do próprio
-    // repositório (git log --oneline), contada em 19/08/2026.
+    // Sem dado de impacto no site em si: a métrica vem da seção de
+    // discografia de index.htm (github.com/ganwalk/pinkopala), contada em
+    // 19/08/2026.
     metrics: [
       {
-        value: "54",
+        value: "6",
         label: {
-          pt: "commits no repositório",
-          en: "commits in the repository",
-          es: "commits en el repositorio",
-          zh: "仓库提交次数",
+          pt: "lançamentos na discografia",
+          en: "releases in the discography",
+          es: "lanzamientos en la discografía",
+          zh: "唱片作品数量",
         },
         illustrative: false,
       },
@@ -357,82 +365,101 @@ export const cases: CaseStudy[] = [
     demoUrl: "https://ganwalk.github.io/intranet/",
   },
   {
-    slug: "guia-da-musica",
-    area: "music",
+    slug: "ecossistema-auvp",
+    area: "banking",
     group: "web",
+    // "Landing Pages", não "Landing Pages AUVP": a lista vai crescer com
+    // páginas fora da AUVP, o rótulo não pode ficar preso a um cliente só.
     title: {
-      pt: "Guia da música",
-      en: "Music Guide",
-      es: "Guía de música",
-      zh: "音乐指南",
+      pt: "Landing Pages",
+      en: "Landing Pages",
+      es: "Landing Pages",
+      zh: "落地页",
     },
     statement: {
       headline: {
-        pt: "Construí uma plataforma colaborativa com os lançamentos mais esperados da música brasileira.",
-        en: "I built a collaborative platform for Brazilian music's most anticipated releases.",
-        es: "Construí una plataforma colaborativa con los lanzamientos más esperados de la música brasileña.",
-        zh: "打造了一个收录巴西音乐最受期待发行作品的协作平台。",
+        pt: "Desenho e mantenho o ecossistema de webpages da AUVP Capital.",
+        en: "I design and maintain AUVP Capital's webpage ecosystem.",
+        es: "Diseño y mantengo el ecosistema de webpages de AUVP Capital.",
+        zh: "设计并维护 AUVP Capital 的网页生态系统。",
       },
       detail: {
-        pt: "Linha do tempo, mapa por estado e um fluxo de submissão da comunidade, com moderação em tempo real via Firebase.",
-        en: "A timeline, a map by state, and a community submission flow, moderated in real time via Firebase.",
-        es: "Línea de tiempo, mapa por estado y un flujo de envío de la comunidad, moderado en tiempo real vía Firebase.",
-        zh: "发行时间线、按州划分的地图，以及通过 Firebase 实时审核的社区提交流程。",
+        pt: "Todas as LPs com no mínimo 90/100 de performance, alta conversão e bom rankeamento nos mecanismos de busca e em IA.",
+        en: "Every LP scores at least 90/100 on performance, with high conversion and strong ranking on search engines and AI.",
+        es: "Todas las LPs con al menos 90/100 de rendimiento, alta conversión y buen posicionamiento en buscadores y en IA.",
+        zh: "所有落地页性能评分至少 90/100，转化率高，且在搜索引擎和人工智能中排名良好。",
       },
     },
     hoverLabel: {
-      pt: "Ver o guia",
-      en: "See the guide",
-      es: "Ver la guía",
-      zh: "查看指南",
+      pt: "Ver as landing pages",
+      en: "See the landing pages",
+      es: "Ver las landing pages",
+      zh: "查看落地页",
     },
     tags: {
-      pt: ["Firebase", "Google Charts", "Tailwind CSS", "Comunidade"],
-      en: ["Firebase", "Google Charts", "Tailwind CSS", "Community"],
-      es: ["Firebase", "Google Charts", "Tailwind CSS", "Comunidad"],
-      zh: ["Firebase", "Google Charts", "Tailwind CSS", "社区"],
+      pt: ["Webpages", "SEO", "Conversão", "Clarity & GA"],
+      en: ["Webpages", "SEO", "Conversion", "Clarity & GA"],
+      es: ["Webpages", "SEO", "Conversión", "Clarity & GA"],
+      zh: ["Webpages", "SEO", "转化率", "Clarity & GA"],
     },
-    // Números reais, lidos direto do próprio site (guiadelancamentos.com.br)
-    // em 19/08/2026: soma do seed estático com as submissões da comunidade
-    // já aprovadas no Firestore, não uma estimativa.
+    // Acessos e performance são números reais (não placeholder): a conversão
+    // ainda não tem um percentual calibrado, então continua ilustrativa até
+    // a métrica exata chegar.
     metrics: [
       {
-        value: "432",
+        value: "20 mil+",
         label: {
-          pt: "lançamentos catalogados",
-          en: "releases catalogued",
-          es: "lanzamientos catalogados",
-          zh: "已收录的发行作品",
+          pt: "acessos diários",
+          en: "daily visits",
+          es: "visitas diarias",
+          zh: "每日访问量",
         },
         illustrative: false,
       },
       {
-        value: "301",
+        value: "90+/100",
         label: {
-          pt: "artistas mapeados",
-          en: "artists mapped",
-          es: "artistas mapeados",
-          zh: "已收录的艺人",
+          pt: "performance mínima",
+          en: "minimum performance",
+          es: "rendimiento mínimo",
+          zh: "最低性能",
         },
         illustrative: false,
       },
+      {
+        value: "+XX%",
+        label: {
+          pt: "conversão",
+          en: "conversion",
+          es: "conversión",
+          zh: "转化率",
+        },
+        illustrative: true,
+      },
     ],
-    // Mídia real: screencast rolando pela home do site publicado (ver
-    // scripts/capture-guia-cover.mjs), capturado direto do `demoUrl`.
+    // Mídia real: recorte de um reel (Jitter) com o mosaico de landing pages
+    // do ecossistema, enviado direto pra main em 19/08/2026 (ver
+    // landing-pages-preview/Scene (1).mp4) e processado por
+    // scripts/build-landing-pages-preview.mjs, que corta a marca d'água
+    // "jitter.video" do canto inferior direito (960×720 → 960×620, tira
+    // inteira, não uma máscara pontual). objectPosition "top": o `object-
+    // cover` do card corta as bordas pra preencher o quadro, e o essencial
+    // do mosaico mora no topo, não no meio, então qualquer corte deve
+    // preferir mantê-lo visível.
     cover: {
       kind: "video",
-      src: `${basePath}/videos/guia-musica-preview.mp4`,
-      poster: `${basePath}/photos/guia-musica-preview.webp`,
+      src: `${basePath}/videos/landing-pages-preview.mp4`,
+      poster: `${basePath}/photos/landing-pages-preview.webp`,
+      objectPosition: "top",
       alt: {
-        pt: "Home do Guia de Lançamentos 2026, com gráfico de frequência de lançamentos por mês e mapa do Brasil por estado",
-        en: "Guia de Lançamentos 2026 home, showing a monthly release frequency chart and a map of Brazil by state",
-        es: "Home de Guia de Lançamentos 2026, con gráfico de frecuencia de lanzamientos por mes y mapa de Brasil por estado",
-        zh: "Guia de Lançamentos 2026 主页，展示按月发行频率图表和巴西各州地图",
+        pt: "Mosaico com telas de várias landing pages do ecossistema AUVP",
+        en: "A mosaic of screens from several AUVP ecosystem landing pages",
+        es: "Mosaico con pantallas de varias landing pages del ecosistema AUVP",
+        zh: "AUVP 生态系统多个落地页画面拼成的马赛克",
       },
     },
-    comingSoon: false,
-    repoUrl: "https://github.com/ganwalk/guia2026",
-    demoUrl: "https://guiadelancamentos.com.br/",
+    comingSoon: true,
+    repoUrl: "#", // placeholder até a URL real do repositório: só pra testar o botão "ver repositório" aparecendo, troque por um link de verdade antes de publicar.
   },
 ];
 

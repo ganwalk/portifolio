@@ -27,6 +27,13 @@ export interface Media {
   srcMobile?: string;
   posterMobile?: string;
   alt: Localized;
+  /**
+   * Ponto de ancoragem do `object-cover` (ver MediaView.tsx). Padrão
+   * "center". "top" força qualquer corte a preferir manter o topo do
+   * quadro visível: usado por mídia onde o essencial já mora ali (ex.: um
+   * still recém-cortado por baixo, ver o case de Landing Pages).
+   */
+  objectPosition?: "center" | "top";
 }
 
 export interface CaseMetric {
