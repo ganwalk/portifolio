@@ -38,9 +38,11 @@ const basePath = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
 // com o preto e branco em vez de gritar por cima dele.
 //
 // Ordem do carrossel: o trio de artistas abre a lista (três colunas lado a
-// lado no desktop, ver `group: "artistas"` abaixo), seguido do par Intranet
-// + Landing Pages (duas colunas, `group: "web"`). Cases adjacentes com o
-// mesmo `group` viram uma fatia só do carrossel (ver buildSlides em
+// lado no desktop, ver `group: "artistas"` abaixo), seguido de Intranet e
+// Landing Pages, cada um na própria fatia cheia da tela, não mais lado a
+// lado: já testado como par (`group: "web"`) e revertido, a coluna de cada
+// um ficava estreita demais pra informação que carrega. Cases adjacentes
+// com o mesmo `group` viram uma fatia só do carrossel (ver buildSlides em
 // CasesGrid.tsx): a ordem do array decide tanto a sequência quanto o
 // agrupamento, os dois de uma vez.
 
@@ -272,10 +274,6 @@ export const cases: CaseStudy[] = [
   {
     slug: "intranet-auvp",
     area: "banking",
-    // Intranet e Guia da música ficam lado a lado no carrossel da home
-    // (desktop), duas colunas: mesmo group, adjacentes no array (mesmo
-    // raciocínio do trio de artistas acima).
-    group: "web",
     title: {
       pt: "Intranet completa",
       en: "Complete intranet",
@@ -367,7 +365,6 @@ export const cases: CaseStudy[] = [
   {
     slug: "ecossistema-auvp",
     area: "banking",
-    group: "web",
     // "Landing Pages", não "Landing Pages AUVP": a lista vai crescer com
     // páginas fora da AUVP, o rótulo não pode ficar preso a um cliente só.
     title: {

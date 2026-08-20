@@ -18,11 +18,11 @@ import { ARTIST_PREVIEW_SLUGS, ArtistPreview } from "@/components/ui/ArtistPrevi
 import { CaseMetrics } from "@/components/ui/CaseMetrics";
 import { CaseStatement } from "@/components/ui/CaseStatement";
 import { CursorLabel } from "@/components/ui/CursorLabel";
-import { GitHubIcon } from "@/components/ui/icons/GitHubIcon";
 import { IntranetShowcase } from "@/components/ui/IntranetShowcase";
 import { LiveEmbed } from "@/components/ui/LiveEmbed";
 import { MediaView } from "@/components/ui/MediaView";
 import { Reveal } from "@/components/ui/Reveal";
+import { RepoLink } from "@/components/ui/RepoLink";
 import { cases } from "@/data/cases";
 import type { CaseStudy } from "@/data/types";
 import type { Locale } from "@/i18n/config";
@@ -75,17 +75,18 @@ const MotionLink = motion.create(Link);
 // (`buildSlides`, calculado uma vez fora do componente porque `cases` é
 // estático), lado a lado a partir do `lg:` (1024px) ou empilhados
 // verticalmente dentro do mesmo painel antes disso: reduz o scroll do trio
-// a 1/3 do que seria com um artista por fatia. O rótulo de índice de cada coluna
-// ("03 / 06") sempre conta cases, não fatias: SlidePanel repassa o índice
-// original (`flatIndex`) pra cada CaseColumn, independente de quantas
-// fatias existem; é a ÚNICA contagem da seção, não existe outra em nível de
-// fatia competindo com ela. Nas pontas (primeira e última fatia) a fatia
-// não tem a metade que não existe: a primeira já nasce aberta (nada
-// "antes" dela pra desdobrar de), a última fica aberta até o fim da seção
-// (nada "depois").
+// a 1/3 do que seria com um artista por fatia. Nas pontas (primeira e
+// última fatia) a fatia não tem a metade que não existe: a primeira já
+// nasce aberta (nada "antes" dela pra desdobrar de), a última fica aberta
+// até o fim da seção (nada "depois").
 //
-// Texto em máscara escalonada por cima da pilha, atrás do MotionConfig do
-// Modo Boring: cada linha (índice, métrica, título, tags, convite) mora num
+// Cada cartão de prévia mostra só o nome do projeto e o convite pra entrar
+// ("ver case"): sem índice, sem métrica, sem tags, sem link de repositório
+// ali. Esse conteúdo todo mora na página/overlay do case (ver ExpandedCase
+// e CaseDetail.tsx), não na vitrine, que existe pra apresentar o projeto e
+// convidar o clique, não pra antecipar o conteúdo que só faz sentido depois
+// dele. Texto em máscara escalonada por cima da pilha, atrás do
+// MotionConfig do Modo Boring: cada linha (título, convite) mora num
 // overflow-hidden próprio e sobe do zero por baixo dele num instante
 // diferente, em vez do bloco inteiro nascer junto num só fade. O atraso
 // entre linhas é maior justamente no título, o elemento mais dramático da
@@ -137,10 +138,6 @@ const MotionLink = motion.create(Link);
 //
 // Clicar no projeto em cena ainda expande pra tela cheia com os dados
 // completos do case, igual antes; só a navegação ENTRE projetos mudou.
-
-function pad(n: number) {
-  return String(n).padStart(2, "0");
-}
 
 /** Fração da janela de uma fatia gasta subindo. O resto é a pausa em que ela
  *  fica assentada em cena, recebendo a próxima por cima. */
@@ -210,27 +207,19 @@ function activeSlideAt(progress: number, windows: SlideWindow[]) {
   return 0;
 }
 
-interface SlideCase {
-  caseStudy: CaseStudy;
-  /** Posição do case na lista completa (0-based), independente de slide:
-   *  o rótulo de índice de cada coluna ("03 / 06") conta projetos, não
-   *  fatias de scroll. */
-  flatIndex: number;
-}
-
 /** Agrupa cases adjacentes que compartilham `group` numa fatia só de scroll
  *  (ver SlidePanel: lado a lado a partir do lg:, empilhados antes disso).
  *  Cases sem `group`, ou cujo vizinho tem um `group` diferente, viram uma
  *  fatia de um caso só, do jeito que sempre foi. */
-function buildSlides(list: CaseStudy[]): SlideCase[][] {
-  const slides: SlideCase[][] = [];
+function buildSlides(list: CaseStudy[]): CaseStudy[][] {
+  const slides: CaseStudy[][] = [];
   let i = 0;
   while (i < list.length) {
     const group = list[i].group;
-    const slide: SlideCase[] = [{ caseStudy: list[i], flatIndex: i }];
+    const slide: CaseStudy[] = [list[i]];
     i++;
     while (group && i < list.length && list[i].group === group) {
-      slide.push({ caseStudy: list[i], flatIndex: i });
+      slide.push(list[i]);
       i++;
     }
     slides.push(slide);
@@ -244,7 +233,6 @@ const groupedSlides = buildSlides(cases);
 
 function SlidePanel({
   slide,
-  totalCases,
   locale,
   dict,
   index,
@@ -256,8 +244,7 @@ function SlidePanel({
   hoveredSlug,
   onExpand,
 }: {
-  slide: SlideCase[];
-  totalCases: number;
+  slide: CaseStudy[];
   locale: Locale;
   dict: Dictionary;
   index: number;
@@ -334,12 +321,10 @@ function SlidePanel({
             empilhando cada artista na fatia dele, sem abrir mão do "lado a
             lado" onde sobra largura. */}
         <div className="flex min-w-0 flex-1 flex-col lg:flex-row">
-          {slide.map(({ caseStudy, flatIndex }) => (
+          {slide.map((caseStudy) => (
             <CaseColumn
               key={caseStudy.slug}
               caseStudy={caseStudy}
-              flatIndex={flatIndex}
-              totalCases={totalCases}
               locale={locale}
               dict={dict}
               enterT={enterT}
@@ -361,8 +346,6 @@ function SlidePanel({
 
 function CaseColumn({
   caseStudy,
-  flatIndex,
-  totalCases,
   locale,
   dict,
   enterT,
@@ -376,8 +359,6 @@ function CaseColumn({
   onExpand,
 }: {
   caseStudy: CaseStudy;
-  flatIndex: number;
-  totalCases: number;
   locale: Locale;
   dict: Dictionary;
   enterT: MotionValue<number>;
@@ -393,16 +374,15 @@ function CaseColumn({
    *  cada coluna rastrear seu próprio hover: o zoom sutil da mídia usa o
    *  mesmo valor. */
   isHovered: boolean;
-  /** Uma de três, não o painel cheio: título, métrica e respiro encolhem
-   *  pra caber num terço do espaço (da largura no lg:, da altura antes
-   *  disso, ver dividerLeft) em vez de vazar. */
+  /** Uma de três, não o painel cheio: título e respiro encolhem pra caber
+   *  num terço do espaço (da largura no lg:, da altura antes disso, ver
+   *  dividerLeft) em vez de vazar. */
   multi: boolean;
   /** Fio entre as colunas do trio, na direção que muda com o layout: em
    *  cima (empilhado, antes do lg:) ou à esquerda (lado a lado, lg:). */
   dividerLeft: boolean;
   onExpand: (caseStudy: CaseStudy, rect: DOMRect) => void;
 }) {
-  const metric = caseStudy.metrics[0];
   // `enterT`, não uma curva com fase de saída: o conteúdo sobe e fica,
   // continua visível mesmo depois de coberto pela próxima fatia (é a fatia
   // INTEIRA que encolhe e escurece nesse momento, ver coveredScale/
@@ -411,12 +391,11 @@ function CaseColumn({
 
   // Máscara escalonada: cada linha sobe do zero num instante diferente
   // dentro da própria subida da fatia, em vez do bloco de texto inteiro
-  // nascer junto. Título por último e com a janela mais longa, é o elemento
-  // que merece mais peso na entrada.
-  const kickerY = useTransform(enterT, [0.05, 0.4], ["100%", "0%"]);
-  const metricY = useTransform(enterT, [0.1, 0.45], ["100%", "0%"]);
+  // nascer junto. Só título e CTA restam aqui (índice, métrica e tags
+  // migraram pro overlay expandido/página do case, ver RepoLink.tsx): a
+  // vitrine da home é só nome do projeto e convite pra entrar, o resto é
+  // conteúdo da página interna dele.
   const titleY = useTransform(enterT, [0.18, 0.58], ["100%", "0%"]);
-  const tagsY = useTransform(enterT, [0.32, 0.62], ["100%", "0%"]);
   const ctaY = useTransform(enterT, [0.42, 0.7], ["100%", "0%"]);
 
   // Paralaxe da mídia: ela desce de +parallax% a -parallax% ao longo de toda
@@ -508,117 +487,66 @@ function CaseColumn({
         </motion.div>
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/75 via-black/10 to-black/45" />
 
-        {/* pointer-events-none: mesmo com o texto só ocupando topo e
-            rodapé (justify-between), a CAIXA deste wrapper cobre o cartão
+        {/* pointer-events-none: a CAIXA deste wrapper cobre o cartão
             inteiro (h-full), e sem isso ela capturava todo mousemove antes
             dele alcançar a prévia por baixo (ver ArtistPreview.tsx) — o
-            hover do Pink Opala nunca chegava no canvas por causa disso.
-            Os dois elementos clicáveis de verdade (botão de ver case e
-            link do repositório) recuperam pointer-events-auto abaixo. */}
+            hover do Pink Opala nunca chegava no canvas por causa disso. O
+            botão de ver case recupera pointer-events-auto abaixo. */}
         <motion.div
           style={{ opacity: contentOpacity }}
-          className={`gutter relative flex h-full flex-col pointer-events-none text-white ${
-            multi
-              ? "justify-end gap-2 py-4 sm:py-5 lg:justify-between lg:gap-0 lg:py-24"
-              : "justify-between py-24 sm:py-28"
+          className={`gutter relative flex h-full flex-col justify-end pointer-events-none text-white ${
+            multi ? "py-4 sm:py-5 lg:py-24" : "py-24 sm:py-28"
           }`}
         >
-          <div className="flex items-start justify-between gap-4">
-            <div className="overflow-hidden">
-              <motion.p style={{ y: kickerY }} className="type-mono text-white/70">
-                {pad(flatIndex + 1)} / {pad(totalCases)}
-              </motion.p>
-            </div>
-            <div className="overflow-hidden text-right">
-              <motion.p style={{ y: metricY }}>
-                <span
-                  className={`type-serif-display block ${
-                    multi ? "text-xl sm:text-2xl lg:text-4xl" : "text-4xl sm:text-6xl"
-                  }`}
-                >
-                  {metric.value}
-                </span>
-                <span className="type-mono text-white/70">
-                  {metric.label[locale]}
-                </span>
-              </motion.p>
-            </div>
+          {/* Só nome do projeto e convite pra entrar: índice, métrica,
+              tags e link do repositório saíram do cartão de prévia e
+              foram morar na página/overlay do case (ver ExpandedCase e
+              CaseDetail.tsx, que já mostram tudo isso e agora também o
+              RepoLink), pra a vitrine da home ficar limpa e o
+              aprofundamento vir só depois do clique. */}
+          {/* pt-[0.16em] no PRÓPRIO h3, não no wrapper: leading-[0.9] é
+              mais apertado que a altura real da Whyte Inktrap, sem esse
+              respiro o overflow-hidden usado pra máscara de entrada corta
+              o topo do "A" e de outras letras (mesmo ajuste do H1 na
+              hero, ver Hero.tsx). Precisa estar no h3, e não no wrapper:
+              em é relativo ao font-size do próprio elemento, e o wrapper
+              não herda o text-[Xvw] do h3 (font-size só desce a árvore,
+              não sobe), então um pt-[0.16em] nele resolvia contra o
+              tamanho herdado de bem mais acima, uma fração pequena demais
+              do respiro necessário. */}
+          <div className="overflow-hidden">
+            <motion.h3
+              style={{ y: titleY }}
+              className={`type-display type-inktrap pt-[0.16em] leading-[0.9] ${
+                multi ? "text-[7vw] sm:text-[5vw] lg:text-[3.4vw]" : "text-[12vw] sm:text-[6vw]"
+              }`}
+            >
+              {caseStudy.title[locale]}
+            </motion.h3>
           </div>
-
-          <div>
-            {/* pt-[0.16em] no PRÓPRIO h3, não no wrapper: leading-[0.9] é
-                mais apertado que a altura real da Whyte Inktrap, sem esse
-                respiro o overflow-hidden usado pra máscara de entrada corta
-                o topo do "A" e de outras letras (mesmo ajuste do H1 na
-                hero, ver Hero.tsx). Precisa estar no h3, e não no wrapper:
-                em é relativo ao font-size do próprio elemento, e o wrapper
-                não herda o text-[Xvw] do h3 (font-size só desce a árvore,
-                não sobe), então um pt-[0.16em] nele resolvia contra o
-                tamanho herdado de bem mais acima, uma fração pequena demais
-                do respiro necessário. */}
-            <div className="overflow-hidden">
-              <motion.h3
-                style={{ y: titleY }}
-                className={`type-display type-inktrap pt-[0.16em] leading-[0.9] ${
-                  multi ? "text-[7vw] sm:text-[5vw] lg:text-[3.4vw]" : "text-[12vw] sm:text-[6vw]"
+          <div className={`overflow-hidden ${multi ? "mt-2 lg:mt-8" : "mt-8"}`}>
+            {/* O botão não tem onClick próprio: o cartão inteiro já chama
+                onExpand (ver o motion.div lá em cima), e o clique aqui
+                dentro sobe até ele por bubbling, o mesmo FLIP de sempre
+                pro overlay (ver ExpandedCase). */}
+            <motion.div style={{ y: ctaY }}>
+              <motion.button
+                type="button"
+                // Feedback tátil no clique: um leve encolhimento antes do
+                // FLIP assumir (ver ExpandedCase), pra o gesto já responder
+                // no instante do toque, não só quando o overlay termina de
+                // nascer.
+                whileTap={isActive ? { scale: 0.98 } : undefined}
+                tabIndex={isActive ? 0 : -1}
+                aria-label={caseStudy.title[locale]}
+                className={`pointer-events-auto type-mono inline-flex items-center gap-3 border border-white/40 backdrop-blur-sm ${
+                  multi ? "px-3 py-1.5 lg:px-6 lg:py-3" : "px-6 py-3"
                 }`}
               >
-                {caseStudy.title[locale]}
-              </motion.h3>
-            </div>
-            <div className={`overflow-hidden ${multi ? "mt-1 lg:mt-4" : "mt-4"}`}>
-              <motion.p style={{ y: tagsY }} className="type-mono text-white/70">
-                {caseStudy.tags[locale].join(" • ")}
-              </motion.p>
-            </div>
-            <div
-              className={`overflow-hidden ${multi ? "mt-2 lg:mt-8" : "mt-8"}`}
-            >
-              {/* O botão de detalhamento não tem onClick próprio: o cartão
-                  inteiro já chama onExpand (ver o motion.div lá em cima), e
-                  o clique aqui dentro sobe até ele por bubbling, o mesmo
-                  FLIP de sempre pro overlay (ver ExpandedCase). Só o do
-                  repositório precisa de tratamento à parte: ele navega pra
-                  fora (aba nova), então para a propagação pra não expandir o
-                  case JUNTO com abrir o repositório. A logo do GitHub entra
-                  discreta, do tamanho do texto ao redor. */}
-              <motion.div style={{ y: ctaY }} className="flex flex-wrap items-center gap-3">
-                <motion.button
-                  type="button"
-                  // Feedback tátil no clique: um leve encolhimento antes do
-                  // FLIP assumir (ver ExpandedCase), pra o gesto já responder
-                  // no instante do toque, não só quando o overlay termina de
-                  // nascer.
-                  whileTap={isActive ? { scale: 0.98 } : undefined}
-                  tabIndex={isActive ? 0 : -1}
-                  aria-label={caseStudy.title[locale]}
-                  className={`pointer-events-auto type-mono inline-flex items-center gap-3 border border-white/40 backdrop-blur-sm ${
-                    multi ? "px-3 py-1.5 lg:px-6 lg:py-3" : "px-6 py-3"
-                  }`}
-                >
-                  {caseStudy.comingSoon ? dict.cases.comingSoon : dict.cases.viewCase}
-                  <span aria-hidden>→</span>
-                </motion.button>
-
-                {caseStudy.repoUrl && (
-                  <motion.a
-                    href={caseStudy.repoUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    onClick={(event) => event.stopPropagation()}
-                    whileTap={{ scale: 0.98 }}
-                    tabIndex={isActive ? 0 : -1}
-                    aria-label={`${dict.cases.repo} · ${caseStudy.title[locale]}`}
-                    className={`pointer-events-auto type-mono inline-flex items-center gap-2 border border-white/40 text-white/70 backdrop-blur-sm transition-colors hover:text-white ${
-                      multi ? "px-3 py-1.5 lg:px-4 lg:py-3" : "px-4 py-3"
-                    }`}
-                  >
-                    <GitHubIcon className="h-3.5 w-3.5" />
-                    {dict.cases.repo}
-                  </motion.a>
-                )}
-              </motion.div>
-            </div>
+                {caseStudy.comingSoon ? dict.cases.comingSoon : dict.cases.viewCase}
+                <span aria-hidden>→</span>
+              </motion.button>
+            </motion.div>
           </div>
         </motion.div>
       </div>
@@ -777,6 +705,9 @@ function ExpandedCase({
           <p className="type-mono mt-10 text-muted">
             {caseStudy.tags[locale].join(" • ")}
           </p>
+          {caseStudy.repoUrl && (
+            <RepoLink repoUrl={caseStudy.repoUrl} title={caseStudy.title[locale]} dict={dict} className="mt-3" />
+          )}
         </Reveal>
 
         {caseStudy.slug === "intranet-auvp" && caseStudy.demoUrl ? (
@@ -893,15 +824,11 @@ const MOBILE_CARD_REST_VH = 18;
 
 function MobileCaseCard({
   caseStudy,
-  index,
-  totalCases,
   locale,
   dict,
   reduceMotion,
 }: {
   caseStudy: CaseStudy;
-  index: number;
-  totalCases: number;
   locale: Locale;
   dict: Dictionary;
   reduceMotion: boolean;
@@ -930,7 +857,6 @@ function MobileCaseCard({
   // deslocamento interno, dentro do overflow-hidden abaixo, não abre borda
   // nenhuma pro fundo da página.
   const mediaY = useTransform(progress, [0, 1], ["-8%", "8%"]);
-  const metric = caseStudy.metrics[0];
 
   return (
     // O CARTÃO em si é que é mais alto que a tela (h-svh + MOBILE_CARD_REST_VH
@@ -953,9 +879,8 @@ function MobileCaseCard({
       style={{ height: `${100 + MOBILE_CARD_REST_VH}svh` }}
       className="sticky top-0 w-full overflow-hidden bg-black text-white"
     >
-      {/* Não é mais o cartão inteiro clicável: dois botões de verdade no
-          rodapé (detalhamento + repositório, ver abaixo) no lugar de um
-          <Link> só cobrindo tudo. */}
+      {/* Não é mais o cartão inteiro clicável: um botão de verdade no
+          rodapé (ver abaixo) no lugar de um <Link> só cobrindo tudo. */}
       <div className="absolute inset-0">
         <motion.div
           className="absolute inset-0 scale-125"
@@ -983,65 +908,22 @@ function MobileCaseCard({
         {/* h-svh, não inset-0: as informações precisam caber na TELA, não
             no cartão inteiro (que agora é mais alto que ela). Ancorado no
             topo (top-0), a mesma janela que fica visível o tempo todo
-            enquanto o cartão está grudado ali. pt-24, não py-10 nos dois
-            lados: o cabeçalho é fixed e flutua por cima da pilha inteira
-            (z-40, mais alto que qualquer cartão sticky aqui embaixo), então
-            sem esse respiro extra a linha de índice do cartão TRAVADO no
-            topo (ver `sticky` acima) nascia parcialmente atrás da barra,
-            mesmo antes do próximo cartão chegar pra cobri-la de verdade.
-            pt-24 desconta a altura da barra (3.5rem) e sobra o mesmo 2,5rem
-            de respiro que o pb-10 dá embaixo, o mesmo raciocínio do
-            `pt-24` da hero (ver Hero.tsx). Antes era pt-16 aqui: sobravam só
-            0,5rem no topo contra os 2,5rem inteiros do pb-10 embaixo (nada
-            flutua ali, esse lado não tem desconto nenhum), então o índice lá
-            em cima e o bloco de título embaixo liam desalinhados, mais perto
-            do topo do que do fundo, durante quase todo o tempo em que o
-            cartão fica parado (sticky) na tela. Assim a única coisa que
-            chega a cobrir a informação de um cartão é o PRÓXIMO cartão
-            chegando por cima, nunca o cabeçalho. */}
+            enquanto o cartão está grudado ali. Só nome do projeto e convite
+            pra entrar aqui: índice, métrica, tags e link do repositório
+            saíram do cartão de prévia e foram morar na página do case (ver
+            CaseDetail.tsx, que já mostra tudo isso e agora também o
+            RepoLink). justify-end, não justify-between: sem outro bloco lá
+            em cima disputando espaço, o título fica ancorado embaixo,
+            perto do polegar, o mesmo lugar de sempre. */}
         {/* pointer-events-none pelo mesmo motivo do trio de desktop (ver
-            CaseColumn): a caixa deste wrapper cobre o cartão inteiro
-            mesmo com o conteúdo ancorado nas pontas (justify-between), e
-            sem isso bloqueava o toque/hover na prévia por baixo. */}
-        <div className="pointer-events-none gutter absolute inset-x-0 top-0 flex h-svh flex-col justify-between pb-10 pt-24">
-          <Reveal className="flex items-start justify-between gap-4">
-            <p className="type-mono text-white/70">
-              {pad(index + 1)} / {pad(totalCases)}
-            </p>
-            <p className="text-right">
-              <span className="type-serif-display block text-4xl">
-                {metric.value}
-              </span>
-              <span className="type-mono text-white/70">
-                {metric.label[locale]}
-              </span>
-            </p>
-          </Reveal>
-
-          <Reveal delay={0.08}>
-            {/* min-h nos dois: título (uma linha em "Ganwalk", "Pink Opala"…
-                duas em "Intranet completa", "Landing Pages") e tags (uma ou
-                duas linhas dependendo do idioma e do case) variam de altura
-                sozinhos, e como esse bloco inteiro fica ANCORADO embaixo
-                (justify-between no pai, ver acima), um título de uma linha só
-                deixava o bloco mais curto começar mais TARDE (mais perto do
-                fundo), abrindo um vão maior até o índice lá em cima do que em
-                cases com título e tags de duas linhas cada. 2lh reserva a
-                altura de DUAS linhas sempre (a unidade `lh` acompanha o
-                line-height do próprio elemento, não depende de recalcular à
-                mão o tamanho da fonte): com uma linha só, sobra espaço
-                reservado (invisível) por cima dela, mas o bloco como um todo
-                sempre começa no mesmo lugar, o mesmo efeito que "Intranet
-                completa" já tinha de graça por o texto ocupar as duas linhas
-                de verdade. calc(2lh+0.16em) no título soma de volta o
-                pt-[0.16em] que já é sempre contado (existe com uma linha ou
-                duas), senão a reserva ficaria 0,16em curta. */}
-            <h3 className="type-display type-inktrap min-h-[calc(2lh+0.16em)] pt-[0.16em] text-[11vw] leading-[0.9]">
+            CaseColumn): a caixa deste wrapper cobre o cartão inteiro mesmo
+            com o conteúdo ancorado embaixo, e sem isso bloqueava o
+            toque/hover na prévia por baixo. */}
+        <div className="pointer-events-none gutter absolute inset-x-0 top-0 flex h-svh flex-col justify-end pb-10 pt-24">
+          <Reveal>
+            <h3 className="type-display type-inktrap pt-[0.16em] text-[11vw] leading-[0.9]">
               {caseStudy.title[locale]}
             </h3>
-            <p className="type-mono mt-3 min-h-[2lh] text-white/70">
-              {caseStudy.tags[locale].join(" • ")}
-            </p>
             <div className="mt-6 flex flex-wrap items-center gap-3">
               <MotionLink
                 href={`/${locale}/work/${caseStudy.slug}/`}
@@ -1052,20 +934,6 @@ function MobileCaseCard({
                 {caseStudy.comingSoon ? dict.cases.comingSoon : dict.cases.viewCase}
                 <span aria-hidden>→</span>
               </MotionLink>
-
-              {caseStudy.repoUrl && (
-                <motion.a
-                  href={caseStudy.repoUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  whileTap={{ scale: 0.98 }}
-                  aria-label={`${dict.cases.repo} · ${caseStudy.title[locale]}`}
-                  className="pointer-events-auto type-mono inline-flex items-center gap-2 border border-white/40 px-4 py-3 text-white/70"
-                >
-                  <GitHubIcon className="h-3.5 w-3.5" />
-                  {dict.cases.repo}
-                </motion.a>
-              )}
             </div>
           </Reveal>
         </div>
@@ -1085,12 +953,10 @@ function MobileCaseList({ locale, dict }: { locale: Locale; dict: Dictionary }) 
   // cada troca.
   return (
     <div className="flex flex-col sm:hidden">
-      {cases.map((caseStudy, index) => (
+      {cases.map((caseStudy) => (
         <MobileCaseCard
           key={caseStudy.slug}
           caseStudy={caseStudy}
-          index={index}
-          totalCases={cases.length}
           locale={locale}
           dict={dict}
           reduceMotion={!!reduceMotion}
@@ -1252,9 +1118,8 @@ function DesktopCasesGrid({
           <div className="absolute inset-0">
             {slides.map((slide, index) => (
               <SlidePanel
-                key={slide.map(({ caseStudy }) => caseStudy.slug).join("+")}
+                key={slide.map((caseStudy) => caseStudy.slug).join("+")}
                 slide={slide}
-                totalCases={cases.length}
                 locale={locale}
                 dict={dict}
                 index={index}
@@ -1269,19 +1134,17 @@ function DesktopCasesGrid({
             ))}
           </div>
 
-          {/* A contagem já mora em cada card ("03 / 06", o índice do case na
-              lista inteira), então o rodapé não repete outra em nível de
-              fatia: só um lembrete de que rolar é a navegação, no lugar
-              onde um contador "01 / 04" ficava antes. Os pontos continuam
-              como leitura de posição (não navegação, não oferecem atalho de
-              clique), animando a troca em vez de só saltar de um pro
-              outro. */}
+          {/* Sem contagem numérica nenhuma (nem aqui, nem mais no card, ver
+              CaseColumn): só um lembrete de que rolar é a navegação. Os
+              pontos continuam como leitura de posição (não navegação, não
+              oferecem atalho de clique), animando a troca em vez de só
+              saltar de um pro outro. */}
           <div className="gutter pointer-events-none absolute inset-x-0 bottom-8 z-20 flex items-center justify-between text-white">
             <span className="type-mono text-white/50">{dict.cases.scrollHint}</span>
             <div className="flex gap-2">
               {slides.map((slide, index) => (
                 <motion.span
-                  key={slide.map(({ caseStudy }) => caseStudy.slug).join("+")}
+                  key={slide.map((caseStudy) => caseStudy.slug).join("+")}
                   animate={{ scale: index === activeIndex ? 1.4 : 1 }}
                   transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
                   className={`h-2 w-2 rounded-full transition-colors ${
