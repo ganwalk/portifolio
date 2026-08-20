@@ -46,6 +46,9 @@ async function logSize(path) {
 }
 
 async function toLoopMp4(outFile) {
+  // crf 14 e preset veryslow, não um meio-termo: pedido explícito do
+  // Armando é priorizar qualidade sobre peso de arquivo, "melhor a página
+  // demorar mais pra carregar do que o vídeo sair de baixa qualidade".
   await run(ffmpegPath.path, [
     "-y",
     "-i",
@@ -56,9 +59,9 @@ async function toLoopMp4(outFile) {
     "-c:v",
     "libx264",
     "-preset",
-    "slow",
+    "veryslow",
     "-crf",
-    "22",
+    "14",
     "-movflags",
     "+faststart",
     outFile,
@@ -68,7 +71,7 @@ async function toLoopMp4(outFile) {
 async function toPosterWebp(outFile) {
   const rawPng = `${outFile}.raw.png`;
   await run(ffmpegPath.path, ["-y", "-ss", "0.5", "-i", SRC, "-vf", `crop=${CROP}`, "-frames:v", "1", rawPng]);
-  await sharp(rawPng).webp({ quality: 88 }).toFile(outFile);
+  await sharp(rawPng).webp({ quality: 97 }).toFile(outFile);
   await rm(rawPng);
 }
 
