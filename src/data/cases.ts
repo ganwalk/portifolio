@@ -344,18 +344,22 @@ export const cases: CaseStudy[] = [
         illustrative: false,
       },
     ],
-    // Mídia real: screencast rolando pela home do Design System
-    // (ver scripts/capture-intranet-cover.mjs), capturado direto do site
-    // publicado em `demoUrl`.
+    // Mídia real: peça de motion design com zoom saindo de um mosaico de
+    // telas do Design System até o Dashboard do Aluno, enviada direto pra
+    // main em 20/08/2026 (ver intranet-preview/download (1).mp4) e
+    // processada por scripts/build-intranet-preview.mjs. Substitui o
+    // screencast ao vivo que scripts/capture-intranet-cover.mjs fazia
+    // (esse script continua funcionando, só não é mais a fonte da capa
+    // atual).
     cover: {
       kind: "video",
       src: `${basePath}/videos/intranet-preview.mp4`,
       poster: `${basePath}/photos/intranet-preview.webp`,
       alt: {
-        pt: "Rolagem pela home do Design System, mostrando o símbolo da marca, paletas de cor e componentes documentados",
-        en: "Scrolling through the Design System home, showing the brand symbol, color palettes and documented components",
-        es: "Recorrido por la home del Design System, mostrando el símbolo de la marca, paletas de color y componentes documentados",
-        zh: "滚动浏览设计系统主页,展示品牌标志、色板与已归档的组件",
+        pt: "Zoom saindo de um mosaico de telas do Design System até o Dashboard do Aluno, com progresso e atividade semanal",
+        en: "Zooming out from a mosaic of Design System screens to the Student Dashboard, showing progress and weekly activity",
+        es: "Zoom que sale de un mosaico de pantallas del Design System hasta el Dashboard del Alumno, con progreso y actividad semanal",
+        zh: "从设计系统屏幕的马赛克拉远到学员仪表盘，展示学习进度和每周活动",
       },
     },
     comingSoon: false,
