@@ -19,6 +19,7 @@ import { CaseMetrics } from "@/components/ui/CaseMetrics";
 import { CaseStatement } from "@/components/ui/CaseStatement";
 import { CursorLabel } from "@/components/ui/CursorLabel";
 import { IntranetShowcase } from "@/components/ui/IntranetShowcase";
+import { LandingPagesGridPreview } from "@/components/ui/LandingPagesGridPreview";
 import { LiveEmbed } from "@/components/ui/LiveEmbed";
 import { MediaView } from "@/components/ui/MediaView";
 import { Reveal } from "@/components/ui/Reveal";
@@ -473,6 +474,14 @@ function CaseColumn({
                 title={caseStudy.title[locale]}
                 className="h-full w-full"
               />
+            ) : caseStudy.slug === "ecossistema-auvp" ? (
+              // Sem MediaView aqui: em vez de um vídeo, uma grade animada
+              // de capturas reais deslizando em CSS puro (ver
+              // LandingPagesGridPreview.tsx). Mesmo raciocínio do trio de
+              // artistas (monta de cara, sem gate de isNearActive): é só
+              // CSS/imagens leves, não um WebGL ou vídeo pesado que
+              // justifique esperar o scroll chegar perto.
+              <LandingPagesGridPreview className="h-full w-full" />
             ) : isNearActive ? (
               <MediaView
                 media={caseStudy.cover}
@@ -893,6 +902,8 @@ function MobileCaseCard({
               title={caseStudy.title[locale]}
               className="absolute inset-0 h-full w-full"
             />
+          ) : caseStudy.slug === "ecossistema-auvp" ? (
+            <LandingPagesGridPreview className="absolute inset-0 h-full w-full" />
           ) : isNear ? (
             <MediaView
               media={caseStudy.cover}
