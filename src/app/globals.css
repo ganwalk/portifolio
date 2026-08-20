@@ -617,18 +617,20 @@ html[data-boring="true"] .texture-noise::after {
 }
 
 /* ==========================================================================
-   CASE DE LANDING PAGES: grade animada (LandingPagesGridPreview.tsx)
-   Três fileiras de capturas reais deslizando em loop infinito sobre o
-   fundo gradiente granulado, como uma câmera passando por cima de uma
-   vitrine grande. Cada fileira é o MESMO conjunto de imagens desenhado
-   duas vezes seguidas (ver o componente): animar de translateX(0) até
-   translateX(-50%) e recomeçar cai exatamente sobre a cópia seguinte, sem
-   nenhum salto visível no loop. Só `transform`, nunca `left`/`width`: o
-   compositor anima isso na GPU, sem repintar a cada quadro, o motivo de
-   caber aqui como CSS puro em vez de JS/rAF.
+   PRÉVIAS AO VIVO DOS CASES (LandingPagesGridPreview.tsx,
+   IntranetGridPreview.tsx)
+   Fileiras de imagens reais deslizando em loop infinito, como uma câmera
+   passando por cima de uma vitrine grande. Cada fileira é o MESMO conjunto
+   de imagens desenhado duas vezes seguidas (ver os componentes): animar de
+   translateX(0) até translateX(-50%) e recomeçar cai exatamente sobre a
+   cópia seguinte, sem nenhum salto visível no loop. Só `transform`, nunca
+   `left`/`width`: o compositor anima isso na GPU, sem repintar a cada
+   quadro, o motivo de caber aqui como CSS puro em vez de JS/rAF. Usada só
+   pela Landing Pages; a Intranet tem sua própria vitrine em destaque logo
+   abaixo, mesma lógica de puro CSS, coreografia diferente.
    ========================================================================== */
 
-@keyframes lp-marquee-left {
+@keyframes marquee-row-left {
   from {
     transform: translate3d(0, 0, 0);
   }
@@ -636,7 +638,7 @@ html[data-boring="true"] .texture-noise::after {
     transform: translate3d(-50%, 0, 0);
   }
 }
-@keyframes lp-marquee-right {
+@keyframes marquee-row-right {
   from {
     transform: translate3d(-50%, 0, 0);
   }
@@ -644,13 +646,99 @@ html[data-boring="true"] .texture-noise::after {
     transform: translate3d(0, 0, 0);
   }
 }
-.lp-row-left {
-  animation: lp-marquee-left linear infinite;
-  animation-duration: var(--lp-row-duration, 50s);
+.marquee-row-left {
+  animation: marquee-row-left linear infinite;
+  animation-duration: var(--marquee-row-duration, 50s);
 }
-.lp-row-right {
-  animation: lp-marquee-right linear infinite;
-  animation-duration: var(--lp-row-duration, 50s);
+.marquee-row-right {
+  animation: marquee-row-right linear infinite;
+  animation-duration: var(--marquee-row-duration, 50s);
+}
+
+/* Zoom dinâmico de algumas telas da grade: um respiro periódico de escala,
+   não sincronizado entre ladrilhos (animation-delay varia por instância),
+   pra parecer uma câmera reparando em detalhes, não um piscar mecânico
+   igual em todo mundo ao mesmo tempo. Fica no próprio <img>, dentro do
+   ladrilho com overflow-hidden: o zoom nunca vaza pra fora do quadro. */
+@keyframes marquee-tile-zoom {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.14);
+  }
+}
+.marquee-tile-zoom {
+  animation: marquee-tile-zoom ease-in-out infinite;
+  animation-duration: var(--marquee-zoom-duration, 7s);
+  animation-delay: var(--marquee-zoom-delay, 0s);
+}
+
+/* Vitrine em destaque da Intranet (IntranetGridPreview.tsx): o Dashboard do
+   Aluno cresce até preencher o quadro, encolhe pro centro, revela quatro
+   telas do Design System nas quatro pontas (separadas por uma cruz de
+   grade), somem, e o Dashboard volta a crescer. Loop perpétuo, três fases
+   (destaque · grade · destaque) no mesmo espírito do vídeo de motion design
+   que ocupava esse lugar antes. Só `transform`/`opacity`, mesma razão das
+   grades acima pra caber como CSS puro. */
+@keyframes intranet-hero-scale {
+  0%,
+  12% {
+    transform: translate(-50%, -50%) scale(2.05);
+  }
+  24%,
+  66% {
+    transform: translate(-50%, -50%) scale(1);
+  }
+  78%,
+  100% {
+    transform: translate(-50%, -50%) scale(2.05);
+  }
+}
+.intranet-hero-scale {
+  animation: intranet-hero-scale ease-in-out infinite;
+  animation-duration: var(--intranet-loop-duration, 16s);
+}
+@keyframes intranet-satellite {
+  0%,
+  20% {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  32%,
+  58% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  70%,
+  100% {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+}
+.intranet-satellite {
+  animation: intranet-satellite ease-in-out infinite;
+  animation-duration: var(--intranet-loop-duration, 16s);
+  animation-delay: var(--intranet-satellite-delay, 0s);
+}
+@keyframes intranet-grid-lines {
+  0%,
+  20% {
+    opacity: 0;
+  }
+  32%,
+  58% {
+    opacity: 1;
+  }
+  70%,
+  100% {
+    opacity: 0;
+  }
+}
+.intranet-grid-lines {
+  animation: intranet-grid-lines ease-in-out infinite;
+  animation-duration: var(--intranet-loop-duration, 16s);
 }
 
 /* Respeito ao sistema: se a pessoa pediu menos movimento, o site obedece
