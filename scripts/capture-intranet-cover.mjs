@@ -6,6 +6,12 @@
 // um still de capa). Mesmo raciocínio de scripts/capture-artist-covers.mjs,
 // adaptado pra uma página de produto (sem preloader próprio pra esperar).
 //
+// Não é mais a fonte da capa atual (ver cases.ts): a peça de motion design
+// enviada em 20/08/2026 tomou o lugar do screencast ao vivo (ver
+// scripts/build-intranet-preview.mjs). Este script continua funcionando
+// exatamente como antes, útil se um dia for preciso recapturar o site
+// publicado direto de novo.
+//
 // Uso local: node scripts/capture-intranet-cover.mjs
 // (requer playwright, sharp e @ffmpeg-installer/ffmpeg instalados fora do
 // package.json: npm install --no-save playwright sharp @ffmpeg-installer/ffmpeg,
