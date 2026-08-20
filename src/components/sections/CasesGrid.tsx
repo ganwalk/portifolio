@@ -18,6 +18,7 @@ import { ARTIST_PREVIEW_SLUGS, ArtistPreview } from "@/components/ui/ArtistPrevi
 import { CaseMetrics } from "@/components/ui/CaseMetrics";
 import { CaseStatement } from "@/components/ui/CaseStatement";
 import { CursorLabel } from "@/components/ui/CursorLabel";
+import { IntranetGridPreview } from "@/components/ui/IntranetGridPreview";
 import { IntranetShowcase } from "@/components/ui/IntranetShowcase";
 import { LandingPagesGridPreview } from "@/components/ui/LandingPagesGridPreview";
 import { LiveEmbed } from "@/components/ui/LiveEmbed";
@@ -465,9 +466,7 @@ function CaseColumn({
               // ArtistPreview.tsx), não o site de verdade embutido num
               // iframe: o trio inteiro já chega pronto quando o scroll
               // alcança ele, sem o custo de três WebGL/Three.js/áudio
-              // simultâneos só pra prévia. Só o trio de artistas: outro
-              // case com demoUrl próprio (ex.: a Intranet) não tem
-              // reconstrução bespoke aqui, cai pro MediaView normal abaixo.
+              // simultâneos só pra prévia.
               <ArtistPreview
                 slug={caseStudy.slug}
                 demoUrl={caseStudy.demoUrl}
@@ -482,6 +481,11 @@ function CaseColumn({
               // CSS/imagens leves, não um WebGL ou vídeo pesado que
               // justifique esperar o scroll chegar perto.
               <LandingPagesGridPreview className="h-full w-full" />
+            ) : caseStudy.slug === "intranet-auvp" ? (
+              // Mesma técnica da grade de Landing Pages, apresentação
+              // própria (ver IntranetGridPreview.tsx): pranchetas reais do
+              // Design System, não capturas de landing page.
+              <IntranetGridPreview className="h-full w-full" />
             ) : isNearActive ? (
               <MediaView
                 media={caseStudy.cover}
@@ -904,6 +908,8 @@ function MobileCaseCard({
             />
           ) : caseStudy.slug === "ecossistema-auvp" ? (
             <LandingPagesGridPreview className="absolute inset-0 h-full w-full" />
+          ) : caseStudy.slug === "intranet-auvp" ? (
+            <IntranetGridPreview className="absolute inset-0 h-full w-full" />
           ) : isNear ? (
             <MediaView
               media={caseStudy.cover}
