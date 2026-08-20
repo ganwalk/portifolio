@@ -50,6 +50,7 @@ function stripeProgress(elapsedInPhase: number, index: number): number {
 export function StripeCurtain({
   triggerKey,
   onCovered,
+  onDone,
   colorClassName = "bg-foreground",
   zIndexClassName = "z-[100]",
 }: {
@@ -60,6 +61,21 @@ export function StripeCurtain({
    *  da cortina abrir de novo: o momento certo pra trocar o que está por
    *  baixo sem que a troca se veja. */
   onCovered?: () => void;
+  /** Chamado no instante exato em que o ciclo termina de verdade (réguas já
+   *  de volta a scaleY(0)), pelo relógio de quem realmente anima (o próprio
+   *  requestAnimationFrame). Quem precisa desmontar algo só depois que a
+   *  cortina termina (ver SiteLoader.tsx) deve esperar por este callback, não
+   *  reimplementar a mesma duração num setTimeout à parte: um setTimeout
+   *  independente conta a partir do instante em que o efeito rodou, não do
+   *  instante em que o primeiro quadro do rAF de fato começou a animar (que
+   *  vem sempre um pouco depois, e pode vir bem mais depois se o fio
+   *  principal estiver ocupado montando o site por baixo), então os dois
+   *  relógios podem se desalinhar. Nesse desalinhamento, quem desmonta cedo
+   *  demais arranca a cortina do DOM no meio do gesto, ainda cobrindo parte
+   *  da tela, revelando de golpe o que estiver por baixo (às vezes uma tela
+   *  sólida, o site ainda não pintado) em vez da abertura terminar de
+   *  verdade. */
+  onDone?: () => void;
   colorClassName?: string;
   zIndexClassName?: string;
 }) {
@@ -68,6 +84,25 @@ export function StripeCurtain({
   const prevKeyRef = useRef(triggerKey);
   const rafRef = useRef<number | null>(null);
 
+  // Refs pros callbacks, não dependências do efeito abaixo: onCovered e
+  // onDone chegam como função nova a cada render de quem usa a cortina (ex.:
+  // SiteLoader recria as duas toda vez que ready/contentHidden/mounted
+  // mudam). Se estivessem no array de dependências, cada uma dessas
+  // recriações reexecutaria o efeito, cuja função de limpeza cancela o
+  // requestAnimationFrame em andamento — e o corpo do efeito, ao rodar de
+  // novo, esbarra direto no early return de `prevKeyRef.current ===
+  // triggerKey` (ele já foi atualizado na primeira vez) e nunca reagenda um
+  // novo quadro. Resultado: a cortina cancela a própria animação no meio do
+  // ciclo e trava ali, coberta pra sempre, exatamente o "tela sólida que não
+  // some" que este componente existe pra evitar. As refs guardam sempre a
+  // versão mais recente sem disparar o efeito de novo.
+  const onCoveredRef = useRef(onCovered);
+  const onDoneRef = useRef(onDone);
+  useEffect(() => {
+    onCoveredRef.current = onCovered;
+    onDoneRef.current = onDone;
+  });
+
   useEffect(() => {
     if (prevKeyRef.current === triggerKey) return;
     prevKeyRef.current = triggerKey;
@@ -75,7 +110,8 @@ export function StripeCurtain({
     const container = containerRef.current;
     const stripes = stripeRefs.current;
     if (!container || stripes.some((s) => !s)) {
-      onCovered?.();
+      onCoveredRef.current?.();
+      onDoneRef.current?.();
       return;
     }
 
@@ -83,7 +119,8 @@ export function StripeCurtain({
       typeof window !== "undefined" &&
       window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (reduced) {
-      onCovered?.();
+      onCoveredRef.current?.();
+      onDoneRef.current?.();
       return;
     }
 
@@ -102,7 +139,7 @@ export function StripeCurtain({
       // A tela já está totalmente coberta assim que o cover termina: é o
       // único instante em que trocar o conteúdo por baixo não se vê.
       if (!covered && elapsed >= COVER_MS) {
-        onCovered?.();
+        onCoveredRef.current?.();
         covered = true;
       }
 
@@ -129,6 +166,7 @@ export function StripeCurtain({
       } else {
         overlayEl.style.pointerEvents = "none";
         rafRef.current = null;
+        onDoneRef.current?.();
       }
     }
 
@@ -137,7 +175,7 @@ export function StripeCurtain({
     return () => {
       if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
     };
-  }, [triggerKey, onCovered]);
+  }, [triggerKey]);
 
   return (
     <div
