@@ -2,38 +2,51 @@
 
 import type { CSSProperties } from "react";
 
-// Prévia ao vivo do case da Intranet (ver CasesGrid.tsx): mesma "tecnologia"
-// da grade de Landing Pages (LandingPagesGridPreview.tsx, puro CSS via
-// keyframes, nenhum JS de animação) e agora também o mesmo desenho: fileiras
-// das nove pranchetas reais do Design System (Progress Bar, Contagem
-// Regressiva, Jornada do Herói, Botões, Paleta Sequencial, Tipografia,
-// Timeline, Badges & Tags, Dashboard do Aluno) deslizando em loop infinito.
+// Prévia ao vivo do case da Intranet (ver CasesGrid.tsx): câmera que
+// respira sobre uma grade 3×3 estática das nove pranchetas reais do Design
+// System (Progress Bar, Contagem Regressiva, Jornada do Herói, Botões,
+// Paleta Sequencial, Tipografia, Timeline, Badges & Tags, Dashboard do
+// Aluno), o Dashboard sempre na célula central. O ciclo: nasce com zoom
+// aproximado, só o Dashboard preenchendo o quadro; zoom out rápido revela
+// a grade inteira por baixo; segura um instante (tempo de sobra pra ler as
+// nove pranchetas); zoom in rápido de volta pro Dashboard; segura; repete.
+// Puro CSS (@keyframes intranet-camera-zoom em globals.css, `scale` num
+// wrapper só, `transform-origin: center` de propósito: a célula central da
+// grade coincide com o centro do quadro, então aumentar a escala a partir
+// dali "amplia" exatamente a célula do Dashboard, sem precisar de nenhum
+// translate extra pra recentralizar).
 //
-// A primeira versão deste componente era uma coreografia própria (Dashboard
-// em destaque, encolhe, revela quatro pranchetas nas pontas, some, repete):
-// na prática, mostrava só uma prancheta de cada vez em destaque e as outras
-// quatro pequenas demais/pouco tempo em cena pra realmente dar pra ler o
-// Design System. A pessoa que tirou essas nove capturas e forneceu queria
-// uma vitrine que mostrasse os componentes de verdade, não um efeito por
-// cima deles: a grade resolve isso, todas as nove sempre passando, do
-// mesmo jeito que a Landing Pages já mostra as sete capturas dela.
+// Terceira versão deste componente. A primeira era uma coreografia própria
+// (Dashboard em destaque, encolhe, revela quatro pranchetas nas pontas,
+// some, repete): mostrava só uma prancheta grande por vez, as outras quatro
+// pequenas e pouco tempo em cena. A segunda trocou pra fileiras deslizantes
+// (a mesma técnica da Landing Pages): todas as nove sempre visíveis, mas
+// sem nenhum "gesto de câmera", lida como genérica demais pro Design
+// System de um produto de verdade. Esta versão persegue especificamente um
+// vídeo de referência de motion design (zoom out rápido de um painel único
+// revelando uma grade, segura, zoom in de volta), com fundo escuro
+// granulado e linhas finas de grade por cima, ambos parte da referência.
 //
-// Ladrilho na proporção NATIVA de cada prancheta, não aspect-video: as
-// pranchetas têm proporções bem diferentes entre si (de 1.54:1 a 2.46:1,
-// ver scripts/build-intranet-grid.mjs, que preserva a proporção original ao
-// recortar a margem preta), forçar todas num quadro 16:9 cortava pedaço de
-// conteúdo em quase todas. Cada bloco só fixa a altura (a mesma da
-// fileira); a largura nasce da proporção natural da própria imagem. Sem
+// Duas camadas que NÃO se movem juntas, de propósito: o zoom (scale numa
+// pequena sobra elástica além do alvo, não parando seco nele, ver
+// @keyframes intranet-camera-zoom) fica só no wrapper que envolve a grade
+// de pranchetas; as linhas de grade vivem FORA desse wrapper, num
+// viewfinder de tamanho fixo por cima da cena (a mesma caixa de referência,
+// sem o transform), cuja opacidade acende e apaga acompanhando a mesma
+// linha do tempo de 12s (ver @keyframes intranet-grid-lines-guide). O
+// efeito: a câmera zoom de verdade sobre o conteúdo, enquanto a grade guia
+// o olho pro instante certo da revelação, sem virar um traço estático que
+// só existe pra decorar.
+//
+// Ladrilho na proporção NATIVA de cada prancheta dentro de uma célula de
+// proporção fixa (aspect-video): as pranchetas têm proporções bem
+// diferentes entre si (de 1.54:1 a 2.46:1, ver
+// scripts/build-intranet-grid.mjs, que preserva a proporção original ao
+// recortar a margem preta), então object-contain (não object-cover) evita
+// cortar qualquer uma, sobrando uma faixa de fundo preto nas que não batem
+// exatamente com 16:9 (imperceptível, já é a cor do resto do quadro). Sem
 // arredondamento nas bordas, a mesma linguagem "prancheta" das capturas em
-// si. Fundo preto sólido, não um gradiente granulado: as pranchetas já
-// chegam em fundo preto na origem, então o preto do quadro e o preto de
-// cada prancheta se emendam sem costura, sem precisar de textura atrás.
-//
-// items-start, não items-center, no empilhamento das fileiras: ver o
-// comentário equivalente em LandingPagesGridPreview.tsx sobre por que
-// centralizar uma fileira bem mais larga que o cartão abre um buraco (do
-// tamanho de metade do cartão) na borda direita quando a animação chega
-// perto do fim do ciclo.
+// si.
 //
 // Imagens processadas por scripts/build-intranet-grid.mjs a partir das
 // pranchetas brutas em intranet-componentes/ (enviadas direto pra main em
@@ -42,89 +55,73 @@ import type { CSSProperties } from "react";
 const basePath = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
 const gridPath = (file: string) => `${basePath}/photos/intranet-grid/${file}`;
 
-const TILE_COUNT = 9;
-const TILES = Array.from({ length: TILE_COUNT }, (_, i) => gridPath(`ig-${String(i + 1).padStart(2, "0")}.webp`));
-
-// Embaralhamentos diferentes dos mesmos nove índices em cada fileira, não a
-// mesma ordem repetida: evita que as fileiras fiquem "empilhadas" mostrando
-// a mesma prancheta na mesma coluna a qualquer instante.
-const ROW_ORDERS: number[][] = [
-  [0, 1, 2, 3, 4, 5, 6, 7, 8],
-  [4, 8, 1, 6, 0, 3, 7, 2, 5],
-  [6, 2, 8, 0, 5, 1, 3, 7, 4],
-  [2, 5, 0, 7, 3, 8, 1, 4, 6],
-  [8, 3, 6, 1, 7, 0, 4, 2, 5],
+// Posição 4 (linha do meio, coluna do meio) de uma grade 3×3 em ordem de
+// leitura é sempre o Dashboard do Aluno: é a célula que o zoom aproxima.
+const GRID_TILES = [
+  gridPath("ig-01.webp"), // Jornada do Herói
+  gridPath("ig-02.webp"), // Botões
+  gridPath("ig-03.webp"), // Contagem Regressiva
+  gridPath("ig-04.webp"), // Paleta Sequencial
+  gridPath("ig-08.webp"), // Dashboard do Aluno — célula central
+  gridPath("ig-05.webp"), // Tipografia
+  gridPath("ig-06.webp"), // Timeline
+  gridPath("ig-07.webp"), // Badges & Tags
+  gridPath("ig-09.webp"), // Progress Bar
 ];
-const ROW_DIRECTIONS: ("left" | "right")[] = ["left", "right", "left", "right", "left"];
-// Durações diferentes por fileira: sincronizadas, elas emendariam no mesmo
-// instante e a "câmera" pareceria travar de tempos em tempos; fora de
-// sincronia, o movimento lê como orgânico, não como cópias do mesmo
-// relógio.
-const ROW_DURATIONS_S = [52, 40, 34, 48, 37];
-// Só as três primeiras fileiras existem a partir do sm: (o cartão mobile é
-// bem mais alto que o desktop, ver MobileCaseCard em CasesGrid.tsx); as
-// duas extras só aparecem no mobile.
-const ROW_MOBILE_ONLY = [false, false, false, true, true];
-// Índices (dentro de cada fileira, já com a sequência dobrada) que ganham o
-// respiro de zoom: um a cada três, começando num deslocamento diferente
-// por fileira pra não pulsarem todos juntos.
-const ZOOM_OFFSETS = [1, 0, 2, 1, 0];
-const ZOOM_STEP = 3;
-
-function Row({
-  order,
-  direction,
-  durationS,
-  zoomOffset,
-  mobileOnly,
-}: {
-  order: number[];
-  direction: "left" | "right";
-  durationS: number;
-  zoomOffset: number;
-  mobileOnly: boolean;
-}) {
-  const sequence = [...order, ...order];
-  return (
-    <div
-      className={`${mobileOnly ? "flex sm:hidden" : "flex"} w-max shrink-0 gap-3 will-change-transform sm:gap-4 ${
-        direction === "left" ? "marquee-row-left" : "marquee-row-right"
-      }`}
-      style={{ "--marquee-row-duration": `${durationS}s` } as CSSProperties}
-    >
-      {sequence.map((idx, i) => {
-        const zooms = i % ZOOM_STEP === zoomOffset;
-        return (
-          <div key={i} className="h-24 shrink-0 overflow-hidden border border-white/10 shadow-xl shadow-black/60 sm:h-32 lg:h-40">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={TILES[idx]}
-              alt=""
-              aria-hidden="true"
-              className={`block h-full w-auto ${zooms ? "marquee-tile-zoom" : ""}`}
-              style={zooms ? ({ "--marquee-zoom-delay": `${(i * 0.7) % 5}s` } as CSSProperties) : undefined}
-            />
-          </div>
-        );
-      })}
-    </div>
-  );
-}
 
 export function IntranetGridPreview({ className = "" }: { className?: string }) {
   return (
     <div className={`relative overflow-hidden bg-black ${className}`}>
-      <div className="absolute inset-0 flex flex-col items-start justify-center gap-3 sm:gap-4 lg:gap-5">
-        {ROW_ORDERS.map((order, i) => (
-          <Row
-            key={i}
-            order={order}
-            direction={ROW_DIRECTIONS[i]}
-            durationS={ROW_DURATIONS_S[i]}
-            zoomOffset={ZOOM_OFFSETS[i]}
-            mobileOnly={ROW_MOBILE_ONLY[i]}
-          />
-        ))}
+      {/* Grão de filme evidente, parte do fundo da referência: opacidade
+          mais alta que o padrão de 0.05 (ver .texture-noise em
+          globals.css), mas sem a variação animada da hero, pra não competir
+          com o próprio movimento de câmera. */}
+      <div className="texture-noise absolute inset-0" style={{ "--noise-opacity": "0.09" } as CSSProperties} />
+
+      {/* No mobile (ver MobileCaseCard em CasesGrid.tsx), este componente
+          vive dentro de um cartão bem mais alto que largo (h-svh + folga
+          vertical). Um `h-full` na grade esticaria as 3 fileiras por essa
+          altura toda, mas cada célula continua com a proporção fixa
+          (aspect-video, derivada da LARGURA): o resultado era fileira presa
+          lá em cima, outra lá embaixo, um vão enorme de nada no meio. Por
+          isso a grade não estica: nasce do próprio conteúdo (altura
+          automática, só a largura é w-full) e este wrapper de fora só
+          centraliza esse bloco de altura natural dentro do cartão, sobrando
+          fundo granulado acima/abaixo em vez de vão vazio. No desktop, onde
+          o cartão já é bem mais próximo da proporção da própria grade
+          (~16:9), o efeito prático é quase idêntico a preencher tudo. */}
+      <div className="absolute inset-0 flex items-center justify-center">
+        {/* Caixa de referência só: o tamanho de verdade (largura do cartão,
+            altura automática vinda da grade) mora aqui, sem transform
+            nenhum. As linhas de grade (abaixo) são absolute inset-0 DESTA
+            caixa, então herdam essas mesmas medidas sem escalar quando a
+            câmera zoom (que só afeta o wrapper irmão .intranet-camera-zoom)
+            aumenta ou diminui: um viewfinder de tamanho fixo por cima da
+            cena, não um traço que cresce e encolhe junto com o conteúdo. */}
+        <div className="relative w-full">
+          <div className="intranet-camera-zoom w-full">
+            <div className="grid w-full grid-cols-3 gap-2 sm:gap-3">
+              {GRID_TILES.map((src, i) => (
+                <div key={i} className="aspect-video overflow-hidden border border-white/10 bg-black">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={src} alt="" aria-hidden="true" className="h-full w-full object-contain" />
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Linhas finas da "grade estrutural": acendem durante a
+              revelação e apagam durante o soco de volta pro Dashboard
+              (.intranet-grid-lines-guide em globals.css, mesma linha do
+              tempo dos 12s da câmera), guiando o olho pro instante em que a
+              grade aparece em vez de ficar um traço estático o tempo todo. */}
+          <div className="intranet-grid-lines-guide pointer-events-none absolute inset-0 z-10">
+            <div className="absolute top-0 left-1/3 h-full w-px bg-white/25" />
+            <div className="absolute top-0 left-2/3 h-full w-px bg-white/25" />
+            <div className="absolute top-1/3 left-0 h-px w-full bg-white/25" />
+            <div className="absolute top-2/3 left-0 h-px w-full bg-white/25" />
+          </div>
+        </div>
       </div>
     </div>
   );

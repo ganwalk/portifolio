@@ -617,11 +617,10 @@ html[data-boring="true"] .texture-noise::after {
 }
 
 /* ==========================================================================
-   PRÉVIAS AO VIVO DOS CASES (LandingPagesGridPreview.tsx,
-   IntranetGridPreview.tsx)
+   PRÉVIA AO VIVO DA LANDING PAGES (LandingPagesGridPreview.tsx)
    Fileiras de imagens reais deslizando em loop infinito, como uma câmera
    passando por cima de uma vitrine grande. Cada fileira é o MESMO conjunto
-   de imagens desenhado duas vezes seguidas (ver os componentes): animar de
+   de imagens desenhado duas vezes seguidas (ver o componente): animar de
    translateX(0) até translateX(-50%) e recomeçar cai exatamente sobre a
    cópia seguinte, sem nenhum salto visível no loop. Só `transform`, nunca
    `left`/`width`: o compositor anima isso na GPU, sem repintar a cada
@@ -671,6 +670,93 @@ html[data-boring="true"] .texture-noise::after {
   animation: marquee-tile-zoom ease-in-out infinite;
   animation-duration: var(--marquee-zoom-duration, 7s);
   animation-delay: var(--marquee-zoom-delay, 0s);
+}
+
+/* ==========================================================================
+   PRÉVIA AO VIVO DA INTRANET (IntranetGridPreview.tsx)
+   Câmera que respira sobre uma grade 3×3 estática: nasce com zoom aproximado
+   só na célula central (o Dashboard do Aluno), zoom out rápido revela a
+   grade inteira, segura um instante (com uma respiração leve, não um
+   congelamento seco), zoom in rápido de volta, segura, repete. `scale` num
+   wrapper só, `transform-origin` no centro (o padrão, não precisa
+   declarar): a célula central de uma grade 3×3 já cai bem no meio do
+   quadro, então ampliar a partir dali "aproxima" exatamente aquela célula
+   sem nenhum translate extra pra recentralizar. Só `transform`, o mesmo
+   motivo das prévias acima pra caber como CSS puro.
+
+   As duas transições (fecha e abre) passam um pouco do alvo e voltam (3.2 →
+   0.94 → 1, e 1 → 3.34 → 3.2) em vez de parar exatamente nele: é essa
+   pequena sobra elástica que faz o gesto ler como uma câmera de verdade
+   freando, não uma barra de progresso interpolando dois números. As linhas
+   da grade (ver .intranet-grid-lines-guide abaixo) NÃO entram nesta
+   animação: ficam de fora do wrapper que escala, um viewfinder de tamanho
+   fixo por cima da cena que zoom nenhum move, e brilham mais forte
+   exatamente durante a revelação (acompanham esta mesma linha do tempo,
+   noutra @keyframes), guiando o olho pro instante em que a grade aparece. */
+@keyframes intranet-camera-zoom {
+  0%,
+  4% {
+    transform: scale(3.2);
+    animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  18% {
+    transform: scale(0.94);
+  }
+  26% {
+    transform: scale(1.015);
+    animation-timing-function: ease-in-out;
+  }
+  32%,
+  42% {
+    transform: scale(1);
+  }
+  /* Respiro no meio da pausa longa: sem isso, seis segundos parado no mesmo
+     scale(1) exato lê como quadro travado, não câmera segurando o
+     enquadramento. */
+  58% {
+    transform: scale(1.02);
+  }
+  74% {
+    transform: scale(1);
+    animation-timing-function: cubic-bezier(0.7, 0, 0.84, 0);
+  }
+  86% {
+    transform: scale(3.34);
+  }
+  94% {
+    transform: scale(3.16);
+    animation-timing-function: ease-out;
+  }
+  100% {
+    transform: scale(3.2);
+  }
+}
+.intranet-camera-zoom {
+  animation: intranet-camera-zoom ease-in-out infinite;
+  animation-duration: 12s;
+}
+
+/* Viewfinder fixo (não escala com a cena, ver comentário acima): opacidade
+   sobe exatamente durante a revelação da grade e desce durante o soco de
+   volta pro Dashboard, guiando visualmente as duas transições em vez de
+   ficar um risco estático o tempo todo. */
+@keyframes intranet-grid-lines-guide {
+  0%,
+  8% {
+    opacity: 0;
+  }
+  24%,
+  72% {
+    opacity: 1;
+  }
+  90%,
+  100% {
+    opacity: 0;
+  }
+}
+.intranet-grid-lines-guide {
+  animation: intranet-grid-lines-guide ease-in-out infinite;
+  animation-duration: 12s;
 }
 
 /* Respeito ao sistema: se a pessoa pediu menos movimento, o site obedece
