@@ -6,7 +6,7 @@ import { useBoringMode } from "@/contexts/BoringModeContext";
 import { usePageLoadingPendingCount } from "@/contexts/PageLoadingContext";
 import { profile } from "@/data/profile";
 import { moonPath, MOON_CENTER, MOON_R } from "@/lib/moon-path";
-import { CURTAIN_CYCLE_MS, StripeCurtain } from "./StripeCurtain";
+import { StripeCurtain } from "./StripeCurtain";
 
 // Tela de entrada do próprio portfólio: cobre a página até as fontes
 // carregarem e uma folga mínima passar, e SÓ ENTÃO revela o site.
@@ -182,9 +182,19 @@ export function SiteLoader() {
     setCurtainKey((k) => k + 1);
   }, [ready, reduceMotion]);
 
+  // Sem cortina (movimento reduzido), a StripeCurtain nem monta (ver o JSX
+  // abaixo), então o próprio onDone dela nunca dispara: desmonta na hora.
+  // Com cortina, é o onDone dela (não um setTimeout à parte contando a
+  // mesma duração) que desmonta o loader — ver o comentário de onDone em
+  // StripeCurtain.tsx sobre por que dois relógios independentes pra mesma
+  // duração desalinham e arrancam a cortina do meio do gesto.
   useEffect(() => {
-    if (!ready) return;
-    const timeout = window.setTimeout(() => setMounted(false), reduceMotion ? 0 : CURTAIN_CYCLE_MS);
+    if (!ready || !reduceMotion) return;
+    // setTimeout de 0ms, não a chamada direta: setState síncrono dentro do
+    // corpo do efeito dispara renders em cascata (regra do próprio React),
+    // mesmo com esta condição só ficando verdadeira uma vez. Zero ms ainda
+    // roda antes da próxima pintura, sem cortina nenhuma pra esperar.
+    const timeout = window.setTimeout(() => setMounted(false), 0);
     return () => window.clearTimeout(timeout);
   }, [ready, reduceMotion]);
 
@@ -220,6 +230,7 @@ export function SiteLoader() {
         <StripeCurtain
           triggerKey={curtainKey}
           onCovered={() => setContentHidden(true)}
+          onDone={() => setMounted(false)}
           // bg-background, não bg-foreground (o padrão, usado na troca de
           // modo): ali a cortina cobre um flash preto de propósito, um corte
           // dramático entre dois modos que podem até ter temas diferentes.
