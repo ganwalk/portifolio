@@ -625,9 +625,7 @@ html[data-boring="true"] .texture-noise::after {
    translateX(0) até translateX(-50%) e recomeçar cai exatamente sobre a
    cópia seguinte, sem nenhum salto visível no loop. Só `transform`, nunca
    `left`/`width`: o compositor anima isso na GPU, sem repintar a cada
-   quadro, o motivo de caber aqui como CSS puro em vez de JS/rAF. Usada só
-   pela Landing Pages; a Intranet tem sua própria vitrine em destaque logo
-   abaixo, mesma lógica de puro CSS, coreografia diferente.
+   quadro, o motivo de caber aqui como CSS puro em vez de JS/rAF.
    ========================================================================== */
 
 @keyframes marquee-row-left {
@@ -673,72 +671,6 @@ html[data-boring="true"] .texture-noise::after {
   animation: marquee-tile-zoom ease-in-out infinite;
   animation-duration: var(--marquee-zoom-duration, 7s);
   animation-delay: var(--marquee-zoom-delay, 0s);
-}
-
-/* Vitrine em destaque da Intranet (IntranetGridPreview.tsx): o Dashboard do
-   Aluno cresce até preencher o quadro, encolhe pro centro, revela quatro
-   telas do Design System nas quatro pontas (separadas por uma cruz de
-   grade), somem, e o Dashboard volta a crescer. Loop perpétuo, três fases
-   (destaque · grade · destaque) no mesmo espírito do vídeo de motion design
-   que ocupava esse lugar antes. Só `transform`/`opacity`, mesma razão das
-   grades acima pra caber como CSS puro. */
-@keyframes intranet-hero-scale {
-  0%,
-  12% {
-    transform: translate(-50%, -50%) scale(2.05);
-  }
-  24%,
-  66% {
-    transform: translate(-50%, -50%) scale(1);
-  }
-  78%,
-  100% {
-    transform: translate(-50%, -50%) scale(2.05);
-  }
-}
-.intranet-hero-scale {
-  animation: intranet-hero-scale ease-in-out infinite;
-  animation-duration: var(--intranet-loop-duration, 16s);
-}
-@keyframes intranet-satellite {
-  0%,
-  20% {
-    opacity: 0;
-    transform: scale(0.8);
-  }
-  32%,
-  58% {
-    opacity: 1;
-    transform: scale(1);
-  }
-  70%,
-  100% {
-    opacity: 0;
-    transform: scale(0.8);
-  }
-}
-.intranet-satellite {
-  animation: intranet-satellite ease-in-out infinite;
-  animation-duration: var(--intranet-loop-duration, 16s);
-  animation-delay: var(--intranet-satellite-delay, 0s);
-}
-@keyframes intranet-grid-lines {
-  0%,
-  20% {
-    opacity: 0;
-  }
-  32%,
-  58% {
-    opacity: 1;
-  }
-  70%,
-  100% {
-    opacity: 0;
-  }
-}
-.intranet-grid-lines {
-  animation: intranet-grid-lines ease-in-out infinite;
-  animation-duration: var(--intranet-loop-duration, 16s);
 }
 
 /* Respeito ao sistema: se a pessoa pediu menos movimento, o site obedece

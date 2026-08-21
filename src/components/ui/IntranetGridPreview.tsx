@@ -4,85 +4,127 @@ import type { CSSProperties } from "react";
 
 // Prévia ao vivo do case da Intranet (ver CasesGrid.tsx): mesma "tecnologia"
 // da grade de Landing Pages (LandingPagesGridPreview.tsx, puro CSS via
-// keyframes, nenhum JS de animação), mas com coreografia própria, herdada do
-// vídeo de motion design que ocupava esse lugar antes: o Dashboard do Aluno
-// em destaque, cheio de tela, encolhe pro centro, revela quatro telas do
-// Design System nas quatro pontas (separadas por uma cruz de grade), somem,
-// e o Dashboard volta a crescer. Loop perpétuo (ver .intranet-hero-scale,
-// .intranet-satellite e .intranet-grid-lines em globals.css). Imagens
-// processadas por scripts/build-intranet-grid.mjs a partir das pranchetas
-// brutas em intranet-componentes/ (enviadas direto pra main em 20/08/2026).
+// keyframes, nenhum JS de animação) e agora também o mesmo desenho: fileiras
+// das nove pranchetas reais do Design System (Progress Bar, Contagem
+// Regressiva, Jornada do Herói, Botões, Paleta Sequencial, Tipografia,
+// Timeline, Badges & Tags, Dashboard do Aluno) deslizando em loop infinito.
+//
+// A primeira versão deste componente era uma coreografia própria (Dashboard
+// em destaque, encolhe, revela quatro pranchetas nas pontas, some, repete):
+// na prática, mostrava só uma prancheta de cada vez em destaque e as outras
+// quatro pequenas demais/pouco tempo em cena pra realmente dar pra ler o
+// Design System. A pessoa que tirou essas nove capturas e forneceu queria
+// uma vitrine que mostrasse os componentes de verdade, não um efeito por
+// cima deles: a grade resolve isso, todas as nove sempre passando, do
+// mesmo jeito que a Landing Pages já mostra as sete capturas dela.
+//
+// Ladrilho na proporção NATIVA de cada prancheta, não aspect-video: as
+// pranchetas têm proporções bem diferentes entre si (de 1.54:1 a 2.46:1,
+// ver scripts/build-intranet-grid.mjs, que preserva a proporção original ao
+// recortar a margem preta), forçar todas num quadro 16:9 cortava pedaço de
+// conteúdo em quase todas. Cada bloco só fixa a altura (a mesma da
+// fileira); a largura nasce da proporção natural da própria imagem. Sem
+// arredondamento nas bordas, a mesma linguagem "prancheta" das capturas em
+// si. Fundo preto sólido, não um gradiente granulado: as pranchetas já
+// chegam em fundo preto na origem, então o preto do quadro e o preto de
+// cada prancheta se emendam sem costura, sem precisar de textura atrás.
+//
+// items-start, não items-center, no empilhamento das fileiras: ver o
+// comentário equivalente em LandingPagesGridPreview.tsx sobre por que
+// centralizar uma fileira bem mais larga que o cartão abre um buraco (do
+// tamanho de metade do cartão) na borda direita quando a animação chega
+// perto do fim do ciclo.
+//
+// Imagens processadas por scripts/build-intranet-grid.mjs a partir das
+// pranchetas brutas em intranet-componentes/ (enviadas direto pra main em
+// 20/08/2026).
 
 const basePath = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
 const gridPath = (file: string) => `${basePath}/photos/intranet-grid/${file}`;
 
-const HERO = gridPath("ig-08.webp"); // Dashboard do Aluno
+const TILE_COUNT = 9;
+const TILES = Array.from({ length: TILE_COUNT }, (_, i) => gridPath(`ig-${String(i + 1).padStart(2, "0")}.webp`));
 
-const SATELLITES: {
-  src: string;
-  corner: "top-left" | "top-right" | "bottom-left" | "bottom-right";
-  delayS: number;
-}[] = [
-  { src: gridPath("ig-02.webp"), corner: "top-left", delayS: 0 }, // Botões
-  { src: gridPath("ig-04.webp"), corner: "top-right", delayS: 0.4 }, // Paleta Sequencial
-  { src: gridPath("ig-06.webp"), corner: "bottom-left", delayS: 0.8 }, // Timeline
-  { src: gridPath("ig-07.webp"), corner: "bottom-right", delayS: 1.2 }, // Badges & Tags
+// Embaralhamentos diferentes dos mesmos nove índices em cada fileira, não a
+// mesma ordem repetida: evita que as fileiras fiquem "empilhadas" mostrando
+// a mesma prancheta na mesma coluna a qualquer instante.
+const ROW_ORDERS: number[][] = [
+  [0, 1, 2, 3, 4, 5, 6, 7, 8],
+  [4, 8, 1, 6, 0, 3, 7, 2, 5],
+  [6, 2, 8, 0, 5, 1, 3, 7, 4],
+  [2, 5, 0, 7, 3, 8, 1, 4, 6],
+  [8, 3, 6, 1, 7, 0, 4, 2, 5],
 ];
+const ROW_DIRECTIONS: ("left" | "right")[] = ["left", "right", "left", "right", "left"];
+// Durações diferentes por fileira: sincronizadas, elas emendariam no mesmo
+// instante e a "câmera" pareceria travar de tempos em tempos; fora de
+// sincronia, o movimento lê como orgânico, não como cópias do mesmo
+// relógio.
+const ROW_DURATIONS_S = [52, 40, 34, 48, 37];
+// Só as três primeiras fileiras existem a partir do sm: (o cartão mobile é
+// bem mais alto que o desktop, ver MobileCaseCard em CasesGrid.tsx); as
+// duas extras só aparecem no mobile.
+const ROW_MOBILE_ONLY = [false, false, false, true, true];
+// Índices (dentro de cada fileira, já com a sequência dobrada) que ganham o
+// respiro de zoom: um a cada três, começando num deslocamento diferente
+// por fileira pra não pulsarem todos juntos.
+const ZOOM_OFFSETS = [1, 0, 2, 1, 0];
+const ZOOM_STEP = 3;
 
-// Sem aspect-video nem object-cover: as pranchetas do Design System têm
-// proporções bem diferentes entre si (de 1.54:1 a 2.46:1, ver
-// scripts/build-intranet-grid.mjs, que preserva a proporção original de
-// cada uma ao recortar a margem preta), forçar todas num quadro 16:9
-// cortava pedaço de conteúdo em quase todas. Cada bloco só fixa a LARGURA
-// (w-[X%]); a altura nasce da proporção natural da própria imagem
-// (`h-auto`), sem corte nenhum. Bordas retas (sem rounded), a mesma
-// linguagem "prancheta" das capturas em si, que já chegam com cantos retos.
-//
-// No mobile (ver MobileCaseCard em CasesGrid.tsx), este componente vive
-// dentro de um cartão mais alto que a tela (`scale-125` sobre uma caixa
-// `118svh`, sticky, só o topo `100svh` realmente visível) E por baixo do
-// título do case, ancorado embaixo com gradiente escurecendo o rodapé (ver
-// `pb-10 pt-24 justify-end` em CasesGrid.tsx). As pontas de baixo (`bottom:
-// 44%`, bem mais que os 16% do topo) não são escolha estética: é a margem
-// medida na prática (Playwright, getBoundingClientRect), já considerando a
-// prancheta mais alta entre as duas de baixo (Badges & Tags, 1.62:1), pra
-// ficarem acima do título "INTRANET COMPLETA" e não coladas nele, além de
-// não colidirem com o Dashboard em destaque no centro quando ele encolhe.
-// Mexeu no tamanho do herói, das pontas ou trocou qual prancheta vai em
-// qual canto? Meça de novo no mobile antes de mexer só nos percentuais
-// aqui: a prancheta mais "quadrada" (proporção mais baixa) do canto de
-// baixo é quem dita a margem mínima segura.
-const CORNER_STYLE: Record<(typeof SATELLITES)[number]["corner"], CSSProperties> = {
-  "top-left": { top: "14%", left: "10%", transformOrigin: "top left" },
-  "top-right": { top: "14%", right: "10%", transformOrigin: "top right" },
-  "bottom-left": { bottom: "44%", left: "10%", transformOrigin: "bottom left" },
-  "bottom-right": { bottom: "44%", right: "10%", transformOrigin: "bottom right" },
-};
+function Row({
+  order,
+  direction,
+  durationS,
+  zoomOffset,
+  mobileOnly,
+}: {
+  order: number[];
+  direction: "left" | "right";
+  durationS: number;
+  zoomOffset: number;
+  mobileOnly: boolean;
+}) {
+  const sequence = [...order, ...order];
+  return (
+    <div
+      className={`${mobileOnly ? "flex sm:hidden" : "flex"} w-max shrink-0 gap-3 will-change-transform sm:gap-4 ${
+        direction === "left" ? "marquee-row-left" : "marquee-row-right"
+      }`}
+      style={{ "--marquee-row-duration": `${durationS}s` } as CSSProperties}
+    >
+      {sequence.map((idx, i) => {
+        const zooms = i % ZOOM_STEP === zoomOffset;
+        return (
+          <div key={i} className="h-24 shrink-0 overflow-hidden border border-white/10 shadow-xl shadow-black/60 sm:h-32 lg:h-40">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={TILES[idx]}
+              alt=""
+              aria-hidden="true"
+              className={`block h-full w-auto ${zooms ? "marquee-tile-zoom" : ""}`}
+              style={zooms ? ({ "--marquee-zoom-delay": `${(i * 0.7) % 5}s` } as CSSProperties) : undefined}
+            />
+          </div>
+        );
+      })}
+    </div>
+  );
+}
 
 export function IntranetGridPreview({ className = "" }: { className?: string }) {
   return (
     <div className={`relative overflow-hidden bg-black ${className}`}>
-      {/* Cruz de grade que separa as quatro pontas, só visível durante a fase
-          revelada (mesma janela de opacidade das telas satélite). */}
-      <div className="intranet-grid-lines pointer-events-none absolute inset-0">
-        <div className="absolute top-1/2 left-0 h-px w-full -translate-y-1/2 bg-white/10" />
-        <div className="absolute top-0 left-1/2 h-full w-px -translate-x-1/2 bg-white/10" />
-      </div>
-
-      {SATELLITES.map(({ src, corner, delayS }) => (
-        <div
-          key={corner}
-          className="intranet-satellite absolute w-[22%] overflow-hidden border border-white/10 shadow-xl shadow-black/60"
-          style={{ ...CORNER_STYLE[corner], "--intranet-satellite-delay": `${delayS}s` } as CSSProperties}
-        >
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={src} alt="" aria-hidden="true" className="block h-auto w-full" />
-        </div>
-      ))}
-
-      <div className="intranet-hero-scale absolute top-1/2 left-1/2 w-[38%] overflow-hidden border border-white/10 shadow-2xl shadow-black/70">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={HERO} alt="" aria-hidden="true" className="block h-auto w-full" />
+      <div className="absolute inset-0 flex flex-col items-start justify-center gap-3 sm:gap-4 lg:gap-5">
+        {ROW_ORDERS.map((order, i) => (
+          <Row
+            key={i}
+            order={order}
+            direction={ROW_DIRECTIONS[i]}
+            durationS={ROW_DURATIONS_S[i]}
+            zoomOffset={ZOOM_OFFSETS[i]}
+            mobileOnly={ROW_MOBILE_ONLY[i]}
+          />
+        ))}
       </div>
     </div>
   );
