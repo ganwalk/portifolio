@@ -100,22 +100,41 @@ const ZOOM_DELAY_BY_POSITION: Record<number, number> = {
 export function IntranetGridPreview({ className = "" }: { className?: string }) {
   return (
     <div className={`relative overflow-hidden bg-black ${className}`}>
-      {/* Grão de filme evidente, parte do fundo da referência: opacidade
-          mais alta que o padrão de 0.05 (ver .texture-noise em
-          globals.css), mas sem a variação animada da hero, pra não competir
-          com o próprio movimento das células. */}
-      <div className="texture-noise absolute inset-0" style={{ "--noise-opacity": "0.09" } as CSSProperties} />
+      {/* Mesmo fundo animado da Landing Pages (.grid-fundo-gradient, ver
+          globals.css), na variante --intranet: bem mais escura e mais
+          lenta, quase preto com só um brilho sutil se movendo, porque as
+          pranchetas do Design System já vivem sobre preto sólido (ver os
+          próprios cantos `bg-black` abaixo) e aqui o fundo é atmosfera, não
+          protagonista. position/inset via style inline, não a utility
+          `absolute inset-0`: .texture-noise define position: relative como
+          CSS sem layer, que sempre vence a utility (layered) na mesma tag
+          (ver o mesmo ajuste em SiteLoader.tsx e LandingPagesGridPreview.tsx). */}
+      <div
+        className="grid-fundo-gradient grid-fundo-gradient--intranet texture-noise texture-noise-animate"
+        style={{ position: "absolute", inset: 0 }}
+      />
 
       {/* No mobile (ver MobileCaseCard em CasesGrid.tsx), este componente
           vive dentro de um cartão bem mais alto que largo (h-svh + folga
           vertical). Um `h-full` na grade esticaria as 3 fileiras por essa
           altura toda, mas cada célula continua com a proporção fixa
-          (aspect-video, derivada da LARGURA): o resultado era fileira presa
-          lá em cima, outra lá embaixo, um vão enorme de nada no meio. Por
-          isso a grade não estica: nasce do próprio conteúdo (altura
-          automática, só a largura é w-full) e este wrapper de fora só
-          centraliza esse bloco de altura natural dentro do cartão, sobrando
-          fundo granulado acima/abaixo em vez de vão vazio. */}
+          (derivada da LARGURA): o resultado era fileira presa lá em cima,
+          outra lá embaixo, um vão enorme de nada no meio. Por isso a grade
+          não estica: nasce do próprio conteúdo (altura automática, só a
+          largura é w-full) e este wrapper de fora só centraliza esse bloco
+          de altura natural dentro do cartão, sobrando fundo granulado
+          acima/abaixo em vez de vão vazio.
+
+          aspect-[4/3] até o sm:, aspect-video dali pra cima: mesmo com o
+          fundo animado preenchendo a sobra, a grade sozinha ainda ficava
+          baixa demais (a maioria do cartão sobrando vazio) numa tela alta e
+          estreita. Células mais altas no mobile fazem a grade inteira
+          crescer verticalmente (~33% mais alta, ver as contas no commit),
+          ocupando bem mais do cartão; um pouco mais de faixa preta dentro
+          de cada célula pras pranchetas mais largas (object-contain, sem
+          cortar nada) é o preço, aceitável. No desktop, onde o cartão já
+          não é tão desproporcional, aspect-video (a proporção nativa da
+          maioria das pranchetas) volta a ser a melhor forma. */}
       <div className="absolute inset-0 flex items-center justify-center">
         <div className="relative w-full">
           <div className="grid w-full grid-cols-3 gap-2 sm:gap-3">
@@ -124,7 +143,7 @@ export function IntranetGridPreview({ className = "" }: { className?: string }) 
               return (
                 <div
                   key={i}
-                  className={`aspect-video overflow-hidden border border-white/10 bg-black ${
+                  className={`aspect-[4/3] overflow-hidden border border-white/10 bg-black sm:aspect-video ${
                     isCenter ? "intranet-tile-center" : "intranet-tile-satellite"
                   }`}
                   style={!isCenter ? { transformOrigin: TRANSFORM_ORIGIN_BY_POSITION[i] } : undefined}
