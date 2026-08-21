@@ -10,13 +10,30 @@ import { useEffect, useRef } from "react";
 // de animação, pra que "entrar no site" e "trocar de modo" sejam literalmente
 // o mesmo gesto, não dois efeitos parecidos por coincidência.
 //
-// Não pode depender de CSS transition nem de Framer Motion: a regra global em
-// globals.css que zera todo movimento quando `data-boring="true"` mata
-// literalmente qualquer transition do documento inteiro no instante em que o
-// atributo muda, incluindo indo PARA o Boring (é uma regra de CSS, então
-// alcança qualquer elemento do DOM). Por isso a cortina anima via
-// requestAnimationFrame, escrevendo transform a cada quadro na mão: nenhuma
-// regra de CSS intercepta uma mutação de estilo feita assim.
+// Não pode depender de CSS transition/animation declaradas em classe: a
+// regra global em globals.css que zera todo movimento quando
+// `data-boring="true"` mata literalmente qualquer transition/animation do
+// documento inteiro no instante em que o atributo muda, incluindo indo PARA
+// o Boring (é uma regra de CSS, então alcança qualquer elemento do DOM). Por
+// isso a cortina anima via Web Animations API (`el.animate(...)`), não CSS:
+// uma Animation criada por script não é regida pela propriedade CSS
+// `animation`, então aquela regra global não enxerga nem cancela isso.
+//
+// E não é um requestAnimationFrame escrevendo `transform` a cada quadro na
+// mão (a primeira versão disto): num celular, hidratando a página real por
+// baixo (WebGL/Canvas/Framer Motion dos cases), o fio principal pode ficar
+// ocupado por centenas de ms bem no instante em que a cortina deveria estar
+// animando. Um laço de rAF só roda quando o fio principal está livre pra
+// chamar o callback: sob esse tipo de engasgo, ou os quadros vinham tarde
+// demais e a pessoa via só um pedaço do gesto antes dele saltar pro final
+// (o relógio é por tempo real decorrido, não por quadro), ou o próprio
+// primeiro quadro atrasava tanto que o ciclo inteiro colapsava num
+// `elapsed` já maior que a duração toda, sem nenhum quadro visível no meio:
+// "a transição não disparou". Animação criada via Web Animations API em
+// `transform`/`opacity` roda no compositor, fora do fio principal: continua
+// pintando quadro a quadro ainda que o JavaScript esteja ocupado montando o
+// resto da página, então o gesto sempre termina de tocar por inteiro, fio
+// principal livre ou não.
 //
 // Disparo: incrementar (ou trocar) `triggerKey` roda um ciclo completo
 // (cobre, segura, revela). O valor de montagem nunca dispara sozinho, só uma
@@ -30,21 +47,33 @@ export const COVER_MS = STRIPE_MS + (STRIPE_COUNT - 1) * STAGGER_MS;
 export const REVEAL_MS = COVER_MS;
 export const CURTAIN_CYCLE_MS = COVER_MS + HOLD_MS + REVEAL_MS;
 
-function easeOutCubic(t: number): number {
-  return 1 - Math.pow(1 - t, 3);
-}
+// Aproximações em cubic-bezier dos mesmos easeOutCubic/easeInCubic de
+// sempre (1-(1-t)³ e t³): as curvas padrão do easings.net pro par, e o
+// formato que a Web Animations API entende por quadro.
+const EASE_OUT_CUBIC = "cubic-bezier(0.33, 1, 0.68, 1)";
+const EASE_IN_CUBIC = "cubic-bezier(0.32, 0, 0.67, 0)";
 
-function easeInCubic(t: number): number {
-  return t * t * t;
-}
+// Quadros-chave de UMA régua, com o atraso dela (posição na fileira) já
+// embutido nos offsets em vez de um `delay` separado: como todas as réguas
+// compartilham a MESMA duração total (CURTAIN_CYCLE_MS), dá pra descrever a
+// timeline inteira de cada uma (parada, fecha, segura, abre, parada) como
+// frações de 0 a 1 dessa duração. offset() satura em 1 pra régua de maior
+// atraso (índice mais alto), cujo fim do "abre" cai bem em CURTAIN_CYCLE_MS.
+function stripeKeyframes(index: number): Keyframe[] {
+  const coverStart = index * STAGGER_MS;
+  const coverEnd = coverStart + STRIPE_MS;
+  const revealStart = COVER_MS + HOLD_MS + coverStart;
+  const revealEnd = revealStart + STRIPE_MS;
+  const offset = (ms: number) => Math.min(1, ms / CURTAIN_CYCLE_MS);
 
-// Progresso (0 a 1) de uma régua num dado instante, considerando o atraso
-// que a régua carrega por causa da posição dela na fileira.
-function stripeProgress(elapsedInPhase: number, index: number): number {
-  const local = elapsedInPhase - index * STAGGER_MS;
-  if (local <= 0) return 0;
-  if (local >= STRIPE_MS) return 1;
-  return local / STRIPE_MS;
+  return [
+    { transform: "scaleY(0)", offset: offset(0) },
+    { transform: "scaleY(0)", offset: offset(coverStart), easing: EASE_OUT_CUBIC },
+    { transform: "scaleY(1)", offset: offset(coverEnd) },
+    { transform: "scaleY(1)", offset: offset(revealStart), easing: EASE_IN_CUBIC },
+    { transform: "scaleY(0)", offset: offset(revealEnd) },
+    { transform: "scaleY(0)", offset: 1 },
+  ];
 }
 
 export function StripeCurtain({
@@ -59,22 +88,18 @@ export function StripeCurtain({
   triggerKey: number;
   /** Chamado no instante exato em que a tela fica totalmente coberta, antes
    *  da cortina abrir de novo: o momento certo pra trocar o que está por
-   *  baixo sem que a troca se veja. */
+   *  baixo sem que a troca se veja. Via setTimeout (não um evento da
+   *  Animation): não precisa de precisão de quadro, a tela já está coberta
+   *  de qualquer jeito nessa janela, só não pode nunca ATRASAR além dela. */
   onCovered?: () => void;
-  /** Chamado no instante exato em que o ciclo termina de verdade (réguas já
-   *  de volta a scaleY(0)), pelo relógio de quem realmente anima (o próprio
-   *  requestAnimationFrame). Quem precisa desmontar algo só depois que a
-   *  cortina termina (ver SiteLoader.tsx) deve esperar por este callback, não
-   *  reimplementar a mesma duração num setTimeout à parte: um setTimeout
-   *  independente conta a partir do instante em que o efeito rodou, não do
-   *  instante em que o primeiro quadro do rAF de fato começou a animar (que
-   *  vem sempre um pouco depois, e pode vir bem mais depois se o fio
-   *  principal estiver ocupado montando o site por baixo), então os dois
-   *  relógios podem se desalinhar. Nesse desalinhamento, quem desmonta cedo
-   *  demais arranca a cortina do DOM no meio do gesto, ainda cobrindo parte
-   *  da tela, revelando de golpe o que estiver por baixo (às vezes uma tela
-   *  sólida, o site ainda não pintado) em vez da abertura terminar de
-   *  verdade. */
+  /** Chamado no instante exato em que o ciclo termina de verdade (todas as
+   *  réguas já resolvidas de volta a scaleY(0)), via Promise.all das
+   *  próprias Animation.finished: quem precisa desmontar algo só depois que
+   *  a cortina termina (ver SiteLoader.tsx) espera por este callback, não
+   *  reimplementa a mesma duração num setTimeout à parte. Um setTimeout
+   *  independente conta a partir de um instante diferente do que a Animation
+   *  de fato usa internamente e pode se desalinhar; esperar pela conclusão
+   *  real elimina esse desalinhamento por completo. */
   onDone?: () => void;
   colorClassName?: string;
   zIndexClassName?: string;
@@ -82,20 +107,17 @@ export function StripeCurtain({
   const containerRef = useRef<HTMLDivElement>(null);
   const stripeRefs = useRef<(HTMLDivElement | null)[]>([]);
   const prevKeyRef = useRef(triggerKey);
-  const rafRef = useRef<number | null>(null);
+  const animationsRef = useRef<Animation[]>([]);
 
   // Refs pros callbacks, não dependências do efeito abaixo: onCovered e
   // onDone chegam como função nova a cada render de quem usa a cortina (ex.:
   // SiteLoader recria as duas toda vez que ready/contentHidden/mounted
   // mudam). Se estivessem no array de dependências, cada uma dessas
-  // recriações reexecutaria o efeito, cuja função de limpeza cancela o
-  // requestAnimationFrame em andamento — e o corpo do efeito, ao rodar de
-  // novo, esbarra direto no early return de `prevKeyRef.current ===
-  // triggerKey` (ele já foi atualizado na primeira vez) e nunca reagenda um
-  // novo quadro. Resultado: a cortina cancela a própria animação no meio do
-  // ciclo e trava ali, coberta pra sempre, exatamente o "tela sólida que não
-  // some" que este componente existe pra evitar. As refs guardam sempre a
-  // versão mais recente sem disparar o efeito de novo.
+  // recriações reexecutaria o efeito, cuja função de limpeza cancelaria as
+  // animações em andamento — e o corpo do efeito, ao rodar de novo, esbarra
+  // direto no early return de `prevKeyRef.current === triggerKey` (ele já
+  // foi atualizado na primeira vez) e nunca recomeça o ciclo. As refs
+  // guardam sempre a versão mais recente sem disparar o efeito de novo.
   const onCoveredRef = useRef(onCovered);
   const onDoneRef = useRef(onDone);
   useEffect(() => {
@@ -124,56 +146,36 @@ export function StripeCurtain({
       return;
     }
 
-    if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
+    animationsRef.current.forEach((anim) => anim.cancel());
 
-    const start = performance.now();
-    // Reatribuído a uma const própria: dentro do closure de frame() o TS não
-    // conserva o estreitamento de null feito acima, mesmo sendo const.
-    const overlayEl = container;
-    overlayEl.style.pointerEvents = "auto";
-    let covered = false;
+    container.style.pointerEvents = "auto";
 
-    function frame(now: number) {
-      const elapsed = now - start;
+    // Os 8 elementos já foram garantidos não-nulos pelo guard acima
+    // (`stripes.some((s) => !s)`): o índice de cada um aqui é literalmente a
+    // posição na fileira que stripeKeyframes() espera, então mapear direto
+    // (sem filter) é o que preserva essa correspondência.
+    const animations = stripes.map((el, i) =>
+      el!.animate(stripeKeyframes(i), {
+        duration: CURTAIN_CYCLE_MS,
+        fill: "forwards",
+      }),
+    );
+    animationsRef.current = animations;
 
-      // A tela já está totalmente coberta assim que o cover termina: é o
-      // único instante em que trocar o conteúdo por baixo não se vê.
-      if (!covered && elapsed >= COVER_MS) {
-        onCoveredRef.current?.();
-        covered = true;
-      }
+    const coveredTimeout = window.setTimeout(() => {
+      onCoveredRef.current?.();
+    }, COVER_MS);
 
-      stripes.forEach((el, i) => {
-        if (!el) return;
-        let scale: number;
-
-        if (elapsed < COVER_MS) {
-          scale = easeOutCubic(stripeProgress(elapsed, i));
-        } else if (elapsed < COVER_MS + HOLD_MS) {
-          scale = 1;
-        } else if (elapsed < CURTAIN_CYCLE_MS) {
-          const t = stripeProgress(elapsed - COVER_MS - HOLD_MS, i);
-          scale = 1 - easeInCubic(t);
-        } else {
-          scale = 0;
-        }
-
-        el.style.transform = `scaleY(${scale})`;
-      });
-
-      if (elapsed < CURTAIN_CYCLE_MS) {
-        rafRef.current = requestAnimationFrame(frame);
-      } else {
-        overlayEl.style.pointerEvents = "none";
-        rafRef.current = null;
-        onDoneRef.current?.();
-      }
-    }
-
-    rafRef.current = requestAnimationFrame(frame);
+    let cancelled = false;
+    Promise.all(animations.map((anim) => anim.finished)).then(() => {
+      if (cancelled) return;
+      container.style.pointerEvents = "none";
+      onDoneRef.current?.();
+    });
 
     return () => {
-      if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
+      cancelled = true;
+      window.clearTimeout(coveredTimeout);
     };
   }, [triggerKey]);
 
@@ -189,16 +191,18 @@ export function StripeCurtain({
           ref={(el) => {
             stripeRefs.current[i] = el;
           }}
-          className={`h-full flex-1 ${colorClassName} ${
+          className={`h-full flex-1 will-change-transform ${colorClassName} ${
             i % 2 === 0 ? "origin-top" : "origin-bottom"
           }`}
           // O repouso é "transform: scaleY(0)" via style inline, não a
           // utilitária scale-y-0 do Tailwind: aquela utilitária escreve na
           // propriedade CSS `scale`, separada de `transform`, e as duas se
-          // compõem multiplicando uma pela outra na hora de renderizar. Como
-          // o rAF só escreve em `transform`, um `scale-y-0` deixado para trás
-          // travaria a régua em altura zero para sempre, não importa o que
-          // `transform` diga.
+          // compõem multiplicando uma pela outra na hora de renderizar. Uma
+          // Animation via Web Animations API só escreve em `transform`
+          // enquanto está tocando (fill: forwards mantém o último quadro
+          // depois de terminar, mas ainda em `transform`); um `scale-y-0`
+          // deixado para trás travaria a régua em altura zero pra sempre,
+          // não importa o que a Animation diga.
           style={{ transform: "scaleY(0)" }}
         />
       ))}

@@ -541,8 +541,27 @@ function CaseColumn({
             {/* O botão não tem onClick próprio: o cartão inteiro já chama
                 onExpand (ver o motion.div lá em cima), e o clique aqui
                 dentro sobe até ele por bubbling, o mesmo FLIP de sempre
-                pro overlay (ver ExpandedCase). */}
-            <motion.div style={{ y: ctaY }}>
+                pro overlay (ver ExpandedCase). Descrição curta ao lado
+                (statement.headline, já existia pra página do case, ver
+                CaseStatement.tsx): aproveita o respiro que o botão sozinho
+                deixava vazio na mesma linha.
+
+                A altura do bloco de texto é uma classe h-* explícita, não
+                `items-stretch`: stretch só ESTICA um item mais baixo até
+                igualar o mais alto da fileira, nunca ENCOLHE um item cujo
+                próprio conteúdo (duas linhas de texto) já é mais alto que o
+                botão sozinho, então não bastava pra garantir a "altura
+                exata" pedida quando o texto for longo. Os valores h-8/h-11
+                vêm de medir o botão de verdade (Playwright,
+                getBoundingClientRect): 12px de padding vertical + 18px de
+                linha do type-mono + 2px de borda = 44px (h-11) sempre que
+                não for `multi`, ou só a partir do lg: quando for (abaixo
+                disso o botão do trio usa py-1.5, 6px de padding = 32px,
+                h-8). text-[10px]/leading-[16px] no parágrafo: duas linhas
+                somam exatamente os 32px do caso mais apertado (h-8),
+                sobrando respiro nos demais, centralizado por
+                `justify-center`. */}
+            <motion.div style={{ y: ctaY }} className="flex items-start gap-3 lg:gap-4">
               <motion.button
                 type="button"
                 // Feedback tátil no clique: um leve encolhimento antes do
@@ -552,13 +571,22 @@ function CaseColumn({
                 whileTap={isActive ? { scale: 0.98 } : undefined}
                 tabIndex={isActive ? 0 : -1}
                 aria-label={caseStudy.title[locale]}
-                className={`pointer-events-auto type-mono inline-flex items-center gap-3 border border-white/40 backdrop-blur-sm ${
+                className={`pointer-events-auto type-mono inline-flex shrink-0 items-center gap-3 border border-white/40 backdrop-blur-sm ${
                   multi ? "px-3 py-1.5 lg:px-6 lg:py-3" : "px-6 py-3"
                 }`}
               >
                 {caseStudy.comingSoon ? dict.cases.comingSoon : dict.cases.viewCase}
                 <span aria-hidden>→</span>
               </motion.button>
+              <div
+                className={`hidden min-w-0 flex-1 flex-col justify-center sm:flex ${
+                  multi ? "h-8 max-w-[20ch] lg:h-11" : "h-11 max-w-[30ch]"
+                }`}
+              >
+                <p className="line-clamp-2 text-[10px] leading-[16px] text-white/60">
+                  {caseStudy.statement.headline[locale]}
+                </p>
+              </div>
             </motion.div>
           </div>
         </motion.div>
@@ -941,16 +969,26 @@ function MobileCaseCard({
             <h3 className="type-display type-inktrap pt-[0.16em] text-[11vw] leading-[0.9]">
               {caseStudy.title[locale]}
             </h3>
-            <div className="mt-6 flex flex-wrap items-center gap-3">
+            {/* Descrição curta ao lado do botão (statement.headline, mesmo
+                raciocínio do CaseColumn de desktop: ver o comentário lá,
+                inclusive de onde vêm os 44px do h-11). px-6 py-3 aqui é
+                fixo (sem variante `multi`, o mobile empilha um case por
+                tela inteira), então só existe o caso "sempre 44px". */}
+            <div className="mt-6 flex items-start gap-3">
               <MotionLink
                 href={`/${locale}/work/${caseStudy.slug}/`}
                 onClick={saveHomeScrollPosition}
                 whileTap={{ scale: 0.98 }}
-                className="pointer-events-auto type-mono inline-flex items-center gap-3 border border-white/40 px-6 py-3"
+                className="pointer-events-auto type-mono inline-flex shrink-0 items-center gap-3 border border-white/40 px-6 py-3"
               >
                 {caseStudy.comingSoon ? dict.cases.comingSoon : dict.cases.viewCase}
                 <span aria-hidden>→</span>
               </MotionLink>
+              <div className="flex h-11 min-w-0 flex-1 flex-col justify-center">
+                <p className="line-clamp-2 text-[10px] leading-[16px] text-white/60">
+                  {caseStudy.statement.headline[locale]}
+                </p>
+              </div>
             </div>
           </Reveal>
         </div>
