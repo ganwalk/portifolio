@@ -575,7 +575,7 @@ function CaseColumn({
                   multi ? "px-3 py-1.5 lg:px-6 lg:py-3" : "px-6 py-3"
                 }`}
               >
-                {caseStudy.comingSoon ? dict.cases.comingSoon : dict.cases.viewCase}
+                {dict.cases.viewCase}
                 <span aria-hidden>→</span>
               </motion.button>
               <div
@@ -583,7 +583,7 @@ function CaseColumn({
                   multi ? "h-8 max-w-[20ch] lg:h-11" : "h-11 max-w-[30ch]"
                 }`}
               >
-                <p className="line-clamp-2 text-[10px] leading-[16px] text-white/60">
+                <p className="line-clamp-2 text-balance text-[10px] leading-[16px] text-white/60">
                   {caseStudy.statement.headline[locale]}
                 </p>
               </div>
@@ -981,11 +981,11 @@ function MobileCaseCard({
                 whileTap={{ scale: 0.98 }}
                 className="pointer-events-auto type-mono inline-flex shrink-0 items-center gap-3 border border-white/40 px-6 py-3"
               >
-                {caseStudy.comingSoon ? dict.cases.comingSoon : dict.cases.viewCase}
+                {dict.cases.viewCase}
                 <span aria-hidden>→</span>
               </MotionLink>
               <div className="flex h-11 min-w-0 flex-1 flex-col justify-center">
-                <p className="line-clamp-2 text-[10px] leading-[16px] text-white/60">
+                <p className="line-clamp-2 text-balance text-[10px] leading-[16px] text-white/60">
                   {caseStudy.statement.headline[locale]}
                 </p>
               </div>

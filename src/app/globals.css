@@ -617,6 +617,74 @@ html[data-boring="true"] .texture-noise::after {
 }
 
 /* ==========================================================================
+   FUNDO ANIMADO DAS GRADES DE PRÉVIA (LandingPagesGridPreview.tsx,
+   IntranetGridPreview.tsx)
+   Gradiente radial em tons de cinza que deriva devagar pela tela (posição
+   de fundo, não gera nem recalcula o gradiente em si a cada quadro) mais
+   .texture-noise-animate (o mesmo grão de filme com movimento em passos da
+   hero, ver acima) por cima: substitui a antiga fundo.webp (uma foto
+   estática recortada do repositório) por uma textura só de CSS, sem peso
+   de imagem nenhum e que nunca repete o mesmo enquadramento exato de um
+   carregamento pro outro.
+
+   Uma classe base com os tons/velocidade em custom properties, e duas
+   variantes que só trocam esses valores: --landing é mais clara e mais
+   rápida (o fundo original de Landing Pages já era um cinza mais aberto);
+   --intranet é bem mais escura e mais lenta, quase preto com só um brilho
+   sutil se movendo (as pranchetas do Design System já vivem sobre preto
+   sólido, ver IntranetGridPreview.tsx, então o fundo aqui é atmosfera, não
+   protagonista). Mesmo mecanismo, sintonias diferentes: a "variação" pedida
+   é literalmente isso, não um efeito totalmente à parte. */
+@keyframes grid-fundo-drift {
+  0%,
+  100% {
+    background-position:
+      20% 25%,
+      80% 70%,
+      0% 0%;
+  }
+  33% {
+    background-position:
+      65% 15%,
+      25% 80%,
+      0% 0%;
+  }
+  66% {
+    background-position:
+      30% 75%,
+      75% 20%,
+      0% 0%;
+  }
+}
+.grid-fundo-gradient {
+  background-image:
+    radial-gradient(circle, var(--fundo-c1), transparent 60%),
+    radial-gradient(circle, var(--fundo-c2), transparent 65%),
+    linear-gradient(160deg, var(--fundo-base-1), var(--fundo-base-2) 75%);
+  background-size:
+    150% 150%,
+    170% 170%,
+    100% 100%;
+  background-repeat: no-repeat;
+  animation: grid-fundo-drift var(--fundo-duration, 26s) ease-in-out infinite;
+}
+.grid-fundo-gradient--landing {
+  --fundo-c1: rgba(255, 255, 255, 0.16);
+  --fundo-c2: rgba(255, 255, 255, 0.1);
+  --fundo-base-1: #262626;
+  --fundo-base-2: #0a0a0a;
+  --fundo-duration: 22s;
+}
+.grid-fundo-gradient--intranet {
+  --fundo-c1: rgba(255, 255, 255, 0.055);
+  --fundo-c2: rgba(255, 255, 255, 0.03);
+  --fundo-base-1: #101010;
+  --fundo-base-2: #000000;
+  --fundo-duration: 34s;
+  animation-direction: reverse;
+}
+
+/* ==========================================================================
    PRÉVIA AO VIVO DA LANDING PAGES (LandingPagesGridPreview.tsx)
    Fileiras de imagens reais deslizando em loop infinito, como uma câmera
    passando por cima de uma vitrine grande. Cada fileira é o MESMO conjunto

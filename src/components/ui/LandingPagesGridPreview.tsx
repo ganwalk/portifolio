@@ -4,10 +4,17 @@ import type { CSSProperties } from "react";
 
 // Prévia ao vivo do case de Landing Pages (ver CasesGrid.tsx): fileiras de
 // capturas reais (claras e escuras, dashboard financeiro, página de evento)
-// deslizando em loop infinito sobre o fundo gradiente granulado, como uma
-// câmera passando por cima de uma vitrine grande. Imagens processadas por
-// scripts/build-landing-pages-grid.mjs a partir dos stills brutos em
-// landing-pages-grid/ (enviados direto pra main em 20/08/2026).
+// deslizando em loop infinito sobre um fundo gradiente cinza granulado,
+// como uma câmera passando por cima de uma vitrine grande. Imagens
+// processadas por scripts/build-landing-pages-grid.mjs a partir dos stills
+// brutos em landing-pages-grid/ (enviados direto pra main em 20/08/2026).
+//
+// O fundo é puro CSS (.grid-fundo-gradient--landing + .texture-noise-
+// animate, ver globals.css), não mais uma foto do repositório (fundo.webp,
+// removida): gradiente radial cinza que deriva devagar de posição, com o
+// mesmo grão de filme animado da hero por cima. Zero peso de imagem e nunca
+// repete o mesmo enquadramento exato de um carregamento pro outro, ao
+// contrário de uma foto fixa recortada num tamanho.
 //
 // Puro CSS (ver .marquee-row-left/.marquee-row-right em globals.css,
 // reaproveitadas por IntranetGridPreview.tsx com a mesma técnica), nenhum
@@ -48,7 +55,6 @@ const gridPath = (file: string) => `${basePath}/photos/landing-pages-grid/${file
 
 const TILE_COUNT = 7;
 const TILES = Array.from({ length: TILE_COUNT }, (_, i) => gridPath(`lp-${String(i + 1).padStart(2, "0")}.webp`));
-const FUNDO = gridPath("fundo.webp");
 
 // Embaralhamentos diferentes dos mesmos sete índices em cada fileira, não a
 // mesma ordem repetida: evita que as fileiras fiquem "empilhadas" mostrando
@@ -118,8 +124,15 @@ function Row({
 export function LandingPagesGridPreview({ className = "" }: { className?: string }) {
   return (
     <div className={`relative overflow-hidden bg-black ${className}`}>
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src={FUNDO} alt="" aria-hidden="true" className="absolute inset-0 h-full w-full object-cover" />
+      {/* position/inset via style inline, não a utility `absolute inset-0`:
+          .texture-noise define position: relative como CSS sem layer, que
+          sempre vence a utility (layered) na mesma tag (ver o mesmo ajuste
+          em SiteLoader.tsx). Sem o inline style, este div colapsaria pra
+          0×0 (relative não estica sozinho) e o grão nunca apareceria. */}
+      <div
+        className="grid-fundo-gradient grid-fundo-gradient--landing texture-noise texture-noise-animate"
+        style={{ position: "absolute", inset: 0 }}
+      />
       {/* items-start, não items-center: cada fileira é bem mais larga que o
           cartão (w-max, o dobro da sequência de sete ladrilhos), e o loop
           "desenha duas vezes, anima 0 até -50%" só fecha sem buraco se a
