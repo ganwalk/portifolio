@@ -120,7 +120,20 @@ export function LandingPagesGridPreview({ className = "" }: { className?: string
     <div className={`relative overflow-hidden bg-black ${className}`}>
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img src={FUNDO} alt="" aria-hidden="true" className="absolute inset-0 h-full w-full object-cover" />
-      <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 sm:gap-4 lg:gap-5">
+      {/* items-start, não items-center: cada fileira é bem mais larga que o
+          cartão (w-max, o dobro da sequência de sete ladrilhos), e o loop
+          "desenha duas vezes, anima 0 até -50%" só fecha sem buraco se a
+          fileira nascer encostada na borda esquerda. Centralizada, a
+          fileira já nasce deslocada pra dentro (metade da sobra de cada
+          lado); somado ao -50% da animação (metade da LARGURA DA PRÓPRIA
+          fileira, bem maior que a sobra), o deslocamento total passa da
+          conta e descola a borda direita da fileira da borda direita do
+          cartão por exatamente metade da largura do cartão, expondo o fundo
+          por baixo ali (o "buraco" onde devia aparecer outro ladrilho). Com
+          items-start a fileira nasce com a borda esquerda já encostada em
+          0, e o mesmo -50% fecha o ciclo perfeito: a segunda cópia da
+          sequência cai exatamente onde a primeira começou. */}
+      <div className="absolute inset-0 flex flex-col items-start justify-center gap-3 sm:gap-4 lg:gap-5">
         {ROW_ORDERS.map((order, i) => (
           <Row
             key={i}
