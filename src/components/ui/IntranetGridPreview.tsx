@@ -1,7 +1,5 @@
 "use client";
 
-import type { CSSProperties } from "react";
-
 // Prévia ao vivo do case da Intranet (ver CasesGrid.tsx): grade 3×3 estática
 // das nove pranchetas reais do Design System (Progress Bar, Contagem
 // Regressiva, Jornada do Herói, Botões, Paleta Sequencial, Tipografia,
@@ -15,10 +13,11 @@ import type { CSSProperties } from "react";
 // lê como "se aproximando", guiadas pela própria grade, não aparecendo do
 // nada. O Dashboard encolhe de volta no mesmo instante em que as outras
 // oito terminam de crescer. Depois de um respiro com a grade inteira
-// revelada (onde a mesma pulsação de zoom dos ladrilhos da Landing Pages,
-// .marquee-tile-zoom, dá um revezamento sutil de destaque entre as
-// pranchetas), as oito encolhem de volta e o Dashboard cresce de novo,
-// fechando o loop no mesmo estado do início.
+// revelada e PARADA (sem nenhum zoom extra por cima: a Landing Pages tem
+// aquela pulsação porque a fileira nunca para de deslizar, aqui a grade já
+// assentou em 3x3, revezar zoom nas oito por cima só ia ler como ruído
+// aleatório, não como guia), as oito encolhem de volta e o Dashboard cresce
+// de novo, fechando o loop no mesmo estado do início.
 //
 // Quarta versão deste componente. A primeira era uma coreografia com quatro
 // pranchetas nas pontas; a segunda, fileiras deslizantes sem nenhum "gesto
@@ -82,21 +81,6 @@ const TRANSFORM_ORIGIN_BY_POSITION: Record<number, string> = {
   8: "top left",
 };
 
-// Atraso do revezamento de destaque (.marquee-tile-zoom, a mesma pulsação
-// dos ladrilhos da Landing Pages) entre as oito pranchetas satélite:
-// espalhado pra não pulsarem todas juntas, cada uma "chama a atenção" na
-// sua vez enquanto a grade está revelada.
-const ZOOM_DELAY_BY_POSITION: Record<number, number> = {
-  0: 0,
-  1: 0.8,
-  2: 1.6,
-  3: 2.4,
-  5: 3.2,
-  6: 4,
-  7: 4.8,
-  8: 5.6,
-};
-
 export function IntranetGridPreview({ className = "" }: { className?: string }) {
   return (
     <div className={`relative overflow-hidden bg-black ${className}`}>
@@ -134,9 +118,22 @@ export function IntranetGridPreview({ className = "" }: { className?: string }) 
           de cada célula pras pranchetas mais largas (object-contain, sem
           cortar nada) é o preço, aceitável. No desktop, onde o cartão já
           não é tão desproporcional, aspect-video (a proporção nativa da
-          maioria das pranchetas) volta a ser a melhor forma. */}
+          maioria das pranchetas) volta a ser a melhor forma.
+
+          -translate-y-[15svh] no bloco da grade: centralizado no CARTÃO
+          INTEIRO (items-center sozinho), a grade lia como jogada pra baixo,
+          porque o cartão não é uma janela vazia, tem o título e o botão
+          ancorados embaixo (justify-end + py-24/py-28 em CaseColumn, o
+          mesmo no MobileCaseCard) comendo uma fatia de baixo que o olho já
+          risca como "ocupada". Centralizar contra a altura TOTAL ignora
+          essa fatia; o que parece centralizado é centralizar contra o
+          espaço que sobra ACIMA do título. Medido com Playwright
+          (getBoundingClientRect da grade e do h3 do próprio card, desktop
+          1440×900 e mobile 390×844): o deslocamento ideal fica entre 14%
+          (desktop) e 17% (mobile) da altura do cartão, então 15svh cobre
+          as duas pontas sem precisar de um valor por breakpoint. */}
       <div className="absolute inset-0 flex items-center justify-center">
-        <div className="relative w-full">
+        <div className="relative w-full -translate-y-[15svh]">
           <div className="grid w-full grid-cols-3 gap-2 sm:gap-3">
             {GRID_TILES.map((src, i) => {
               const isCenter = i === CENTER_INDEX;
@@ -149,20 +146,7 @@ export function IntranetGridPreview({ className = "" }: { className?: string }) 
                   style={!isCenter ? { transformOrigin: TRANSFORM_ORIGIN_BY_POSITION[i] } : undefined}
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={src}
-                    alt=""
-                    aria-hidden="true"
-                    className={`h-full w-full object-contain ${isCenter ? "" : "marquee-tile-zoom"}`}
-                    style={
-                      !isCenter
-                        ? ({
-                            "--marquee-zoom-duration": "6s",
-                            "--marquee-zoom-delay": `${ZOOM_DELAY_BY_POSITION[i]}s`,
-                          } as CSSProperties)
-                        : undefined
-                    }
-                  />
+                  <img src={src} alt="" aria-hidden="true" className="h-full w-full object-contain" />
                 </div>
               );
             })}

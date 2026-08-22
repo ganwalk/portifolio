@@ -42,13 +42,22 @@ import type { CSSProperties } from "react";
 // IntersectionObserver do lazy loading escuta pra reavaliar. Sete imagens
 // de poucos KB cada não pesam o bastante pra justificar lazy aqui mesmo.
 //
-// Cinco fileiras no total, só três a partir do sm: no mobile (ver
-// MobileCaseCard em CasesGrid.tsx) este componente vive dentro de um cartão
-// bem mais alto que a tela (h-svh + folga, ver MOBILE_CARD_REST_VH), sobra
-// altura de sobra que três fileiras deixavam vazia; no desktop, a mesma
-// prévia cabe numa caixa normal (h-full de uma coluna do carrossel), onde
-// cinco fileiras apertariam demais. As duas fileiras extras (índice 3 e 4)
-// só têm a classe `flex` (visíveis) até o sm:, e `sm:hidden` dali pra cima.
+// Sete fileiras no total. As cinco primeiras aparecem em qualquer tela: no
+// mobile (ver MobileCaseCard em CasesGrid.tsx) este componente vive dentro
+// de um cartão bem mais alto que a tela (h-svh + folga, ver
+// MOBILE_CARD_REST_VH), então cinco fileiras preenchem o que três deixavam
+// vazio. No desktop este card é a fatia (SlidePanel) inteira, não uma
+// coluna de trio (ecossistema-auvp e intranet-auvp nunca entram no grupo de
+// três artistas, ver `multi` em CasesGrid.tsx), sobra altura de sobra pra
+// mais movimento: as duas últimas fileiras (índice 5 e 6) só existem a
+// partir do sm:, `hidden` até lá.
+//
+// O respiro de zoom (.marquee-tile-zoom) não é mais sorteado por posição na
+// fileira: é fixo em três capturas específicas (câmbio, plataforma de
+// investimento, guia de lançamentos), as que têm mais detalhe de interface
+// pra valer a pausa (ver ZOOM_TILE_INDICES). A mesma imagem pulsa sempre
+// que aparece, em qualquer fileira ou embaralhamento, então o olho aprende
+// a associar aquele respiro a ela e não a uma posição aleatória na tela.
 
 const basePath = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
 const gridPath = (file: string) => `${basePath}/photos/landing-pages-grid/${file}`;
@@ -65,45 +74,45 @@ const ROW_ORDERS: number[][] = [
   [5, 2, 6, 0, 3, 1, 4],
   [1, 4, 0, 6, 2, 3, 5],
   [6, 3, 5, 1, 4, 2, 0],
+  [2, 5, 3, 6, 1, 0, 4],
+  [4, 0, 6, 2, 5, 3, 1],
 ];
-const ROW_DIRECTIONS: ("left" | "right")[] = ["left", "right", "left", "right", "left"];
+const ROW_DIRECTIONS: ("left" | "right")[] = ["left", "right", "left", "right", "left", "right", "left"];
 // Durações diferentes por fileira: sincronizadas, elas emendariam no mesmo
 // instante e a "câmera" pareceria travar de tempos em tempos; fora de
 // sincronia, o movimento lê como orgânico, não como cópias do mesmo
 // relógio.
-const ROW_DURATIONS_S = [46, 36, 30, 42, 33];
-// Só as três primeiras fileiras existem a partir do sm: (ver comentário no
-// topo do arquivo); as duas extras só aparecem no mobile.
-const ROW_MOBILE_ONLY = [false, false, false, true, true];
-// Índices (dentro de cada fileira, já com a sequência dobrada) que ganham o
-// respiro de zoom: um a cada três, começando num deslocamento diferente
-// por fileira pra não pulsarem todos juntos.
-const ZOOM_OFFSETS = [1, 0, 2, 1, 0];
-const ZOOM_STEP = 3;
+const ROW_DURATIONS_S = [46, 36, 30, 42, 33, 39, 28];
+// As duas últimas fileiras só existem a partir do sm: (ver comentário no
+// topo do arquivo); as cinco primeiras aparecem em qualquer tamanho de tela.
+const ROW_DESKTOP_ONLY = [false, false, false, false, false, true, true];
+// Capturas específicas (não posições sorteadas na fileira) que ganham o
+// respiro de zoom sempre que aparecem: câmbio (lp-03), plataforma de
+// investimento (lp-04) e o dashboard do guia de lançamentos (lp-06), as
+// telas com mais interface pra render valer o destaque.
+const ZOOM_TILE_INDICES = new Set([2, 3, 5]);
 
 function Row({
   order,
   direction,
   durationS,
-  zoomOffset,
-  mobileOnly,
+  desktopOnly,
 }: {
   order: number[];
   direction: "left" | "right";
   durationS: number;
-  zoomOffset: number;
-  mobileOnly: boolean;
+  desktopOnly: boolean;
 }) {
   const sequence = [...order, ...order];
   return (
     <div
-      className={`${mobileOnly ? "flex sm:hidden" : "flex"} w-max shrink-0 gap-3 will-change-transform sm:gap-4 ${
+      className={`${desktopOnly ? "hidden sm:flex" : "flex"} w-max shrink-0 gap-3 will-change-transform sm:gap-4 ${
         direction === "left" ? "marquee-row-left" : "marquee-row-right"
       }`}
       style={{ "--marquee-row-duration": `${durationS}s` } as CSSProperties}
     >
       {sequence.map((idx, i) => {
-        const zooms = i % ZOOM_STEP === zoomOffset;
+        const zooms = ZOOM_TILE_INDICES.has(idx);
         return (
           <div key={i} className="h-24 shrink-0 overflow-hidden shadow-xl shadow-black/40 sm:h-32 lg:h-40">
             {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -153,8 +162,7 @@ export function LandingPagesGridPreview({ className = "" }: { className?: string
             order={order}
             direction={ROW_DIRECTIONS[i]}
             durationS={ROW_DURATIONS_S[i]}
-            zoomOffset={ZOOM_OFFSETS[i]}
-            mobileOnly={ROW_MOBILE_ONLY[i]}
+            desktopOnly={ROW_DESKTOP_ONLY[i]}
           />
         ))}
       </div>
