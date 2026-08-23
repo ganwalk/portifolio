@@ -551,16 +551,19 @@ function CaseColumn({
                 igualar o mais alto da fileira, nunca ENCOLHE um item cujo
                 próprio conteúdo (duas linhas de texto) já é mais alto que o
                 botão sozinho, então não bastava pra garantir a "altura
-                exata" pedida quando o texto for longo. Os valores h-8/h-11
-                vêm de medir o botão de verdade (Playwright,
+                exata" pedida quando o texto for longo. Os valores h-11/
+                h-[34px] vêm de medir o botão de verdade (Playwright,
                 getBoundingClientRect): 12px de padding vertical + 18px de
                 linha do type-mono + 2px de borda = 44px (h-11) sempre que
                 não for `multi`, ou só a partir do lg: quando for (abaixo
-                disso o botão do trio usa py-1.5, 6px de padding = 32px,
-                h-8). text-[10px]/leading-[16px] no parágrafo: duas linhas
-                somam exatamente os 32px do caso mais apertado (h-8),
-                sobrando respiro nos demais, centralizado por
-                `justify-center`. */}
+                disso o botão do trio usa py-1.5, 6px de padding = 32px).
+                text-[11px]/leading-[17px] no parágrafo (um ponto maior que
+                o corpo original, o suficiente pra ler melhor sem perder o
+                equilíbrio de duas linhas): duas linhas somam exatamente os
+                34px do caso mais apertado (h-[34px], um pouco mais alto que
+                o botão de 32px ali, mas ainda cabe na mesma linha sem
+                empurrar o resto do rodapé), sobrando respiro nos demais,
+                centralizado por `justify-center`. */}
             <motion.div style={{ y: ctaY }} className="flex items-start gap-3 lg:gap-4">
               <motion.button
                 type="button"
@@ -580,10 +583,10 @@ function CaseColumn({
               </motion.button>
               <div
                 className={`hidden min-w-0 flex-1 flex-col justify-center sm:flex ${
-                  multi ? "h-8 max-w-[20ch] lg:h-11" : "h-11 max-w-[30ch]"
+                  multi ? "h-[34px] max-w-[20ch] lg:h-11" : "h-11 max-w-[30ch]"
                 }`}
               >
-                <p className="line-clamp-2 text-balance text-[10px] leading-[16px] text-white/60">
+                <p className="line-clamp-2 text-balance text-[11px] leading-[17px] text-white/60">
                   {caseStudy.statement.headline[locale]}
                 </p>
               </div>
@@ -985,7 +988,7 @@ function MobileCaseCard({
                 <span aria-hidden>→</span>
               </MotionLink>
               <div className="flex h-11 min-w-0 flex-1 flex-col justify-center">
-                <p className="line-clamp-2 text-balance text-[10px] leading-[16px] text-white/60">
+                <p className="line-clamp-2 text-balance text-[11px] leading-[17px] text-white/60">
                   {caseStudy.statement.headline[locale]}
                 </p>
               </div>
@@ -1193,8 +1196,17 @@ function DesktopCasesGrid({
               CaseColumn): só um lembrete de que rolar é a navegação. Os
               pontos continuam como leitura de posição (não navegação, não
               oferecem atalho de clique), animando a troca em vez de só
-              saltar de um pro outro. */}
-          <div className="gutter pointer-events-none absolute inset-x-0 bottom-8 z-20 flex items-center justify-between text-white">
+              saltar de um pro outro.
+
+              No topo, não mais embaixo: a base do cartão já ficou cheia
+              (botão "ver case" + descrição, ver CaseColumn/MotionLink logo
+              abaixo), enquanto o topo sobrou vazio desde que o card deixou
+              de ter qualquer elemento gráfico próprio ali. top-20/sm:top-24
+              (não top-8, que a base usava) porque o header continua `fixed`
+              por cima de TODA a página (ver SiteFrame.tsx), inclusive
+              quando esta seção já está no meio do scroll: precisa da mesma
+              folga que a Hero usa pra não nascer atrás dele. */}
+          <div className="gutter pointer-events-none absolute inset-x-0 top-20 z-20 flex items-center justify-between text-white sm:top-24">
             <span className="type-mono text-white/50">{dict.cases.scrollHint}</span>
             <div className="flex gap-2">
               {slides.map((slide, index) => (
