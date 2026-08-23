@@ -57,18 +57,28 @@ export function SubtitleRoulette({ words }: { words: readonly string[] }) {
           {w}
         </span>
       ))}
-      {/* Saída mais rápida que a entrada (0.32s contra 0.45s, a mesma regra
+      {/* mode="wait", não o "sync" padrão: sem ele, a palavra que sai e a
+          que entra ficam montadas ao mesmo tempo, as duas na mesma célula
+          da grade, e por um instante aparecem sobrepostas (foi exatamente
+          esse embolado que a versão anterior deixava ver). "wait" só monta
+          a próxima depois que a saída da anterior termina de vez: nunca há
+          duas palavras no ar ao mesmo tempo, garantido pelo próprio
+          Framer Motion, não por acerto de tempo entre durações.
+
+          Saída mais rápida que a entrada (0.32s contra 0.45s, a mesma regra
           de "sai mais rápido do que entra" usada no resto do site), com uma
           curva de ease-in diferente da de entrada em vez da mesma curva
           espelhada: cubic-bezier(0.7, 0, 0.84, 0), a mesma da fase de
           recolhimento das células da Intranet (ver @keyframes
           intranet-tile-center em globals.css), então a fita sai com um
           movimento mais abrupto, "chicoteado", e chega devagar, se
-          assentando. O desfoque de saída também é mais forte (10px contra
-          6px na entrada): a palavra que sai está se movendo mais rápido no
-          mesmo instante, então borra mais, como desfoque de movimento de
-          verdade, não um blur simétrico igual nos dois sentidos. */}
-      <AnimatePresence initial={false}>
+          assentando. Com mode="wait" essa diferença já não serve mais pra
+          reduzir sobreposição (não existe mais nenhuma), só pra manter esse
+          ritmo de saída rápida e chegada deliberada. O desfoque de saída
+          também é mais forte (10px contra 6px na entrada): a palavra que
+          sai está se movendo mais rápido no mesmo instante, então borra
+          mais, como desfoque de movimento de verdade. */}
+      <AnimatePresence initial={false} mode="wait">
         <motion.span
           key={word}
           className="col-start-1 row-start-1 whitespace-nowrap"

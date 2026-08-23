@@ -389,7 +389,21 @@ function CaseColumn({
   // continua visível mesmo depois de coberto pela próxima fatia (é a fatia
   // INTEIRA que encolhe e escurece nesse momento, ver coveredScale/
   // coveredDim em SlidePanel), em vez de desaparecer sozinho antes disso.
-  const contentOpacity = useTransform(enterT, [0, 0.55], [0, 1]);
+  //
+  // As três curvas (opacidade, título, CTA) terminam de subir bem ANTES de
+  // enterT chegar em 1 (0.55/0.58/0.7, medido em Playwright: a informação
+  // toda já estava assentada depois de só ~31% da janela de entrada da
+  // fatia), enquanto `slideY` logo abaixo, a fatia INTEIRA subindo, usa a
+  // janela inteira (enterT 0 a 1). Resultado: o texto chegava e parava
+  // antes da própria fatia terminar de subir atrás dele, lendo como um
+  // corte, informação "estourando" cedo demais em vez de emergir junto com
+  // o resto do movimento. Esticadas até perto do fim de enterT (a CTA
+  // termina exatamente em 1, junto com a fatia), a emergência passa a
+  // acompanhar a subida física da fatia do início ao fim, sem depender de
+  // nenhum tempo de relógio: é a mesma rolagem (já amortecida pela mola em
+  // `smoothProgress`, ver CasesGrid) que rege a fatia e o texto, só que
+  // cada um em ranges diferentes de enterT, criando o escalonamento.
+  const contentOpacity = useTransform(enterT, [0, 0.72], [0, 1]);
 
   // Máscara escalonada: cada linha sobe do zero num instante diferente
   // dentro da própria subida da fatia, em vez do bloco de texto inteiro
@@ -397,8 +411,8 @@ function CaseColumn({
   // migraram pro overlay expandido/página do case, ver RepoLink.tsx): a
   // vitrine da home é só nome do projeto e convite pra entrar, o resto é
   // conteúdo da página interna dele.
-  const titleY = useTransform(enterT, [0.18, 0.58], ["100%", "0%"]);
-  const ctaY = useTransform(enterT, [0.42, 0.7], ["100%", "0%"]);
+  const titleY = useTransform(enterT, [0.25, 0.85], ["100%", "0%"]);
+  const ctaY = useTransform(enterT, [0.55, 1], ["100%", "0%"]);
 
   // Paralaxe da mídia: ela desce de +parallax% a -parallax% ao longo de toda
   // a permanência da fatia, enquanto o texto fica ancorado. É o que mantém a
@@ -508,9 +522,17 @@ function CaseColumn({
         <motion.div
           style={{ opacity: contentOpacity }}
           className={`gutter relative flex h-full flex-col justify-end pointer-events-none text-white ${
-            multi ? "py-4 sm:py-5 lg:py-24" : "py-24 sm:py-28"
+            multi ? "py-4 sm:py-5 lg:py-14" : "py-14 sm:py-16"
           }`}
         >
+          {/* py-14/py-16, não mais py-24/py-28: com o indicador de rolagem
+              (ver mais abaixo) agora morando no topo, a base do cartão não
+              precisa mais reservar tanta distância pra si, e título/botão/
+              descrição descem, ocupando o respiro que sobrou. Só o padding
+              de BAIXO importa de verdade aqui (justify-end absorve o de
+              cima na folga vazia, já que o bloco nunca chega perto do
+              topo), mas py-* continua simétrico por simplicidade, o mesmo
+              raciocínio de sempre. */}
           {/* Só nome do projeto e convite pra entrar: índice, métrica,
               tags e link do repositório saíram do cartão de prévia e
               foram morar na página/overlay do case (ver ExpandedCase e
