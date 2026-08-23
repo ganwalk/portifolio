@@ -1225,18 +1225,23 @@ function DesktopCasesGrid({
               abaixo), enquanto o topo sobrou vazio desde que o card deixou
               de ter qualquer elemento gráfico próprio ali.
 
-              top-16 (64px), a MESMA distância que o botão "ver case" fica
-              da base (py-16 em CaseColumn, o valor que vale pra qualquer
-              caso não `multi` a partir do sm:, ver comentário lá). Sem essa
-              igualdade, o topo e a base liam como duas régua diferentes.
-              Cabe: o header mede 57px de altura (medido via Playwright,
-              já no estado `scrolled`, o mais compacto), então 64px ainda
-              sobra uma folga de 7px antes do texto, sem precisar abrir mão
-              da simetria com a base. Sem responsividade (nem sm:, nem
-              lg:) de propósito: este bar só existe a partir do sm:
+              top-[121px]: a mesma folga de 64px que o botão "ver case" tem
+              da base (py-16 em CaseColumn, ver comentário lá), só que
+              medida a partir do obstáculo mais próximo em cada ponta, não
+              da borda da tela nos dois casos. O botão não tem nada
+              disputando espaço embaixo dele, os 64px são limpos até a
+              borda; o topo tem o header `fixed` por cima de TUDO (ver
+              SiteFrame.tsx), inclusive no meio do scroll desta seção, então
+              64px a partir da borda do topo (primeira tentativa, revertida)
+              sobrava só 7px depois do header (57px de altura, medido via
+              Playwright já no estado `scrolled`) e lia como grudado nele,
+              não como a mesma folga espaçosa que o botão tem. 57 + 64 = 121:
+              a MESMA folga de 64px, contada a partir de onde o header
+              termina, não de onde a tela começa. Sem responsividade (nem
+              sm:, nem lg:) de propósito: este bar só existe a partir do sm:
               (DesktopCasesGrid só monta ali, ver isDesktop em CasesGrid),
               então um valor só já cobre toda faixa em que ele aparece. */}
-          <div className="gutter pointer-events-none absolute inset-x-0 top-16 z-20 flex items-center justify-between text-white">
+          <div className="gutter pointer-events-none absolute inset-x-0 top-[121px] z-20 flex items-center justify-between text-white">
             <span className="type-mono text-white/50">{dict.cases.scrollHint}</span>
             <div className="flex gap-2">
               {slides.map((slide, index) => (
