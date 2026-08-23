@@ -19,6 +19,17 @@
 // aleatório, não como guia), as oito encolhem de volta e o Dashboard cresce
 // de novo, fechando o loop no mesmo estado do início.
 //
+// Duas camadas extras de vida pro trecho que ficava mais parado (a
+// comparação direta com o resto do site, cheio de movimento contínuo,
+// deixava esta prévia com cara de "pobre"): um brilho de vidro
+// (.intranet-tile-sheen, ver globals.css) passa pela célula central só
+// durante os dois respiros em que ela está de fato em destaque, e as
+// linhas da grade ganham um pulso sutil de opacidade no meio do próprio
+// platô revelado, em vez de ficarem num traço fixo o tempo todo. As duas
+// coisas vivem no MESMO relógio de 14s das células, não um relógio à
+// parte: dois relógios fora de sincronia é exatamente o que fazia o zoom
+// antigo dos satélites ler como aleatório.
+//
 // Quarta versão deste componente. A primeira era uma coreografia com quatro
 // pranchetas nas pontas; a segunda, fileiras deslizantes sem nenhum "gesto
 // de câmera"; a terceira, um zoom de câmera sobre a grade inteira (chegava
@@ -141,7 +152,7 @@ export function IntranetGridPreview({ className = "" }: { className?: string }) 
                 <div
                   key={i}
                   className={`aspect-[4/3] overflow-hidden border border-white/10 bg-black sm:aspect-video ${
-                    isCenter ? "intranet-tile-center" : "intranet-tile-satellite"
+                    isCenter ? "intranet-tile-center intranet-tile-sheen" : "intranet-tile-satellite"
                   }`}
                   style={!isCenter ? { transformOrigin: TRANSFORM_ORIGIN_BY_POSITION[i] } : undefined}
                 >

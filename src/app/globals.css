@@ -754,12 +754,11 @@ html[data-boring="true"] .texture-noise::after {
    nada. O Dashboard encolhe de volta a 1 no mesmo instante em que as outras
    oito terminam de crescer: metade do "zoom out" é literalmente as outras
    telas se aproximando, não só o destaque afastando. Depois de um respiro
-   com a grade inteira revelada (onde .marquee-tile-zoom, a mesma pulsação
-   usada nos ladrilhos da Landing Pages, já dá o "revezamento" de destaque
-   entre as pranchetas — ver o componente), as oito encolhem de volta a 0 e
-   o Dashboard cresce de novo pra 1.5, fechando o loop no mesmo estado do
-   início. Só `transform`, o mesmo motivo das prévias acima pra caber como
-   CSS puro. */
+   com a grade inteira revelada e PARADA (sem pulsação nenhuma por cima: ver
+   .intranet-grid-lines-guide logo abaixo pro que dá vida a essa pausa), as
+   oito encolhem de volta a 0 e o Dashboard cresce de novo pra 1.5, fechando
+   o loop no mesmo estado do início. Só `transform`, o mesmo motivo das
+   prévias acima pra caber como CSS puro. */
 @keyframes intranet-tile-center {
   0%,
   8% {
@@ -782,10 +781,101 @@ html[data-boring="true"] .texture-noise::after {
     transform: scale(1.5);
   }
 }
+/* Halo suave em volta da célula em destaque, nas mesmas duas janelas do
+   brilho de vidro abaixo (0 a 8% e 87 a 100%): dá peso visual real ao
+   "esta é a tela em foco agora" mesmo num screenshot parado, sem depender
+   só do brilho de vidro (sutil demais sozinho em cima de pranchetas já
+   claras) pra comunicar o destaque. box-shadow, não transform/opacity: foge
+   da regra de só animar as duas propriedades compositáveis, mas é UM
+   elemento pequeno, ativo só ~2s dos 14s do ciclo, custo desprezível. */
+@keyframes intranet-tile-glow {
+  0%,
+  8% {
+    box-shadow:
+      0 0 0 1px rgba(255, 255, 255, 0.35),
+      0 24px 64px -12px rgba(255, 255, 255, 0.4);
+  }
+  20%,
+  87% {
+    box-shadow:
+      0 0 0 1px rgba(255, 255, 255, 0.1),
+      0 0 0 0 rgba(255, 255, 255, 0);
+  }
+  100% {
+    box-shadow:
+      0 0 0 1px rgba(255, 255, 255, 0.35),
+      0 24px 64px -12px rgba(255, 255, 255, 0.4);
+  }
+}
 .intranet-tile-center {
-  animation: intranet-tile-center ease-in-out infinite;
+  animation:
+    intranet-tile-center ease-in-out infinite,
+    intranet-tile-glow ease-in-out infinite;
   animation-duration: 14s;
 }
+
+/* Brilho de vidro passando pela célula em destaque, só durante as duas
+   janelas em que ela está de fato PARADA em destaque (0 a 8% e 87 a 100%
+   do mesmo relógio de 14s acima, os mesmos instantes de scale(1.5) em
+   .intranet-tile-center): sem ele, esses dois respiros ficavam com a
+   prancheta só parada ali, sem nenhum brilho ou peso visual extra pra
+   marcar "esta é a tela em foco agora". Opacidade cai a 0 no resto do
+   ciclo (a grade crescendo/revelada/encolhendo já tem movimento de sobra
+   vindo das próprias células, não precisa de mais nada por cima). Mesmo
+   relógio, não um novo: evita o problema de duas pulsações fora de sincronia
+   que fazia o zoom aleatório antigo dos satélites (removido) ler como
+   ruído em vez de guia. */
+@keyframes intranet-tile-sheen {
+  0% {
+    transform: translate3d(-35%, -35%, 0) rotate(20deg);
+    opacity: 0.8;
+  }
+  8% {
+    transform: translate3d(35%, 35%, 0) rotate(20deg);
+    opacity: 0.8;
+  }
+  8.5%,
+  86.5% {
+    opacity: 0;
+  }
+  87% {
+    transform: translate3d(-35%, -35%, 0) rotate(20deg);
+    opacity: 0.8;
+  }
+  95% {
+    transform: translate3d(35%, 35%, 0) rotate(20deg);
+    opacity: 0.8;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+.intranet-tile-sheen {
+  position: relative;
+}
+.intranet-tile-sheen::after {
+  content: "";
+  position: absolute;
+  inset: -50%;
+  /* mix-blend-mode: overlay, não um branco translúcido comum por cima:
+     as pranchetas do Design System já têm áreas bem claras (cards do
+     Dashboard, fundos brancos de componente), onde um branco simples em
+     cima quase não aparece. Overlay reage ao brilho de baixo (escurece
+     um pouco o que já é claro, clareia o que é escuro), então o brilho
+     lê como um reflexo de vidro de verdade em qualquer trecho da
+     prancheta, não só nas partes escuras. */
+  background: linear-gradient(
+    115deg,
+    transparent 40%,
+    rgba(255, 255, 255, 0.9) 50%,
+    transparent 60%
+  );
+  mix-blend-mode: overlay;
+  pointer-events: none;
+  animation: intranet-tile-sheen ease-in-out infinite;
+  animation-duration: 14s;
+}
+
 @keyframes intranet-tile-satellite {
   0%,
   8% {
@@ -816,13 +906,28 @@ html[data-boring="true"] .texture-noise::after {
 /* Viewfinder fixo (não escala com nenhuma célula): opacidade sobe exatamente
    durante a revelação da grade e desce durante o recolhimento de volta pro
    destaque, guiando visualmente as duas transições em vez de ficar um
-   traço estático o tempo todo. Mesma linha do tempo dos 14s acima. */
+   traço estático o tempo todo. Mesma linha do tempo dos 14s acima.
+
+   Um respiro sutil de opacidade DENTRO do próprio platô (26% a 69%, quando
+   a grade já está toda revelada e as células paradas): sem ele, esse trecho
+   inteiro (uns 6s dos 14s do ciclo) ficava sem nenhum movimento nenhum,
+   nem nas células, nem aqui, e a prévia lia como "travada" bem no meio do
+   próprio loop. A variação é pequena (1 a 0.65 a 1), não um pisca-pisca,
+   só o suficiente pra nunca ficar de fato parado. */
 @keyframes intranet-grid-lines-guide {
   0%,
   10% {
     opacity: 0;
   }
-  26%,
+  26% {
+    opacity: 1;
+  }
+  40% {
+    opacity: 0.65;
+  }
+  55% {
+    opacity: 1;
+  }
   69% {
     opacity: 1;
   }

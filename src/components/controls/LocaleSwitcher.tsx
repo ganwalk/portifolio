@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { locales, localeNames, type Locale } from "@/i18n/config";
+import { locales, localeNames, localeCodes, type Locale } from "@/i18n/config";
 import type { Dictionary } from "@/i18n/dictionaries";
 
 // Nav de troca de idioma. Vive em dois lugares: dentro de ControlBar
@@ -49,7 +49,7 @@ export function LocaleSwitcher({
           }`}
           title={localeNames[l]}
         >
-          {l.toUpperCase()}
+          {localeCodes[l]}
         </Link>
       ))}
     </nav>

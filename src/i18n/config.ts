@@ -11,6 +11,17 @@ export const localeNames: Record<Locale, string> = {
   zh: "中文",
 };
 
+// Sigla curta do seletor de idioma (ver LocaleSwitcher.tsx): "PT" sozinho lê
+// como português de Portugal, não do Brasil. "BR" tira a ambiguidade sem
+// precisar de "PT-BR" (a rota e o slug continuam "pt", só a sigla visível
+// muda).
+export const localeCodes: Record<Locale, string> = {
+  pt: "BR",
+  en: "EN",
+  es: "ES",
+  zh: "ZH",
+};
+
 export const htmlLang: Record<Locale, string> = {
   pt: "pt-BR",
   en: "en",

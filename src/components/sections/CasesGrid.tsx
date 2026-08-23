@@ -1223,12 +1223,20 @@ function DesktopCasesGrid({
               No topo, não mais embaixo: a base do cartão já ficou cheia
               (botão "ver case" + descrição, ver CaseColumn/MotionLink logo
               abaixo), enquanto o topo sobrou vazio desde que o card deixou
-              de ter qualquer elemento gráfico próprio ali. top-20/sm:top-24
-              (não top-8, que a base usava) porque o header continua `fixed`
-              por cima de TODA a página (ver SiteFrame.tsx), inclusive
-              quando esta seção já está no meio do scroll: precisa da mesma
-              folga que a Hero usa pra não nascer atrás dele. */}
-          <div className="gutter pointer-events-none absolute inset-x-0 top-20 z-20 flex items-center justify-between text-white sm:top-24">
+              de ter qualquer elemento gráfico próprio ali.
+
+              top-16 (64px), a MESMA distância que o botão "ver case" fica
+              da base (py-16 em CaseColumn, o valor que vale pra qualquer
+              caso não `multi` a partir do sm:, ver comentário lá). Sem essa
+              igualdade, o topo e a base liam como duas régua diferentes.
+              Cabe: o header mede 57px de altura (medido via Playwright,
+              já no estado `scrolled`, o mais compacto), então 64px ainda
+              sobra uma folga de 7px antes do texto, sem precisar abrir mão
+              da simetria com a base. Sem responsividade (nem sm:, nem
+              lg:) de propósito: este bar só existe a partir do sm:
+              (DesktopCasesGrid só monta ali, ver isDesktop em CasesGrid),
+              então um valor só já cobre toda faixa em que ele aparece. */}
+          <div className="gutter pointer-events-none absolute inset-x-0 top-16 z-20 flex items-center justify-between text-white">
             <span className="type-mono text-white/50">{dict.cases.scrollHint}</span>
             <div className="flex gap-2">
               {slides.map((slide, index) => (
