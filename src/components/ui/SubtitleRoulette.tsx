@@ -57,13 +57,29 @@ export function SubtitleRoulette({ words }: { words: readonly string[] }) {
           {w}
         </span>
       ))}
+      {/* Saída mais rápida que a entrada (0.32s contra 0.45s, a mesma regra
+          de "sai mais rápido do que entra" usada no resto do site), com uma
+          curva de ease-in diferente da de entrada em vez da mesma curva
+          espelhada: cubic-bezier(0.7, 0, 0.84, 0), a mesma da fase de
+          recolhimento das células da Intranet (ver @keyframes
+          intranet-tile-center em globals.css), então a fita sai com um
+          movimento mais abrupto, "chicoteado", e chega devagar, se
+          assentando. O desfoque de saída também é mais forte (10px contra
+          6px na entrada): a palavra que sai está se movendo mais rápido no
+          mesmo instante, então borra mais, como desfoque de movimento de
+          verdade, não um blur simétrico igual nos dois sentidos. */}
       <AnimatePresence initial={false}>
         <motion.span
           key={word}
           className="col-start-1 row-start-1 whitespace-nowrap"
           initial={{ y: "70%", opacity: 0, filter: "blur(6px)" }}
           animate={{ y: "0%", opacity: 1, filter: "blur(0px)" }}
-          exit={{ y: "-70%", opacity: 0, filter: "blur(6px)" }}
+          exit={{
+            y: "-70%",
+            opacity: 0,
+            filter: "blur(10px)",
+            transition: { duration: 0.32, ease: [0.7, 0, 0.84, 0] },
+          }}
           transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
         >
           {word}
