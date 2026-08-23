@@ -508,9 +508,17 @@ function CaseColumn({
         <motion.div
           style={{ opacity: contentOpacity }}
           className={`gutter relative flex h-full flex-col justify-end pointer-events-none text-white ${
-            multi ? "py-4 sm:py-5 lg:py-24" : "py-24 sm:py-28"
+            multi ? "py-4 sm:py-5 lg:py-14" : "py-14 sm:py-16"
           }`}
         >
+          {/* py-14/py-16, não mais py-24/py-28: com o indicador de rolagem
+              (ver mais abaixo) agora morando no topo, a base do cartão não
+              precisa mais reservar tanta distância pra si, e título/botão/
+              descrição descem, ocupando o respiro que sobrou. Só o padding
+              de BAIXO importa de verdade aqui (justify-end absorve o de
+              cima na folga vazia, já que o bloco nunca chega perto do
+              topo), mas py-* continua simétrico por simplicidade, o mesmo
+              raciocínio de sempre. */}
           {/* Só nome do projeto e convite pra entrar: índice, métrica,
               tags e link do repositório saíram do cartão de prévia e
               foram morar na página/overlay do case (ver ExpandedCase e
