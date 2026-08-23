@@ -18,7 +18,6 @@ import { ARTIST_PREVIEW_SLUGS, ArtistPreview } from "@/components/ui/ArtistPrevi
 import { CaseMetrics } from "@/components/ui/CaseMetrics";
 import { CaseStatement } from "@/components/ui/CaseStatement";
 import { CursorLabel } from "@/components/ui/CursorLabel";
-import { IntranetGridPreview } from "@/components/ui/IntranetGridPreview";
 import { IntranetShowcase } from "@/components/ui/IntranetShowcase";
 import { LandingPagesGridPreview } from "@/components/ui/LandingPagesGridPreview";
 import { LiveEmbed } from "@/components/ui/LiveEmbed";
@@ -495,11 +494,6 @@ function CaseColumn({
               // CSS/imagens leves, não um WebGL ou vídeo pesado que
               // justifique esperar o scroll chegar perto.
               <LandingPagesGridPreview className="h-full w-full" />
-            ) : caseStudy.slug === "intranet-auvp" ? (
-              // Mesma técnica da grade de Landing Pages, apresentação
-              // própria (ver IntranetGridPreview.tsx): pranchetas reais do
-              // Design System, não capturas de landing page.
-              <IntranetGridPreview className="h-full w-full" />
             ) : isNearActive ? (
               <MediaView
                 media={caseStudy.cover}
@@ -961,8 +955,6 @@ function MobileCaseCard({
             />
           ) : caseStudy.slug === "ecossistema-auvp" ? (
             <LandingPagesGridPreview className="absolute inset-0 h-full w-full" />
-          ) : caseStudy.slug === "intranet-auvp" ? (
-            <IntranetGridPreview className="absolute inset-0 h-full w-full" />
           ) : isNear ? (
             <MediaView
               media={caseStudy.cover}

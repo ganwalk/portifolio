@@ -16,8 +16,7 @@ import type { CSSProperties } from "react";
 // repete o mesmo enquadramento exato de um carregamento pro outro, ao
 // contrário de uma foto fixa recortada num tamanho.
 //
-// Puro CSS (ver .marquee-row-left/.marquee-row-right em globals.css,
-// reaproveitadas por IntranetGridPreview.tsx com a mesma técnica), nenhum
+// Puro CSS (ver .marquee-row-left/.marquee-row-right em globals.css), nenhum
 // JS de animação: cada fileira é o MESMO conjunto de sete imagens desenhado
 // duas vezes seguidas, e animar de translateX(0) até translateX(-50%) cai
 // exatamente sobre a cópia seguinte, sem salto nenhum no loop. O
