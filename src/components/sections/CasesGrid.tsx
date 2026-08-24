@@ -18,6 +18,7 @@ import { ARTIST_PREVIEW_SLUGS, ArtistPreview } from "@/components/ui/ArtistPrevi
 import { CaseMetrics } from "@/components/ui/CaseMetrics";
 import { CaseStatement } from "@/components/ui/CaseStatement";
 import { CursorLabel } from "@/components/ui/CursorLabel";
+import { IntranetGridPreview } from "@/components/ui/IntranetGridPreview";
 import { IntranetShowcase } from "@/components/ui/IntranetShowcase";
 import { LandingPagesGridPreview } from "@/components/ui/LandingPagesGridPreview";
 import { LiveEmbed } from "@/components/ui/LiveEmbed";
@@ -494,6 +495,13 @@ function CaseColumn({
               // CSS/imagens leves, não um WebGL ou vídeo pesado que
               // justifique esperar o scroll chegar perto.
               <LandingPagesGridPreview className="h-full w-full" />
+            ) : caseStudy.slug === "intranet-auvp" ? (
+              // Sem MediaView aqui também: réplica em CSS puro do vídeo
+              // que ocupava esse lugar (ver IntranetGridPreview.tsx), não
+              // o vídeo comprimido em si, que perde nitidez nas capturas
+              // de tela de UI mesmo em qualidade alta. Mesmo raciocínio
+              // do trio de artistas e de Landing Pages.
+              <IntranetGridPreview className="h-full w-full" />
             ) : isNearActive ? (
               <MediaView
                 media={caseStudy.cover}
@@ -955,6 +963,8 @@ function MobileCaseCard({
             />
           ) : caseStudy.slug === "ecossistema-auvp" ? (
             <LandingPagesGridPreview className="absolute inset-0 h-full w-full" />
+          ) : caseStudy.slug === "intranet-auvp" ? (
+            <IntranetGridPreview className="absolute inset-0 h-full w-full" />
           ) : isNear ? (
             <MediaView
               media={caseStudy.cover}

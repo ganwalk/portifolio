@@ -670,6 +670,14 @@ html[data-boring="true"] .texture-noise::after {
   --fundo-base-2: #0a0a0a;
   --fundo-duration: 22s;
 }
+.grid-fundo-gradient--intranet {
+  --fundo-c1: rgba(255, 255, 255, 0.055);
+  --fundo-c2: rgba(255, 255, 255, 0.03);
+  --fundo-base-1: #101010;
+  --fundo-base-2: #000000;
+  --fundo-duration: 34s;
+  animation-direction: reverse;
+}
 
 /* ==========================================================================
    PRÉVIA AO VIVO DA LANDING PAGES (LandingPagesGridPreview.tsx)
@@ -725,6 +733,81 @@ html[data-boring="true"] .texture-noise::after {
   animation: marquee-tile-zoom ease-in-out infinite;
   animation-duration: var(--marquee-zoom-duration, 7s);
   animation-delay: var(--marquee-zoom-delay, 0s);
+}
+
+/* ==========================================================================
+   PRÉVIA AO VIVO DA INTRANET (IntranetGridPreview.tsx)
+   Réplica da coreografia do vídeo que ocupava esse lugar antes
+   (intranet-preview.mp4, estudado quadro a quadro): não é cada célula
+   animando a própria escala (as três versões anteriores deste componente
+   tentaram isso e nenhuma chegou perto), é uma câmera só, um scale() na
+   GRADE INTEIRA, com transform-origin no centro dela mesma, que por
+   coincidência de layout (3×3, célula central) é exatamente onde vive o
+   Dashboard do Aluno. Dá zoom saindo dele sozinho preenchendo o quadro até
+   revelar as nove pranchetas, descansa, e volta.
+
+   Tempos medidos no vídeo de verdade (9,03s ao todo, 271 quadros a 30fps,
+   ffmpeg -vf fps=5 + contact sheet pra mapear onde cada fase começa e
+   termina): sai do zoom em ~1,8s (20% do ciclo), descansa revelada até
+   ~5,0s (55%), volta a fechar em ~5,8s (64%), descansa fechada até o fim
+   (100%, onde fecha o loop exatamente no mesmo estado do início). scale(1)
+   é a grade em repouso (as nove células do tamanho normal); o valor de
+   scale() fechado (2.7) veio de medir de verdade (Playwright,
+   getBoundingClientRect): a célula do Dashboard tem 538px numa grade de
+   1440px de viewport, 1440/538 ≈ 2.68, arredondado pra 2.7. Sobra folga
+   vertical de propósito (a célula preenche a largura toda, mas não a
+   altura toda): é aí que a moldura de monitor abaixo "respira". */
+@keyframes intranet-camera-zoom {
+  0%,
+  8% {
+    transform: scale(2.7);
+    animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+  }
+  20% {
+    transform: scale(1);
+  }
+  55% {
+    transform: scale(1);
+    animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+  }
+  64%,
+  100% {
+    transform: scale(2.7);
+  }
+}
+.intranet-camera {
+  animation: intranet-camera-zoom 9s ease-in-out infinite;
+}
+
+/* Moldura de monitor: só aparece quando a câmera está fechada num único
+   quadro (as mesmas duas janelas do scale(2.7) acima), igual no vídeo
+   original (na grade revelada, nenhuma prancheta tem essa moldura, é a
+   câmera fechada que "veste" o quadro nela). Vinheta radial escurecendo os
+   cantos + um degradê sutil simulando o bisel metálico, sem escalar junto
+   com `.intranet-camera` (vive num elemento irmão, por cima, com posição
+   fixa em relação ao quadro): a moldura é do ENQUADRAMENTO, não da grade. */
+@keyframes intranet-bezel-fade {
+  0%,
+  8% {
+    opacity: 1;
+  }
+  20%,
+  55% {
+    opacity: 0;
+  }
+  64%,
+  100% {
+    opacity: 1;
+  }
+}
+.intranet-bezel {
+  animation: intranet-bezel-fade ease-in-out infinite;
+  animation-duration: 9s;
+  background:
+    linear-gradient(rgba(0, 0, 0, 0.55), transparent 12%, transparent 88%, rgba(0, 0, 0, 0.55)),
+    linear-gradient(90deg, rgba(0, 0, 0, 0.5), transparent 8%, transparent 92%, rgba(0, 0, 0, 0.5)),
+    radial-gradient(ellipse at center, transparent 55%, rgba(0, 0, 0, 0.45) 100%);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
 }
 
 /* Respeito ao sistema: se a pessoa pediu menos movimento, o site obedece
