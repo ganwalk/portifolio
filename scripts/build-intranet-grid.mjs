@@ -2,14 +2,18 @@
 // (intranet-componentes/*.png, enviados direto pra main em 20/08/2026) pro
 // que a prévia ao vivo do case usa (ver IntranetGridPreview.tsx): nove
 // pranchetas do Design System (Progress Bar, Contagem Regressiva, Timeline,
-// Botões, Paleta Sequencial, Tipografia, Badges & Tags, Dashboard do Aluno),
-// cada uma centralizada num quadro preto bem maior que o conteúdo em si.
+// Botões, Paleta Sequencial, Tipografia, Badges & Tags, Dashboard do Aluno).
 //
-// .trim() corta essa margem preta uniforme automaticamente (detecta a caixa
-// de conteúdo de verdade por imagem, cada prancheta com uma folga
-// diferente), sem precisar de nove recortes manuais calibrados um a um.
-// Depois disso, redimensiona pra largura de exibição real (800px, não os
-// ~1150px da prancheta original).
+// Sem .trim() (versão anterior cortava a margem preta ao redor do conteúdo
+// automaticamente): pedido explícito de usar as pranchetas exatamente como
+// foram enviadas, moldura preta original incluída, não uma versão recortada
+// por heurística. Como resultado direto, as nove saem todas na MESMA
+// proporção (as pranchetas originais já têm o mesmo tamanho, 1166×724), o
+// que também simplifica a grade: uma célula só (ver ASPECT em
+// IntranetGridPreview.tsx) serve pra todas, sem letterbox nenhum.
+//
+// Só redimensiona pra largura de exibição real (800px, não os ~1150px da
+// prancheta original).
 //
 // Uso (sharp não fica no package.json, é ferramenta de bancada, não do
 // site):
@@ -42,7 +46,6 @@ async function main() {
   for (const file of files) {
     const outFile = `${OUT_DIR}/ig-${String(i).padStart(2, "0")}.webp`;
     await sharp(`${SRC_DIR}/${file}`)
-      .trim()
       .resize({ width: TILE_WIDTH, withoutEnlargement: true })
       .webp({ quality: TILE_QUALITY })
       .toFile(outFile);
