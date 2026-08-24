@@ -4,10 +4,10 @@ import type { Experiment } from "./types";
 // internos do próprio Next): o mesmo motivo do CONTACT_IMAGE em Contact.tsx.
 const basePath = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
 
-// Bloco compacto "Extras" na home, 3 a 4 experimentos selecionados.
-// Mídias placeholder (Pexels e Picsum) até as reais chegarem: colagens
-// digitalizadas, gravações de tela dos estudos de movimento e trechos de
-// produção no DAW. A troca é substituir o bloco media de cada item.
+// Bloco compacto "Extras" na home, 3 a 4 experimentos selecionados: colagens
+// digitalizadas, gravações de tela dos estudos de movimento e um show ao
+// vivo de produção musical, todos com mídia real (nenhum placeholder de
+// banco de imagens restante).
 
 export const experiments: Experiment[] = [
   {
@@ -176,23 +176,29 @@ export const experiments: Experiment[] = [
       es: "Audio",
       zh: "音频",
     },
-    // Sugestão de mídia real: vídeo do arranjo no DAW rodando, ou player de
-    // áudio com uma faixa autoral. Herdou o placeholder que antes morava no
-    // case do Ganwalk (estúdio de gravação): o Ganwalk trocou pra um
-    // placeholder de tela/código, mais afinado com a "identidade visual que
-    // ganha vida" do próprio texto do case, e este estúdio combina melhor
-    // aqui, com produção musical de verdade.
+    // Vídeo real (0824.mp4, enviado direto pra main): um show ao vivo, com
+    // guitarra e microfone, cabelo grande de uma época já passada, daí o
+    // hoverNote abaixo. Poster gerado por scripts/build-som-poster.mjs, um
+    // quadro do próprio vídeo.
     media: {
       kind: "video",
-      src: "https://videos.pexels.com/video-files/7586165/7586165-hd_1920_1080_24fps.mp4",
-      poster:
-        "https://images.pexels.com/videos/7586165/adult-analogue-art-audio-engineer-7586165.jpeg?auto=compress&w=1280",
+      src: `${basePath}/videos/0824.mp4`,
+      poster: `${basePath}/photos/som-01-poster.webp`,
       alt: {
-        pt: "Estúdio de gravação em luz âmbar, mesa de mixagem em primeiro plano",
-        en: "Recording studio in amber light, mixing desk in the foreground",
-        es: "Estudio de grabación con luz ámbar, mesa de mezclas en primer plano",
-        zh: "琥珀色灯光下的录音棚，前景是调音台",
+        pt: "Apresentação ao vivo, guitarra e microfone sob luz de palco rosa e roxa",
+        en: "Live performance, guitar and microphone under pink and purple stage light",
+        es: "Presentación en vivo, guitarra y micrófono bajo luz de escenario rosa y morada",
+        zh: "现场演出，粉紫色舞台灯光下的吉他与麦克风",
       },
+    },
+    // Vídeo já fala por si (show ao vivo): o hover não troca a vitrine por
+    // nenhum still, só acrescenta este comentário à parte (ver hoverNote em
+    // types.ts e ExperimentCard.tsx).
+    hoverNote: {
+      pt: "(as vezes sinto saudade do cabelo grande)",
+      en: "(sometimes I miss having long hair)",
+      es: "(a veces extraño el pelo largo)",
+      zh: "(有时会怀念长发)",
     },
   },
 ];

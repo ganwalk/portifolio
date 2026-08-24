@@ -773,9 +773,6 @@ function ExpandedCase({
           <p className="type-mono mt-10 text-muted">
             {caseStudy.tags[locale].join(" • ")}
           </p>
-          {caseStudy.repoUrl && (
-            <RepoLink repoUrl={caseStudy.repoUrl} title={caseStudy.title[locale]} dict={dict} className="mt-3" />
-          )}
         </Reveal>
 
         {caseStudy.slug === "intranet-auvp" && caseStudy.demoUrl ? (
@@ -806,6 +803,12 @@ function ExpandedCase({
                 <div className="texture-noise aspect-4/3 bg-surface" />
               </div>
             )}
+          </Reveal>
+        )}
+
+        {caseStudy.repoUrl && (
+          <Reveal delay={0.62} className="mt-12 flex justify-center">
+            <RepoLink repoUrl={caseStudy.repoUrl} title={caseStudy.title[locale]} dict={dict} />
           </Reveal>
         )}
 
