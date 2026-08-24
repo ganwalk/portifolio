@@ -28,13 +28,15 @@ import type { CSSProperties } from "react";
 // Paleta Sequencial embaixo), mantida aqui mesmo sem mais replicar a
 // câmera dele.
 //
-// Ladrilho na proporção NATIVA de cada prancheta dentro de uma célula
-// aspect-video (a proporção nativa da maioria delas): as pranchetas têm
-// proporções bem diferentes entre si (de 1.54:1 a 2.46:1, ver
-// scripts/build-intranet-grid.mjs, que preserva a proporção original ao
-// recortar a margem preta), então object-contain (não object-cover) evita
-// cortar qualquer uma. Sem arredondamento nas bordas, a mesma linguagem
-// "prancheta" das capturas em si.
+// Pranchetas usadas EXATAMENTE como foram enviadas, moldura preta original
+// incluída, sem cortar nada (scripts/build-intranet-grid.mjs não usa mais
+// .trim(), pedido explícito): as nove já nascem na mesma proporção
+// (1166×724, a prancheta original), então uma célula só (TILE_ASPECT
+// abaixo) serve pra todas, sem letterbox nenhum. object-contain continua
+// como rede de segurança (não object-cover): mesmo com a proporção
+// batendo, contain garante que nenhum arredondamento de pixel corte um
+// fio sequer da imagem. Sem arredondamento nas bordas da célula, a mesma
+// linguagem "prancheta" das capturas em si.
 //
 // Imagens processadas por scripts/build-intranet-grid.mjs a partir das
 // pranchetas brutas em intranet-componentes/ (enviadas direto pra main em
@@ -42,6 +44,11 @@ import type { CSSProperties } from "react";
 
 const basePath = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
 const gridPath = (file: string) => `${basePath}/photos/intranet-grid/${file}`;
+
+// Proporção nativa da prancheta original (1166×724), a mesma pras nove:
+// sem essa aspect-ratio exata, o navegador teria que esperar a imagem
+// carregar pra saber a altura da célula, deslocando o resto da grade.
+const TILE_ASPECT = "1166/724";
 
 const CENTER_INDEX = 4;
 
@@ -109,14 +116,13 @@ export function IntranetGridPreview({ className = "" }: { className?: string }) 
               return (
                 <div
                   key={i}
-                  className={`aspect-video overflow-hidden border border-white/10 bg-black ${
+                  className={`overflow-hidden border border-white/10 bg-black ${
                     isCenter ? "intranet-tile-center-pulse" : "intranet-tile-slide"
                   }`}
-                  style={
-                    !isCenter
-                      ? ({ "--slide-x": slide.x, "--slide-y": slide.y } as CSSProperties)
-                      : undefined
-                  }
+                  style={{
+                    aspectRatio: TILE_ASPECT,
+                    ...(!isCenter ? { "--slide-x": slide.x, "--slide-y": slide.y } : {}),
+                  } as CSSProperties}
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src={src} alt="" aria-hidden="true" className="h-full w-full object-contain" />
