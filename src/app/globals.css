@@ -627,9 +627,10 @@ html[data-boring="true"] .texture-noise::after {
    carregamento pro outro.
 
    Uma classe base com os tons/velocidade em custom properties, e a variante
-   --landing por cima só trocando esses valores (existiu uma --intranet
-   também, removida junto com IntranetGridPreview.tsx: a Intranet voltou a
-   usar o vídeo de capa de verdade, ver CasesGrid.tsx). */
+   --landing por cima só trocando esses valores. Existiu uma --intranet
+   também (mesma ideia, tons bem mais escuros): removida porque IntranetGrid-
+   Preview.tsx passou a usar a FOTO de verdade como fundo em vez de tentar
+   aproximá-la com gradiente radial (ver .intranet-fundo-photo logo abaixo). */
 @keyframes grid-fundo-drift {
   0%,
   100% {
@@ -670,13 +671,35 @@ html[data-boring="true"] .texture-noise::after {
   --fundo-base-2: #0a0a0a;
   --fundo-duration: 22s;
 }
-.grid-fundo-gradient--intranet {
-  --fundo-c1: rgba(255, 255, 255, 0.055);
-  --fundo-c2: rgba(255, 255, 255, 0.03);
-  --fundo-base-1: #101010;
-  --fundo-base-2: #000000;
-  --fundo-duration: 34s;
-  animation-direction: reverse;
+/* Fundo da Intranet: a FOTO de verdade (landing-pages-grid/FUNDO.jpg,
+   processada por scripts/build-intranet-fundo.mjs), não uma aproximação em
+   gradiente radial (a variante --intranet daqui de cima, removida: tentar
+   RECRIAR a nuvem de luz fora de centro e o grão pesado só com CSS nunca
+   convenceu, a foto já tem os dois prontos). background-image via style
+   inline no componente (a URL depende de NEXT_PUBLIC_BASE_PATH em tempo de
+   build, CSS puro não alcança isso); aqui só o movimento: um "Ken Burns"
+   lento, background-position derivando e um scale bem sutil respirando
+   junto, pra nunca ficar de fato parada sem depender de mais nenhum grão
+   sintético por cima (a foto já é grão o bastante, empilhar
+   .texture-noise-animate ficava denso demais). brightness/contrast escurece
+   um pouco a foto (a versão em landing-pages-grid/ é mais clara do que
+   combina com o resto, bem mais escuro, da Intranet). */
+@keyframes intranet-fundo-drift {
+  0%,
+  100% {
+    background-position: 32% 22%;
+    transform: scale(1.06);
+  }
+  50% {
+    background-position: 62% 62%;
+    transform: scale(1.14);
+  }
+}
+.intranet-fundo-photo {
+  background-size: 130% auto;
+  background-repeat: no-repeat;
+  filter: brightness(0.6) contrast(1.08);
+  animation: intranet-fundo-drift 38s ease-in-out infinite;
 }
 
 /* ==========================================================================
@@ -737,30 +760,27 @@ html[data-boring="true"] .texture-noise::after {
 
 /* ==========================================================================
    PRÉVIA AO VIVO DA INTRANET (IntranetGridPreview.tsx)
-   Réplica da coreografia do vídeo que ocupava esse lugar antes
-   (intranet-preview.mp4, estudado quadro a quadro): não é cada célula
-   animando a própria escala (as três versões anteriores deste componente
-   tentaram isso e nenhuma chegou perto), é uma câmera só, um scale() na
-   GRADE INTEIRA, com transform-origin no centro dela mesma, que por
-   coincidência de layout (3×3, célula central) é exatamente onde vive o
-   Dashboard do Aluno. Dá zoom saindo dele sozinho preenchendo o quadro até
-   revelar as nove pranchetas, descansa, e volta.
+   Não é mais uma câmera dando zoom na grade inteira (versão anterior: um
+   scale(2.7) só, replicando o vídeo original ao pé da letra). Pedido
+   explícito de revisão: zoom bem mais sutil no Dashboard (célula central) e
+   as outras oito pranchetas ENTRANDO deslizando em direção a ele, parando
+   quando encostam nas próprias bordas dele, em vez de tudo escalando junto
+   como um bloco só.
 
-   Tempos medidos no vídeo de verdade (9,03s ao todo, 271 quadros a 30fps,
-   ffmpeg -vf fps=5 + contact sheet pra mapear onde cada fase começa e
-   termina): sai do zoom em ~1,8s (20% do ciclo), descansa revelada até
-   ~5,0s (55%), volta a fechar em ~5,8s (64%), descansa fechada até o fim
-   (100%, onde fecha o loop exatamente no mesmo estado do início). scale(1)
-   é a grade em repouso (as nove células do tamanho normal); o valor de
-   scale() fechado (2.7) veio de medir de verdade (Playwright,
-   getBoundingClientRect): a célula do Dashboard tem 538px numa grade de
-   1440px de viewport, 1440/538 ≈ 2.68, arredondado pra 2.7. Sobra folga
-   vertical de propósito (a célula preenche a largura toda, mas não a
-   altura toda): é aí que a moldura de monitor abaixo "respira". */
-@keyframes intranet-camera-zoom {
+   Duas animações irmãs, o MESMO relógio de 9s e os MESMOS quatro pontos de
+   fase em ambas (0/8%, 20%, 55%, 64%/100%, herdados da versão anterior:
+   saída rápida, platô revelado longo, entrada rápida, platô fechado longo),
+   pra nunca dessincronizar: .intranet-tile-center-pulse (só o Dashboard,
+   scale 1 a 1.28, bem menos que os 2.7 de antes) e .intranet-tile-slide
+   (as outras oito, translate() pra posição natural e de volta pra "dentro"
+   do Dashboard). Cada uma das oito tem sua PRÓPRIA direção (--slide-x/--
+   slide-y, custom properties setadas inline no componente a partir da
+   posição na grade: canto/lado que encosta na célula central), então a
+   mesma keyframe serve pra todas, só a direção muda. */
+@keyframes intranet-tile-center-pulse {
   0%,
   8% {
-    transform: scale(2.7);
+    transform: scale(1.28);
     animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
   }
   20% {
@@ -772,42 +792,56 @@ html[data-boring="true"] .texture-noise::after {
   }
   64%,
   100% {
-    transform: scale(2.7);
+    transform: scale(1.28);
   }
 }
-.intranet-camera {
-  animation: intranet-camera-zoom 9s ease-in-out infinite;
+.intranet-tile-center-pulse {
+  animation: intranet-tile-center-pulse 9s ease-in-out infinite;
 }
 
-/* Moldura de monitor: só aparece quando a câmera está fechada num único
-   quadro (as mesmas duas janelas do scale(2.7) acima), igual no vídeo
-   original (na grade revelada, nenhuma prancheta tem essa moldura, é a
-   câmera fechada que "veste" o quadro nela). Vinheta radial escurecendo os
-   cantos + um degradê sutil simulando o bisel metálico, sem escalar junto
-   com `.intranet-camera` (vive num elemento irmão, por cima, com posição
-   fixa em relação ao quadro): a moldura é do ENQUADRAMENTO, não da grade. */
-@keyframes intranet-bezel-fade {
+@keyframes intranet-tile-slide {
   0%,
   8% {
-    opacity: 1;
+    transform: translate(var(--slide-x), var(--slide-y));
+    animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
   }
-  20%,
+  20% {
+    transform: translate(0, 0);
+  }
   55% {
-    opacity: 0;
+    transform: translate(0, 0);
+    animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
   }
   64%,
   100% {
-    opacity: 1;
+    transform: translate(var(--slide-x), var(--slide-y));
   }
 }
-.intranet-bezel {
-  animation: intranet-bezel-fade ease-in-out infinite;
-  animation-duration: 9s;
-  background:
-    linear-gradient(rgba(0, 0, 0, 0.55), transparent 12%, transparent 88%, rgba(0, 0, 0, 0.55)),
-    linear-gradient(90deg, rgba(0, 0, 0, 0.5), transparent 8%, transparent 92%, rgba(0, 0, 0, 0.5)),
-    radial-gradient(ellipse at center, transparent 55%, rgba(0, 0, 0, 0.45) 100%);
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+.intranet-tile-slide {
+  animation: intranet-tile-slide 9s ease-in-out infinite;
+}
+
+/* Linhas da grade: voltam a precisar da própria animação de opacidade (a
+   versão em câmera não precisava, as linhas escalavam junto com o resto e
+   saíam de quadro sozinhas; agora que nada escala mais, elas ficariam
+   estáticas o tempo todo sem isso). Mesmo relógio de 9s, visível só durante
+   o platô revelado. */
+@keyframes intranet-grid-lines-guide {
+  0%,
+  14% {
+    opacity: 0;
+  }
+  26%,
+  49% {
+    opacity: 1;
+  }
+  61%,
+  100% {
+    opacity: 0;
+  }
+}
+.intranet-grid-lines-guide {
+  animation: intranet-grid-lines-guide 9s ease-in-out infinite;
 }
 
 /* Respeito ao sistema: se a pessoa pediu menos movimento, o site obedece
