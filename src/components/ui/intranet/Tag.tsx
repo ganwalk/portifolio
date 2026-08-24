@@ -36,7 +36,7 @@ export const tagToneClasses: Record<TagTone, string> = {
   warning: "bg-[hsl(var(--warning)/0.16)] text-[hsl(var(--warning))]",
   info: "bg-[hsl(var(--info)/0.14)] text-[hsl(var(--info))]",
   error: "bg-[hsl(var(--error)/0.14)] text-[hsl(var(--error))]",
-  neutral: "bg-[hsl(var(--muted))] text-[hsl(var(--muted-foreground))]",
+  neutral: "bg-[hsl(var(--ig-muted))] text-[hsl(var(--muted-foreground))]",
   primary: "bg-[hsl(var(--primary)/0.1)] text-[hsl(var(--primary-emphasis))]",
 };
 
