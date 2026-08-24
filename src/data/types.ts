@@ -120,6 +120,13 @@ export interface Experiment {
   process?: ProcessFrame[];
   /** Vitrine que cicla sozinha, opcional: só cards com uma série de peças usam. Troca com ou sem hover. */
   gallery?: GalleryFrame[];
+  /**
+   * Comentário curto na legenda que segue o mouse durante o hover, sem
+   * trocar a vitrine por nenhum still (ao contrário de `process`): pra
+   * cards em que a mídia já fala por si, e o hover só acrescenta uma
+   * observação à parte (ver ExperimentCard.tsx).
+   */
+  hoverNote?: Localized;
 }
 
 /** Uma marca no carrossel "Marcas com que já trabalhei" (ver Brands.tsx). */

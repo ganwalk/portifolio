@@ -24,8 +24,11 @@ import type { Locale } from "@/i18n/config";
 //   acompanha o cursor. Mesma pílula do letreiro acima, mas sem o texto
 //   correndo: a ascii já é curta, girar só atrapalharia a leitura, então
 //   fica fixa na peça atual da galeria.
+// - `hoverNote` (um comentário à parte, ex.: a produção musical): a vitrine
+//   nunca troca, só a legenda aparece no hover, no mesmo letreiro rolante
+//   do process acima (é uma frase, não uma ascii de uma linha só).
 //
-// As duas legendas (`CursorLabel`) moram fora do overflow-hidden da vitrine,
+// As legendas (`CursorLabel`) moram fora do overflow-hidden da vitrine,
 // direto no <figure>: podem transbordar o cartão inteiro, não só a imagem,
 // senão a legenda corta perto da borda toda vez que o cursor chega lá.
 const PROCESS_CYCLE_MS = 1600;
@@ -49,6 +52,8 @@ export function ExperimentCard({
   const hasProcess = Boolean(process && process.length > 0 && !reduceMotion);
   const gallery = experiment.gallery;
   const hasGallery = Boolean(gallery && gallery.length > 0);
+  const hoverNote = experiment.hoverNote;
+  const hasHoverNote = Boolean(hoverNote && !reduceMotion);
 
   const mediaBoxRef = useRef<HTMLDivElement>(null);
   const [hovering, setHovering] = useState(false);
@@ -57,7 +62,8 @@ export function ExperimentCard({
 
   const showProcess = hasProcess && hovering;
   const showAsciiTooltip = hasGallery && !reduceMotion && hovering;
-  const showTooltip = showProcess || showAsciiTooltip;
+  const showHoverNote = hasHoverNote && hovering;
+  const showTooltip = showProcess || showAsciiTooltip || showHoverNote;
 
   // Mesma mola do selo "ver caso" de CasesGrid: a posição bruta do cursor
   // vira a posição da legenda só depois de passar por uma spring, então ela
@@ -149,19 +155,21 @@ export function ExperimentCard({
       {/* Fora do overflow-hidden da vitrine, de propósito: a legenda pode
           transbordar o cartão inteiro conforme o cursor se aproxima da
           borda, em vez de cortar junto com a imagem. */}
-      {(hasProcess || hasGallery) && (
+      {(hasProcess || hasGallery || hasHoverNote) && (
         <CursorLabel
           x={labelX}
           y={labelY}
           visible={showTooltip}
-          scroll={showProcess}
+          scroll={showProcess || showHoverNote}
           width="w-56"
           text={
             showProcess && process
               ? process[processIndex].caption[locale]
               : hasGallery && gallery
                 ? gallery[galleryIndex].asciiArt
-                : ""
+                : hoverNote
+                  ? hoverNote[locale]
+                  : ""
           }
         />
       )}
