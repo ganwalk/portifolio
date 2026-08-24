@@ -1,27 +1,32 @@
 "use client";
 
-// Prévia ao vivo do case da Intranet (ver CasesGrid.tsx): réplica em CSS
-// puro do vídeo que ocupava esse lugar antes (public/videos/intranet-
-// preview.mp4, uma peça de motion design pronta), não uma coreografia
-// inventada. As três versões anteriores deste componente (fileiras
-// deslizantes, zoom de câmera sobre o grupo inteiro, cada célula animando a
-// própria escala) tentaram resolver "algo parecido" sem nunca estudar o
-// vídeo de verdade quadro a quadro; o resultado nunca convencia porque
-// nenhuma delas era de fato a mesma coisa.
+import type { CSSProperties } from "react";
+
+// Prévia ao vivo do case da Intranet (ver CasesGrid.tsx): grade 3×3 das
+// nove pranchetas do Design System, o Dashboard do Aluno sempre na célula
+// central. Quarta versão desta animação (fileiras deslizantes, zoom de
+// câmera sobre o grupo inteiro replicando um vídeo antigo, e esta): o
+// Dashboard tem um zoom SUTIL (scale 1 a 1.28, bem menos que as versões
+// anteriores), e as outras oito pranchetas ENTRAM deslizando em direção a
+// ele, parando exatamente onde encostam nas próprias bordas do Dashboard
+// (a posição natural delas na grade), em vez de tudo escalar junto como um
+// bloco de câmera só.
 //
-// Estudado com ffmpeg (fps=5, contact sheets, quadros isolados em pontos
-// específicos): o vídeo é uma câmera só, dando zoom numa grade 3×3 estática
-// de pranchetas do Design System, o Dashboard do Aluno sempre na célula
-// central. Por isso aqui é um scale() só na GRADE INTEIRA (ver .intranet-
-// camera em globals.css para os tempos exatos medidos), com transform-
-// origin no centro dela mesma: como o Dashboard mora exatamente ali, "a
-// grade encolhe pro centro" e "o Dashboard cresce sozinho preenchendo o
-// quadro" são o MESMO movimento, não dois efeitos combinados. Nenhuma
-// célula anima a própria escala; a câmera é quem se move.
+// Cada uma das oito tem sua PRÓPRIA direção de entrada: o canto/lado que
+// encosta na célula central (--slide-x/--slide-y, ver
+// SLIDE_OFFSET_BY_POSITION abaixo, setadas como custom properties inline),
+// então crescer/deslizar a partir dali lê como "se aproximando" ao longo da
+// própria grade, não aparecendo de um lugar aleatório. Dashboard e as oito
+// pranchetas vivem no MESMO relógio de 9s (.intranet-tile-center-pulse e
+// .intranet-tile-slide, ver globals.css), com os mesmos quatro pontos de
+// fase: dois relógios fora de sincronia foi exatamente o que fez uma
+// versão bem mais antiga deste componente ler como aleatória.
 //
-// Ordem das nove pranchetas: a mesma do vídeo (lida direto de um quadro da
-// grade revelada em resolução real), não a ordem alfabética nem a ordem em
-// que os componentes existem no Design System.
+// Ordem das nove pranchetas: a mesma de um quadro real do vídeo antigo que
+// ocupava esse lugar (Tipografia/Timeline/Badges&Tags em cima, Progress
+// Bar/Dashboard/Jornada do Herói no meio, Botões/Contagem Regressiva/
+// Paleta Sequencial embaixo), mantida aqui mesmo sem mais replicar a
+// câmera dele.
 //
 // Ladrilho na proporção NATIVA de cada prancheta dentro de uma célula
 // aspect-video (a proporção nativa da maioria delas): as pranchetas têm
@@ -38,75 +43,93 @@
 const basePath = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
 const gridPath = (file: string) => `${basePath}/photos/intranet-grid/${file}`;
 
-// Ordem de leitura (0 a 8, esquerda pra direita, cima pra baixo) igual à
-// grade revelada no vídeo de origem: Tipografia/Timeline/Badges&Tags na
-// fileira de cima, Progress Bar/Dashboard/Jornada do Herói no meio,
-// Botões/Contagem Regressiva/Paleta Sequencial embaixo.
+const CENTER_INDEX = 4;
+
 const GRID_TILES = [
   gridPath("ig-05.webp"), // Tipografia
   gridPath("ig-06.webp"), // Timeline
   gridPath("ig-07.webp"), // Badges & Tags
   gridPath("ig-09.webp"), // Progress Bar
-  gridPath("ig-08.webp"), // Dashboard do Aluno — célula central, onde a câmera fecha
+  gridPath("ig-08.webp"), // Dashboard do Aluno — célula central, em destaque
   gridPath("ig-01.webp"), // Jornada do Herói
   gridPath("ig-02.webp"), // Botões
   gridPath("ig-03.webp"), // Contagem Regressiva
   gridPath("ig-04.webp"), // Paleta Sequencial
 ];
 
+// Direção de entrada de cada satélite, em porcentagem da PRÓPRIA célula
+// (translate()): o sinal aponta pra fora, na mesma direção da posição da
+// célula em relação ao centro (linha 0 = cima, então -y; coluna 2 =
+// direita, então +x). 200% desloca a célula bem além da borda visível do
+// cartão (a grade não escala mais, então "sumir de quadro" depende só
+// desse deslocamento), e ela desliza de volta pra translate(0,0), a
+// própria posição na grade, "parando em suas extremidades" contra o
+// Dashboard.
+const SLIDE_OFFSET_BY_POSITION: Record<number, { x: string; y: string }> = {
+  0: { x: "-200%", y: "-200%" },
+  1: { x: "0%", y: "-200%" },
+  2: { x: "200%", y: "-200%" },
+  3: { x: "-200%", y: "0%" },
+  5: { x: "200%", y: "0%" },
+  6: { x: "-200%", y: "200%" },
+  7: { x: "0%", y: "200%" },
+  8: { x: "200%", y: "200%" },
+};
+
 export function IntranetGridPreview({ className = "" }: { className?: string }) {
   return (
     <div className={`relative overflow-hidden bg-black ${className}`}>
-      {/* Mesmo fundo animado da Landing Pages (.grid-fundo-gradient, ver
-          globals.css), na variante --intranet: bem mais escura e mais
-          lenta, quase preto com só um brilho sutil se movendo, porque as
-          pranchetas do Design System já vivem sobre preto sólido (ver os
-          próprios cantos `bg-black` abaixo) e aqui o fundo é atmosfera, não
-          protagonista. position/inset via style inline, não a utility
-          `absolute inset-0`: .texture-noise define position: relative como
-          CSS sem layer, que sempre vence a utility (layered) na mesma tag
-          (ver o mesmo ajuste em SiteLoader.tsx e LandingPagesGridPreview.tsx). */}
+      {/* Fundo: a FOTO de verdade (landing-pages-grid/FUNDO.jpg, processada
+          por scripts/build-intranet-fundo.mjs), não mais uma aproximação em
+          gradiente radial (a Landing Pages usa isso, ver
+          LandingPagesGridPreview.tsx, mas tentar recriar a nuvem de luz
+          fora de centro e o grão pesado da própria foto só com CSS nunca
+          convencia). .intranet-fundo-photo (ver globals.css) cuida do
+          movimento (Ken Burns lento); aqui só o backgroundImage, que
+          precisa de style inline porque a URL depende de
+          NEXT_PUBLIC_BASE_PATH em tempo de build. Mostra bem mais dela
+          agora: sem uma câmera escalando a grade inteira, sobra fundo
+          visível em volta das pranchetas o tempo todo, não só nas bordas. */}
       <div
-        className="grid-fundo-gradient grid-fundo-gradient--intranet texture-noise texture-noise-animate"
-        style={{ position: "absolute", inset: 0 }}
+        className="intranet-fundo-photo"
+        style={{ position: "absolute", inset: 0, backgroundImage: `url(${gridPath("fundo.webp")})` }}
       />
 
       {/* No mobile (ver MobileCaseCard em CasesGrid.tsx), este componente
           vive dentro de um cartão bem mais alto que largo. A grade não
           estica pra preencher essa altura (nasce do próprio conteúdo,
           altura automática, só a largura é w-full); este wrapper de fora
-          só centraliza esse bloco dentro do cartão.
-
-          Sem deslocamento vertical fixo (versões anteriores deste
-          componente usavam um -translate-y pra compensar o título/botão
-          ancorados embaixo do cartão, ver CaseColumn/MotionLink em
-          CasesGrid.tsx): a grade em repouso (aspect-video × 3 fileiras) já
-          cabe com folga na altura do cartão, então centralizar contra a
-          altura TOTAL não corta nada nem precisa de ajuste extra. */}
+          só centraliza esse bloco dentro do cartão. */}
       <div className="absolute inset-0 flex items-center justify-center">
         <div className="relative w-full">
-          {/* .intranet-camera: o scale() único que faz a vez de câmera (ver
-              globals.css). transform-origin fica no padrão (center), o
-              centro da PRÓPRIA grade, que é exatamente a célula do
-              Dashboard: por isso zoom-out da câmera e "as outras oito
-              pranchetas se afastando do centro" são o mesmo movimento
-              físico, não dois efeitos separados tentando concordar. */}
-          <div className="intranet-camera grid w-full grid-cols-3 gap-2 sm:gap-3">
-            {GRID_TILES.map((src, i) => (
-              <div key={i} className="aspect-video overflow-hidden border border-white/10 bg-black">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={src} alt="" aria-hidden="true" className="h-full w-full object-contain" />
-              </div>
-            ))}
+          <div className="grid w-full grid-cols-3 gap-2 sm:gap-3">
+            {GRID_TILES.map((src, i) => {
+              const isCenter = i === CENTER_INDEX;
+              const slide = SLIDE_OFFSET_BY_POSITION[i];
+              return (
+                <div
+                  key={i}
+                  className={`aspect-video overflow-hidden border border-white/10 bg-black ${
+                    isCenter ? "intranet-tile-center-pulse" : "intranet-tile-slide"
+                  }`}
+                  style={
+                    !isCenter
+                      ? ({ "--slide-x": slide.x, "--slide-y": slide.y } as CSSProperties)
+                      : undefined
+                  }
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={src} alt="" aria-hidden="true" className="h-full w-full object-contain" />
+                </div>
+              );
+            })}
 
-            {/* Linhas finas da "grade estrutural", dentro do MESMO elemento
-                escalado que as células: crescem e encolhem junto com o
-                zoom, então somem de quadro sozinhas quando a câmera fecha
-                no Dashboard (exatamente como no vídeo: a grade revelada tem
-                essas linhas, o quadro fechado não tem nenhuma), sem
-                precisar de uma animação de opacidade à parte tentando
-                sincronizar com o zoom. */}
-            <div className="pointer-events-none absolute inset-0 z-10">
+            {/* Linhas finas da "grade estrutural": acendem durante o platô
+                revelado e apagam durante os dois fechamentos (ver
+                .intranet-grid-lines-guide em globals.css, mesmo relógio de
+                9s), guiando o olho pro instante em que a grade se completa
+                em vez de ficar um traço estático o tempo todo. */}
+            <div className="intranet-grid-lines-guide pointer-events-none absolute inset-0 z-10">
               <div className="absolute top-0 left-1/3 h-full w-px bg-white/25" />
               <div className="absolute top-0 left-2/3 h-full w-px bg-white/25" />
               <div className="absolute top-1/3 left-0 h-px w-full bg-white/25" />
@@ -115,12 +138,6 @@ export function IntranetGridPreview({ className = "" }: { className?: string }) 
           </div>
         </div>
       </div>
-
-      {/* Moldura de monitor (ver .intranet-bezel em globals.css): vive FORA
-          do bloco escalado de propósito, então nunca cresce/encolhe junto
-          com a grade, só aparece (opacidade) quando a câmera está fechada
-          num quadro só, igual no vídeo original. */}
-      <div className="intranet-bezel pointer-events-none absolute inset-0 z-20" />
     </div>
   );
 }
