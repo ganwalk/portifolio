@@ -47,13 +47,13 @@ const TOOLTIP_OFFSET_X = 16;
 // própria mão.
 const TOOLTIP_OFFSET_Y = 60;
 
-// Xadrez de 2px por quadrante (4px o par): um truque só de CSS
+// Xadrez de 4px por quadrante (8px o par): um truque só de CSS
 // (conic-gradient repetindo, sem imagem nenhuma), preto e branco puros
 // porque quem preserva a cor do vídeo por baixo é o mix-blend-mode
 // difference (inverte só onde cai o branco, mantém intacto onde cai o
-// preto), não uma opacidade a mais na própria trama. 4px, não menor: o par
-// precisa ser divisível por 2 pra .experiment-dither (ver globals.css)
-// trocar de fase deslocando exatamente meio quadro.
+// preto), não uma opacidade a mais na própria trama. O par precisa ser
+// divisível por 2 pra .experiment-dither (ver globals.css) trocar de fase
+// deslocando exatamente meio quadro.
 const DITHER_PATTERN = "repeating-conic-gradient(#000 0% 25%, #fff 0% 50%)";
 
 export function ExperimentCard({
@@ -145,7 +145,7 @@ export function ExperimentCard({
           <div
             aria-hidden
             className="experiment-dither pointer-events-none absolute inset-0 mix-blend-difference opacity-85 transition-opacity duration-700 ease-out group-hover:opacity-0"
-            style={{ backgroundImage: DITHER_PATTERN, backgroundSize: "4px 4px" }}
+            style={{ backgroundImage: DITHER_PATTERN, backgroundSize: "8px 8px" }}
           />
         )}
 

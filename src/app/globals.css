@@ -406,8 +406,8 @@ html[data-boring="true"] .texture-noise::after {
 /* Retículo de meio-tom do experimento "Produção musical" (Playground, ver
    dither em ExperimentCard.tsx): o mesmo raciocínio do texture-drift acima
    (steps(), não uma curva suave, pra ler como cintilação, não deslize), só
-   que aqui o "tile" tem 4px (ver DITHER_PATTERN no componente), então
-   deslocar exatamente meio quadro (2px) em x e/ou y não desliza a trama,
+   que aqui o "tile" tem 8px (ver DITHER_PATTERN no componente), então
+   deslocar exatamente meio quadro (4px) em x e/ou y não desliza a trama,
    INVERTE quais quadrados ficam pretos e quais ficam brancos: as quatro
    fases possíveis desse xadrez, uma por vez, uma a cada quarto do ciclo
    (steps(4) pros 4 intervalos entre os cinco pontos abaixo, mesma conta de
@@ -417,13 +417,13 @@ html[data-boring="true"] .texture-noise::after {
     background-position: 0 0;
   }
   25% {
-    background-position: 2px 0;
+    background-position: 4px 0;
   }
   50% {
-    background-position: 2px 2px;
+    background-position: 4px 4px;
   }
   75% {
-    background-position: 0 2px;
+    background-position: 0 4px;
   }
   100% {
     background-position: 0 0;
