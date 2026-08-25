@@ -28,6 +28,13 @@ import type { Locale } from "@/i18n/config";
 //   nunca troca, só a legenda aparece no hover, no mesmo letreiro rolante
 //   do process acima (é uma frase, não uma ascii de uma linha só).
 //
+// Independente desses três, `dither` (também usado pela produção musical)
+// cobre a vitrine com um retículo de meio-tom animado (xadrez preto e
+// branco bem fino, cintilando, ver DITHER_PATTERN e .experiment-dither em
+// globals.css) em mix-blend-mode overlay, sem tocar na cor da mídia por
+// baixo: um efeito por cima, não uma versão dessaturada dela. O hover
+// dissolve o retículo, revelando a mídia como já estava, colorida.
+//
 // As legendas (`CursorLabel`) moram fora do overflow-hidden da vitrine,
 // direto no <figure>: podem transbordar o cartão inteiro, não só a imagem,
 // senão a legenda corta perto da borda toda vez que o cursor chega lá.
@@ -39,6 +46,15 @@ const TOOLTIP_OFFSET_X = 16;
 // do mouse: um offset vertical raso deixava a legenda nascendo tampada pela
 // própria mão.
 const TOOLTIP_OFFSET_Y = 60;
+
+// Xadrez de 2px por quadrante (4px o par): um truque só de CSS
+// (conic-gradient repetindo, sem imagem nenhuma), preto e branco puros
+// porque quem preserva a cor do vídeo por baixo é o mix-blend-mode
+// difference (inverte só onde cai o branco, mantém intacto onde cai o
+// preto), não uma opacidade a mais na própria trama. 4px, não menor: o par
+// precisa ser divisível por 2 pra .experiment-dither (ver globals.css)
+// trocar de fase deslocando exatamente meio quadro.
+const DITHER_PATTERN = "repeating-conic-gradient(#000 0% 25%, #fff 0% 50%)";
 
 export function ExperimentCard({
   experiment,
@@ -54,6 +70,7 @@ export function ExperimentCard({
   const hasGallery = Boolean(gallery && gallery.length > 0);
   const hoverNote = experiment.hoverNote;
   const hasHoverNote = Boolean(hoverNote && !reduceMotion);
+  const hasDither = Boolean(experiment.dither && !reduceMotion);
 
   const mediaBoxRef = useRef<HTMLDivElement>(null);
   const [hovering, setHovering] = useState(false);
@@ -121,6 +138,14 @@ export function ExperimentCard({
             className={`h-full w-full object-cover transition-opacity duration-700 ease-out ${
               showProcess ? "opacity-0" : "opacity-100"
             }`}
+          />
+        )}
+
+        {hasDither && (
+          <div
+            aria-hidden
+            className="experiment-dither pointer-events-none absolute inset-0 mix-blend-difference opacity-85 transition-opacity duration-700 ease-out group-hover:opacity-0"
+            style={{ backgroundImage: DITHER_PATTERN, backgroundSize: "4px 4px" }}
           />
         )}
 

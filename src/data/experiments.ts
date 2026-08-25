@@ -200,5 +200,9 @@ export const experiments: Experiment[] = [
       es: "(a veces extraño el pelo largo)",
       zh: "(有时会怀念长发)",
     },
+    // Retículo de meio-tom por cima do vídeo (ver DITHER_PATTERN em
+    // ExperimentCard.tsx), que dissolve no hover: a mesma lógica do
+    // hoverNote acima, um efeito à parte, não uma troca de vitrine.
+    dither: true,
   },
 ];

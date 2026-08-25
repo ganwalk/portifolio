@@ -127,6 +127,13 @@ export interface Experiment {
    * observação à parte (ver ExperimentCard.tsx).
    */
   hoverNote?: Localized;
+  /**
+   * Vitrine nasce com um retículo de meio-tom por cima (preto e branco,
+   * mistura em overlay) e a mídia em cinza, contraste puxado: um efeito de
+   * dither, não a mídia "de verdade". O hover dissolve os dois de volta ao
+   * normal (ver ExperimentCard.tsx). Opcional: só quem pede.
+   */
+  dither?: boolean;
 }
 
 /** Uma marca no carrossel "Marcas com que já trabalhei" (ver Brands.tsx). */
