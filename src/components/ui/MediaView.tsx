@@ -1,5 +1,6 @@
 "use client";
 
+import { forwardRef } from "react";
 import { useMediaQuery } from "@/lib/use-media-query";
 import type { Media } from "@/data/types";
 import type { Locale } from "@/i18n/config";
@@ -8,13 +9,14 @@ import type { Locale } from "@/i18n/config";
 // Vídeos são mudos, em loop e com poster, comportamento de textura viva, não
 // de player. Usamos <img> puro em vez de next/image porque o export estático
 // não otimiza imagem no servidor e as URLs remotas mudam junto com as mídias.
+//
+// forwardRef pro elemento <video>: só o ExperimentCard usa (ver
+// useBayerDither.ts), pra desenhar o quadro atual do vídeo de verdade num
+// canvas de dither, sem precisar de um segundo <video> tocando em paralelo
+// só pra isso. Sem uso na variante <img>: nenhum consumidor precisa dela
+// ainda.
 
-export function MediaView({
-  media,
-  locale,
-  className = "",
-  preferMobile = false,
-}: {
+export const MediaView = forwardRef<HTMLVideoElement, {
   media: Media;
   locale: Locale;
   className?: string;
@@ -30,7 +32,7 @@ export function MediaView({
    * breakpoint de sempre.
    */
   preferMobile?: boolean;
-}) {
+}>(function MediaView({ media, locale, className = "", preferMobile = false }, ref) {
   // Mesmo breakpoint que decide a versão mobile/desktop de CasesGrid (ver
   // useMediaQuery("(min-width: 640px)") lá): abaixo dele, troca pela
   // variante vertical (srcMobile/posterMobile), quando existe, em vez de
@@ -57,6 +59,7 @@ export function MediaView({
           />
         )}
         <video
+          ref={ref}
           // key força o navegador a recarregar a fonte quando a variante
           // troca (ex.: hidratação corrigindo o palpite mobile-first do
           // servidor pra desktop, ver useMediaQuery), em vez de manter o
@@ -87,4 +90,4 @@ export function MediaView({
       loading="lazy"
     />
   );
-}
+});

@@ -403,36 +403,6 @@ html[data-boring="true"] .texture-noise::after {
   }
 }
 
-/* Retículo de meio-tom do experimento "Produção musical" (Playground, ver
-   dither em ExperimentCard.tsx): o mesmo raciocínio do texture-drift acima
-   (steps(), não uma curva suave, pra ler como cintilação, não deslize), só
-   que aqui o "tile" tem 8px (ver DITHER_PATTERN no componente), então
-   deslocar exatamente meio quadro (4px) em x e/ou y não desliza a trama,
-   INVERTE quais quadrados ficam pretos e quais ficam brancos: as quatro
-   fases possíveis desse xadrez, uma por vez, uma a cada quarto do ciclo
-   (steps(4) pros 4 intervalos entre os cinco pontos abaixo, mesma conta de
-   texture-drift pra steps(7)). */
-@keyframes experiment-dither-flicker {
-  0% {
-    background-position: 0 0;
-  }
-  25% {
-    background-position: 4px 0;
-  }
-  50% {
-    background-position: 4px 4px;
-  }
-  75% {
-    background-position: 0 4px;
-  }
-  100% {
-    background-position: 0 0;
-  }
-}
-.experiment-dither {
-  animation: experiment-dither-flicker 700ms steps(4) infinite;
-}
-
 /* Luas da tela de entrada (LoaderMoons, em SiteLoader.tsx): o giro precisa
    ser CSS estático aqui, não um <style> inline montado pelo componente.
    React 19 hasteia e deduplica tags <style> renderizadas dentro de
