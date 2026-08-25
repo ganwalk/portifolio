@@ -19,6 +19,7 @@ import { CaseMetrics } from "@/components/ui/CaseMetrics";
 import { CaseStatement } from "@/components/ui/CaseStatement";
 import { CursorLabel } from "@/components/ui/CursorLabel";
 import { IntranetGridPreview } from "@/components/ui/IntranetGridPreview";
+import { IntranetMobileCarousel } from "@/components/ui/IntranetMobileCarousel";
 import { IntranetShowcase } from "@/components/ui/IntranetShowcase";
 import { LandingPagesGridPreview } from "@/components/ui/LandingPagesGridPreview";
 import { LiveEmbed } from "@/components/ui/LiveEmbed";
@@ -972,7 +973,11 @@ function MobileCaseCard({
           ) : caseStudy.slug === "ecossistema-auvp" ? (
             <LandingPagesGridPreview className="absolute inset-0 h-full w-full" />
           ) : caseStudy.slug === "intranet-auvp" ? (
-            <IntranetGridPreview className="absolute inset-0 h-full w-full" />
+            // Carrossel vertical infinito no lugar da grade 3×3 de desktop
+            // (ver IntranetGridPreview.tsx, ainda usada lá): a mesma grade
+            // encolhida num cartão bem mais alto que largo virava células
+            // pequenas demais pra ler (ver IntranetMobileCarousel.tsx).
+            <IntranetMobileCarousel className="absolute inset-0 h-full w-full" />
           ) : isNear ? (
             <MediaView
               media={caseStudy.cover}
