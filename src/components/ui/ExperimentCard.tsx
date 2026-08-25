@@ -28,6 +28,12 @@ import type { Locale } from "@/i18n/config";
 //   nunca troca, só a legenda aparece no hover, no mesmo letreiro rolante
 //   do process acima (é uma frase, não uma ascii de uma linha só).
 //
+// Independente desses três, `dither` (também usado pela produção musical)
+// cobre a vitrine com um retículo de meio-tom (xadrez preto e branco bem
+// fino, ver DITHER_PATTERN abaixo) em mix-blend-mode overlay, com a mídia
+// em cinza e contraste puxado por baixo: um efeito de dither, não a mídia
+// "de verdade". O hover dissolve os dois de volta ao normal.
+//
 // As legendas (`CursorLabel`) moram fora do overflow-hidden da vitrine,
 // direto no <figure>: podem transbordar o cartão inteiro, não só a imagem,
 // senão a legenda corta perto da borda toda vez que o cursor chega lá.
@@ -39,6 +45,13 @@ const TOOLTIP_OFFSET_X = 16;
 // do mouse: um offset vertical raso deixava a legenda nascendo tampada pela
 // própria mão.
 const TOOLTIP_OFFSET_Y = 60;
+
+// Xadrez de 1px por quadrante (2px o par), a unidade mínima que ainda lê
+// como retículo de meio-tom em vez de virar um xadrez grande demais: um
+// truque só de CSS (conic-gradient repetindo, sem imagem nenhuma), preto e
+// branco puros porque quem dá o meio-tom de verdade é o mix-blend-mode
+// overlay por cima do vídeo, não uma opacidade a mais na própria trama.
+const DITHER_PATTERN = "repeating-conic-gradient(#000 0% 25%, #fff 0% 50%)";
 
 export function ExperimentCard({
   experiment,
@@ -54,6 +67,7 @@ export function ExperimentCard({
   const hasGallery = Boolean(gallery && gallery.length > 0);
   const hoverNote = experiment.hoverNote;
   const hasHoverNote = Boolean(hoverNote && !reduceMotion);
+  const hasDither = Boolean(experiment.dither && !reduceMotion);
 
   const mediaBoxRef = useRef<HTMLDivElement>(null);
   const [hovering, setHovering] = useState(false);
@@ -118,9 +132,17 @@ export function ExperimentCard({
           <MediaView
             media={experiment.media}
             locale={locale}
-            className={`h-full w-full object-cover transition-opacity duration-700 ease-out ${
+            className={`h-full w-full object-cover transition-[opacity,filter] duration-700 ease-out ${
               showProcess ? "opacity-0" : "opacity-100"
-            }`}
+            } ${hasDither ? "grayscale contrast-125 group-hover:grayscale-0 group-hover:contrast-100" : ""}`}
+          />
+        )}
+
+        {hasDither && (
+          <div
+            aria-hidden
+            className="pointer-events-none absolute inset-0 mix-blend-overlay opacity-80 transition-opacity duration-700 ease-out group-hover:opacity-0"
+            style={{ backgroundImage: DITHER_PATTERN, backgroundSize: "2px 2px" }}
           />
         )}
 
