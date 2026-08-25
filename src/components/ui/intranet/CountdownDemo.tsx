@@ -46,7 +46,7 @@ export function CountdownDemo() {
         <span className="mb-3 inline-block rounded-lg border border-[hsl(var(--accent)/0.2)] bg-[hsl(var(--accent)/0.1)] px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider text-[hsl(var(--accent))]">
           Lorem ipsum dolor sit amet
         </span>
-        <h3 className="m-0 mb-2 text-2xl font-black uppercase tracking-tight text-[hsl(var(--foreground))] sm:text-3xl">
+        <h3 className="m-0 mb-2 text-2xl font-black uppercase tracking-tight text-[hsl(var(--ig-foreground))] sm:text-3xl">
           Consectetur adipiscing
         </h3>
         <p className="mb-6 max-w-md text-sm text-[hsl(var(--muted-foreground))]">
@@ -55,7 +55,7 @@ export function CountdownDemo() {
         <div className="grid max-w-md grid-cols-4 gap-2 sm:gap-3">
           {units.map(([key, label]) => (
             <div key={label} className="flex flex-col items-center rounded-xl border bg-[hsl(var(--card)/0.6)] py-3">
-              <span className="text-2xl font-black leading-none text-[hsl(var(--foreground))] sm:text-3xl">
+              <span className="text-2xl font-black leading-none text-[hsl(var(--ig-foreground))] sm:text-3xl">
                 {String(t[key]).padStart(2, "0")}
               </span>
               <span className="mt-1 text-[9px] font-bold uppercase tracking-wider text-[hsl(var(--accent))]">{label}</span>

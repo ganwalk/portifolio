@@ -505,16 +505,26 @@ html[data-boring="true"] .texture-noise::after {
    reais da Marca A (claro) copiados de intranet/src/index.css. Fora dessa
    classe, esses nomes de variável não existem e não vazam pro resto do
    site.
-   ========================================================================== */
+
+   --ig-background/--ig-foreground/--ig-muted, não --background/--foreground/
+   --muted: esses três (ao contrário de --card, --primary etc) SÃO nomes que
+   o resto do site já usa (ver TOKENS DE DESIGN no topo do arquivo), com
+   valor trocado por tema (claro/escuro). Herdar por engano o valor fixo
+   daqui (sempre "claro", nunca o do tema ativo) é exatamente o que
+   acontecia com o texto de BentoCard.tsx (title/description, que usam as
+   classes text-foreground/text-muted do PRÓPRIO site): no modo escuro, o
+   card virava fundo escuro com texto tentando herdar essa cor daqui, quase
+   preto sobre quase preto. Prefixados, esses três só respondem por quem
+   pede explicitamente var(--ig-*), como os outros tokens desta lista. */
 
 .intranet-scope {
-  --background: 0 0% 100%;
-  --foreground: 42 70% 9%;
+  --ig-background: 0 0% 100%;
+  --ig-foreground: 42 70% 9%;
   --card: 0 0% 100%;
   --primary: 42 96% 46%;
   --primary-foreground: 42 45% 11%;
   --primary-emphasis: 40 95% 30%;
-  --muted: 42 10% 95%;
+  --ig-muted: 42 10% 95%;
   --muted-foreground: 42 10% 40%;
   --success: 142 72% 29%;
   --warning: 35 95% 42%;
@@ -534,7 +544,7 @@ html[data-boring="true"] .texture-noise::after {
   --chart-7: 90 55% 40%;
   --chart-8: 220 30% 35%;
   font-family: var(--font-sans);
-  color: hsl(var(--foreground));
+  color: hsl(var(--ig-foreground));
 }
 
 .intranet-scope,
@@ -583,7 +593,7 @@ html[data-boring="true"] .texture-noise::after {
   height: 4px;
 }
 .timeline-scrollbar::-webkit-scrollbar-track {
-  background: hsl(var(--muted));
+  background: hsl(var(--ig-muted));
   border-radius: 9999px;
 }
 .timeline-scrollbar::-webkit-scrollbar-thumb {
@@ -595,7 +605,7 @@ html[data-boring="true"] .texture-noise::after {
 }
 .timeline-scrollbar {
   scrollbar-width: thin;
-  scrollbar-color: hsl(var(--primary) / 0.3) hsl(var(--muted));
+  scrollbar-color: hsl(var(--primary) / 0.3) hsl(var(--ig-muted));
 }
 
 /* Painel de detalhe do marco em foco: entra com um leve fade + subida

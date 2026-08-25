@@ -587,7 +587,12 @@ function CaseColumn({
                 34px do caso mais apertado (h-[34px], um pouco mais alto que
                 o botão de 32px ali, mas ainda cabe na mesma linha sem
                 empurrar o resto do rodapé), sobrando respiro nos demais,
-                centralizado por `justify-center`. */}
+                centralizado por `justify-center`. A partir do lg: (onde o
+                container já vira h-11/44px pros dois casos, `multi` ou não,
+                bastante folga), sobe mais um passo pra text-[12px]/
+                leading-[18px]: 36px pras duas linhas, ainda longe de
+                estourar os 44px, só pra ler melhor numa tela grande sem
+                mexer no encaixe apertado do trio em telas médias. */}
             <motion.div style={{ y: ctaY }} className="flex items-start gap-3 lg:gap-4">
               <motion.button
                 type="button"
@@ -610,7 +615,7 @@ function CaseColumn({
                   multi ? "h-[34px] max-w-[20ch] lg:h-11" : "h-11 max-w-[30ch]"
                 }`}
               >
-                <p className="line-clamp-2 text-balance text-[11px] leading-[17px] text-white/60">
+                <p className="line-clamp-2 text-balance text-[11px] leading-[17px] text-white/60 lg:text-[12px] lg:leading-[18px]">
                   {caseStudy.statement.headline[locale]}
                 </p>
               </div>

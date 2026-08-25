@@ -20,14 +20,14 @@ export function NovidadeCard({ item }: { item: NovidadeItem }) {
       </span>
       <div className="min-w-0 flex-1 space-y-3">
         <div>
-          <p className="mb-1 text-sm font-bold leading-snug text-[hsl(var(--foreground))]">{item.titulo}</p>
+          <p className="mb-1 text-sm font-bold leading-snug text-[hsl(var(--ig-foreground))]">{item.titulo}</p>
           <p className="text-xs leading-relaxed text-[hsl(var(--muted-foreground))]">{item.descricao}</p>
         </div>
 
         {temAntesDepois && (
           <div className={cx("grid gap-px overflow-hidden rounded-lg border bg-[hsl(var(--border))]", item.antes && item.depois && "sm:grid-cols-2")}>
             {item.antes && (
-              <div className="bg-[hsl(var(--muted)/0.4)] p-3">
+              <div className="bg-[hsl(var(--ig-muted)/0.4)] p-3">
                 <p className="mb-1 text-[9px] font-bold uppercase tracking-wider text-[hsl(var(--muted-foreground))]">Antes</p>
                 <p className="text-xs leading-relaxed text-[hsl(var(--muted-foreground))]">{item.antes}</p>
               </div>
@@ -35,7 +35,7 @@ export function NovidadeCard({ item }: { item: NovidadeItem }) {
             {item.depois && (
               <div className="bg-[hsl(var(--primary)/0.05)] p-3">
                 <p className="mb-1 text-[9px] font-bold uppercase tracking-wider text-[hsl(var(--primary))]">Como ficou</p>
-                <p className="text-xs leading-relaxed text-[hsl(var(--foreground)/0.8)]">{item.depois}</p>
+                <p className="text-xs leading-relaxed text-[hsl(var(--ig-foreground)/0.8)]">{item.depois}</p>
               </div>
             )}
           </div>
@@ -60,7 +60,7 @@ export function NovidadeCard({ item }: { item: NovidadeItem }) {
             <p className="mb-1.5 text-[9px] font-bold uppercase tracking-wider text-[hsl(var(--muted-foreground))]">Envolvidos na entrega</p>
             <ul className="flex flex-wrap gap-1.5">
               {item.envolvidos.map((nome, k) => (
-                <li key={k} className="rounded-full border bg-[hsl(var(--muted)/0.4)] px-2.5 py-0.5 text-[11px] text-[hsl(var(--muted-foreground))]">
+                <li key={k} className="rounded-full border bg-[hsl(var(--ig-muted)/0.4)] px-2.5 py-0.5 text-[11px] text-[hsl(var(--muted-foreground))]">
                   {nome}
                 </li>
               ))}

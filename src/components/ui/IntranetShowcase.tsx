@@ -221,8 +221,16 @@ export function IntranetShowcase({
           resto da linha anterior fica em branco pra sempre. Rosca e Rate
           eram col-span-1 antes, larguras que não fechavam conta com o resto
           (4+2+1+1+2+4=14, não múltiplo de 4) e deixavam um vão de 2 colunas
-          vazio antes da Tabela de Preços. */}
-      <div className="intranet-scope mt-6 grid grid-cols-1 items-start gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          vazio antes da Tabela de Preços.
+
+          Sem items-start: o padrão do grid (stretch) é o que faz sentido
+          aqui, já que BentoCard.tsx já nasce h-full pra isso. Rate e
+          Countdown, lado a lado na mesma fileira, têm conteúdo de altura
+          bem diferente (a lista de estrelas é bem mais baixa que o relógio);
+          com items-start, cada caixa parava na própria altura de conteúdo,
+          deixando as duas com bordas inferiores desencontradas, uma
+          "escada" em vez de uma fileira. */}
+      <div className="intranet-scope mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <BentoCard
           title={roadmapTitle[locale]}
           description={roadmapDesc[locale]}

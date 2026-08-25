@@ -95,7 +95,7 @@ function MarcoCard({ marco, ativo }: { marco: Marco; ativo: boolean }) {
         <span className={cx("flex h-8 w-8 shrink-0 items-center justify-center rounded-lg", tagToneClasses[marco.tone])} aria-hidden="true">
           <Icon className="h-4 w-4" />
         </span>
-        <p className="min-w-0 text-[13px] font-bold leading-tight text-[hsl(var(--foreground))] line-clamp-2 sm:text-sm">{marco.titulo}</p>
+        <p className="min-w-0 text-[13px] font-bold leading-tight text-[hsl(var(--ig-foreground))] line-clamp-2 sm:text-sm">{marco.titulo}</p>
       </div>
       <p className="shrink-0 text-[11px] leading-snug text-[hsl(var(--muted-foreground))] line-clamp-3">{marco.descricao}</p>
       <span className="sr-only">
@@ -116,7 +116,7 @@ function MarcoMiniCard({ marco, ativo }: { marco: Marco; ativo: boolean }) {
       )}
       style={{ transitionTimingFunction: EASE_APPLE }}
     >
-      <p className="max-w-full truncate text-[11px] font-bold leading-tight text-[hsl(var(--foreground))]">{marco.periodo}</p>
+      <p className="max-w-full truncate text-[11px] font-bold leading-tight text-[hsl(var(--ig-foreground))]">{marco.periodo}</p>
       <span className={cx("inline-flex max-w-full items-center justify-center gap-1 text-[9px] font-bold uppercase tracking-wide", cfg.classe)}>
         <Icon className="h-3 w-3 shrink-0" />
         <span className="truncate">{cfg.label}</span>
@@ -251,7 +251,7 @@ export function RoadmapTimeline() {
           onClick={() => irPara(ativo - 1)}
           disabled={ativo === 0}
           aria-label="Marco anterior"
-          className="absolute left-2 top-1/2 z-20 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full border bg-[hsl(var(--background)/0.8)] text-[hsl(var(--foreground))] shadow-lg backdrop-blur transition-[opacity,transform,border-color] duration-300 disabled:opacity-30 sm:left-3 sm:h-11 sm:w-11 sm:hover:scale-105 sm:hover:border-[hsl(var(--primary)/0.4)]"
+          className="absolute left-2 top-1/2 z-20 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full border bg-[hsl(var(--ig-background)/0.8)] text-[hsl(var(--ig-foreground))] shadow-lg backdrop-blur transition-[opacity,transform,border-color] duration-300 disabled:opacity-30 sm:left-3 sm:h-11 sm:w-11 sm:hover:scale-105 sm:hover:border-[hsl(var(--primary)/0.4)]"
           style={{ transitionTimingFunction: EASE_APPLE }}
         >
           <ChevronLeft className="h-4 w-4 sm:h-5 sm:w-5" />
@@ -260,7 +260,7 @@ export function RoadmapTimeline() {
           onClick={() => irPara(ativo + 1)}
           disabled={ativo === total - 1}
           aria-label="Próximo marco"
-          className="absolute right-2 top-1/2 z-20 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full border bg-[hsl(var(--background)/0.8)] text-[hsl(var(--foreground))] shadow-lg backdrop-blur transition-[opacity,transform,border-color] duration-300 disabled:opacity-30 sm:right-3 sm:h-11 sm:w-11 sm:hover:scale-105 sm:hover:border-[hsl(var(--primary)/0.4)]"
+          className="absolute right-2 top-1/2 z-20 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full border bg-[hsl(var(--ig-background)/0.8)] text-[hsl(var(--ig-foreground))] shadow-lg backdrop-blur transition-[opacity,transform,border-color] duration-300 disabled:opacity-30 sm:right-3 sm:h-11 sm:w-11 sm:hover:scale-105 sm:hover:border-[hsl(var(--primary)/0.4)]"
           style={{ transitionTimingFunction: EASE_APPLE }}
         >
           <ChevronRight className="h-4 w-4 sm:h-5 sm:w-5" />
@@ -429,7 +429,7 @@ export function RoadmapTimeline() {
         </div>
       </div>
 
-      <div className="border-t bg-[hsl(var(--muted)/0.2)] px-3 py-2.5">
+      <div className="border-t bg-[hsl(var(--ig-muted)/0.2)] px-3 py-2.5">
         <div className="no-scrollbar flex items-center justify-start gap-1 overflow-x-auto sm:justify-center">
           {regua.map(({ periodo, indice }) => {
             const selecionado = marcoAtivo.periodo === periodo;
@@ -439,7 +439,7 @@ export function RoadmapTimeline() {
                 onClick={() => irPara(indice)}
                 className={cx(
                   "relative shrink-0 whitespace-nowrap px-2.5 py-1 text-[11px] font-semibold transition-colors duration-300",
-                  selecionado ? "text-[hsl(var(--primary))]" : "text-[hsl(var(--muted-foreground))] sm:hover:text-[hsl(var(--foreground))]",
+                  selecionado ? "text-[hsl(var(--primary))]" : "text-[hsl(var(--muted-foreground))] sm:hover:text-[hsl(var(--ig-foreground))]",
                 )}
               >
                 {periodo}
@@ -464,7 +464,7 @@ export function RoadmapTimeline() {
             </span>
             <div className="min-w-[200px] flex-1">
               <div className="flex flex-wrap items-center gap-2">
-                <h3 className="text-base font-bold leading-tight text-[hsl(var(--foreground))] sm:text-lg">{marcoAtivo.titulo}</h3>
+                <h3 className="text-base font-bold leading-tight text-[hsl(var(--ig-foreground))] sm:text-lg">{marcoAtivo.titulo}</h3>
                 <Tag tone={marcoAtivo.tone} className="text-[9px]">
                   <IconAtivo className="h-3 w-3" />
                   {cfgAtivo.label}

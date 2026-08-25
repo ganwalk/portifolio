@@ -39,7 +39,7 @@ export function DonutChart() {
   return (
     <div className="mx-auto flex flex-col items-center gap-4 rounded-xl border bg-[hsl(var(--card)/0.6)] p-6 backdrop-blur-xl sm:max-w-sm">
       <div className="flex w-full items-center justify-between">
-        <p className="text-sm font-semibold text-[hsl(var(--foreground))]">Lorem ipsum dolor sit</p>
+        <p className="text-sm font-semibold text-[hsl(var(--ig-foreground))]">Lorem ipsum dolor sit</p>
       </div>
       <svg viewBox="0 0 160 160" className="h-40 w-40">
         <g transform="translate(80,80) rotate(-90)">
@@ -72,7 +72,7 @@ export function DonutChart() {
           >
             <span className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ backgroundColor: `hsl(var(--chart-${i + 1}))` }} />
             <span className="text-[11px] text-[hsl(var(--muted-foreground))]">
-              {d.name} <span className="font-medium tabular-nums text-[hsl(var(--foreground))]">{d.value}</span>
+              {d.name} <span className="font-medium tabular-nums text-[hsl(var(--ig-foreground))]">{d.value}</span>
             </span>
           </button>
         ))}

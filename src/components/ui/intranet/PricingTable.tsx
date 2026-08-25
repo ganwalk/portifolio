@@ -67,10 +67,10 @@ export function PricingTable() {
   return (
     <div>
       <div className="mb-6 flex justify-center">
-        <div className="relative inline-flex w-full max-w-xs items-center rounded-xl border bg-[hsl(var(--foreground)/0.05)] p-1">
+        <div className="relative inline-flex w-full max-w-xs items-center rounded-xl border bg-[hsl(var(--ig-foreground)/0.05)] p-1">
           <div
             className={cx(
-              "absolute top-1 h-[calc(100%-8px)] w-[calc(50%-4px)] rounded-lg bg-[hsl(var(--foreground))] shadow-md transition-transform duration-300",
+              "absolute top-1 h-[calc(100%-8px)] w-[calc(50%-4px)] rounded-lg bg-[hsl(var(--ig-foreground))] shadow-md transition-transform duration-300",
               view === "pacotes" ? "translate-x-[calc(100%+4px)]" : "translate-x-0",
             )}
             style={{ transitionTimingFunction: "cubic-bezier(0.4,0,0.2,1)" }}
@@ -79,7 +79,7 @@ export function PricingTable() {
             onClick={() => setView("individual")}
             className={cx(
               "relative z-10 flex-1 py-2.5 text-[12px] font-bold uppercase tracking-wider transition-colors duration-300",
-              view === "individual" ? "text-[hsl(var(--background))]" : "text-[hsl(var(--muted-foreground))]",
+              view === "individual" ? "text-[hsl(var(--ig-background))]" : "text-[hsl(var(--muted-foreground))]",
             )}
           >
             Individual
@@ -88,7 +88,7 @@ export function PricingTable() {
             onClick={() => setView("pacotes")}
             className={cx(
               "relative z-10 flex-1 py-2.5 text-[12px] font-bold uppercase tracking-wider transition-colors duration-300",
-              view === "pacotes" ? "text-[hsl(var(--background))]" : "text-[hsl(var(--muted-foreground))]",
+              view === "pacotes" ? "text-[hsl(var(--ig-background))]" : "text-[hsl(var(--muted-foreground))]",
             )}
           >
             Pacotes
@@ -101,7 +101,7 @@ export function PricingTable() {
           <div
             key={plan.name}
             className={cx(
-              "relative flex flex-col rounded-xl border bg-[hsl(var(--background)/0.6)] p-5",
+              "relative flex flex-col rounded-xl border bg-[hsl(var(--ig-background)/0.6)] p-5",
               plan.featured ? "border-[hsl(var(--accent))] shadow-md" : "border-[hsl(var(--border))]",
             )}
           >
@@ -111,13 +111,13 @@ export function PricingTable() {
               </div>
             )}
             {plan.discount && (
-              <span className="mb-2 w-fit rounded-full bg-[hsl(var(--foreground))] px-2 py-0.5 text-[10px] font-bold uppercase text-[hsl(var(--background))]">
+              <span className="mb-2 w-fit rounded-full bg-[hsl(var(--ig-foreground))] px-2 py-0.5 text-[10px] font-bold uppercase text-[hsl(var(--ig-background))]">
                 {plan.discount}
               </span>
             )}
-            <h4 className="mb-2 text-lg font-extrabold text-[hsl(var(--foreground))]">{plan.name}</h4>
-            <span className="text-2xl font-black text-[hsl(var(--foreground))]">{plan.price}</span>
-            <div className="my-3 rounded-lg border-l-[3px] border-[hsl(var(--accent))] bg-[hsl(var(--foreground)/0.03)] px-3 py-2 text-xs text-[hsl(var(--muted-foreground))]">
+            <h4 className="mb-2 text-lg font-extrabold text-[hsl(var(--ig-foreground))]">{plan.name}</h4>
+            <span className="text-2xl font-black text-[hsl(var(--ig-foreground))]">{plan.price}</span>
+            <div className="my-3 rounded-lg border-l-[3px] border-[hsl(var(--accent))] bg-[hsl(var(--ig-foreground)/0.03)] px-3 py-2 text-xs text-[hsl(var(--muted-foreground))]">
               {plan.paymentInfo}
             </div>
             <ul className="mb-5 flex-grow space-y-2">
