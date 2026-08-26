@@ -15,10 +15,13 @@ import type { Locale } from "@/i18n/config";
 // - Só `media` (a maioria): vitrine parada ou vídeo em loop, via MediaView,
 //   sem nenhum aparato a mais.
 // - `process` (bastidores reais, ex.: o teste de animação): a vitrine
-//   normal continua até o hover, que troca pelos stills do processo em
-//   ciclo (crossfade) com uma legenda em texto acompanhando o cursor, no
-//   mesmo letreiro (janela fixa, texto correndo) do selo "ver caso" de
-//   CasesGrid.
+//   normal continua durante o hover, e só depois de PROCESS_REVEAL_DELAY_MS
+//   de hover contínuo (6s) é que troca pelos stills do processo em ciclo
+//   (crossfade) com uma legenda em texto acompanhando o cursor, no mesmo
+//   letreiro (janela fixa, texto correndo) do selo "ver caso" de CasesGrid.
+//   Fica visível só por PROCESS_VISIBLE_MS (3s) e volta pra vitrine normal
+//   sozinha, mesmo com o cursor ainda em cima: não é "segure pra ver", é um
+//   respiro que aparece e passa, pra não competir com o resto do hover.
 // - `gallery` (uma série de peças, ex.: as ilustrações): entra em ciclo
 //   sozinha, com ou sem hover, no lugar da vitrine normal; o hover só
 //   acrescenta uma ascii art de uma linha (a peça de cada quadro) que
@@ -41,6 +44,11 @@ import type { Locale } from "@/i18n/config";
 // direto no <figure>: podem transbordar o cartão inteiro, não só a imagem,
 // senão a legenda corta perto da borda toda vez que o cursor chega lá.
 const PROCESS_CYCLE_MS = 1600;
+// Pedido explícito: a concept art só aparece depois de 6s de hover contínuo,
+// fica visível por 3s, e some sozinha (ver os dois efeitos abaixo que
+// controlam `processVisible`).
+const PROCESS_REVEAL_DELAY_MS = 6000;
+const PROCESS_VISIBLE_MS = 3000;
 const GALLERY_CYCLE_MS = 2800;
 const TOOLTIP_OFFSET_X = 16;
 // O cursor personalizado (ver cursor/hover.webp) é uma mãozinha de 56x63
@@ -70,9 +78,10 @@ export function ExperimentCard({
   const galleryImgRefs = useRef<(HTMLImageElement | null)[]>([]);
   const [hovering, setHovering] = useState(false);
   const [processIndex, setProcessIndex] = useState(0);
+  const [processVisible, setProcessVisible] = useState(false);
   const [galleryIndex, setGalleryIndex] = useState(0);
 
-  const showProcess = hasProcess && hovering;
+  const showProcess = hasProcess && processVisible;
   const showAsciiTooltip = hasGallery && !reduceMotion && hovering;
   const showHoverNote = hasHoverNote && hovering;
   const showTooltip = showProcess || showAsciiTooltip || showHoverNote;
@@ -103,6 +112,26 @@ export function ExperimentCard({
     }, PROCESS_CYCLE_MS);
     return () => window.clearInterval(interval);
   }, [showProcess, process]);
+
+  // Início do respiro: só depois de 6s de hover contínuo. Sai do hover antes
+  // disso, ou o mouse nunca chegou a entrar: o cleanup cancela o timer e
+  // garante que a concept art comece escondida da próxima vez.
+  useEffect(() => {
+    if (!hasProcess || !hovering) return;
+    const timer = window.setTimeout(() => setProcessVisible(true), PROCESS_REVEAL_DELAY_MS);
+    return () => {
+      window.clearTimeout(timer);
+      setProcessVisible(false);
+    };
+  }, [hovering, hasProcess]);
+
+  // Fim do respiro: 3s depois de aparecer, sozinho, mesmo com o cursor
+  // ainda em cima (o efeito acima só cuida do início).
+  useEffect(() => {
+    if (!processVisible) return;
+    const timer = window.setTimeout(() => setProcessVisible(false), PROCESS_VISIBLE_MS);
+    return () => window.clearTimeout(timer);
+  }, [processVisible]);
 
   useEffect(() => {
     if (!hasGallery || reduceMotion || !gallery) return;
@@ -146,15 +175,6 @@ export function ExperimentCard({
           />
         )}
 
-        {hasDither && (
-          <canvas
-            ref={ditherCanvasRef}
-            aria-hidden
-            className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-100 transition-opacity duration-700 ease-out group-hover:opacity-0"
-            style={{ imageRendering: "pixelated" }}
-          />
-        )}
-
         {hasGallery &&
           gallery!.map((frame, i) => (
             // eslint-disable-next-line @next/next/no-img-element
@@ -184,6 +204,19 @@ export function ExperimentCard({
               style={{ opacity: showProcess && i === processIndex ? 1 : 0 }}
             />
           ))}
+
+        {/* Por cima da galeria/vitrine na ordem do DOM, de propósito: sem
+            isso, os quadros da galeria (sempre opacos) tampam o canvas por
+            baixo, e o retículo nunca aparece, mesmo desenhando certo (só
+            invisível, escondido atrás da própria imagem que deveria cobrir). */}
+        {hasDither && (
+          <canvas
+            ref={ditherCanvasRef}
+            aria-hidden
+            className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-100 transition-opacity duration-700 ease-out group-hover:opacity-0"
+            style={{ imageRendering: "pixelated" }}
+          />
+        )}
       </div>
 
       {/* Fora do overflow-hidden da vitrine, de propósito: a legenda pode

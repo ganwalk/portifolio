@@ -79,7 +79,6 @@ export function CaseDetail({
         // IntranetShowcase.tsx).
         <IntranetShowcase
           locale={locale}
-          dict={dict}
           demoUrl={caseStudy.demoUrl}
           className="mt-12"
         />

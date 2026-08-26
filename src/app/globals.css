@@ -526,6 +526,15 @@ html[data-boring="true"] .texture-noise::after {
   --primary-emphasis: 40 95% 30%;
   --ig-muted: 42 10% 95%;
   --muted-foreground: 42 10% 40%;
+  /* --accent, não --ig-accent: mesmo caso do --border logo abaixo (não é
+     nome que o resto do site usa), mas SEM ele aqui, CountdownDemo.tsx e
+     PricingTable.tsx (que já usavam var(--accent) antes desta correção)
+     herdavam por engano o --accent do TEMA ativo do site (preto no claro,
+     branco no escuro, ver TOKENS DE DESIGN no topo do arquivo): o selo
+     "LOREM IPSUM..." de Countdown e o preço ativo de Pricing liam texto
+     quase branco sobre fundo quase branco no modo escuro. */
+  --accent: 40 95% 32%;
+  --accent-foreground: 0 0% 100%;
   --success: 142 72% 29%;
   --warning: 35 95% 42%;
   --info: 210 90% 42%;

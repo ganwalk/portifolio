@@ -790,7 +790,6 @@ function ExpandedCase({
           // a animação de entrada num overlay que já nasce visível de vez.
           <IntranetShowcase
             locale={locale}
-            dict={dict}
             demoUrl={caseStudy.demoUrl}
             className="mt-12"
           />

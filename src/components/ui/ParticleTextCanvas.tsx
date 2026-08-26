@@ -5,12 +5,38 @@ import { useReducedMotion } from "framer-motion";
 
 // Prévia leve, local, de um nome em partículas: a mesma linguagem visual
 // que Ganwalk e Pink Opala usam de verdade (texto amostrado em pixels,
-// virando partículas), reconstruída em Canvas 2D simples, sem WebGL nem
-// física de mola. Existe pra tirar o peso de embutir os sites de verdade
-// num iframe sempre montado no card do trio (três contextos de
-// WebGL/Three.js/áudio simultâneos, só pra uma prévia) — a versão
-// completa, com todos os efeitos de verdade, continua um clique de
-// distância (LiveEmbed, no corpo do case).
+// virando partículas), reconstruída em Canvas 2D simples, sem WebGL. Existe
+// pra tirar o peso de embutir os sites de verdade num iframe sempre montado
+// no card do trio (três contextos de WebGL/Three.js/áudio simultâneos, só
+// pra uma prévia) — a versão completa, com todos os efeitos de verdade,
+// continua um clique de distância (LiveEmbed, no corpo do case).
+//
+// A física de partículas (Pink Opala, `interactive`) é a mesma de verdade
+// do site publicado, portada de ganwalk/pinkopala (index.htm,
+// animateSand()), não uma aproximação: velocidade acumulada por partícula
+// (não um lerp direto de posição), repulsão como impulso, mola de retorno
+// com constante variável (fraca perto do destino, forte longe), atrito por
+// quadro, e a mesma troca de cor gradual (branco → `highlightColor`) nas
+// partículas perturbadas, com a queda bem mais lenta que a subida
+// (COLOR_RISE vs COLOR_DECAY) — o rastro rosa que persiste um instante
+// depois do cursor já ter passado, igual no site real.
+//
+// Três diferenças deliberadas do site real, as três pra uma PRÉVIA pequena
+// e sempre visível fazer sentido (o site inteiro é full-bleed, só reage a
+// hover de verdade):
+// 1. Sem o materializar de entrada (partículas espalhadas assentando na
+//    primeira rodada de frames): leva vários segundos pra ficar nítido,
+//    bom numa página cheia visitada uma vez, ruim num card pequeno que já
+//    chega pronto (monta de cara, mesmo fora de tela, ver embaixo) e pode
+//    remontar mais de uma vez numa sessão. Nasce direto no destino.
+// 2. Respiro ambiente sutil (IDLE_AMPLITUDE) por cima do destino da mola,
+//    mesmo fora do hover: sem ele, o cartão parado (sem interação) ficava
+//    com uma imagem 100% estática, destoando do resto do trio.
+// 3. Sem hover de verdade (toque, ver `hoverCapable`), o ponto de repulsão
+//    vira sintético e varre a tela sozinho num Lissajous, reaproveitando a
+//    mesma física — no site cheio, o próprio dedo faz esse papel via
+//    touchmove; aqui, um cartão pequeno na home raramente recebe um toque
+//    que caia bem em cima do texto.
 //
 // IntersectionObserver pausa o loop de animação fora de tela: útil aqui
 // porque o card do trio monta de cara, mesmo antes do scroll alcançar
@@ -20,16 +46,37 @@ import { useReducedMotion } from "framer-motion";
 const GAP = 4;
 const IDLE_AMPLITUDE = 1.4;
 const REPULSE_RADIUS = 70;
-const REPULSE_STRENGTH = 26;
-const RETURN_SPEED = 0.12;
+// Física de mola/velocidade real, portada de ganwalk/pinkopala (index.htm,
+// animateSand): não é a mesma coisa que um lerp direto de posição (o que
+// existia aqui antes). Cada partícula acumula velocidade (impulso da
+// repulsão, puxão da mola de volta à origem, atrito), então uma passada
+// perto do cursor deixa rastro: a partícula continua em movimento (e ainda
+// mudando de cor) por um instante depois do cursor já ter saído do raio,
+// em vez de simplesmente parar.
+const REPULSE_FORCE = 10;
+const SPRING_FAR = 0.045;
+const SPRING_NEAR = 0.003;
+const SPRING_NEAR_THRESHOLD_SQ = 64; // 8px: abaixo disso, mola fraca (assentar sem trepidar)
+const DAMPING = 0.88;
+const COLOR_RISE = 0.15;
+const COLOR_DECAY = 0.015;
 
 interface Particle {
   ox: number;
   oy: number;
   x: number;
   y: number;
+  vx: number;
+  vy: number;
   size: number;
+  mass: number;
   seed: number;
+  colorFactor: number;
+}
+
+function hexToRgb(hex: string): [number, number, number] {
+  const n = Number.parseInt(hex.replace("#", ""), 16);
+  return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
 }
 
 export function ParticleTextCanvas({
@@ -37,6 +84,7 @@ export function ParticleTextCanvas({
   color,
   background,
   interactive = false,
+  highlightColor,
   className = "",
 }: {
   lines: string[];
@@ -47,6 +95,11 @@ export function ParticleTextCanvas({
    *  aparelho sem hover de verdade (toque), o ponto de repulsão vira
    *  sintético e varre a tela sozinho (ver `hoverCapable` no efeito). */
   interactive?: boolean;
+  /** Cor de destaque das partículas perturbadas (ver colorFactor):
+   *  interpola de `color` até esta, e volta, bem mais devagar que o
+   *  assentamento físico. Sem valor, não há troca de cor (fica só em
+   *  `color`, o comportamento de antes desta prop existir). */
+  highlightColor?: string;
   className?: string;
 }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -154,13 +207,23 @@ export function ParticleTextCanvas({
         for (let x = 0; x < width; x += GAP) {
           const alpha = data[(y * width + x) * 4 + 3];
           if (alpha > 128) {
+            // Nascem já no destino, não espalhadas: o site real materializa
+            // o texto assim no carregamento (ver ganwalk/pinkopala,
+            // index.htm), mas aqui é uma prévia pequena, sempre visível
+            // mesmo antes do scroll alcançá-la (ver CasesGrid.tsx) — um
+            // texto que leva vários segundos pra ficar nítido de novo toda
+            // vez que o card remonta lia como quebrado, não como efeito.
             particles.push({
               ox: x,
               oy: y,
               x,
               y,
+              vx: 0,
+              vy: 0,
               size: Math.random() * 1.1 + 0.9,
+              mass: Math.random() * 0.6 + 0.4,
               seed: Math.random() * Math.PI * 2,
+              colorFactor: 0,
             });
           }
         }
@@ -193,11 +256,13 @@ export function ParticleTextCanvas({
       container.addEventListener("pointerleave", handlePointerLeave);
     }
 
+    const [cr, cg, cb] = hexToRgb(color);
+    const [hr, hg, hb] = highlightColor ? hexToRgb(highlightColor) : [cr, cg, cb];
+
     function paint(now: number) {
       ctx!.setTransform(dpr, 0, 0, dpr, 0, 0);
       ctx!.fillStyle = background;
       ctx!.fillRect(0, 0, width, height);
-      ctx!.fillStyle = color;
 
       const t = now / 1000;
       // Convertido pra espaço local aqui, contra a rect ATUAL do container,
@@ -205,38 +270,77 @@ export function ParticleTextCanvas({
       // pointerRef): o eixo da repulsão fica preso na ponta do cursor de
       // verdade mesmo se o container se mover por baixo dele (paralaxe de
       // scroll, ver mediaY em CasesGrid) sem nenhum movimento novo do mouse.
+      //
+      // Escalado por width/rect.width (e o par em Y): a MESMA paralaxe de
+      // scroll também aplica um `scale()` num ANCESTRAL do container (ver
+      // mediaScale em CasesGrid.tsx), então rect (que reflete esse scale,
+      // por herdar de todo ancestral) fica maior que o espaço de layout
+      // onde as partículas realmente vivem (clientWidth/Height, nunca
+      // afetado por transform, ver comentário em buildParticles). Sem essa
+      // razão, um scale de +8% já bastava pra repulsão nascer alguns
+      // pixels fora da ponta real do cursor, pior nas bordas: o efeito
+      // "se deforma fora do ponteiro" relatado.
       let px = -9999;
       let py = -9999;
       if (interactive && hoverCapable && pointerRef.current.x !== -9999) {
         const rect = container!.getBoundingClientRect();
-        px = pointerRef.current.x - rect.left;
-        py = pointerRef.current.y - rect.top;
+        px = (pointerRef.current.x - rect.left) * (width / rect.width);
+        py = (pointerRef.current.y - rect.top) * (height / rect.height);
       } else if (interactive && !hoverCapable) {
         px = width / 2 + Math.sin(t * 0.31) * width * 0.42;
         py = height / 2 + Math.sin(t * 0.23) * height * 0.38;
       }
 
       for (const p of particlesRef.current) {
-        let tx = p.ox;
-        let ty = p.oy;
-        if (!reduceMotion) {
-          tx += Math.sin(t * 0.8 + p.seed) * IDLE_AMPLITUDE;
-          ty += Math.cos(t * 0.8 + p.seed) * IDLE_AMPLITUDE;
+        // Destino da mola: a origem na trama do texto, com um respiro
+        // ambiente sutil por cima (não existe no site real, ver as duas
+        // diferenças deliberadas no topo do arquivo) pra prévia nunca
+        // ficar 100% parada fora do hover.
+        const targetX = p.ox + (reduceMotion ? 0 : Math.sin(t * 0.8 + p.seed) * IDLE_AMPLITUDE);
+        const targetY = p.oy + (reduceMotion ? 0 : Math.cos(t * 0.8 + p.seed) * IDLE_AMPLITUDE);
+
+        if (reduceMotion) {
+          p.x = targetX;
+          p.y = targetY;
+        } else {
           if (interactive) {
-            const dx = tx - px;
-            const dy = ty - py;
-            const dist = Math.sqrt(dx * dx + dy * dy);
-            if (dist < REPULSE_RADIUS) {
-              const force = (1 - dist / REPULSE_RADIUS) * REPULSE_STRENGTH;
-              tx += (dx / (dist || 1)) * force;
-              ty += (dy / (dist || 1)) * force;
+            const dx = px - p.x;
+            const dy = py - p.y;
+            const distSq = dx * dx + dy * dy;
+            if (distSq < REPULSE_RADIUS * REPULSE_RADIUS) {
+              const dist = Math.sqrt(distSq) || 0.0001;
+              const force = (REPULSE_RADIUS - dist) / REPULSE_RADIUS;
+              const inv = 1 / dist;
+              p.vx -= dx * inv * force * (REPULSE_FORCE / p.mass);
+              p.vy -= dy * inv * force * (REPULSE_FORCE / p.mass);
+              p.colorFactor = Math.min(1, p.colorFactor + COLOR_RISE);
+            } else if (p.colorFactor > 0) {
+              p.colorFactor = Math.max(0, p.colorFactor - COLOR_DECAY);
             }
           }
-          p.x += (tx - p.x) * RETURN_SPEED;
-          p.y += (ty - p.y) * RETURN_SPEED;
+          // Mola de volta ao destino: mais fraca perto dele (assenta sem
+          // trepidar num círculo de 8px) e mais forte longe (puxa de volta
+          // com vontade depois de uma repulsão forte). Atrito (DAMPING) a
+          // cada quadro, não um retorno linear: é o que dá o overshoot e o
+          // rastro (ver topo do arquivo) que faltavam na versão anterior
+          // (um lerp direto de posição, sem velocidade).
+          const ox = targetX - p.x;
+          const oy = targetY - p.y;
+          const distOriginSq = ox * ox + oy * oy;
+          const springK = (distOriginSq > SPRING_NEAR_THRESHOLD_SQ ? SPRING_FAR : SPRING_NEAR) * p.mass;
+          p.vx = (p.vx + ox * springK) * DAMPING;
+          p.vy = (p.vy + oy * springK) * DAMPING;
+          p.x += p.vx;
+          p.y += p.vy;
+        }
+
+        if (p.colorFactor > 0) {
+          const r = Math.round(cr + (hr - cr) * p.colorFactor);
+          const g = Math.round(cg + (hg - cg) * p.colorFactor);
+          const b = Math.round(cb + (hb - cb) * p.colorFactor);
+          ctx!.fillStyle = `rgb(${r},${g},${b})`;
         } else {
-          p.x = tx;
-          p.y = ty;
+          ctx!.fillStyle = color;
         }
         ctx!.fillRect(p.x, p.y, p.size, p.size);
       }
@@ -278,7 +382,7 @@ export function ParticleTextCanvas({
     return () => {
       resizeObserver.disconnect();
     };
-  }, [lines, color, background, interactive, reduceMotion]);
+  }, [lines, color, background, interactive, highlightColor, reduceMotion]);
 
   return (
     <div ref={containerRef} className={`relative overflow-hidden ${className}`}>

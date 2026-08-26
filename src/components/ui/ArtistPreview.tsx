@@ -55,6 +55,10 @@ export function ArtistPreview({
           lines={PINK_OPALA_LINES}
           color="#ffffff"
           background="#000000"
+          // Mesmo rosa do site real (--neon-pink em ganwalk/pinkopala,
+          // index.htm): as partículas perturbadas mudam de cor de verdade,
+          // não só de posição, ver ParticleTextCanvas.tsx.
+          highlightColor="#ff00aa"
           interactive
           className={className}
         />

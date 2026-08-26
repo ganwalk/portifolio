@@ -14,6 +14,18 @@ import { Reveal } from "../Reveal";
 // um vão de tela em branco enorme (a seção inteira presa em opacity: 0) até
 // o visitante rolar bem além dela. Caixas pequenas, uma por vez, sempre
 // cabem no viewport e sempre revelam.
+//
+// Cor sempre da "Marca A" (--ig-background/--ig-foreground/--border, ver
+// .intranet-scope em globals.css), nunca dos tokens do site (bg-surface,
+// text-foreground): esses seguem o tema claro/escuro do resto do site, mas
+// tudo AQUI DENTRO (os componentes portados, ver FaqAccordion.tsx,
+// TooltipsDemo.tsx etc.) já é fixo, um retrato real da Intranet publicada,
+// sempre clara. Com
+// a casca acompanhando o tema e o miolo sempre claro, o modo escuro do site
+// virava uma caixa escura com conteúdo branco dentro, destoando do resto da
+// vitrine (que também é sempre clara). Casca e miolo na mesma paleta fixa:
+// lê como uma peça só, um recorte do produto de verdade, não uma mistura
+// dos dois temas.
 
 export function BentoCard({
   title,
@@ -30,10 +42,10 @@ export function BentoCard({
 }) {
   return (
     <Reveal delay={delay} className={className}>
-      <div className="flex h-full flex-col gap-4 rounded-2xl border border-line bg-surface p-5 transition-colors duration-300 hover:border-foreground/25">
+      <div className="flex h-full flex-col gap-4 rounded-2xl border border-[hsl(var(--border))] bg-[hsl(var(--ig-background))] p-5 transition-colors duration-300 hover:border-[hsl(var(--ig-foreground)/0.25)]">
         <div>
-          <p className="text-sm font-bold text-foreground">{title}</p>
-          <p className="mt-1 text-xs leading-relaxed text-muted">{description}</p>
+          <p className="text-sm font-bold text-[hsl(var(--ig-foreground))]">{title}</p>
+          <p className="mt-1 text-xs leading-relaxed text-[hsl(var(--muted-foreground))]">{description}</p>
         </div>
         <div className="w-full flex-1">{children}</div>
       </div>
