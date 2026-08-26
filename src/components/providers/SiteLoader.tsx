@@ -220,7 +220,19 @@ export function SiteLoader() {
             className="texture-noise texture-noise-animate"
             style={{ position: "absolute", inset: 0 }}
           />
-          <span className="type-display type-inktrap px-6 text-center text-[9vw] leading-none sm:text-[4vw]">
+          {/* opacity, não um render condicional: o nome só pode aparecer
+              depois que fontsSettled vira true (document.fonts.ready
+              resolvido, Whyte Inktrap já baixada), senão a página inteira
+              disparava exatamente o flash que este loader existe pra
+              esconder — font-display: swap (ver whyte-inktrap.css) mostra
+              a fonte de reserva (Archivo) até a Whyte terminar de baixar,
+              e sem essa guarda o NOME DO PRÓPRIO LOADER era a única coisa
+              ainda visível durante essa troca, pisca de fonte errada por
+              cima de tudo o resto que o loader já protege. */}
+          <span
+            className="type-display type-inktrap px-6 text-center text-[9vw] leading-none opacity-0 transition-opacity duration-300 sm:text-[4vw]"
+            style={fontsSettled ? { opacity: 1 } : undefined}
+          >
             {profile.name}
           </span>
           {!reduceMotion && <LoaderMoons />}
