@@ -18,20 +18,30 @@ import {
   Award,
   MessagesSquare,
   BookOpen,
+  Megaphone,
+  Blocks,
 } from "lucide-react";
 
-// Índice de outras 18 partes documentadas no Design System real (das 70
+// Índice de outras 20 partes documentadas no Design System real (das 70
 // listadas em cases.ts), com a descrição de verdade copiada de
 // ganwalk/intranet, src/pages/DesignSystem.tsx (prop `description` de cada
 // ComponentShowcase/SectionThemeToggle). Não são componentes portados como
 // os de cima: é um índice, com link para abrir cada um ao vivo na Intranet
 // publicada.
+//
+// Manual de Tom e Voz e Nossas Soluções (grupo "Conteúdo" abaixo) moravam
+// num bloco à parte, com still e link (ver histórico de IntranetShowcase.tsx):
+// pedido explícito pra virarem só mais duas entradas do índice, como
+// qualquer uma das outras 18, não um tratamento especial. `path` aponta pra
+// fora de /design-system nesses dois casos (são páginas próprias, não uma
+// seção da página do Design System), por isso o campo é o caminho inteiro,
+// não só um anchor dentro dela.
 
 export interface CatalogItem {
   icon: LucideIcon;
   name: string;
   description: string;
-  anchor: string;
+  path: string;
 }
 
 export interface CatalogGroup {
@@ -47,19 +57,19 @@ export const catalogGroups: CatalogGroup[] = [
         icon: Shapes,
         name: "Ícones Phosphor",
         description: "Biblioteca Phosphor Icons usada em todo o produto. Inclui variantes regular, bold e fill.",
-        anchor: "icons",
+        path: "/design-system#icons",
       },
       {
         icon: LayoutGrid,
         name: "Layout & espaçamento",
         description: "Ritmo vertical e alinhamento baseados em múltiplos de 15px. Container max-width 1200px.",
-        anchor: "layout",
+        path: "/design-system#layout",
       },
       {
         icon: Layers,
         name: "Sombras & elevação",
         description: "Escala de sombras para hierarquia de profundidade, do mais sutil ao mais elevado.",
-        anchor: "elevation",
+        path: "/design-system#elevation",
       },
     ],
   },
@@ -70,37 +80,37 @@ export const catalogGroups: CatalogGroup[] = [
         icon: MessageCircle,
         name: "Widgets flutuantes",
         description: "Botões flutuantes fixos com animação pulse contínua e z-index elevado.",
-        anchor: "floaters",
+        path: "/design-system#floaters",
       },
       {
         icon: ChevronDown,
         name: "Dropdown / FAQ",
         description: "Accordion para páginas de vendas. Ícone de mais que gira para x na abertura.",
-        anchor: "faq",
+        path: "/design-system#faq",
       },
       {
         icon: Route,
         name: "Jornada do herói",
         description: "Timeline interativa com pontos clicáveis, barra de progresso e painel por etapa.",
-        anchor: "journey",
+        path: "/design-system#journey",
       },
       {
         icon: TrendingUp,
         name: "Calculadora de rendimentos",
         description: "Simulação com slider de valor, resultado animado e identidade Marca A/Marca B.",
-        anchor: "site-calc",
+        path: "/design-system#site-calc",
       },
       {
         icon: ArrowLeftRight,
         name: "Calculadora de câmbio",
         description: "Conversão de moedas com cálculo automático de IOF, VET e cotação em tempo real.",
-        anchor: "tool-calc",
+        path: "/design-system#tool-calc",
       },
       {
         icon: MessageSquare,
         name: "Tooltips & popups",
         description: "Tooltip simples por hover, popover com conteúdo rico por clique, popup de destaque.",
-        anchor: "tooltips",
+        path: "/design-system#tooltips",
       },
     ],
   },
@@ -111,55 +121,73 @@ export const catalogGroups: CatalogGroup[] = [
         icon: LayoutList,
         name: "Grade curricular",
         description: "Tabs com categorias e cards de módulos.",
-        anchor: "grade",
+        path: "/design-system#grade",
       },
       {
         icon: GraduationCap,
         name: "Visualização de cursos",
         description: "Grid de cursos com cards de progresso, thumbnail e botão de retomada de aula.",
-        anchor: "plat-courses",
+        path: "/design-system#plat-courses",
       },
       {
         icon: PlayCircle,
         name: "Interface do player",
         description: "Player de vídeo com overlay de controles, volume, fullscreen e auto-hide.",
-        anchor: "plat-player",
+        path: "/design-system#plat-player",
       },
       {
         icon: ListVideo,
         name: "Lista de aulas",
         description: "Três estados visuais: assistindo (amarelo), concluído (check verde) e bloqueado (cadeado).",
-        anchor: "plat-playlist",
+        path: "/design-system#plat-playlist",
       },
       {
         icon: LayoutDashboard,
         name: "Dashboard do aluno",
         description: "KPIs de uso, gráfico de atividade semanal e grid de conquistas desbloqueadas.",
-        anchor: "plat-dashboard",
+        path: "/design-system#plat-dashboard",
       },
       {
         icon: StickyNote,
         name: "Notas & anotações",
         description: "Bloco de notas vinculado ao timestamp do vídeo, com carimbos de tempo clicáveis.",
-        anchor: "plat-notes",
+        path: "/design-system#plat-notes",
       },
       {
         icon: Award,
         name: "Certificados",
         description: "Emitidos automaticamente ao concluir um módulo, com botão de download em PDF.",
-        anchor: "plat-certificates",
+        path: "/design-system#plat-certificates",
       },
       {
         icon: MessagesSquare,
         name: "Comunidade & dúvidas",
         description: "Fórum com votos, respostas de instrutores destacadas e filtros por status.",
-        anchor: "plat-community",
+        path: "/design-system#plat-community",
       },
       {
         icon: BookOpen,
         name: "Livro",
         description: "Capa 3D inspirada no Book do Geist (Vercel), para hero de módulos e trilhas.",
-        anchor: "plat-livro",
+        path: "/design-system#plat-livro",
+      },
+    ],
+  },
+  {
+    label: "Conteúdo",
+    items: [
+      {
+        icon: Megaphone,
+        name: "Manual de Tom e Voz",
+        description:
+          "Guia de comunicação por área da empresa (dez ao todo, do atendimento ao jurídico) e por produto, com exemplos reais de erro e correção lado a lado.",
+        path: "/tom-e-voz#fundador",
+      },
+      {
+        icon: Blocks,
+        name: "Nossas Soluções",
+        description: "Guia dos cinco produtos do ecossistema, cada um com sua própria seção, terminando numa tabela comparativa.",
+        path: "/solucoes#resumo",
       },
     ],
   },

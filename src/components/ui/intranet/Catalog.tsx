@@ -2,20 +2,21 @@ import type { Localized } from "@/data/types";
 import type { Locale } from "@/i18n/config";
 import { catalogGroups } from "./catalog";
 
-// Índice de mais 18 partes do Design System real (das 70 documentadas),
+// Índice de mais 20 partes do Design System real (das 70 documentadas),
 // além dos seis componentes funcionais portados acima: nome, ícone e a
 // descrição de verdade de cada uma, com link para abrir ao vivo na
 // Intranet publicada. Um índice, não mais uma porta de código: cobre a
-// variedade do sistema (plataforma de ensino, jornadas, calculadoras...)
-// sem repetir o custo de portar cada peça de verdade.
+// variedade do sistema (plataforma de ensino, jornadas, calculadoras, o
+// manual de tom e voz, o guia de soluções...) sem repetir o custo de
+// portar cada peça de verdade.
 
 const INTRANET_ORIGIN = "https://ganwalk.github.io/intranet";
 
 const intro: Localized = {
-  pt: "No índice, mais 18 partes do Design System (das 70 documentadas), cada uma com link direto para abrir ao vivo na Intranet publicada.",
-  en: "In the index, 18 more parts of the Design System (out of the 70 documented), each linking straight to the live one on the published Intranet.",
-  es: "En el índice, 18 partes más del Design System (de las 70 documentadas), cada una con enlace directo para abrirla en vivo en la Intranet publicada.",
-  zh: "索引中还有 18 个设计系统部分（共 70 个已归档），每个都直接链接到已发布内网上的实际版本。",
+  pt: "No índice, mais 20 partes do Design System (das 70 documentadas), cada uma com link direto para abrir ao vivo na Intranet publicada.",
+  en: "In the index, 20 more parts of the Design System (out of the 70 documented), each linking straight to the live one on the published Intranet.",
+  es: "En el índice, 20 partes más del Design System (de las 70 documentadas), cada una con enlace directo para abrirla en vivo en la Intranet publicada.",
+  zh: "索引中还有 20 个设计系统部分（共 70 个已归档），每个都直接链接到已发布内网上的实际版本。",
 };
 
 export function Catalog({ locale }: { locale: Locale }) {
@@ -32,7 +33,7 @@ export function Catalog({ locale }: { locale: Locale }) {
                 return (
                   <a
                     key={item.name}
-                    href={`${INTRANET_ORIGIN}/design-system#${item.anchor}`}
+                    href={`${INTRANET_ORIGIN}${item.path}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="group flex items-start gap-3 border border-line bg-background p-4 transition-colors hover:bg-surface"
