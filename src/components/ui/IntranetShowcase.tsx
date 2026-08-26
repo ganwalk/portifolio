@@ -5,9 +5,9 @@ import { RoadmapTimeline } from "./intranet/RoadmapTimeline";
 import { NovidadeCard } from "./intranet/NovidadeCard";
 import { novidadesSample } from "./intranet/novidadesSample";
 import { CountdownDemo } from "./intranet/CountdownDemo";
-import { RateDemo } from "./intranet/RateDemo";
 import { PricingTable } from "./intranet/PricingTable";
-import { DonutChart } from "./intranet/DonutChart";
+import { FaqAccordion } from "./intranet/FaqAccordion";
+import { TooltipsDemo } from "./intranet/TooltipsDemo";
 import { Catalog } from "./intranet/Catalog";
 import type { Localized } from "@/data/types";
 import type { Locale } from "@/i18n/config";
@@ -64,30 +64,30 @@ const novidadesDesc: Localized = {
   zh: "公告墙上的两张真实卡片，前后对比并列展示，附带每次交付的成果。",
 };
 
-const donutTitle: Localized = {
-  pt: "Gráfico de rosca",
-  en: "Donut chart",
-  es: "Gráfico de rosca",
-  zh: "环形图",
+const faqTitle: Localized = {
+  pt: "Dúvidas frequentes",
+  en: "Frequently asked questions",
+  es: "Preguntas frecuentes",
+  zh: "常见问题",
 };
-const donutDesc: Localized = {
-  pt: "Passe o mouse numa fatia ou na legenda: as duas se destacam juntas, sincronizadas.",
-  en: "Hover a slice or the legend: the two highlight together, in sync.",
-  es: "Pasa el mouse por una porción o la leyenda: las dos se destacan juntas, sincronizadas.",
-  zh: "将鼠标悬停在扇区或图例上：两者会同步高亮。",
+const faqDesc: Localized = {
+  pt: "Clique numa pergunta para abrir a resposta. Só uma fica aberta por vez, a mesma regra do site publicado.",
+  en: "Click a question to open the answer. Only one stays open at a time, the same rule as the published site.",
+  es: "Haz clic en una pregunta para abrir la respuesta. Solo una queda abierta a la vez, la misma regla del sitio publicado.",
+  zh: "点击问题展开答案。同一时间只能展开一个，与已发布网站的规则一致。",
 };
 
-const rateLabel: Localized = {
-  pt: "Avaliação por estrelas",
-  en: "Star rating",
-  es: "Valoración por estrellas",
-  zh: "星级评分",
+const tooltipsTitle: Localized = {
+  pt: "Tooltips",
+  en: "Tooltips",
+  es: "Tooltips",
+  zh: "提示气泡",
 };
-const rateDesc: Localized = {
-  pt: "Clique para votar, passe o mouse para pré-visualizar. Suporta meia estrela e um modo somente leitura.",
-  en: "Click to vote, hover to preview. Supports half stars and a read only mode.",
-  es: "Haz clic para votar, pasa el mouse para previsualizar. Admite media estrella y un modo de solo lectura.",
-  zh: "点击投票，悬停预览。支持半星和只读模式。",
+const tooltipsDesc: Localized = {
+  pt: "Passe o mouse em qualquer texto de referência: a mesma dica aparece nas quatro posições possíveis.",
+  en: "Hover any reference text: the same hint appears in the four possible positions.",
+  es: "Pasa el mouse por cualquier texto de referencia: la misma pista aparece en las cuatro posiciones posibles.",
+  zh: "将鼠标悬停在任意参考文字上：同一条提示会出现在四个可能的位置。",
 };
 
 const countdownLabel: Localized = {
@@ -190,11 +190,11 @@ export function IntranetShowcase({
             ))}
           </div>
         </BentoCard>
-        <BentoCard title={donutTitle[locale]} description={donutDesc[locale]} delay={0.08} className="lg:col-span-2">
-          <DonutChart />
+        <BentoCard title={faqTitle[locale]} description={faqDesc[locale]} delay={0.08} className="lg:col-span-2">
+          <FaqAccordion />
         </BentoCard>
-        <BentoCard title={rateLabel[locale]} description={rateDesc[locale]} delay={0.1} className="lg:col-span-2">
-          <RateDemo />
+        <BentoCard title={tooltipsTitle[locale]} description={tooltipsDesc[locale]} delay={0.1} className="lg:col-span-2">
+          <TooltipsDemo />
         </BentoCard>
         <BentoCard
           title={countdownLabel[locale]}

@@ -18,8 +18,9 @@ import { Reveal } from "../Reveal";
 // Cor sempre da "Marca A" (--ig-background/--ig-foreground/--border, ver
 // .intranet-scope em globals.css), nunca dos tokens do site (bg-surface,
 // text-foreground): esses seguem o tema claro/escuro do resto do site, mas
-// tudo AQUI DENTRO (os componentes portados, ver RateDemo.tsx, DonutChart.tsx
-// etc.) já é fixo, um retrato real da Intranet publicada, sempre clara. Com
+// tudo AQUI DENTRO (os componentes portados, ver FaqAccordion.tsx,
+// TooltipsDemo.tsx etc.) já é fixo, um retrato real da Intranet publicada,
+// sempre clara. Com
 // a casca acompanhando o tema e o miolo sempre claro, o modo escuro do site
 // virava uma caixa escura com conteúdo branco dentro, destoando do resto da
 // vitrine (que também é sempre clara). Casca e miolo na mesma paleta fixa:
