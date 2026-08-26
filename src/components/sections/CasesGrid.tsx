@@ -27,9 +27,16 @@ import { MediaView } from "@/components/ui/MediaView";
 import { Reveal } from "@/components/ui/Reveal";
 import { RepoLink } from "@/components/ui/RepoLink";
 import { cases } from "@/data/cases";
-import type { CaseStudy } from "@/data/types";
+import type { CaseStudy, Localized } from "@/data/types";
 import type { Locale } from "@/i18n/config";
 import type { Dictionary } from "@/i18n/dictionaries";
+
+const seeFullSite: Localized = {
+  pt: "Ver o site completo",
+  en: "See the full site",
+  es: "Ver el sitio completo",
+  zh: "查看完整网站",
+};
 import { saveHomeScrollPosition } from "@/lib/home-scroll-position";
 import { useMediaQuery } from "@/lib/use-media-query";
 import { useNearViewport } from "@/lib/use-near-viewport";
@@ -702,6 +709,9 @@ function ExpandedCase({
     };
   }, [reduceMotionScroller]);
 
+  const showSeeFullSite = caseStudy.slug === "intranet-auvp" && Boolean(caseStudy.demoUrl);
+  const showRepoLink = Boolean(caseStudy.repoUrl);
+
   return (
     <motion.div
       ref={scrollerRef}
@@ -788,11 +798,7 @@ function ExpandedCase({
           // (que só cobre as outras duas variantes): IntranetShowcase já
           // rege a própria entrada com Reveals internos, aninhar duplicaria
           // a animação de entrada num overlay que já nasce visível de vez.
-          <IntranetShowcase
-            locale={locale}
-            demoUrl={caseStudy.demoUrl}
-            className="mt-12"
-          />
+          <IntranetShowcase locale={locale} className="mt-12" />
         ) : (
           <Reveal delay={0.6}>
             {caseStudy.demoUrl ? (
@@ -811,9 +817,28 @@ function ExpandedCase({
           </Reveal>
         )}
 
-        {caseStudy.repoUrl && (
-          <Reveal delay={0.62} className="mt-12 flex justify-center">
-            <RepoLink repoUrl={caseStudy.repoUrl} title={caseStudy.title[locale]} dict={dict} />
+        {/* Mesmo raciocínio de CaseDetail.tsx: uma fileira só quando os
+            dois links existem (justify-between, cada um numa ponta), não
+            duas linhas soltas. */}
+        {(showSeeFullSite || showRepoLink) && (
+          <Reveal
+            delay={0.62}
+            className={`mt-12 flex items-center ${showSeeFullSite && showRepoLink ? "justify-between" : "justify-center"}`}
+          >
+            {showSeeFullSite && caseStudy.demoUrl && (
+              <a
+                href={caseStudy.demoUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="type-mono inline-flex items-center gap-2 text-muted transition-colors hover:text-foreground"
+              >
+                {seeFullSite[locale]}
+                <span aria-hidden>↗</span>
+              </a>
+            )}
+            {showRepoLink && caseStudy.repoUrl && (
+              <RepoLink repoUrl={caseStudy.repoUrl} title={caseStudy.title[locale]} dict={dict} />
+            )}
           </Reveal>
         )}
 
