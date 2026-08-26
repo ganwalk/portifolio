@@ -7,7 +7,8 @@ const basePath = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
 // Bloco compacto "Extras" na home, 3 a 4 experimentos selecionados: colagens
 // digitalizadas, gravações de tela dos estudos de movimento e um show ao
 // vivo de produção musical, todos com mídia real (nenhum placeholder de
-// banco de imagens restante).
+// banco de imagens restante). Os três têm dither: true, o retículo de Bayer
+// animado que cobre a vitrine em repouso (ver ExperimentCard.tsx).
 
 export const experiments: Experiment[] = [
   {
@@ -120,6 +121,11 @@ export const experiments: Experiment[] = [
         asciiArt: "(づ￣³￣)づ",
       },
     ],
+    // Retículo de Bayer animado por cima da peça atual da galeria (ver
+    // dither em types.ts e useBayerDither.ts), dissolvendo no hover: a
+    // troca de peça continua sozinha por baixo dele, só a fonte que o
+    // canvas lê muda junto (ver ExperimentCard.tsx).
+    dither: true,
   },
   {
     id: "animacao-01",
@@ -161,6 +167,10 @@ export const experiments: Experiment[] = [
         },
       },
     ],
+    // Retículo de Bayer animado por cima do vídeo, em repouso: o hover já
+    // trocava a vitrine pelo still do processo, então aqui o dither só
+    // muda o que aparecia ANTES do hover (ver dither em types.ts).
+    dither: true,
   },
   {
     id: "som-01",
@@ -200,8 +210,8 @@ export const experiments: Experiment[] = [
       es: "(a veces extraño el pelo largo)",
       zh: "(有时会怀念长发)",
     },
-    // Retículo de meio-tom por cima do vídeo (ver DITHER_PATTERN em
-    // ExperimentCard.tsx), que dissolve no hover: a mesma lógica do
+    // Retículo de Bayer animado por cima do vídeo (ver dither em types.ts e
+    // useBayerDither.ts), que dissolve no hover: a mesma lógica do
     // hoverNote acima, um efeito à parte, não uma troca de vitrine.
     dither: true,
   },

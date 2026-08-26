@@ -5,6 +5,7 @@ import { useMotionValue, useReducedMotion, useSpring, useTransform } from "frame
 import { CursorLabel } from "@/components/ui/CursorLabel";
 import { ExperimentCaption } from "@/components/ui/ExperimentCaption";
 import { MediaView } from "@/components/ui/MediaView";
+import { useBayerDither } from "@/lib/use-bayer-dither";
 import type { Experiment } from "@/data/types";
 import type { Locale } from "@/i18n/config";
 
@@ -28,12 +29,13 @@ import type { Locale } from "@/i18n/config";
 //   nunca troca, só a legenda aparece no hover, no mesmo letreiro rolante
 //   do process acima (é uma frase, não uma ascii de uma linha só).
 //
-// Independente desses três, `dither` (também usado pela produção musical)
-// cobre a vitrine com um retículo de meio-tom animado (xadrez preto e
-// branco bem fino, cintilando, ver DITHER_PATTERN e .experiment-dither em
-// globals.css) em mix-blend-mode overlay, sem tocar na cor da mídia por
-// baixo: um efeito por cima, não uma versão dessaturada dela. O hover
-// dissolve o retículo, revelando a mídia como já estava, colorida.
+// Independente desses três, `dither` cobre a vitrine com um canvas de
+// dither de Bayer de verdade (ver useBayerDither.ts): um pixel a pixel real
+// da mídia atual, não uma textura decorativa por cima dela. Cor original
+// nos pontos "acesos" pelo limiar da matriz, preto nos demais, cintilando
+// (a matriz muda de fase a cada passo). O hover dissolve o canvas,
+// revelando a mídia como já estava, colorida (ou, nos cards `process`, dá
+// lugar ao crossfade de bastidores que já ia acontecer de qualquer forma).
 //
 // As legendas (`CursorLabel`) moram fora do overflow-hidden da vitrine,
 // direto no <figure>: podem transbordar o cartão inteiro, não só a imagem,
@@ -46,15 +48,6 @@ const TOOLTIP_OFFSET_X = 16;
 // do mouse: um offset vertical raso deixava a legenda nascendo tampada pela
 // própria mão.
 const TOOLTIP_OFFSET_Y = 60;
-
-// Xadrez de 4px por quadrante (8px o par): um truque só de CSS
-// (conic-gradient repetindo, sem imagem nenhuma), preto e branco puros
-// porque quem preserva a cor do vídeo por baixo é o mix-blend-mode
-// difference (inverte só onde cai o branco, mantém intacto onde cai o
-// preto), não uma opacidade a mais na própria trama. O par precisa ser
-// divisível por 2 pra .experiment-dither (ver globals.css) trocar de fase
-// deslocando exatamente meio quadro.
-const DITHER_PATTERN = "repeating-conic-gradient(#000 0% 25%, #fff 0% 50%)";
 
 export function ExperimentCard({
   experiment,
@@ -73,6 +66,8 @@ export function ExperimentCard({
   const hasDither = Boolean(experiment.dither && !reduceMotion);
 
   const mediaBoxRef = useRef<HTMLDivElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const galleryImgRefs = useRef<(HTMLImageElement | null)[]>([]);
   const [hovering, setHovering] = useState(false);
   const [processIndex, setProcessIndex] = useState(0);
   const [galleryIndex, setGalleryIndex] = useState(0);
@@ -81,6 +76,15 @@ export function ExperimentCard({
   const showAsciiTooltip = hasGallery && !reduceMotion && hovering;
   const showHoverNote = hasHoverNote && hovering;
   const showTooltip = showProcess || showAsciiTooltip || showHoverNote;
+
+  // Um canvas só serve os três formatos: vídeo comum (vídeoRef) ou galeria,
+  // onde a fonte muda sozinha (o quadro atual da galeria, não sempre o
+  // mesmo elemento). galleryIndex já é lido de novo a cada render aqui, o
+  // hook guarda a função mais recente sozinho (ver getSourceRef lá).
+  const ditherCanvasRef = useBayerDither(
+    () => (hasGallery ? galleryImgRefs.current[galleryIndex] : videoRef.current) ?? null,
+    hasDither,
+  );
 
   // Mesma mola do selo "ver caso" de CasesGrid: a posição bruta do cursor
   // vira a posição da legenda só depois de passar por uma spring, então ela
@@ -133,6 +137,7 @@ export function ExperimentCard({
       <div ref={mediaBoxRef} className="relative aspect-square overflow-hidden bg-surface">
         {!hasGallery && (
           <MediaView
+            ref={videoRef}
             media={experiment.media}
             locale={locale}
             className={`h-full w-full object-cover transition-opacity duration-700 ease-out ${
@@ -142,10 +147,11 @@ export function ExperimentCard({
         )}
 
         {hasDither && (
-          <div
+          <canvas
+            ref={ditherCanvasRef}
             aria-hidden
-            className="experiment-dither pointer-events-none absolute inset-0 mix-blend-difference opacity-85 transition-opacity duration-700 ease-out group-hover:opacity-0"
-            style={{ backgroundImage: DITHER_PATTERN, backgroundSize: "8px 8px" }}
+            className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-100 transition-opacity duration-700 ease-out group-hover:opacity-0"
+            style={{ imageRendering: "pixelated" }}
           />
         )}
 
@@ -154,6 +160,9 @@ export function ExperimentCard({
             // eslint-disable-next-line @next/next/no-img-element
             <img
               key={frame.src}
+              ref={(el) => {
+                galleryImgRefs.current[i] = el;
+              }}
               src={frame.src}
               alt={i === galleryIndex ? frame.alt[locale] : ""}
               aria-hidden={i !== galleryIndex}
