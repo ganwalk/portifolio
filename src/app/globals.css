@@ -648,14 +648,19 @@ html[data-boring="true"] .texture-noise::after {
 
    Duas animações irmãs, o MESMO relógio de 9s e os MESMOS quatro pontos de
    fase em ambas (0/8%, 20%, 55%, 64%/100%, herdados da versão anterior:
-   saída rápida, platô revelado longo, entrada rápida, platô fechado longo),
-   pra nunca dessincronizar: .intranet-tile-center-pulse (só o Dashboard,
-   scale 1 a 1.28, bem menos que os 2.7 de antes) e .intranet-tile-slide
-   (as outras oito, translate() pra posição natural e de volta pra "dentro"
-   do Dashboard). Cada uma das oito tem sua PRÓPRIA direção (--slide-x/--
-   slide-y, custom properties setadas inline no componente a partir da
-   posição na grade: canto/lado que encosta na célula central), então a
-   mesma keyframe serve pra todas, só a direção muda. */
+   saída rápida, platô revelado longo, entrada rápida, platô fechado longo):
+   .intranet-tile-center-pulse (só o Dashboard, scale 1 a 1.28, bem menos
+   que os 2.7 de antes, sempre no relógio sem atraso, a âncora de onde a
+   onda parte) e .intranet-tile-slide (as outras oito, translate() pra
+   posição natural e de volta pra "dentro" do Dashboard). Cada uma das oito
+   tem sua PRÓPRIA direção (--slide-x/--slide-y) E seu próprio atraso
+   (--wave-delay, mesmo critério: custom properties setadas inline no
+   componente a partir da posição na grade). O atraso NÃO é aleatório
+   (dessincronizar tudo já foi tentado numa versão bem mais antiga deste
+   componente e leu como bagunça, não como onda): cresce com a distância
+   diagonal até o centro (linha+coluna), então as pranchetas mais perto do
+   Dashboard entram primeiro e a onda varre até o canto mais distante,
+   sempre na mesma direção, ciclo após ciclo. */
 @keyframes intranet-tile-center-pulse {
   0%,
   8% {
@@ -698,6 +703,7 @@ html[data-boring="true"] .texture-noise::after {
 }
 .intranet-tile-slide {
   animation: intranet-tile-slide 9s ease-in-out infinite;
+  animation-delay: var(--wave-delay, 0s);
 }
 
 /* Linhas da grade: voltam a precisar da própria animação de opacidade (a
