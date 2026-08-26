@@ -12,8 +12,8 @@ const basePath = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
 // e seis componentes do Design System portados de verdade, código real
 // rodando nativamente, sem imagem nem iframe): pedido explícito pra
 // simplificar, a página nunca ficou satisfatória com tanto tratamento
-// especial competindo entre si. No lugar da bento, um quadro 4:3 com a
-// mesma imagem que já serve de still pro vídeo de capa do case
+// especial competindo entre si. No lugar da bento, um quadro com a mesma
+// imagem que já serve de still pro vídeo de capa do case
 // (photos/intranet-preview.webp: zoom saindo de um mosaico de telas do
 // Design System até o Dashboard do Aluno), representando o site inteiro de
 // uma vez. Só imagem estática, de propósito (pedido explícito): nada de
@@ -21,6 +21,12 @@ const basePath = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
 // continua um clique de distância ("ver o site completo", ver
 // CaseDetail.tsx: mora lá agora, não mais aqui dentro, pra ficar na mesma
 // fileira do link do repositório em vez de duas linhas soltas).
+//
+// aspect-[1440/900], a proporção NATIVA de verdade da imagem (1440×900,
+// mesma resolução do vídeo original que ela representa), não um 4:3
+// arredondado: um quadro 4:3 forçava esse object-cover a cortar as bordas
+// laterais da imagem (1440/900 = 1.6, mais larga que 4:3 = 1.33), pedido
+// explícito pra não cortar nada.
 //
 // As 26 partes do Design System (as seis que tinham card próprio, incluídas)
 // moram todas no índice agora, sem exceção (ver Catalog.tsx e catalog.ts).
@@ -49,12 +55,12 @@ export function IntranetShowcase({
   return (
     <div className={className}>
       <Reveal>
-        <div className="aspect-[4/3] overflow-hidden rounded-2xl border border-line bg-surface">
+        <div className="aspect-[1440/900] overflow-hidden rounded-2xl border border-line bg-surface">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={`${basePath}/photos/intranet-preview.webp`}
             alt={coverAlt[locale]}
-            className="h-full w-full object-cover"
+            className="h-full w-full object-contain"
           />
         </div>
       </Reveal>
