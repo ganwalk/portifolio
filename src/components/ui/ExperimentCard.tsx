@@ -39,6 +39,9 @@ import type { Locale } from "@/i18n/config";
 // (a matriz muda de fase a cada passo). O hover dissolve o canvas,
 // revelando a mídia como já estava, colorida (ou, nos cards `process`, dá
 // lugar ao crossfade de bastidores que já ia acontecer de qualquer forma).
+// Em toque (sem hover de verdade, `group-hover` nunca dispara), um tap
+// dissolve o canvas por TAP_REVEAL_MS e ele volta sozinho (ver
+// handleTapReveal), o mesmo papel que o hover cumpre no mouse.
 //
 // As legendas (`CursorLabel`) moram fora do overflow-hidden da vitrine,
 // direto no <figure>: podem transbordar o cartão inteiro, não só a imagem,
@@ -50,6 +53,12 @@ const PROCESS_CYCLE_MS = 1600;
 const PROCESS_REVEAL_DELAY_MS = 6000;
 const PROCESS_VISIBLE_MS = 3000;
 const GALLERY_CYCLE_MS = 2800;
+// Toque não tem hover de verdade: sem isso, quem usa celular nunca via a
+// mídia por baixo do retículo, já que group-hover (ver o canvas abaixo)
+// nunca dispara com toque. Um toque revela por um instante e o retículo
+// volta sozinho, mesmo critério de "respiro que aparece e passa" do
+// `process` acima, não "segure pra ver".
+const TAP_REVEAL_MS = 1800;
 const TOOLTIP_OFFSET_X = 16;
 // O cursor personalizado (ver cursor/hover.webp) é uma mãozinha de 56x63
 // com o hotspot no topo, então ela ocupa quase 63px abaixo da posição real
@@ -80,6 +89,8 @@ export function ExperimentCard({
   const [processIndex, setProcessIndex] = useState(0);
   const [processVisible, setProcessVisible] = useState(false);
   const [galleryIndex, setGalleryIndex] = useState(0);
+  const [tapRevealed, setTapRevealed] = useState(false);
+  const tapRevealTimer = useRef<number | null>(null);
 
   const showProcess = hasProcess && processVisible;
   const showAsciiTooltip = hasGallery && !reduceMotion && hovering;
@@ -154,6 +165,25 @@ export function ExperimentCard({
     return () => box.removeEventListener("mousemove", onMove);
   }, [showTooltip, pointerRawX, pointerRawY]);
 
+  useEffect(() => {
+    return () => {
+      if (tapRevealTimer.current) window.clearTimeout(tapRevealTimer.current);
+    };
+  }, []);
+
+  // Só em toque (sem hover de verdade, ver TAP_REVEAL_MS acima): num
+  // aparelho com mouse de verdade, o clique não devia interferir no
+  // hover, que já cuida da revelação sozinho.
+  function handleTapReveal() {
+    if (!hasDither) return;
+    const hoverCapable =
+      typeof window.matchMedia === "function" && window.matchMedia("(hover: hover) and (pointer: fine)").matches;
+    if (hoverCapable) return;
+    setTapRevealed(true);
+    if (tapRevealTimer.current) window.clearTimeout(tapRevealTimer.current);
+    tapRevealTimer.current = window.setTimeout(() => setTapRevealed(false), TAP_REVEAL_MS);
+  }
+
   return (
     <figure
       className="group relative border border-line bg-background"
@@ -162,6 +192,7 @@ export function ExperimentCard({
         setHovering(true);
       }}
       onMouseLeave={() => setHovering(false)}
+      onClick={handleTapReveal}
     >
       <div ref={mediaBoxRef} className="relative aspect-square overflow-hidden bg-surface">
         {!hasGallery && (
@@ -214,7 +245,7 @@ export function ExperimentCard({
             ref={ditherCanvasRef}
             aria-hidden
             className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-100 transition-opacity duration-700 ease-out group-hover:opacity-0"
-            style={{ imageRendering: "pixelated" }}
+            style={{ imageRendering: "pixelated", opacity: tapRevealed ? 0 : undefined }}
           />
         )}
       </div>
