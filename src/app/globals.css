@@ -496,146 +496,6 @@ html[data-boring="true"] .texture-noise::after {
 }
 
 /* ==========================================================================
-   CASE DA INTRANET: componentes portados
-   RoadmapTimeline, NovidadeCard e Tag (src/components/ui/intranet/) são o
-   código real de ganwalk/intranet, não uma reconstrução: só a casca de
-   classes mudou. Esses componentes leem tokens (--card, --primary...) que
-   não existem no resto deste site (preto e branco só, ver topo do
-   arquivo), então .intranet-scope define, num escopo próprio, os valores
-   reais da Marca A (claro) copiados de intranet/src/index.css. Fora dessa
-   classe, esses nomes de variável não existem e não vazam pro resto do
-   site.
-
-   --ig-background/--ig-foreground/--ig-muted, não --background/--foreground/
-   --muted: esses três (ao contrário de --card, --primary etc) SÃO nomes que
-   o resto do site já usa (ver TOKENS DE DESIGN no topo do arquivo), com
-   valor trocado por tema (claro/escuro). Herdar por engano o valor fixo
-   daqui (sempre "claro", nunca o do tema ativo) é exatamente o que
-   acontecia com o texto de BentoCard.tsx (title/description, que usam as
-   classes text-foreground/text-muted do PRÓPRIO site): no modo escuro, o
-   card virava fundo escuro com texto tentando herdar essa cor daqui, quase
-   preto sobre quase preto. Prefixados, esses três só respondem por quem
-   pede explicitamente var(--ig-*), como os outros tokens desta lista. */
-
-.intranet-scope {
-  --ig-background: 0 0% 100%;
-  --ig-foreground: 42 70% 9%;
-  --card: 0 0% 100%;
-  --primary: 42 96% 46%;
-  --primary-foreground: 42 45% 11%;
-  --primary-emphasis: 40 95% 30%;
-  --ig-muted: 42 10% 95%;
-  --muted-foreground: 42 10% 40%;
-  /* --accent, não --ig-accent: mesmo caso do --border logo abaixo (não é
-     nome que o resto do site usa), mas SEM ele aqui, CountdownDemo.tsx e
-     PricingTable.tsx (que já usavam var(--accent) antes desta correção)
-     herdavam por engano o --accent do TEMA ativo do site (preto no claro,
-     branco no escuro, ver TOKENS DE DESIGN no topo do arquivo): o selo
-     "LOREM IPSUM..." de Countdown e o preço ativo de Pricing liam texto
-     quase branco sobre fundo quase branco no modo escuro. */
-  --accent: 40 95% 32%;
-  --accent-foreground: 0 0% 100%;
-  --success: 142 72% 29%;
-  --warning: 35 95% 42%;
-  --info: 210 90% 42%;
-  --error: 0 78% 50%;
-  --border: 42 10% 88%;
-  --ring: 42 96% 46%;
-  --brand-foreground: 42 45% 11%;
-  --brand-gradient-from: 42 96% 46%;
-  --brand-gradient-to: 42 60% 22%;
-  --chart-1: 42 75% 42%;
-  --chart-2: 270 60% 55%;
-  --chart-3: 38 92% 55%;
-  --chart-4: 199 89% 48%;
-  --chart-5: 150 55% 38%;
-  --chart-6: 300 55% 45%;
-  --chart-7: 90 55% 40%;
-  --chart-8: 220 30% 35%;
-  font-family: var(--font-sans);
-  color: hsl(var(--ig-foreground));
-}
-
-.intranet-scope,
-.intranet-scope * {
-  border-color: hsl(var(--border));
-}
-
-/* Trilha do roadmap: pontilhado do que ainda vem, caminhando para a frente. */
-@keyframes roadmap-porvir {
-  from {
-    stroke-dashoffset: 0;
-  }
-  to {
-    stroke-dashoffset: -13px;
-  }
-}
-.roadmap-porvir {
-  animation: roadmap-porvir 1.8s linear infinite;
-}
-
-/* Respiro do brilho sob o trecho já entregue. */
-@keyframes roadmap-luz {
-  0%,
-  100% {
-    opacity: 0.22;
-  }
-  50% {
-    opacity: 0.5;
-  }
-}
-.roadmap-luz {
-  animation: roadmap-luz 4.5s ease-in-out infinite;
-}
-
-/* Rolagem horizontal sem barra visível (régua de períodos da trilha). */
-.no-scrollbar {
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-}
-.no-scrollbar::-webkit-scrollbar {
-  display: none;
-}
-
-/* Barra de rolagem fina da trilha horizontal. */
-.timeline-scrollbar::-webkit-scrollbar {
-  height: 4px;
-}
-.timeline-scrollbar::-webkit-scrollbar-track {
-  background: hsl(var(--ig-muted));
-  border-radius: 9999px;
-}
-.timeline-scrollbar::-webkit-scrollbar-thumb {
-  background: hsl(var(--primary) / 0.3);
-  border-radius: 9999px;
-}
-.timeline-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: hsl(var(--primary) / 0.5);
-}
-.timeline-scrollbar {
-  scrollbar-width: thin;
-  scrollbar-color: hsl(var(--primary) / 0.3) hsl(var(--ig-muted));
-}
-
-/* Painel de detalhe do marco em foco: entra com um leve fade + subida
-   sempre que o marco ativo troca (ver `key={marcoAtivo.id}` no componente),
-   substituindo o plugin tailwindcss-animate que o projeto original usa e
-   que este site não instala. */
-@keyframes intranet-panel-in {
-  from {
-    opacity: 0;
-    transform: translateY(4px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-.intranet-panel-in {
-  animation: intranet-panel-in 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-/* ==========================================================================
    FUNDO ANIMADO DA GRADE DE PRÉVIA (LandingPagesGridPreview.tsx)
    Gradiente radial em tons de cinza que deriva devagar pela tela (posição
    de fundo, não gera nem recalcula o gradiente em si a cada quadro) mais
@@ -788,14 +648,19 @@ html[data-boring="true"] .texture-noise::after {
 
    Duas animações irmãs, o MESMO relógio de 9s e os MESMOS quatro pontos de
    fase em ambas (0/8%, 20%, 55%, 64%/100%, herdados da versão anterior:
-   saída rápida, platô revelado longo, entrada rápida, platô fechado longo),
-   pra nunca dessincronizar: .intranet-tile-center-pulse (só o Dashboard,
-   scale 1 a 1.28, bem menos que os 2.7 de antes) e .intranet-tile-slide
-   (as outras oito, translate() pra posição natural e de volta pra "dentro"
-   do Dashboard). Cada uma das oito tem sua PRÓPRIA direção (--slide-x/--
-   slide-y, custom properties setadas inline no componente a partir da
-   posição na grade: canto/lado que encosta na célula central), então a
-   mesma keyframe serve pra todas, só a direção muda. */
+   saída rápida, platô revelado longo, entrada rápida, platô fechado longo):
+   .intranet-tile-center-pulse (só o Dashboard, scale 1 a 1.28, bem menos
+   que os 2.7 de antes, sempre no relógio sem atraso, a âncora de onde a
+   onda parte) e .intranet-tile-slide (as outras oito, translate() pra
+   posição natural e de volta pra "dentro" do Dashboard). Cada uma das oito
+   tem sua PRÓPRIA direção (--slide-x/--slide-y) E seu próprio atraso
+   (--wave-delay, mesmo critério: custom properties setadas inline no
+   componente a partir da posição na grade). O atraso NÃO é aleatório
+   (dessincronizar tudo já foi tentado numa versão bem mais antiga deste
+   componente e leu como bagunça, não como onda): cresce com a distância
+   diagonal até o centro (linha+coluna), então as pranchetas mais perto do
+   Dashboard entram primeiro e a onda varre até o canto mais distante,
+   sempre na mesma direção, ciclo após ciclo. */
 @keyframes intranet-tile-center-pulse {
   0%,
   8% {
@@ -838,6 +703,7 @@ html[data-boring="true"] .texture-noise::after {
 }
 .intranet-tile-slide {
   animation: intranet-tile-slide 9s ease-in-out infinite;
+  animation-delay: var(--wave-delay, 0s);
 }
 
 /* Linhas da grade: voltam a precisar da própria animação de opacidade (a

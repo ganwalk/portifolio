@@ -20,22 +20,30 @@ import {
   BookOpen,
   Megaphone,
   Blocks,
+  Palette,
+  Tag,
+  Clock,
+  DollarSign,
+  Newspaper,
 } from "lucide-react";
 
-// Índice de outras 20 partes documentadas no Design System real (das 70
-// listadas em cases.ts), com a descrição de verdade copiada de
-// ganwalk/intranet, src/pages/DesignSystem.tsx (prop `description` de cada
-// ComponentShowcase/SectionThemeToggle). Não são componentes portados como
-// os de cima: é um índice, com link para abrir cada um ao vivo na Intranet
-// publicada.
+// Índice de 26 partes documentadas no Design System real (das 70 listadas
+// em cases.ts), com a descrição de verdade copiada de ganwalk/intranet,
+// src/pages/DesignSystem.tsx (prop `description` de cada
+// ComponentShowcase/SectionThemeToggle). Um índice só, sem tratamento de
+// destaque pra nenhuma entrada: Trilha do roadmap, Mural de novidades,
+// Cores, Badges & Tags, Contagem regressiva e Tabela de preços tinham cada
+// uma o próprio card interativo (código real portado, ver histórico de
+// IntranetShowcase.tsx e BentoCard.tsx) num bloco de bento antes desta
+// entrada única de página, pedido explícito pra virar só mais seis linhas
+// do índice, como qualquer outra: a página estava carregada demais, cada
+// tratamento especial competindo com os outros.
 //
-// Manual de Tom e Voz e Nossas Soluções (grupo "Conteúdo" abaixo) moravam
-// num bloco à parte, com still e link (ver histórico de IntranetShowcase.tsx):
-// pedido explícito pra virarem só mais duas entradas do índice, como
-// qualquer uma das outras 18, não um tratamento especial. `path` aponta pra
-// fora de /design-system nesses dois casos (são páginas próprias, não uma
-// seção da página do Design System), por isso o campo é o caminho inteiro,
-// não só um anchor dentro dela.
+// Manual de Tom e Voz e Nossas Soluções (grupo "Conteúdo" abaixo) também já
+// não têm mais still e link à parte, mesmo motivo. `path` aponta pra fora
+// de /design-system nesses dois casos (são páginas próprias, não uma seção
+// da página do Design System), por isso o campo é o caminho inteiro, não
+// só um anchor dentro dela.
 
 export interface CatalogItem {
   icon: LucideIcon;
@@ -54,6 +62,13 @@ export const catalogGroups: CatalogGroup[] = [
     label: "Fundamentos",
     items: [
       {
+        icon: Palette,
+        name: "Cores",
+        description:
+          "Paleta de cores semânticas por marca (Marca A amarela, Marca B azul), mais a paleta categórica de oito cores que alimenta os gráficos.",
+        path: "/design-system#colors",
+      },
+      {
         icon: Shapes,
         name: "Ícones Phosphor",
         description: "Biblioteca Phosphor Icons usada em todo o produto. Inclui variantes regular, bold e fill.",
@@ -70,6 +85,13 @@ export const catalogGroups: CatalogGroup[] = [
         name: "Sombras & elevação",
         description: "Escala de sombras para hierarquia de profundidade, do mais sutil ao mais elevado.",
         path: "/design-system#elevation",
+      },
+      {
+        icon: Tag,
+        name: "Badges & Tags",
+        description:
+          "Badge para status simples; Tag tokenizada para categorias e estados, usa os tokens de gráfico e semânticos, adaptando-se a light/dark e às marcas Marca A/Marca B.",
+        path: "/design-system#tags-badges",
       },
     ],
   },
@@ -111,6 +133,20 @@ export const catalogGroups: CatalogGroup[] = [
         name: "Tooltips & popups",
         description: "Tooltip simples por hover, popover com conteúdo rico por clique, popup de destaque.",
         path: "/design-system#tooltips",
+      },
+      {
+        icon: Clock,
+        name: "Contagem regressiva",
+        description:
+          "Widget de countdown dinâmico focado em escassez. Cards com backdrop-blur e transparência. Exibe dias, horas, minutos e segundos em tempo real.",
+        path: "/design-system#countdown",
+      },
+      {
+        icon: DollarSign,
+        name: "Tabela de preços",
+        description:
+          "Toggle animado com cards translúcidos, badge de desconto percentual e CTA primário em destaque.",
+        path: "/design-system#pricing",
       },
     ],
   },
@@ -170,6 +206,23 @@ export const catalogGroups: CatalogGroup[] = [
         name: "Livro",
         description: "Capa 3D inspirada no Book do Geist (Vercel), para hero de módulos e trilhas.",
         path: "/design-system#plat-livro",
+      },
+    ],
+  },
+  {
+    label: "Componentes especiais",
+    items: [
+      {
+        icon: Route,
+        name: "Trilha do roadmap",
+        description: "Trilha em onda dos marcos de produto. Arraste, use as setas ou o teclado para navegar.",
+        path: "/design-system#roadmap-timeline",
+      },
+      {
+        icon: Newspaper,
+        name: "Mural de novidades",
+        description: "Card de uma entrega do mural, com blocos opcionais de antes/depois, resultados e envolvidos.",
+        path: "/design-system#mural-novidades",
       },
     ],
   },

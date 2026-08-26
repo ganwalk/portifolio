@@ -22,6 +22,15 @@ import type { CSSProperties } from "react";
 // fase: dois relógios fora de sincronia foi exatamente o que fez uma
 // versão bem mais antiga deste componente ler como aleatória.
 //
+// Pedido explícito de revisão: as oito entravam TODAS ao mesmo tempo,
+// batendo juntas contra o Dashboard, sem ler como "onda" nenhuma. Cada
+// satélite ganhou o próprio atraso (--wave-delay, ver
+// WAVE_DELAY_BY_POSITION abaixo), crescendo com a distância diagonal até o
+// centro: a onda entra pelo canto superior esquerdo e varre até o inferior
+// direito, sempre na mesma direção, a cada um dos quatro pontos de fase
+// (não é um atraso aleatório por satélite, que é exatamente o que já deu
+// errado antes, ver parágrafo acima).
+//
 // Ordem das nove pranchetas: a mesma de um quadro real do vídeo antigo que
 // ocupava esse lugar (Tipografia/Timeline/Badges&Tags em cima, Progress
 // Bar/Dashboard/Jornada do Herói no meio, Botões/Contagem Regressiva/
@@ -83,6 +92,24 @@ const SLIDE_OFFSET_BY_POSITION: Record<number, { x: string; y: string }> = {
   8: { x: "200%", y: "200%" },
 };
 
+// Atraso de cada satélite (--wave-delay, ver .intranet-tile-slide em
+// globals.css): cresce com a distância diagonal até o centro (linha+coluna
+// da posição na grade 3×3), não é aleatório. O Dashboard (índice 4) nunca
+// atrasa, a âncora de onde a onda parte; "0" (canto superior esquerdo) é o
+// primeiro satélite a entrar, "8" (canto inferior direito) o último, então
+// a entrada varre a grade na diagonal em vez de as oito baterem juntas.
+const WAVE_STEP_SECONDS = 0.2;
+const WAVE_DELAY_BY_POSITION: Record<number, string> = {
+  0: "0s",
+  1: `${WAVE_STEP_SECONDS}s`,
+  2: `${WAVE_STEP_SECONDS * 2}s`,
+  3: `${WAVE_STEP_SECONDS}s`,
+  5: `${WAVE_STEP_SECONDS * 3}s`,
+  6: `${WAVE_STEP_SECONDS * 2}s`,
+  7: `${WAVE_STEP_SECONDS * 3}s`,
+  8: `${WAVE_STEP_SECONDS * 4}s`,
+};
+
 export function IntranetGridPreview({ className = "" }: { className?: string }) {
   return (
     <div className={`relative overflow-hidden bg-black ${className}`}>
@@ -113,6 +140,7 @@ export function IntranetGridPreview({ className = "" }: { className?: string }) 
             {GRID_TILES.map((src, i) => {
               const isCenter = i === CENTER_INDEX;
               const slide = SLIDE_OFFSET_BY_POSITION[i];
+              const waveDelay = WAVE_DELAY_BY_POSITION[i];
               return (
                 <div
                   key={i}
@@ -121,7 +149,7 @@ export function IntranetGridPreview({ className = "" }: { className?: string }) 
                   }`}
                   style={{
                     aspectRatio: TILE_ASPECT,
-                    ...(!isCenter ? { "--slide-x": slide.x, "--slide-y": slide.y } : {}),
+                    ...(!isCenter ? { "--slide-x": slide.x, "--slide-y": slide.y, "--wave-delay": waveDelay } : {}),
                   } as CSSProperties}
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
