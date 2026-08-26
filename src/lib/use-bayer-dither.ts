@@ -23,6 +23,10 @@ import { ditherFrame, type DitherPhase } from "./dither";
 
 const MATRIX_SIZE = 4;
 const STEP_MS = 175;
+// Ver a nota 3 em dither.ts: sem viés, peças claras (a maioria das do
+// Playground) mal cruzavam o limiar da matriz em algum canto, o retículo
+// quase sumia nelas. +42 deixa o retículo forte em qualquer peça.
+const BIAS = 42;
 
 // Quatro fases só, a metade da matriz (2 de 4) em cada eixo: o suficiente
 // pra ler como cintilação, sem precisar passar pelas 16 combinações
@@ -75,7 +79,7 @@ export function useBayerDither(getSource: () => HTMLVideoElement | HTMLImageElem
       const dims = sourceDims(source);
       if (!dims) return;
       phaseIndex = (phaseIndex + 1) % PHASES.length;
-      ditherFrame(ctx, source, dims.width, dims.height, size, size, MATRIX_SIZE, PHASES[phaseIndex]);
+      ditherFrame(ctx, source, dims.width, dims.height, size, size, MATRIX_SIZE, PHASES[phaseIndex], BIAS);
     };
     raf = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf);

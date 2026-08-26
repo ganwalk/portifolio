@@ -4,7 +4,7 @@
 // "Built upon Steinberg Image – Dithering Studio by Oslo418"): a construção
 // recursiva de buildBayer é a mesma de src/utils/algorithms/bayer.ts de lá.
 //
-// Duas diferenças da fonte original, deliberadas:
+// Três diferenças da fonte original, deliberadas:
 //
 // 1. Luminância de verdade (Rec. 601, 0.299R + 0.587G + 0.114B) em vez de só
 //    ler o canal vermelho como se já fosse cinza (o que o bayer.ts de lá
@@ -17,6 +17,13 @@
 //    pra uma paleta fixa); aqui o objetivo é um retículo pontilhado que
 //    ainda deixa a cor do vídeo aparecer nos pontos "acesos", não uma
 //    imagem monocromática.
+// 3. `bias` desloca o limiar pra cima (ver parâmetro abaixo): sem ele, uma
+//    peça clara (a maioria das ilustrações do Playground, fundos e cores
+//    vivas bem acima do meio-tom) quase não tinha pixel abaixo do limiar
+//    da matriz, e o retículo ficava fraco demais pra ler como dither numa
+//    peça dessas, mesmo já visível numa cena escura como a do vídeo da
+//    produção musical. Um viés fixo garante retículo forte em qualquer
+//    peça, clara ou escura, não só nas mais escuras.
 
 const bayerCache = new Map<number, Uint16Array>();
 
@@ -68,6 +75,10 @@ export interface DitherPhase {
  * de proporções bem diferentes (quadradas, retrato...), a mesma vitrine
  * logo abaixo já usa object-cover; sem o mesmo recorte aqui, o instante em
  * que o dither dissolve no hover vinha com um "pulo" de proporção.
+ *
+ * `bias`: soma ao limiar da matriz (0 a 255) antes de comparar com a
+ * luminância, deslocando pra cima quantos pixels caem abaixo dele. Ver a
+ * nota 3 no topo do arquivo.
  */
 export function ditherFrame(
   ctx: CanvasRenderingContext2D,
@@ -78,6 +89,7 @@ export function ditherFrame(
   height: number,
   matrixSize: number,
   phase: DitherPhase,
+  bias: number,
 ) {
   const sourceRatio = sourceWidth / sourceHeight;
   const targetRatio = width / height;
@@ -109,7 +121,7 @@ export function ditherFrame(
       const b = data[i + 2];
       const luminance = 0.299 * r + 0.587 * g + 0.114 * b;
       const col = (x + phase.x) & mask;
-      const threshold = matrix[row + col] * scale255;
+      const threshold = matrix[row + col] * scale255 + bias;
       if (luminance < threshold) {
         data[i] = 0;
         data[i + 1] = 0;
