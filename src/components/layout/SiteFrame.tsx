@@ -123,13 +123,26 @@ export function SiteFrame({
   }
 
   useEffect(() => {
+    // Lenis dispara 'scroll' a cada quadro que processa, então sem
+    // agrupamento por rAF este handler rodava várias vezes por quadro em
+    // rolagem contínua. Sem problema pras duas primeiras leituras (só
+    // window.scrollY, sem custo de layout), mas o getBoundingClientRect
+    // condicional (Modo Boring) força um recálculo de layout de verdade a
+    // cada disparo: uma leitura por quadro, não uma por evento, é o que
+    // esse trabalho merece.
+    let ticking = false;
     const onScroll = () => {
-      setScrolled(window.scrollY > 24);
-      setPastFirstFold(window.scrollY > window.innerHeight * 0.9);
-      if (isBoringHome) {
-        const aboutTop = document.getElementById("about")?.getBoundingClientRect().top;
-        setPastAbout(aboutTop !== undefined && aboutTop <= 80);
-      }
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(() => {
+        ticking = false;
+        setScrolled(window.scrollY > 24);
+        setPastFirstFold(window.scrollY > window.innerHeight * 0.9);
+        if (isBoringHome) {
+          const aboutTop = document.getElementById("about")?.getBoundingClientRect().top;
+          setPastAbout(aboutTop !== undefined && aboutTop <= 80);
+        }
+      });
     };
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
