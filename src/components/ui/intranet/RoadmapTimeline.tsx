@@ -282,7 +282,16 @@ export function RoadmapTimeline() {
           aria-label="Trilha de marcos do Time de Produto"
           className={cx(
             "timeline-scrollbar relative overflow-x-auto overflow-y-hidden outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--ring))] focus-visible:ring-inset",
-            arrastando ? "cursor-grabbing select-none" : "sm:cursor-grab",
+            // cursor-pointer sem prefixo sm:, mesmo em telas pequenas
+            // (mesmo sem efeito visível no toque, sem cursor nenhum lá):
+            // o seletor da mãozinha personalizada em globals.css procura a
+            // classe ".cursor-pointer" literal, não ".sm:cursor-pointer"
+            // (um nome de classe totalmente diferente depois do Tailwind
+            // compilar a variante responsiva). Com o prefixo, a mãozinha
+            // nunca entrava aqui: caía no cursor:pointer comum do
+            // navegador, não na imagem customizada.
+            "cursor-pointer",
+            arrastando && "select-none",
           )}
           style={{ scrollSnapType: arrastando ? "none" : "x proximity" }}
         >
