@@ -2,7 +2,6 @@
 
 import { useRef } from "react";
 import { useNearViewport } from "@/lib/use-near-viewport";
-import type { Dictionary } from "@/i18n/dictionaries";
 
 // Iframe de verdade do projeto publicado (ver `demoUrl` em types.ts), no
 // lugar das duas caixas de still ainda vazias: em vez de simular a
@@ -18,15 +17,18 @@ import type { Dictionary } from "@/i18n/dictionaries";
 // Nunca aparece na vitrine que rola sozinha (o cover continua vídeo/imagem
 // ali): um iframe reagindo ao scroll do mouse ali brigaria com o scroll
 // prendido da própria seção.
+//
+// Sem link "abrir em nova aba" próprio: essa fileira já mora padronizada
+// no fim de toda página de case, ao lado do link do repositório (ver
+// showOpenDemo em CaseDetail.tsx/CasesGrid.tsx), pra não duplicar o mesmo
+// link duas vezes na mesma página.
 export function LiveEmbed({
   url,
   title,
-  dict,
   className = "",
 }: {
   url: string;
   title: string;
-  dict: Dictionary;
   className?: string;
 }) {
   const wrapperRef = useRef<HTMLDivElement>(null);
@@ -45,15 +47,6 @@ export function LiveEmbed({
           />
         )}
       </div>
-      <a
-        href={url}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="type-mono mt-3 inline-flex items-center gap-2 text-muted transition-colors hover:text-foreground"
-      >
-        {dict.cases.openDemo}
-        <span aria-hidden>↗</span>
-      </a>
     </div>
   );
 }

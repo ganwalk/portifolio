@@ -96,6 +96,15 @@ export function LandingPagesShowcase({
                 </a>
                 <div className="border-t border-line p-4">
                   <p className="text-sm font-bold">{page.title[locale]}</p>
+                  {/* Só aparece quando a LP é de outro projeto (ver `client`
+                      em landingPages.ts): o case em si é da AUVP, então uma
+                      LP sem `client` continua lida como dela, sem rótulo
+                      extra nenhum. */}
+                  {page.client && (
+                    <p className="type-mono mt-0.5 text-[11px] text-muted/70">
+                      {page.client[locale]}
+                    </p>
+                  )}
                   <p className="mt-1 text-xs text-muted">{page.description[locale]}</p>
                   <a
                     href={page.url}

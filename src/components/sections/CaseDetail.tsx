@@ -9,16 +9,9 @@ import { LandingPagesShowcase } from "@/components/ui/LandingPagesShowcase";
 import { LiveEmbed } from "@/components/ui/LiveEmbed";
 import { Reveal } from "@/components/ui/Reveal";
 import { RepoLink } from "@/components/ui/RepoLink";
-import type { CaseStudy, Localized } from "@/data/types";
+import type { CaseStudy } from "@/data/types";
 import type { Locale } from "@/i18n/config";
 import type { Dictionary } from "@/i18n/dictionaries";
-
-const seeFullSite: Localized = {
-  pt: "Ver o site completo",
-  en: "See the full site",
-  es: "Ver el sitio completo",
-  zh: "查看完整网站",
-};
 
 // Corpo da página de um case (/work/[slug]): vai direto ao título e à
 // descrição, sem capa de vídeo/imagem no topo. A capa em tela cheia com
@@ -46,8 +39,14 @@ export function CaseDetail({
   locale: Locale;
   dict: Dictionary;
 }) {
-  const showSeeFullSite = caseStudy.slug === "intranet-auvp" && Boolean(caseStudy.demoUrl);
-  const showRepoLink = Boolean(caseStudy.repoUrl);
+  // A Intranet já mostra "abrir em nova aba" e repositório lado a lado no
+  // topo da própria vitrine (ver IntranetShowcase.tsx): a fileira abaixo,
+  // pensada pra fechar a página de QUALQUER case, ficaria duplicada só pra
+  // esse aqui, então ele fica de fora dos dois lados.
+  const showOpenDemo =
+    caseStudy.slug !== "intranet-auvp" && Boolean(caseStudy.demoUrl);
+  const showRepoLink =
+    caseStudy.slug !== "intranet-auvp" && Boolean(caseStudy.repoUrl);
 
   return (
     <div className="gutter pb-16 pt-16 sm:pb-20 sm:pt-20">
@@ -82,13 +81,20 @@ export function CaseDetail({
         </p>
       </Reveal>
 
-      {caseStudy.slug === "intranet-auvp" && caseStudy.demoUrl ? (
+      {caseStudy.slug === "intranet-auvp" && caseStudy.demoUrl && caseStudy.repoUrl ? (
         // No lugar do LiveEmbed genérico (que carregaria o Design System
-        // inteiro num iframe): um quadro estático (still do vídeo de capa)
-        // mais o índice completo das 26 partes documentadas, cada uma com
-        // link pra abrir ao vivo na Intranet publicada (ver
-        // IntranetShowcase.tsx).
-        <IntranetShowcase locale={locale} className="mt-12" />
+        // inteiro num iframe): o índice de acesso (site publicado,
+        // repositório, prompt do Design System pronto pra IA) mais o
+        // catálogo completo das 26 partes documentadas, cada uma com link
+        // pra abrir ao vivo na Intranet publicada (ver IntranetShowcase.tsx).
+        <IntranetShowcase
+          locale={locale}
+          demoUrl={caseStudy.demoUrl}
+          repoUrl={caseStudy.repoUrl}
+          title={caseStudy.title[locale]}
+          dict={dict}
+          className="mt-12"
+        />
       ) : caseStudy.slug === "ecossistema-auvp" ? (
         // Sem demoUrl único (é uma coleção de páginas publicadas separadas,
         // não um produto): cada uma mora na própria simulação de janela de
@@ -99,7 +105,6 @@ export function CaseDetail({
           <LiveEmbed
             url={caseStudy.demoUrl}
             title={caseStudy.title[locale]}
-            dict={dict}
           />
         </Reveal>
       ) : (
@@ -112,25 +117,23 @@ export function CaseDetail({
         </Reveal>
       )}
 
-      {/* Uma fileira só quando os dois links existem (justify-between, cada
-          um numa ponta), em vez de duas linhas soltas: hoje só o case da
-          Intranet tem "ver o site completo" (link do índice, não mais
-          dentro de IntranetShowcase.tsx) pra ficar ao lado do link do
-          repositório, mas o layout já cobre qualquer outro case que ganhe
-          um segundo link no futuro. */}
-      {(showSeeFullSite || showRepoLink) && (
+      {/* Regra geral de toda página de case: "abrir em nova aba" de um lado,
+          repositório do outro (justify-between, cada um numa ponta), nunca
+          duas linhas soltas. Só a Intranet foge dessa fileira porque já
+          mostra o mesmo par lá em cima (ver showOpenDemo acima). */}
+      {(showOpenDemo || showRepoLink) && (
         <Reveal
           delay={0.16}
-          className={`mt-12 flex items-center ${showSeeFullSite && showRepoLink ? "justify-between" : "justify-center"}`}
+          className={`mt-12 flex items-center ${showOpenDemo && showRepoLink ? "justify-between" : "justify-center"}`}
         >
-          {showSeeFullSite && caseStudy.demoUrl && (
+          {showOpenDemo && caseStudy.demoUrl && (
             <a
               href={caseStudy.demoUrl}
               target="_blank"
               rel="noopener noreferrer"
               className="type-mono inline-flex items-center gap-2 text-muted transition-colors hover:text-foreground"
             >
-              {seeFullSite[locale]}
+              {dict.cases.openDemo}
               <span aria-hidden>↗</span>
             </a>
           )}
