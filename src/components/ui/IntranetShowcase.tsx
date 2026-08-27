@@ -1,10 +1,11 @@
 "use client";
 
-import { Check, Copy } from "lucide-react";
-import { useState } from "react";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { useEffect, useState } from "react";
 import { Reveal } from "./Reveal";
 import { RepoLink } from "./RepoLink";
 import { Catalog } from "./intranet/Catalog";
+import { catalogGroups, INTRANET_ORIGIN } from "./intranet/catalog";
 import type { Localized } from "@/data/types";
 import type { Locale } from "@/i18n/config";
 import type { Dictionary } from "@/i18n/dictionaries";
@@ -16,43 +17,17 @@ import type { Dictionary } from "@/i18n/dictionaries";
 // especial competindo entre si (ver histórico de BentoCard.tsx e
 // DesignTokens.tsx, removidos). Depois disso, um quadro estático com o
 // still do vídeo de capa (intranet-preview.webp) ocupou o lugar por um
-// tempo. Agora esse quadro também sai: no lugar dele, um índice de
-// verdade (abrir o site ao vivo, ir direto pro repositório) mais o lembrete
-// de que a documentação do Design System é portável pra qualquer stack via
-// IA, com um prompt pronto pra copiar. A versão viva do site continua um
-// clique de distância, só que agora no topo da própria vitrine, não mais
-// escondida atrás de uma imagem estática.
-//
-// As 26 partes do Design System (as seis que tinham card próprio, incluídas)
-// moram todas no índice abaixo (ver Catalog.tsx e catalog.ts).
+// tempo, e depois dele, um bloco de texto com prompt pronto pra IA
+// (histórico também removido: pedido explícito pra trocar por algo mais
+// visual e dinâmico). Agora esse lugar é o índice de acesso (abrir o site
+// ao vivo, ir direto pro repositório) mais um quadro que cicla sozinho
+// pelas categorias do Design System, com os itens de cada categoria
+// surgindo em cascata a cada troca (ver CategoryCycler abaixo). A versão
+// viva do site continua um clique de distância, e o índice completo das
+// 26 partes documentadas mora logo abaixo (Catalog.tsx).
 
-const languagesHeading: Localized = {
-  pt: "Design System em qualquer linguagem",
-  en: "Design System in any language",
-  es: "Design System en cualquier lenguaje",
-  zh: "适用于任何语言的设计系统",
-};
-
-const languagesIntro: Localized = {
-  pt: "O código de produção é React, mas cada componente documentado carrega tokens e comportamento o bastante pra qualquer IA recriar a mesma peça em outra linguagem. Copie o prompt abaixo e cole numa IA de sua confiança.",
-  en: "The production code is React, but every documented component carries enough tokens and behavior for any AI to recreate the same piece in another language. Copy the prompt below and paste it into an AI you trust.",
-  es: "El código de producción es React, pero cada componente documentado lleva tokens y comportamiento suficientes para que cualquier IA recree la misma pieza en otro lenguaje. Copia el prompt de abajo y pégalo en una IA de tu confianza.",
-  zh: "生产代码是用React写的，但每个已归档的组件都带有足够的样式标记和行为说明，任何AI都能用它在别的语言里重建同一个组件。复制下面的提示词，粘贴到你信任的AI里即可。",
-};
-
-const copyLabel: Localized = {
-  pt: "Copiar prompt",
-  en: "Copy prompt",
-  es: "Copiar prompt",
-  zh: "复制提示词",
-};
-
-const copiedLabel: Localized = {
-  pt: "Prompt copiado",
-  en: "Prompt copied",
-  es: "Prompt copiado",
-  zh: "提示词已复制",
-};
+const CYCLE_MS = 4200;
+const MAX_ITEMS_PER_CATEGORY = 6;
 
 const catalogHeading: Localized = {
   pt: "Índice do Design System",
@@ -61,14 +36,77 @@ const catalogHeading: Localized = {
   zh: "设计系统索引",
 };
 
-function promptFor(locale: Locale, repoUrl: string): string {
-  const templates: Localized = {
-    pt: `Você é um engenheiro de front-end. Com base no Design System documentado em ${repoUrl} (cores semânticas por marca, espaçamento em múltiplos de 15px, escala de sombras e mais de 70 componentes catalogados), recrie [componente ou tela] na linguagem ou framework que eu indicar (React, Vue, Flutter, SwiftUI, HTML puro etc.), preservando os tokens visuais e o comportamento original, adaptados à sintaxe idiomática de cada stack.`,
-    en: `You're a front-end engineer. Based on the Design System documented at ${repoUrl} (brand semantic colors, spacing in multiples of 15px, an elevation scale and more than 70 cataloged components), recreate [component or screen] in the language or framework I specify (React, Vue, Flutter, SwiftUI, plain HTML etc.), preserving the original visual tokens and behavior, adapted to each stack's idiomatic syntax.`,
-    es: `Eres un ingeniero front-end. Con base en el Design System documentado en ${repoUrl} (colores semánticos por marca, espaciado en múltiplos de 15px, escala de sombras y más de 70 componentes catalogados), recrea [componente o pantalla] en el lenguaje o framework que indique (React, Vue, Flutter, SwiftUI, HTML puro etc.), preservando los tokens visuales y el comportamiento original, adaptados a la sintaxis idiomática de cada stack.`,
-    zh: `你是一名前端工程师。基于${repoUrl}中记录的设计系统（按品牌划分的语义色彩、以15px为倍数的间距、阴影层级，以及七十多个已归档组件），请用我指定的语言或框架（React、Vue、Flutter、SwiftUI、纯HTML等）重建[组件或页面名称]，保留原始的视觉标记和行为，并适配每种技术栈的惯用语法。`,
-  };
-  return templates[locale];
+function CategoryCycler() {
+  const [index, setIndex] = useState(0);
+  const reduceMotion = useReducedMotion();
+
+  useEffect(() => {
+    if (reduceMotion) return;
+    const id = window.setInterval(() => {
+      setIndex((i) => (i + 1) % catalogGroups.length);
+    }, CYCLE_MS);
+    return () => window.clearInterval(id);
+  }, [reduceMotion]);
+
+  const group = catalogGroups[index];
+  const items = group.items.slice(0, MAX_ITEMS_PER_CATEGORY);
+
+  return (
+    <div className="relative flex aspect-[1440/900] flex-col justify-center overflow-hidden px-6 py-8 sm:px-12 sm:py-10">
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={group.label}
+          initial={reduceMotion ? undefined : { opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={reduceMotion ? undefined : { opacity: 0 }}
+          transition={{ duration: 0.3 }}
+        >
+          <p className="type-mono text-muted">{group.label}</p>
+          <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4">
+            {items.map((item, i) => {
+              const Icon = item.icon;
+              return (
+                <motion.a
+                  key={item.name}
+                  href={`${INTRANET_ORIGIN}${item.path}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  initial={reduceMotion ? undefined : { opacity: 0, y: 18 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{
+                    duration: 0.45,
+                    delay: reduceMotion ? 0 : i * 0.07,
+                    ease: [0.16, 1, 0.3, 1],
+                  }}
+                  className="group flex items-center gap-2.5 rounded-xl border border-line bg-background px-3.5 py-3 transition-colors hover:bg-surface"
+                >
+                  <Icon
+                    className="h-4 w-4 shrink-0 text-muted transition-colors group-hover:text-foreground"
+                    strokeWidth={1.5}
+                  />
+                  <span className="truncate text-sm">{item.name}</span>
+                </motion.a>
+              );
+            })}
+          </div>
+        </motion.div>
+      </AnimatePresence>
+
+      {/* Bolinhas de qual categoria está ativa no ciclo, mesmo tratamento
+          dos pontos de slide do trio de cases (ver CasesGrid.tsx): a ativa
+          cresce (scale 1.4) em vez de mudar de cor sozinha. */}
+      <div className="absolute bottom-5 right-6 flex gap-1.5 sm:right-8">
+        {catalogGroups.map((g, i) => (
+          <motion.span
+            key={g.label}
+            animate={{ scale: i === index ? 1.4 : 1 }}
+            transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+            className={`h-1.5 w-1.5 rounded-full ${i === index ? "bg-foreground" : "bg-line"}`}
+          />
+        ))}
+      </div>
+    </div>
+  );
 }
 
 export function IntranetShowcase({
@@ -86,20 +124,6 @@ export function IntranetShowcase({
   dict: Dictionary;
   className?: string;
 }) {
-  const [copied, setCopied] = useState(false);
-  const prompt = promptFor(locale, repoUrl);
-
-  async function handleCopy() {
-    try {
-      await navigator.clipboard.writeText(prompt);
-      setCopied(true);
-      window.setTimeout(() => setCopied(false), 2000);
-    } catch {
-      // Permissão de clipboard negada ou API indisponível: o botão só não
-      // confirma a cópia, o texto do prompt continua selecionável à mão.
-    }
-  }
-
   return (
     <div className={className}>
       <Reveal>
@@ -117,24 +141,7 @@ export function IntranetShowcase({
             <RepoLink repoUrl={repoUrl} title={title} dict={dict} />
           </div>
 
-          <div className="px-6 py-6 sm:px-8 sm:py-8">
-            <p className="type-mono text-muted">{languagesHeading[locale]}</p>
-            <p className="mt-3 text-lg text-muted">{languagesIntro[locale]}</p>
-
-            <div className="relative mt-5">
-              <pre className="type-mono overflow-x-auto whitespace-pre-wrap rounded-xl border border-line bg-background p-4 pr-14 text-xs leading-relaxed text-muted sm:text-sm">
-                {prompt}
-              </pre>
-              <button
-                type="button"
-                onClick={handleCopy}
-                aria-label={copied ? copiedLabel[locale] : copyLabel[locale]}
-                className="absolute right-3 top-3 flex h-9 w-9 cursor-pointer items-center justify-center rounded-full border border-line bg-surface text-muted transition-colors hover:text-foreground"
-              >
-                {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-              </button>
-            </div>
-          </div>
+          <CategoryCycler />
         </div>
       </Reveal>
 
