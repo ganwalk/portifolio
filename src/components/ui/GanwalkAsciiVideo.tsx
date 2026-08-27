@@ -24,13 +24,7 @@ const basePath = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
 const CHARS = "ganwalk";
 const GRID_RES = 26;
 const THRESHOLD = 40;
-// Laranja e azul alternados por caractere (pedido explícito no lugar do
-// amarelo único de antes), não uma mistura só: cada letra desenhada usa uma
-// das duas cores conforme a paridade do índice de amostragem (ci), então o
-// efeito lê como duas famílias de caractere se intercalando, não um
-// gradiente confuso.
-const ORANGE = { r: 255, g: 120, b: 20 };
-const BLUE = { r: 40, g: 140, b: 255 };
+const AMBER = { r: 255, g: 200, b: 0 };
 
 export function GanwalkAsciiVideo({ className = "" }: { className?: string }) {
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -114,10 +108,9 @@ export function GanwalkAsciiVideo({ className = "" }: { className?: string }) {
           const v = 0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2];
           if (v < THRESHOLD) continue;
           const char = CHARS[ci % CHARS.length];
-          const color = ci % 2 === 0 ? ORANGE : BLUE;
           ci++;
           const t = v / 255;
-          ctx!.fillStyle = `rgb(${Math.floor(color.r * t)}, ${Math.floor(color.g * t)}, ${Math.floor(color.b * t)})`;
+          ctx!.fillStyle = `rgb(${Math.floor(AMBER.r * t)}, ${Math.floor(AMBER.g * t)}, ${Math.floor(AMBER.b * t)})`;
           const size = Math.max(1, Math.floor(t * chH * 1.4));
           ctx!.font = `${size}px monospace`;
           ctx!.fillText(char, x * cw + cw / 2, y * chH + chH / 2);
