@@ -1,7 +1,7 @@
 "use client";
 
-import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
-import { useEffect, useState } from "react";
+import { useReducedMotion } from "framer-motion";
+import { useEffect, useRef, useState } from "react";
 import { Reveal } from "./Reveal";
 import { RepoLink } from "./RepoLink";
 import { Catalog } from "./intranet/Catalog";
@@ -15,19 +15,23 @@ import type { Dictionary } from "@/i18n/dictionaries";
 // rodando nativamente, sem imagem nem iframe): pedido explícito pra
 // simplificar, a página nunca ficou satisfatória com tanto tratamento
 // especial competindo entre si (ver histórico de BentoCard.tsx e
-// DesignTokens.tsx, removidos). Depois disso, um quadro estático com o
-// still do vídeo de capa (intranet-preview.webp) ocupou o lugar por um
-// tempo, e depois dele, um bloco de texto com prompt pronto pra IA
-// (histórico também removido: pedido explícito pra trocar por algo mais
-// visual e dinâmico). Agora esse lugar é o índice de acesso (abrir o site
-// ao vivo, ir direto pro repositório) mais um quadro que cicla sozinho
-// pelas categorias do Design System, com os itens de cada categoria
-// surgindo em cascata a cada troca (ver CategoryCycler abaixo). A versão
-// viva do site continua um clique de distância, e o índice completo das
-// 26 partes documentadas mora logo abaixo (Catalog.tsx).
+// DesignTokens.tsx, removidos). Depois disso vieram, nessa ordem, um
+// quadro estático com still do vídeo de capa, um bloco de texto com
+// prompt pronto pra IA e um quadro que ciclava só os NOMES das categorias
+// (histórico removido a cada vez, pedido explícito): a última rodada
+// pediu partes DE VERDADE da Intranet, embutidas, não uma representação
+// abstrata. Agora esse lugar é o índice de acesso (abrir o site ao vivo,
+// ir direto pro repositório) mais um quadro com o site publicado de
+// verdade embutido (ver EmbeddedCycler abaixo), que cicla sozinho pelas
+// 26 partes documentadas, rolando até cada seção real dentro do mesmo
+// iframe (sem recarregar a cada troca). O índice completo mora logo
+// abaixo (Catalog.tsx), mesma lista, mesma ordem.
 
-const CYCLE_MS = 4200;
-const MAX_ITEMS_PER_CATEGORY = 6;
+const CYCLE_MS = 3800;
+
+// As 26 partes documentadas, achatadas numa lista só na mesma ordem do
+// índice abaixo: o quadro cicla por elas em sequência, uma de cada vez.
+const CYCLE_ITEMS = catalogGroups.flatMap((group) => group.items);
 
 const catalogHeading: Localized = {
   pt: "Índice do Design System",
@@ -36,76 +40,90 @@ const catalogHeading: Localized = {
   zh: "设计系统索引",
 };
 
-function CategoryCycler() {
+function EmbeddedCycler() {
+  const iframeRef = useRef<HTMLIFrameElement>(null);
   const [index, setIndex] = useState(0);
+  const [ready, setReady] = useState(false);
   const reduceMotion = useReducedMotion();
 
   useEffect(() => {
     if (reduceMotion) return;
     const id = window.setInterval(() => {
-      setIndex((i) => (i + 1) % catalogGroups.length);
+      setIndex((i) => (i + 1) % CYCLE_ITEMS.length);
     }, CYCLE_MS);
     return () => window.clearInterval(id);
   }, [reduceMotion]);
 
-  const group = catalogGroups[index];
-  const items = group.items.slice(0, MAX_ITEMS_PER_CATEGORY);
+  // Só funciona quando o iframe é MESMA ORIGEM que a página que o embute
+  // (ganwalk.github.io serve tanto o portfólio quanto a Intranet, ver
+  // dezert-horse-cleanup.ts pro mesmo raciocínio aplicado lá). Em
+  // desenvolvimento local (localhost embutindo o site publicado) isso NÃO
+  // vale, contentDocument lança SecurityError: o catch cobre esse caso,
+  // caindo pro iframe mostrando a própria home do Design System como
+  // carregou, sem esconder nada nem rolar sozinho.
+  function handleLoad() {
+    const iframe = iframeRef.current;
+    try {
+      const doc = iframe?.contentDocument;
+      if (doc) {
+        const style = doc.createElement("style");
+        // Header fixo e a sidebar de navegação (nav logo antes do <main>,
+        // ver DesignSystem.tsx no repositório da Intranet) escondidos:
+        // sem os dois, cada seção começa já no topo do próprio quadro, sem
+        // precisar compensar a altura do header no cálculo da rolagem.
+        // Duas regras separadas, não uma lista só: se :has() não for
+        // suportado, só a regra da sidebar falha, o header some do mesmo
+        // jeito.
+        style.textContent = "header { display: none !important; } nav:has(+ main) { display: none !important; }";
+        doc.head.appendChild(style);
+      }
+    } catch {
+      // Cross-origin: segue sem limpar nada.
+    } finally {
+      setReady(true);
+    }
+  }
+
+  useEffect(() => {
+    if (!ready) return;
+    const iframe = iframeRef.current;
+    try {
+      const doc = iframe?.contentDocument;
+      const id = CYCLE_ITEMS[index].path.split("#")[1];
+      const el = id ? doc?.getElementById(id) : null;
+      el?.scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "start" });
+    } catch {
+      // Cross-origin: sem como rolar, o iframe fica parado onde carregou.
+    }
+  }, [index, ready, reduceMotion]);
+
+  const current = CYCLE_ITEMS[index];
+  const Icon = current.icon;
 
   return (
-    <div className="relative flex aspect-[1440/900] flex-col justify-center overflow-hidden px-6 py-8 sm:px-12 sm:py-10">
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={group.label}
-          initial={reduceMotion ? undefined : { opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={reduceMotion ? undefined : { opacity: 0 }}
-          transition={{ duration: 0.3 }}
-        >
-          <p className="type-mono text-muted">{group.label}</p>
-          <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4">
-            {items.map((item, i) => {
-              const Icon = item.icon;
-              return (
-                <motion.a
-                  key={item.name}
-                  href={`${INTRANET_ORIGIN}${item.path}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  initial={reduceMotion ? undefined : { opacity: 0, y: 18 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{
-                    duration: 0.45,
-                    delay: reduceMotion ? 0 : i * 0.07,
-                    ease: [0.16, 1, 0.3, 1],
-                  }}
-                  className="group flex items-center gap-2.5 rounded-xl border border-line bg-background px-3.5 py-3 transition-colors hover:bg-surface"
-                >
-                  <Icon
-                    className="h-4 w-4 shrink-0 text-muted transition-colors group-hover:text-foreground"
-                    strokeWidth={1.5}
-                  />
-                  <span className="truncate text-sm">{item.name}</span>
-                </motion.a>
-              );
-            })}
-          </div>
-        </motion.div>
-      </AnimatePresence>
-
-      {/* Bolinhas de qual categoria está ativa no ciclo, mesmo tratamento
-          dos pontos de slide do trio de cases (ver CasesGrid.tsx): a ativa
-          cresce (scale 1.4) em vez de mudar de cor sozinha. */}
-      <div className="absolute bottom-5 right-6 flex gap-1.5 sm:right-8">
-        {catalogGroups.map((g, i) => (
-          <motion.span
-            key={g.label}
-            animate={{ scale: i === index ? 1.4 : 1 }}
-            transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-            className={`h-1.5 w-1.5 rounded-full ${i === index ? "bg-foreground" : "bg-line"}`}
-          />
-        ))}
+    <a
+      href={`${INTRANET_ORIGIN}${current.path}`}
+      target="_blank"
+      rel="noopener noreferrer"
+      aria-label={current.name}
+      className="relative block aspect-[1440/900] overflow-hidden bg-background"
+    >
+      <iframe
+        ref={iframeRef}
+        src={`${INTRANET_ORIGIN}${CYCLE_ITEMS[0].path}`}
+        title="Design System"
+        tabIndex={-1}
+        aria-hidden
+        loading="lazy"
+        onLoad={handleLoad}
+        className="pointer-events-none absolute inset-0 h-full w-full transition-opacity duration-300"
+        style={{ border: 0, opacity: ready ? 1 : 0 }}
+      />
+      <div className="pointer-events-none absolute bottom-4 left-4 inline-flex items-center gap-2 rounded-full border border-line bg-surface/90 px-3 py-1.5 backdrop-blur-sm">
+        <Icon className="h-3.5 w-3.5 text-muted" strokeWidth={1.5} />
+        <span className="type-mono text-xs">{current.name}</span>
       </div>
-    </div>
+    </a>
   );
 }
 
@@ -141,7 +159,7 @@ export function IntranetShowcase({
             <RepoLink repoUrl={repoUrl} title={title} dict={dict} />
           </div>
 
-          <CategoryCycler />
+          <EmbeddedCycler />
         </div>
       </Reveal>
 
