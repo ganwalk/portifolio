@@ -34,12 +34,22 @@ import { cleanupDezertHorsePreview } from "@/lib/dezert-horse-cleanup";
 // trio de artistas força. Nessa proporção mais vertical, a câmera (com um
 // pequeno deslocamento de foco fixo no world space) deixa o cavalo puxado
 // pra esquerda do quadro. Sem acesso pra recompor a câmera de dentro do
-// site, o jeito é deslocar o iframe inteiro pra direita por cima do fundo
-// escuro da própria cena (a lacuna que abre na borda esquerda some nele,
-// ver bg-black no wrapper): estimado, sem como medir o valor exato sem
-// ver o render de verdade. Primeira estimativa (6%) ainda deixava o
-// cavalo puxado pra esquerda (feedback direto depois de ver o site no
-// ar), 10% é o segundo ajuste.
+// site, o jeito é deslocar o CONTEÚDO pra direita dentro do quadro: valor
+// estimado, sem como medir o exato sem ver o render de verdade.
+//
+// Não é mais um transform: translateX no iframe do tamanho do próprio
+// quadro (h-full w-full): deslocar esse iframe pra direita abre uma
+// lacuna do lado esquerdo do tamanho do deslocamento, e essa lacuna
+// expõe o fundo do wrapper (bg-black) como uma tarja sólida, não a
+// própria cena (a suposição de que "o fundo escuro do wrapper se
+// confunde com o fundo da cena" não se sustentou: a cena não é preta
+// sólida nessa borda, então a tarja aparece nítida). Em vez disso, o
+// iframe nasce 30% mais largo que o quadro (excedente que sobra dos
+// dois lados) e `left` desloca esse excedente: com left mais próximo de
+// 0% (em vez do -15% que centralizaria), sobra menos excedente à
+// esquerda e mais à direita, deslocando o que se vê pra direita sem
+// nunca deixar a borda esquerda do iframe entrar no quadro (a reserva de
+// 15% de excedente cobre o deslocamento inteiro, sem lacuna).
 export function DezertHorseLive({ demoUrl, title, className = "" }: { demoUrl: string; title: string; className?: string }) {
   const [settled, setSettled] = useState(false);
   usePageLoadingRegistration(!settled);
@@ -54,8 +64,8 @@ export function DezertHorseLive({ demoUrl, title, className = "" }: { demoUrl: s
         loading="lazy"
         allow="autoplay 'none'"
         onLoad={(event) => cleanupDezertHorsePreview(event.currentTarget, () => setSettled(true))}
-        className="pointer-events-none absolute inset-0 h-full w-full transition-opacity duration-300"
-        style={{ border: 0, transform: "translateX(10%)", opacity: settled ? 1 : 0 }}
+        className="pointer-events-none absolute transition-opacity duration-300"
+        style={{ border: 0, top: 0, left: "-5%", width: "130%", height: "100%", opacity: settled ? 1 : 0 }}
       />
     </div>
   );

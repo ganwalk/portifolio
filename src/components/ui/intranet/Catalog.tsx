@@ -1,6 +1,6 @@
 import type { Localized } from "@/data/types";
 import type { Locale } from "@/i18n/config";
-import { catalogGroups } from "./catalog";
+import { catalogGroups, INTRANET_ORIGIN } from "./catalog";
 
 // Índice de 26 partes documentadas no Design System real (das 70 listadas
 // em cases.ts): nome, ícone e a descrição de verdade de cada uma, com link
@@ -9,8 +9,6 @@ import { catalogGroups } from "./catalog";
 // cobre a variedade do sistema (plataforma de ensino, jornadas,
 // calculadoras, a trilha do roadmap, o manual de tom e voz, o guia de
 // soluções...) numa página só, sem competir consigo mesma.
-
-const INTRANET_ORIGIN = "https://ganwalk.github.io/intranet";
 
 const intro: Localized = {
   pt: "26 partes do Design System (das 70 documentadas), cada uma com link direto para abrir ao vivo na Intranet publicada.",

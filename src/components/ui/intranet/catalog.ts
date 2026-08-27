@@ -45,6 +45,9 @@ import {
 // da página do Design System), por isso o campo é o caminho inteiro, não
 // só um anchor dentro dela.
 
+/** Origem do site publicado da Intranet: `path` de cada item é relativo a ela (ver Catalog.tsx e IntranetShowcase.tsx). */
+export const INTRANET_ORIGIN = "https://ganwalk.github.io/intranet";
+
 export interface CatalogItem {
   icon: LucideIcon;
   name: string;
