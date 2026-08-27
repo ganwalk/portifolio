@@ -27,16 +27,9 @@ import { MediaView } from "@/components/ui/MediaView";
 import { Reveal } from "@/components/ui/Reveal";
 import { RepoLink } from "@/components/ui/RepoLink";
 import { cases } from "@/data/cases";
-import type { CaseStudy, Localized } from "@/data/types";
+import type { CaseStudy } from "@/data/types";
 import type { Locale } from "@/i18n/config";
 import type { Dictionary } from "@/i18n/dictionaries";
-
-const seeFullSite: Localized = {
-  pt: "Ver o site completo",
-  en: "See the full site",
-  es: "Ver el sitio completo",
-  zh: "查看完整网站",
-};
 import { saveHomeScrollPosition } from "@/lib/home-scroll-position";
 import { useMediaQuery } from "@/lib/use-media-query";
 import { useNearViewport } from "@/lib/use-near-viewport";
@@ -563,7 +556,7 @@ function CaseColumn({
             <motion.h3
               style={{ y: titleY }}
               className={`type-display type-inktrap pt-[0.16em] leading-[0.9] ${
-                multi ? "text-[7vw] sm:text-[5vw] lg:text-[3.4vw]" : "text-[12vw] sm:text-[6vw]"
+                multi ? "text-[6.2vw] sm:text-[4.4vw] lg:text-[3vw]" : "text-[12vw] sm:text-[6vw]"
               }`}
             >
               {caseStudy.title[locale]}
@@ -709,8 +702,13 @@ function ExpandedCase({
     };
   }, [reduceMotionScroller]);
 
-  const showSeeFullSite = caseStudy.slug === "intranet-auvp" && Boolean(caseStudy.demoUrl);
-  const showRepoLink = Boolean(caseStudy.repoUrl);
+  // Mesmo raciocínio de CaseDetail.tsx: a Intranet já mostra "abrir em nova
+  // aba" e repositório lado a lado no topo da própria vitrine (ver
+  // IntranetShowcase.tsx), então fica de fora da fileira padrão abaixo.
+  const showOpenDemo =
+    caseStudy.slug !== "intranet-auvp" && Boolean(caseStudy.demoUrl);
+  const showRepoLink =
+    caseStudy.slug !== "intranet-auvp" && Boolean(caseStudy.repoUrl);
 
   return (
     <motion.div
@@ -791,21 +789,27 @@ function ExpandedCase({
           </p>
         </Reveal>
 
-        {caseStudy.slug === "intranet-auvp" && caseStudy.demoUrl ? (
+        {caseStudy.slug === "intranet-auvp" && caseStudy.demoUrl && caseStudy.repoUrl ? (
           // Mesmo raciocínio de CaseDetail.tsx: a Intranet é grande demais
           // pra caber navegável num iframe pequeno, então ganha a vitrine
           // curada em vez do LiveEmbed genérico. Fora do <Reveal> abaixo
           // (que só cobre as outras duas variantes): IntranetShowcase já
           // rege a própria entrada com Reveals internos, aninhar duplicaria
           // a animação de entrada num overlay que já nasce visível de vez.
-          <IntranetShowcase locale={locale} className="mt-12" />
+          <IntranetShowcase
+            locale={locale}
+            demoUrl={caseStudy.demoUrl}
+            repoUrl={caseStudy.repoUrl}
+            title={caseStudy.title[locale]}
+            dict={dict}
+            className="mt-12"
+          />
         ) : (
           <Reveal delay={0.6}>
             {caseStudy.demoUrl ? (
               <LiveEmbed
                 url={caseStudy.demoUrl}
                 title={caseStudy.title[locale]}
-                dict={dict}
                 className="mt-12"
               />
             ) : (
@@ -820,19 +824,19 @@ function ExpandedCase({
         {/* Mesmo raciocínio de CaseDetail.tsx: uma fileira só quando os
             dois links existem (justify-between, cada um numa ponta), não
             duas linhas soltas. */}
-        {(showSeeFullSite || showRepoLink) && (
+        {(showOpenDemo || showRepoLink) && (
           <Reveal
             delay={0.62}
-            className={`mt-12 flex items-center ${showSeeFullSite && showRepoLink ? "justify-between" : "justify-center"}`}
+            className={`mt-12 flex items-center ${showOpenDemo && showRepoLink ? "justify-between" : "justify-center"}`}
           >
-            {showSeeFullSite && caseStudy.demoUrl && (
+            {showOpenDemo && caseStudy.demoUrl && (
               <a
                 href={caseStudy.demoUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="type-mono inline-flex items-center gap-2 text-muted transition-colors hover:text-foreground"
               >
-                {seeFullSite[locale]}
+                {dict.cases.openDemo}
                 <span aria-hidden>↗</span>
               </a>
             )}
