@@ -37,7 +37,9 @@ import { cleanupDezertHorsePreview } from "@/lib/dezert-horse-cleanup";
 // site, o jeito é deslocar o iframe inteiro pra direita por cima do fundo
 // escuro da própria cena (a lacuna que abre na borda esquerda some nele,
 // ver bg-black no wrapper): estimado, sem como medir o valor exato sem
-// ver o render de verdade.
+// ver o render de verdade. Primeira estimativa (6%) ainda deixava o
+// cavalo puxado pra esquerda (feedback direto depois de ver o site no
+// ar), 10% é o segundo ajuste.
 export function DezertHorseLive({ demoUrl, title, className = "" }: { demoUrl: string; title: string; className?: string }) {
   const [settled, setSettled] = useState(false);
   usePageLoadingRegistration(!settled);
@@ -53,7 +55,7 @@ export function DezertHorseLive({ demoUrl, title, className = "" }: { demoUrl: s
         allow="autoplay 'none'"
         onLoad={(event) => cleanupDezertHorsePreview(event.currentTarget, () => setSettled(true))}
         className="pointer-events-none absolute inset-0 h-full w-full transition-opacity duration-300"
-        style={{ border: 0, transform: "translateX(6%)", opacity: settled ? 1 : 0 }}
+        style={{ border: 0, transform: "translateX(10%)", opacity: settled ? 1 : 0 }}
       />
     </div>
   );
