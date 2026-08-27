@@ -10,12 +10,20 @@ import type { Localized } from "./types";
 //
 // `image`: still real da própria LP (screenshot da página publicada), não
 // uma ilustração. `url`: link direto, abre em nova aba a partir do card.
+//
+// `client`: opcional, de propósito. O case (slug "ecossistema-auvp") é a
+// AUVP de verdade (métricas e statement do case são dela), mas a lista
+// abaixo não é exclusiva de um cliente só: quando uma LP aqui for de outro
+// projeto, `client` identifica de quem é ela no card (ver
+// LandingPagesShowcase.tsx); sem o campo, o card não presume nenhum
+// cliente específico.
 
 export interface LandingPage {
   title: Localized;
   description: Localized;
   url: string;
   image: string;
+  client?: Localized;
 }
 
 export const landingPages: LandingPage[] = [];
