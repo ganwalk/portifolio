@@ -83,6 +83,10 @@ const LOGOS = [
     slug: "vivo-fibra",
     url: "https://upload.wikimedia.org/wikipedia/commons/b/b9/Logo_Vivo_Purpura_Positivo.svg",
   },
+  {
+    slug: "boi-verde",
+    url: "https://carnesboiverde.com.br/img/logo.png",
+  },
 ];
 
 function luma(r, g, b) {

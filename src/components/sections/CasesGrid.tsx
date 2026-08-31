@@ -477,16 +477,26 @@ function CaseColumn({
             className="absolute inset-0"
           >
             {ARTIST_PREVIEW_SLUGS.has(caseStudy.slug) && caseStudy.demoUrl ? (
-              // Sem gate de isNearActive: monta de cara, mesmo fora de
-              // cena. Reconstrução local e leve (Canvas 2D, ver
+              // Sem gate de isNearActive no MOUNT: monta de cara, mesmo
+              // fora de cena. Reconstrução local e leve (Canvas 2D, ver
               // ArtistPreview.tsx), não o site de verdade embutido num
               // iframe: o trio inteiro já chega pronto quando o scroll
               // alcança ele, sem o custo de três WebGL/Three.js/áudio
-              // simultâneos só pra prévia.
+              // simultâneos só pra prévia. `active`, isso sim, é
+              // `isNearActive`: aqui TODAS as fatias são `absolute
+              // inset-0` no mesmo contêiner sticky (ver SlidePanel acima),
+              // então o card do trio nunca sai geometricamente da
+              // viewport, mesmo tampado por uma fatia mais nova — sem esse
+              // sinal de fora, as três prévias (a de Dezert Horse
+              // incluída, um cenário 3D de verdade) rodariam pra sempre
+              // escondidas atrás do resto do carrossel, disputando quadro
+              // a quadro com a fatia de verdade em cena, o tipo de coisa
+              // que lê como engasgo justamente nas transições seguintes.
               <ArtistPreview
                 slug={caseStudy.slug}
                 demoUrl={caseStudy.demoUrl}
                 title={caseStudy.title[locale]}
+                active={isNearActive}
                 className="h-full w-full"
               />
             ) : caseStudy.slug === "ecossistema-auvp" ? (

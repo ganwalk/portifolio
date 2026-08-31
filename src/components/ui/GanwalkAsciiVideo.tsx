@@ -26,7 +26,20 @@ const GRID_RES = 26;
 const THRESHOLD = 40;
 const AMBER = { r: 255, g: 200, b: 0 };
 
-export function GanwalkAsciiVideo({ className = "" }: { className?: string }) {
+export function GanwalkAsciiVideo({
+  active = true,
+  className = "",
+}: {
+  /** Sinal de fora, além do IntersectionObserver interno: false enquanto
+   *  outra fatia do carrossel de CasesGrid cobre este card por cima. No
+   *  desktop, todas as fatias ficam `absolute inset-0` no MESMO contêiner
+   *  sticky, então o retângulo deste card nunca sai geometricamente da
+   *  viewport, mesmo tampado por uma fatia mais nova: IntersectionObserver
+   *  não enxerga isso sozinho (mede posição, não ordem de pintura). Default
+   *  true pra quem usa o componente fora desse carrossel. */
+  active?: boolean;
+  className?: string;
+}) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -47,7 +60,7 @@ export function GanwalkAsciiVideo({ className = "" }: { className?: string }) {
     if (!hiddenCtx) return;
 
     let raf: number | null = null;
-    let visible = true;
+    let intersecting = true;
     let width = 0;
     let height = 0;
     let dpr = 1;
@@ -119,7 +132,7 @@ export function GanwalkAsciiVideo({ className = "" }: { className?: string }) {
     }
 
     function frame() {
-      if (!visible) {
+      if (!intersecting || !active) {
         raf = null;
         return;
       }
@@ -146,8 +159,8 @@ export function GanwalkAsciiVideo({ className = "" }: { className?: string }) {
 
     const intersectionObserver = new IntersectionObserver(
       ([entry]) => {
-        visible = entry.isIntersecting;
-        if (visible) {
+        intersecting = entry.isIntersecting;
+        if (intersecting && active) {
           video.play().catch(() => {});
           if (raf === null) raf = requestAnimationFrame(frame);
         } else {
@@ -157,15 +170,18 @@ export function GanwalkAsciiVideo({ className = "" }: { className?: string }) {
       { threshold: 0.01 },
     );
     intersectionObserver.observe(container);
-    video.play().catch(() => {});
-    raf = requestAnimationFrame(frame);
+    if (active) {
+      video.play().catch(() => {});
+      raf = requestAnimationFrame(frame);
+    }
 
     return () => {
       if (raf !== null) cancelAnimationFrame(raf);
       resizeObserver.disconnect();
       intersectionObserver.disconnect();
+      video.pause();
     };
-  }, [reduceMotion]);
+  }, [reduceMotion, active]);
 
   return (
     <div ref={containerRef} className={`relative overflow-hidden bg-black ${className}`}>
