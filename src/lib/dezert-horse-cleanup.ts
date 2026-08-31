@@ -98,14 +98,20 @@ function silenceAudio(doc: Document) {
  *  clique é disparado, quando as tentativas se esgotam ou quando a
  *  detecção falha (cross-origin): é o sinal pra revelar o iframe (ver
  *  DezertHorseLive), que fica invisível até aqui pra nunca piscar a tela
- *  de carregamento do site embutido. Nunca lança: qualquer falha (marcação
- *  que mudou no site de destino) só faz a prévia continuar mostrando o
- *  site como está. */
-export function cleanupDezertHorsePreview(iframe: HTMLIFrameElement, onSettled: () => void) {
+ *  de carregamento do site embutido. Recebe a `window` do documento
+ *  embutido (ou `null`, na falha), pra quem chamou poder montar o
+ *  congelamento de `freezeAnimation` abaixo; ela mesma não decide nada
+ *  sobre pausar a cena, só entrega o alvo. Nunca lança: qualquer falha
+ *  (marcação que mudou no site de destino) só faz a prévia continuar
+ *  mostrando o site como está. */
+export function cleanupDezertHorsePreview(
+  iframe: HTMLIFrameElement,
+  onSettled: (win: Window | null) => void,
+) {
   try {
     const doc = iframe.contentDocument;
     if (!doc) {
-      onSettled();
+      onSettled(null);
       return;
     }
 
@@ -120,7 +126,7 @@ export function cleanupDezertHorsePreview(iframe: HTMLIFrameElement, onSettled: 
     const settle = () => {
       if (settled) return;
       settled = true;
-      onSettled();
+      onSettled(doc.defaultView);
     };
     const tryStart = () => {
       attempts += 1;
@@ -140,6 +146,57 @@ export function cleanupDezertHorsePreview(iframe: HTMLIFrameElement, onSettled: 
   } catch {
     // Cross-origin (dev local contra o site publicado) ou marcação
     // inesperada: a prévia cai pro comportamento padrão, site intacto.
-    onSettled();
+    onSettled(null);
   }
+}
+
+export interface AnimationFreezeControl {
+  freeze: () => void;
+  unfreeze: () => void;
+}
+
+/** Congela e retoma o laço de renderização do cenário 3D embutido, de
+ *  fora, sem recarregar o iframe (o que jogaria fora toda a preparação de
+ *  cleanupDezertHorsePreview: áudio silenciado, UI escondida, botão de
+ *  início já clicado). Diferente dos outros dois do trio de artistas
+ *  (GanwalkAsciiVideo, ParticleTextCanvas), que já pausam o PRÓPRIO laço
+ *  ao sair de tela via IntersectionObserver porque são reconstruções
+ *  locais em canvas, este é o site de verdade rodando por trás: não existe
+ *  como pedir pra ele mesmo pausar sem tocar no código dele.
+ *
+ *  A saída é a mesma família de truque de silenceAudio, acima: sobrescrever
+ *  uma API nativa no documento embutido (mesma origem, ver comentário de
+ *  DezertHorseLive sobre isso), aqui requestAnimationFrame em vez de
+ *  play(). Enquanto congelado, o callback mais recente fica GUARDADO em
+ *  vez de agendado (não simplesmente descartado): descartar quebraria a
+ *  corrente pra sempre, já que é o próprio laço do site quem pede o
+ *  PRÓXIMO quadro de dentro de cada quadro anterior, e sem ninguém
+ *  chamando requestAnimationFrame de fora não sobra gatilho nenhum pra
+ *  reacender. Ao descongelar, o callback guardado dispara uma vez só, via
+ *  requestAnimationFrame nativo, e a corrente se recompõe sozinha a partir
+ *  dali, porque é esse mesmo quadro que pede o próximo. */
+export function freezeAnimation(win: Window): AnimationFreezeControl {
+  const nativeRaf = win.requestAnimationFrame.bind(win);
+  let frozen = false;
+  let pending: FrameRequestCallback | null = null;
+
+  win.requestAnimationFrame = ((callback: FrameRequestCallback) => {
+    if (!frozen) return nativeRaf(callback);
+    pending = callback;
+    return 0;
+  }) as typeof win.requestAnimationFrame;
+
+  return {
+    freeze() {
+      frozen = true;
+    },
+    unfreeze() {
+      frozen = false;
+      if (pending) {
+        const callback = pending;
+        pending = null;
+        nativeRaf(callback);
+      }
+    },
+  };
 }

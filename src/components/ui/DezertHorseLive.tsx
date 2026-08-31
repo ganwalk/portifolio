@@ -1,8 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { usePageLoadingRegistration } from "@/contexts/PageLoadingContext";
-import { cleanupDezertHorsePreview } from "@/lib/dezert-horse-cleanup";
+import {
+  cleanupDezertHorsePreview,
+  freezeAnimation,
+  type AnimationFreezeControl,
+} from "@/lib/dezert-horse-cleanup";
 
 // Prévia ao vivo do Dezert Horse: o cenário 3D de verdade (Three.js, o
 // cavalo correndo no deserto), embutido direto do site publicado, não uma
@@ -53,9 +57,39 @@ import { cleanupDezertHorsePreview } from "@/lib/dezert-horse-cleanup";
 export function DezertHorseLive({ demoUrl, title, className = "" }: { demoUrl: string; title: string; className?: string }) {
   const [settled, setSettled] = useState(false);
   usePageLoadingRegistration(!settled);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const freezeRef = useRef<AnimationFreezeControl | null>(null);
+
+  // O trio de artistas monta de cara (ver comentário em CasesGrid.tsx), e
+  // fica montado pra sempre depois disso, sem o corte de "saiu de tela"
+  // que MediaView aplica aos outros projetos: sem isso, o cenário 3D de
+  // verdade rodando aqui dentro continuaria renderizando pro resto da
+  // sessão, mesmo bem depois do visitante rolar até o último projeto.
+  // GanwalkAsciiVideo e ParticleTextCanvas, os outros dois do trio, já
+  // pausam o PRÓPRIO laço ao sair de tela (são reconstruções locais em
+  // canvas); aqui é o site de verdade por trás do iframe, então o corte
+  // vem de fora, via freezeAnimation (ver dezert-horse-cleanup.ts), só
+  // depois que `settled` confirma que o congelamento já existe pra
+  // controlar.
+  useEffect(() => {
+    if (!settled) return;
+    const control = freezeRef.current;
+    const container = containerRef.current;
+    if (!control || !container) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) control.unfreeze();
+        else control.freeze();
+      },
+      { threshold: 0.01 },
+    );
+    observer.observe(container);
+    return () => observer.disconnect();
+  }, [settled]);
 
   return (
-    <div className={`relative overflow-hidden bg-black ${className}`}>
+    <div ref={containerRef} className={`relative overflow-hidden bg-black ${className}`}>
       <iframe
         src={demoUrl}
         title={title}
@@ -63,7 +97,12 @@ export function DezertHorseLive({ demoUrl, title, className = "" }: { demoUrl: s
         aria-hidden
         loading="lazy"
         allow="autoplay 'none'"
-        onLoad={(event) => cleanupDezertHorsePreview(event.currentTarget, () => setSettled(true))}
+        onLoad={(event) =>
+          cleanupDezertHorsePreview(event.currentTarget, (win) => {
+            if (win) freezeRef.current = freezeAnimation(win);
+            setSettled(true);
+          })
+        }
         className="pointer-events-none absolute transition-opacity duration-300"
         style={{ border: 0, top: 0, left: "-5%", width: "130%", height: "100%", opacity: settled ? 1 : 0 }}
       />
