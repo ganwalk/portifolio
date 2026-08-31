@@ -26,7 +26,7 @@ import type { Dictionary } from "@/i18n/dictionaries";
 // constante de rolagem.
 
 const heading: Localized = {
-  pt: "Landing pages",
+  pt: "SITES E LPs",
   en: "Landing pages",
   es: "Landing pages",
   zh: "落地页",
@@ -178,7 +178,23 @@ export function LandingPagesShowcase({
   return (
     <div className={className}>
       <Reveal>
-        <p className="type-mono text-muted">{heading[locale]}</p>
+        {/* .type-mono força text-transform: uppercase (ver globals.css) no
+            elemento inteiro, herdado por qualquer filho, então escrever
+            "LPs" com "s" minúsculo na string não bastava: o CSS
+            reescrevia pra "LPS" de qualquer jeito. Só em pt: o próprio "s"
+            precisa da PRÓPRIA declaração de text-transform (lowercase,
+            utilitário do Tailwind), que vence a herdada do pai por
+            especificidade normal de CSS, não por estar mais próxima do
+            texto. */}
+        <p className="type-mono text-muted">
+          {locale === "pt" ? (
+            <>
+              SITES E LP<span className="lowercase">s</span>
+            </>
+          ) : (
+            heading[locale]
+          )}
+        </p>
         <p className="mt-3 text-lg text-muted">{intro[locale]}</p>
       </Reveal>
 
