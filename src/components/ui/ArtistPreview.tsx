@@ -39,16 +39,22 @@ export function ArtistPreview({
   slug,
   demoUrl,
   title,
+  active = true,
   className = "",
 }: {
   slug: string;
   demoUrl: string;
   title: string;
+  /** Repassado direto pra cada prévia bespoke (ver o comentário de
+   *  `active` em DezertHorseLive.tsx): false enquanto outra fatia do
+   *  carrossel cobre este card por cima, mesmo com o retângulo dele ainda
+   *  geometricamente na tela no desktop. */
+  active?: boolean;
   className?: string;
 }) {
   switch (slug) {
     case "ganwalk":
-      return <GanwalkAsciiVideo className={className} />;
+      return <GanwalkAsciiVideo active={active} className={className} />;
     case "pink-opala":
       return (
         <ParticleTextCanvas
@@ -60,11 +66,12 @@ export function ArtistPreview({
           // não só de posição, ver ParticleTextCanvas.tsx.
           highlightColor="#ff00aa"
           interactive
+          active={active}
           className={className}
         />
       );
     case "dezert-horse":
-      return <DezertHorseLive demoUrl={demoUrl} title={title} className={className} />;
+      return <DezertHorseLive demoUrl={demoUrl} title={title} active={active} className={className} />;
     default:
       return null;
   }

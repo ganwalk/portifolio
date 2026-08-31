@@ -42,6 +42,19 @@ import { useReducedMotion } from "framer-motion";
 // porque o card do trio monta de cara, mesmo antes do scroll alcançar
 // ele (ver CasesGrid.tsx), então nada impede o visitante de nunca chegar
 // perto o bastante pra essas partículas ficarem visíveis.
+//
+// Sozinho, isso não basta no desktop: lá, cada fatia do carrossel é
+// `absolute inset-0` dentro do MESMO contêiner sticky (ver SlidePanel em
+// CasesGrid.tsx), então o retângulo deste card nunca sai geometricamente
+// da viewport, mesmo quando uma fatia mais nova já subiu por cima e cobre
+// ele por completo: IntersectionObserver mede posição, não ordem de
+// pintura, e não tem como saber que outro elemento tampou este visualmente.
+// O resultado, sem a prop `active` abaixo, era essa simulação de
+// partículas rodando pra sempre, escondida atrás do resto do carrossel,
+// disputando quadro a quadro com a fatia de verdade em cena. `active`
+// (derivada de isNearActive em CaseColumn) é o sinal de fora que sabe
+// disso: junto com `intersecting`, os dois precisam ser verdadeiros pro
+// laço rodar.
 
 const GAP = 4;
 const IDLE_AMPLITUDE = 1.4;
@@ -85,6 +98,7 @@ export function ParticleTextCanvas({
   background,
   interactive = false,
   highlightColor,
+  active = true,
   className = "",
 }: {
   lines: string[];
@@ -95,6 +109,11 @@ export function ParticleTextCanvas({
    *  aparelho sem hover de verdade (toque), o ponto de repulsão vira
    *  sintético e varre a tela sozinho (ver `hoverCapable` no efeito). */
   interactive?: boolean;
+  /** Sinal de fora, além do IntersectionObserver interno (ver comentário
+   *  acima): false enquanto outra fatia do carrossel cobre este card por
+   *  cima, mesmo com o retângulo dele ainda geometricamente na tela.
+   *  Default true pra quem usa o componente fora desse carrossel. */
+  active?: boolean;
   /** Cor de destaque das partículas perturbadas (ver colorFactor):
    *  interpola de `color` até esta, e volta, bem mais devagar que o
    *  assentamento físico. Sem valor, não há troca de cor (fica só em
@@ -124,7 +143,7 @@ export function ParticleTextCanvas({
     if (!ctx) return;
 
     let raf: number | null = null;
-    let visible = true;
+    let intersecting = true;
     let width = 0;
     let height = 0;
     let dpr = 1;
@@ -347,7 +366,7 @@ export function ParticleTextCanvas({
     }
 
     function frame(now: number) {
-      if (!visible) {
+      if (!intersecting || !active) {
         raf = null;
         return;
       }
@@ -360,13 +379,13 @@ export function ParticleTextCanvas({
     } else {
       const intersectionObserver = new IntersectionObserver(
         ([entry]) => {
-          visible = entry.isIntersecting;
-          if (visible && raf === null) raf = requestAnimationFrame(frame);
+          intersecting = entry.isIntersecting;
+          if (intersecting && active && raf === null) raf = requestAnimationFrame(frame);
         },
         { threshold: 0.01 },
       );
       intersectionObserver.observe(container);
-      raf = requestAnimationFrame(frame);
+      if (active) raf = requestAnimationFrame(frame);
 
       return () => {
         if (raf !== null) cancelAnimationFrame(raf);
@@ -382,7 +401,7 @@ export function ParticleTextCanvas({
     return () => {
       resizeObserver.disconnect();
     };
-  }, [lines, color, background, interactive, highlightColor, reduceMotion]);
+  }, [lines, color, background, interactive, highlightColor, reduceMotion, active]);
 
   return (
     <div ref={containerRef} className={`relative overflow-hidden ${className}`}>

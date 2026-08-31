@@ -54,7 +54,25 @@ import {
 // esquerda e mais à direita, deslocando o que se vê pra direita sem
 // nunca deixar a borda esquerda do iframe entrar no quadro (a reserva de
 // 15% de excedente cobre o deslocamento inteiro, sem lacuna).
-export function DezertHorseLive({ demoUrl, title, className = "" }: { demoUrl: string; title: string; className?: string }) {
+export function DezertHorseLive({
+  demoUrl,
+  title,
+  active = true,
+  className = "",
+}: {
+  demoUrl: string;
+  title: string;
+  /** Sinal de fora, além do IntersectionObserver interno abaixo: false
+   *  enquanto outra fatia do carrossel de CasesGrid cobre este card por
+   *  cima. No desktop, todas as fatias ficam `absolute inset-0` no MESMO
+   *  contêiner sticky, então o retângulo deste card nunca sai
+   *  geometricamente da viewport, mesmo tampado por uma fatia mais nova:
+   *  IntersectionObserver não enxerga isso sozinho (mede posição, não
+   *  ordem de pintura). Default true pra quem usa o componente fora desse
+   *  carrossel. */
+  active?: boolean;
+  className?: string;
+}) {
   const [settled, setSettled] = useState(false);
   usePageLoadingRegistration(!settled);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -71,11 +89,25 @@ export function DezertHorseLive({ demoUrl, title, className = "" }: { demoUrl: s
   // vem de fora, via freezeAnimation (ver dezert-horse-cleanup.ts), só
   // depois que `settled` confirma que o congelamento já existe pra
   // controlar.
+  //
+  // `active` entra ANTES do IntersectionObserver, não junto dele: no
+  // desktop este card nunca sai geometricamente da viewport (ver o
+  // comentário da prop acima), então o observer sozinho nunca reportaria
+  // "fora de tela" ali, e o cenário 3D rodaria pra sempre atrás do resto
+  // do carrossel. Com active=false a gente nem chega a montar o observer,
+  // congela direto; active=true recria o observer, que relata o estado
+  // geométrico de verdade (útil pro caso mobile, onde o card sai da tela
+  // de verdade ao rolar) assim que é observado de novo.
   useEffect(() => {
     if (!settled) return;
     const control = freezeRef.current;
     const container = containerRef.current;
     if (!control || !container) return;
+
+    if (!active) {
+      control.freeze();
+      return;
+    }
 
     const observer = new IntersectionObserver(
       ([entry]) => {
@@ -86,7 +118,7 @@ export function DezertHorseLive({ demoUrl, title, className = "" }: { demoUrl: s
     );
     observer.observe(container);
     return () => observer.disconnect();
-  }, [settled]);
+  }, [settled, active]);
 
   return (
     <div ref={containerRef} className={`relative overflow-hidden bg-black ${className}`}>
