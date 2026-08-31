@@ -16,7 +16,7 @@ que também serve de currículo imprimível.
 | Navegação           | Home imersiva com cases em rota própria (`/[locale]/work/[slug]`)        |
 | Hospedagem          | GitHub Pages agora, Vercel depois sem retrabalho                         |
 | Conteúdo            | Arquivos TypeScript tipados no repositório, sem CMS                      |
-| Cases da AUVP       | Telas recriadas e métricas ilustrativas até autorização formal           |
+| Cases da AUVP       | Autorização formal de uso das telas reais concedida: mídia e métricas reais liberadas, sem recriação nem ilustração |
 | Tema padrão         | Segue o sistema operacional de quem visita                               |
 | Tipografia          | Híbrida por contexto (ver abaixo)                                        |
 | Brasilidade         | Calor no tom de voz, visual universal                                    |
@@ -909,11 +909,3 @@ ou na Vercel, basta não definir `NEXT_PUBLIC_BASE_PATH` e trocar
 6. Recortes de colagem em volta do nome no hero, quando chegarem.
 7. Registrar domínio próprio e verificar a propriedade no Google Search
    Console e no Bing Webmaster Tools, depois de trocar `NEXT_PUBLIC_SITE_URL`.
-8. Reconciliar a decisão travada "Cases da AUVP: telas recriadas e
-   métricas ilustrativas até autorização formal" (ver topo deste arquivo):
-   Landing Pages passou a usar capturas e nomes REAIS da AUVP (não
-   recriados), vindos do repositório público `produtosauvp/central`, a
-   pedido explícito. A tabela de decisões travadas não foi atualizada
-   junto: alguém precisa confirmar se a autorização formal já existe (e
-   atualizar a linha da tabela) ou se o case deveria voltar a telas
-   recriadas/anonimizadas até ela existir.

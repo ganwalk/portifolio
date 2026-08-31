@@ -149,10 +149,13 @@ export interface Brand {
    */
   isInvite?: boolean;
   /**
-   * true pra logos quadradas (Minuto Indie, Hits Perdidos): numa altura
-   * fixa, uma logo quadrada ocupa bem menos largura que as retangulares
-   * (AUVP, Defensoria), pesando visualmente menos no letreiro mesmo sem
-   * nenhuma margem transparente pra cortar. Compensa com uma altura maior.
+   * Compensa logo quadrada ou com margem transparente própria (a arte
+   * original menor que a moldura do arquivo), que numa altura fixa igual
+   * às retangulares (AUVP, Defensoria) acaba ocupando bem menos largura,
+   * pesando visualmente menos no letreiro. "large": Minuto Indie, Hits
+   * Perdidos. "xl": Mais Saúde, Boi Verde, ambas com margem própria maior
+   * ainda, precisando de mais altura que "large" já dava pra emparelhar
+   * com o resto. Sem o campo, altura padrão.
    */
-  large?: boolean;
+  size?: "large" | "xl";
 }

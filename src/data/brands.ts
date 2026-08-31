@@ -22,12 +22,12 @@ export const brands: Brand[] = [
   {
     name: { pt: "Minuto Indie", en: "Minuto Indie", es: "Minuto Indie", zh: "Minuto Indie" },
     logo: `${basePath}/logos/minuto-indie.webp`,
-    large: true,
+    size: "large",
   },
   {
     name: { pt: "Hits Perdidos", en: "Hits Perdidos", es: "Hits Perdidos", zh: "Hits Perdidos" },
     logo: `${basePath}/logos/hits-perdidos.webp`,
-    large: true,
+    size: "large",
   },
   {
     name: {
@@ -39,13 +39,12 @@ export const brands: Brand[] = [
     logo: `${basePath}/logos/defensoria-goias.webp`,
   },
   {
-    // large: a logo original é bem menor que as outras dentro do próprio
-    // arquivo (faixa de luminância mais estreita, ver comentário no topo de
-    // build-brand-logos.mjs), o que já a deixava pesando menos no letreiro;
-    // o mesmo tratamento de Minuto Indie/Hits Perdidos compensa.
+    // xl: a arte original ocupa só uma faixa estreita no meio do arquivo
+    // (bastante margem transparente/branca em volta), então "large" ainda
+    // saía pesando menos que o resto do letreiro; xl fecha a conta.
     name: { pt: "Mais Saúde", en: "Mais Saúde", es: "Mais Saúde", zh: "Mais Saúde" },
     logo: `${basePath}/logos/mais-saude.webp`,
-    large: true,
+    size: "xl",
   },
   {
     name: { pt: "Hapvida", en: "Hapvida", es: "Hapvida", zh: "Hapvida" },
@@ -56,8 +55,11 @@ export const brands: Brand[] = [
     logo: `${basePath}/logos/vivo-fibra.webp`,
   },
   {
+    // xl: mesmo raciocínio da Mais Saúde acima, margem própria generosa em
+    // volta do selo circular e do nome.
     name: { pt: "Boi Verde", en: "Boi Verde", es: "Boi Verde", zh: "Boi Verde" },
     logo: `${basePath}/logos/boi-verde.webp`,
+    size: "xl",
   },
   {
     name: { pt: "Sua marca", en: "Your brand", es: "Tu marca", zh: "你的品牌" },
