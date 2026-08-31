@@ -1,7 +1,6 @@
 "use client";
 
-import { useReducedMotion } from "framer-motion";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { Reveal } from "./Reveal";
 import { RepoLink } from "./RepoLink";
 import { Catalog } from "./intranet/Catalog";
@@ -22,16 +21,24 @@ import type { Dictionary } from "@/i18n/dictionaries";
 // pediu partes DE VERDADE da Intranet, embutidas, não uma representação
 // abstrata. Agora esse lugar é o índice de acesso (abrir o site ao vivo,
 // ir direto pro repositório) mais um quadro com o site publicado de
-// verdade embutido (ver EmbeddedCycler abaixo), que cicla sozinho pelas
-// 26 partes documentadas, rolando até cada seção real dentro do mesmo
-// iframe (sem recarregar a cada troca). O índice completo mora logo
-// abaixo (Catalog.tsx), mesma lista, mesma ordem.
-
-const CYCLE_MS = 3800;
+// verdade embutido (ver EmbeddedShowcase abaixo), parado numa parte real,
+// sem trocar sozinho. O índice completo mora logo abaixo (Catalog.tsx),
+// mesma lista, mesma ordem: quem quer ver as outras 25 partes rola até lá
+// e escolhe, em vez de esperar o próprio quadro chegar nela.
+//
+// Chegou a ciclar sozinho por todas as 26, uma a cada 3,8s: pedido
+// explícito pra tirar, porque o quadro virava uma página navegando por
+// conta própria dentro da página do case, competindo pela atenção de quem
+// só queria ler o corpo do texto. `EmbeddedShowcase` mantém o mesmo iframe
+// da Intranet publicada de verdade (não uma captura), só que fixo numa
+// única parte.
 
 // As 26 partes documentadas, achatadas numa lista só na mesma ordem do
-// índice abaixo: o quadro cicla por elas em sequência, uma de cada vez.
-const CYCLE_ITEMS = catalogGroups.flatMap((group) => group.items);
+// índice abaixo: só o primeiro item entra no quadro, mas a lista inteira
+// continua a fonte única de verdade (mesmo item, mesma ordem, mesmo nome
+// que o índice mostra pra ele).
+const SHOWCASE_ITEMS = catalogGroups.flatMap((group) => group.items);
+const SHOWCASE_ITEM = SHOWCASE_ITEMS[0];
 
 const catalogHeading: Localized = {
   pt: "Índice do Design System",
@@ -40,19 +47,9 @@ const catalogHeading: Localized = {
   zh: "设计系统索引",
 };
 
-function EmbeddedCycler() {
+function EmbeddedShowcase() {
   const iframeRef = useRef<HTMLIFrameElement>(null);
-  const [index, setIndex] = useState(0);
   const [ready, setReady] = useState(false);
-  const reduceMotion = useReducedMotion();
-
-  useEffect(() => {
-    if (reduceMotion) return;
-    const id = window.setInterval(() => {
-      setIndex((i) => (i + 1) % CYCLE_ITEMS.length);
-    }, CYCLE_MS);
-    return () => window.clearInterval(id);
-  }, [reduceMotion]);
 
   // Só funciona quando o iframe é MESMA ORIGEM que a página que o embute
   // (ganwalk.github.io serve tanto o portfólio quanto a Intranet, ver
@@ -60,7 +57,7 @@ function EmbeddedCycler() {
   // desenvolvimento local (localhost embutindo o site publicado) isso NÃO
   // vale, contentDocument lança SecurityError: o catch cobre esse caso,
   // caindo pro iframe mostrando a própria home do Design System como
-  // carregou, sem esconder nada nem rolar sozinho.
+  // carregou, sem esconder nada nem rolar até a parte certa.
   function handleLoad() {
     const iframe = iframeRef.current;
     try {
@@ -69,13 +66,17 @@ function EmbeddedCycler() {
         const style = doc.createElement("style");
         // Header fixo e a sidebar de navegação (nav logo antes do <main>,
         // ver DesignSystem.tsx no repositório da Intranet) escondidos:
-        // sem os dois, cada seção começa já no topo do próprio quadro, sem
+        // sem os dois, a seção começa já no topo do próprio quadro, sem
         // precisar compensar a altura do header no cálculo da rolagem.
         // Duas regras separadas, não uma lista só: se :has() não for
         // suportado, só a regra da sidebar falha, o header some do mesmo
         // jeito.
         style.textContent = "header { display: none !important; } nav:has(+ main) { display: none !important; }";
         doc.head.appendChild(style);
+
+        const id = SHOWCASE_ITEM.path.split("#")[1];
+        const el = id ? doc.getElementById(id) : null;
+        el?.scrollIntoView({ behavior: "auto", block: "start" });
       }
     } catch {
       // Cross-origin: segue sem limpar nada.
@@ -84,33 +85,19 @@ function EmbeddedCycler() {
     }
   }
 
-  useEffect(() => {
-    if (!ready) return;
-    const iframe = iframeRef.current;
-    try {
-      const doc = iframe?.contentDocument;
-      const id = CYCLE_ITEMS[index].path.split("#")[1];
-      const el = id ? doc?.getElementById(id) : null;
-      el?.scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "start" });
-    } catch {
-      // Cross-origin: sem como rolar, o iframe fica parado onde carregou.
-    }
-  }, [index, ready, reduceMotion]);
-
-  const current = CYCLE_ITEMS[index];
-  const Icon = current.icon;
+  const Icon = SHOWCASE_ITEM.icon;
 
   return (
     <a
-      href={`${INTRANET_ORIGIN}${current.path}`}
+      href={`${INTRANET_ORIGIN}${SHOWCASE_ITEM.path}`}
       target="_blank"
       rel="noopener noreferrer"
-      aria-label={current.name}
+      aria-label={SHOWCASE_ITEM.name}
       className="relative block aspect-[1440/900] overflow-hidden bg-background"
     >
       <iframe
         ref={iframeRef}
-        src={`${INTRANET_ORIGIN}${CYCLE_ITEMS[0].path}`}
+        src={`${INTRANET_ORIGIN}${SHOWCASE_ITEM.path}`}
         title="Design System"
         tabIndex={-1}
         aria-hidden
@@ -121,7 +108,7 @@ function EmbeddedCycler() {
       />
       <div className="pointer-events-none absolute bottom-4 left-4 inline-flex items-center gap-2 rounded-full border border-line bg-surface/90 px-3 py-1.5 backdrop-blur-sm">
         <Icon className="h-3.5 w-3.5 text-muted" strokeWidth={1.5} />
-        <span className="type-mono text-xs">{current.name}</span>
+        <span className="type-mono text-xs">{SHOWCASE_ITEM.name}</span>
       </div>
     </a>
   );
@@ -159,7 +146,7 @@ export function IntranetShowcase({
             <RepoLink repoUrl={repoUrl} title={title} dict={dict} />
           </div>
 
-          <EmbeddedCycler />
+          <EmbeddedShowcase />
         </div>
       </Reveal>
 
