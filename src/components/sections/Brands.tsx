@@ -40,7 +40,11 @@ export function Brands({ locale, dict }: { locale: Locale; dict: Dictionary }) {
                   src={brand.logo}
                   alt={brand.name[locale]}
                   className={`mx-6 w-auto object-contain sm:mx-8 dark:invert ${
-                    brand.large ? "h-12 sm:h-14" : "h-8 sm:h-10"
+                    brand.size === "xl"
+                      ? "h-16 sm:h-20"
+                      : brand.size === "large"
+                        ? "h-12 sm:h-14"
+                        : "h-8 sm:h-10"
                   }`}
                 />
               ) : (
