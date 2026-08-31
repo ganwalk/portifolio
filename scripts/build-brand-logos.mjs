@@ -62,6 +62,27 @@ const LOGOS = [
     slug: "defensoria-goias",
     url: "https://www2.defensoria.go.def.br/dpe-logo.svg",
   },
+  {
+    slug: "mais-saude",
+    url: "https://www.maissaudecorretora.com.br/assets/images/logo-mais-saude.webp",
+  },
+  {
+    slug: "hapvida",
+    url: "https://www2.hapvida.com.br/image/layout_set_logo?img_id=12975833&t=1787837857743",
+  },
+  {
+    // Não existe um logotipo próprio de "Vivo Fibra": é a mesma marca vivo
+    // (roxo, minúsculo) usada em qualquer produto da Telefônica Brasil,
+    // "Fibra" é rótulo de produto em texto solto ao lado dela, não parte do
+    // desenho. vivo.com.br fica atrás de um desafio Cloudflare que bloqueia
+    // fetch automatizado (testado, 403 em qualquer User-Agent); a origem
+    // aqui é o arquivo que o próprio infobox da Wikipédia em inglês usa pra
+    // "Vivo (telecommunications company)", a operadora brasileira da
+    // Telefônica, não a fabricante chinesa de celulares "vivo" (marca
+    // homônima, empresa diferente).
+    slug: "vivo-fibra",
+    url: "https://upload.wikimedia.org/wikipedia/commons/b/b9/Logo_Vivo_Purpura_Positivo.svg",
+  },
 ];
 
 function luma(r, g, b) {

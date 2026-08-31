@@ -39,6 +39,18 @@ export const brands: Brand[] = [
     logo: `${basePath}/logos/defensoria-goias.webp`,
   },
   {
+    name: { pt: "Mais Saúde", en: "Mais Saúde", es: "Mais Saúde", zh: "Mais Saúde" },
+    logo: `${basePath}/logos/mais-saude.webp`,
+  },
+  {
+    name: { pt: "Hapvida", en: "Hapvida", es: "Hapvida", zh: "Hapvida" },
+    logo: `${basePath}/logos/hapvida.webp`,
+  },
+  {
+    name: { pt: "Vivo Fibra", en: "Vivo Fibra", es: "Vivo Fibra", zh: "Vivo Fibra" },
+    logo: `${basePath}/logos/vivo-fibra.webp`,
+  },
+  {
     name: { pt: "Marca reservada", en: "Reserved slot", es: "Marca reservada", zh: "预留位置" },
     mark: MarkRings,
   },
