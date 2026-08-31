@@ -403,9 +403,8 @@ export const cases: CaseStudy[] = [
       es: ["Webpages", "SEO", "Conversión", "Clarity & GA"],
       zh: ["Webpages", "SEO", "转化率", "Clarity & GA"],
     },
-    // Acessos e performance são números reais (não placeholder): a conversão
-    // ainda não tem um percentual calibrado, então continua ilustrativa até
-    // a métrica exata chegar.
+    // As três são números reais, nenhuma ilustrativa: a conversão costuma
+    // ficar acima de 8%, o piso observado, não uma média otimista.
     metrics: [
       {
         value: "20 mil+",
@@ -428,14 +427,14 @@ export const cases: CaseStudy[] = [
         illustrative: false,
       },
       {
-        value: "+XX%",
+        value: "8%+",
         label: {
           pt: "conversão",
           en: "conversion",
           es: "conversión",
           zh: "转化率",
         },
-        illustrative: true,
+        illustrative: false,
       },
     ],
     // Mídia real: recorte de um reel (Jitter) com o mosaico de landing pages
@@ -460,7 +459,11 @@ export const cases: CaseStudy[] = [
       },
     },
     comingSoon: true,
-    repoUrl: "#", // placeholder até a URL real do repositório: só pra testar o botão "ver repositório" aparecendo, troque por um link de verdade antes de publicar.
+    // Sem repoUrl de propósito: não existe um repositório único por trás
+    // (são várias páginas publicadas separadamente, cada uma com o próprio
+    // link, ver LandingPagesShowcase.tsx). Também sem demoUrl: idem, não
+    // existe UM site pra embutir, CaseDetail.tsx já trata esse slug à
+    // parte.
   },
 ];
 
