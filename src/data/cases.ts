@@ -458,7 +458,11 @@ export const cases: CaseStudy[] = [
         zh: "AUVP 生态系统多个落地页画面拼成的马赛克",
       },
     },
-    comingSoon: true,
+    // false: o case já tem página própria completa (LandingPagesShowcase,
+    // 11 páginas reais indexadas), não é mais rascunho. Selo "case completo
+    // em breve" saía errado no hover, contradizendo o conteúdo real ali
+    // dentro.
+    comingSoon: false,
     // Sem repoUrl de propósito: não existe um repositório único por trás
     // (são várias páginas publicadas separadamente, cada uma com o próprio
     // link, ver LandingPagesShowcase.tsx). Também sem demoUrl: idem, não

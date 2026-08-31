@@ -893,13 +893,27 @@ ou na Vercel, basta não definir `NEXT_PUBLIC_BASE_PATH` e trocar
 
 ## Próximos passos
 
-1. Substituir os placeholders de mídia pelas colagens, telas e vídeos.
-2. Calibrar as métricas dos cases com os números reais e tirar o aviso de
-   métrica ilustrativa de cada uma que for confirmada.
-3. Escrever o corpo dos quatro cases.
-4. Completar `src/data/profile.ts`: cidade e ano de entrada na AUVP. LinkedIn,
-   Instagram e WhatsApp já estão prontos (`profile.links`).
+1. Dezert Horse ainda espera a captura de tela real do próprio site (usa
+   WebGL/Three.js): a capa continua no placeholder do Pexels, duna de
+   areia. Último placeholder de mídia restante, os outros quatro cases já
+   usam mídia real (Ganwalk, Pink Opala, Intranet, Landing Pages).
+2. ~~Calibrar as métricas dos cases~~ — feito: nenhuma métrica de nenhum
+   case continua `illustrative: true`.
+3. ~~Escrever o corpo dos cases~~ — feito, todos os cinco (o número mudou
+   de quatro pra cinco quando Landing Pages virou case próprio).
+4. Completar `src/data/profile.ts`: cidade (`location`) e ano de início na
+   AUVP (`experience[0].period`, hoje "20XX até hoje", texto de espera
+   visível de verdade no Modo Boring/currículo). LinkedIn, Instagram e
+   WhatsApp já estão prontos (`profile.links`).
 5. Ligar Microsoft Clarity e Google Analytics quando os IDs existirem.
 6. Recortes de colagem em volta do nome no hero, quando chegarem.
 7. Registrar domínio próprio e verificar a propriedade no Google Search
    Console e no Bing Webmaster Tools, depois de trocar `NEXT_PUBLIC_SITE_URL`.
+8. Reconciliar a decisão travada "Cases da AUVP: telas recriadas e
+   métricas ilustrativas até autorização formal" (ver topo deste arquivo):
+   Landing Pages passou a usar capturas e nomes REAIS da AUVP (não
+   recriados), vindos do repositório público `produtosauvp/central`, a
+   pedido explícito. A tabela de decisões travadas não foi atualizada
+   junto: alguém precisa confirmar se a autorização formal já existe (e
+   atualizar a linha da tabela) ou se o case deveria voltar a telas
+   recriadas/anonimizadas até ela existir.
