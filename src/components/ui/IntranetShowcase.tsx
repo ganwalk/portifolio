@@ -74,9 +74,19 @@ function EmbeddedShowcase() {
         style.textContent = "header { display: none !important; } nav:has(+ main) { display: none !important; }";
         doc.head.appendChild(style);
 
+        // "instant", não "auto": a página embutida pode ter
+        // scroll-behavior: smooth no próprio CSS, e "auto" nesse caso só
+        // significa "respeita a página", herdando a animação suave dela.
+        // Isso lia como o quadro "se movendo sozinho" um instante depois
+        // de carregar, o correção de posição precisa ser um salto seco,
+        // não um scroll visível: o header some (mudando a altura de tudo
+        // abaixo dele) só depois que a página embutida já tinha calculado
+        // a posição do fragmento da URL contra o layout ANTIGO, com
+        // header, então precisa corrigir uma vez, mas sem parecer
+        // animação.
         const id = SHOWCASE_ITEM.path.split("#")[1];
         const el = id ? doc.getElementById(id) : null;
-        el?.scrollIntoView({ behavior: "auto", block: "start" });
+        el?.scrollIntoView({ behavior: "instant", block: "start" });
       }
     } catch {
       // Cross-origin: segue sem limpar nada.
@@ -88,29 +98,41 @@ function EmbeddedShowcase() {
   const Icon = SHOWCASE_ITEM.icon;
 
   return (
-    <a
-      href={`${INTRANET_ORIGIN}${SHOWCASE_ITEM.path}`}
-      target="_blank"
-      rel="noopener noreferrer"
-      aria-label={SHOWCASE_ITEM.name}
-      className="relative block aspect-[1440/900] overflow-hidden bg-background"
-    >
+    // h-[60vh]/max-h: nunca mais alto que a própria tela (isso já bastava
+    // pra garantir isso sozinho, na prática qualquer fração de vh
+    // garante), com um teto pra não esticar demais em monitor grande e um
+    // piso pra não espremer demais em notebook baixo. Era aspect-
+    // [1440/900] (a proporção da própria tela onde o Design System foi
+    // desenhado): numa coluna larga o bastante, a altura resultante
+    // passava da tela, exatamente o "mais alto que uma tela" reclamado.
+    //
+    // Sem pointer-events-none nem tabIndex/aria-hidden no iframe: agora é
+    // uma janela de verdade pro site publicado, com o scroll nativo dele
+    // (roda, arrasta, teclado, tudo) disponível por dentro, não só um
+    // still decorativo atrás de um link que cobre o quadro inteiro. Abrir
+    // em nova aba vira um botão explícito, próprio, por cima (ver abaixo),
+    // em vez do quadro inteiro reagir a qualquer clique.
+    <div className="relative h-[60vh] max-h-[560px] min-h-[360px] overflow-hidden bg-background">
       <iframe
         ref={iframeRef}
         src={`${INTRANET_ORIGIN}${SHOWCASE_ITEM.path}`}
         title="Design System"
-        tabIndex={-1}
-        aria-hidden
         loading="lazy"
         onLoad={handleLoad}
-        className="pointer-events-none absolute inset-0 h-full w-full transition-opacity duration-300"
+        className="absolute inset-0 h-full w-full transition-opacity duration-300"
         style={{ border: 0, opacity: ready ? 1 : 0 }}
       />
-      <div className="pointer-events-none absolute bottom-4 left-4 inline-flex items-center gap-2 rounded-full border border-line bg-surface/90 px-3 py-1.5 backdrop-blur-sm">
+      <a
+        href={`${INTRANET_ORIGIN}${SHOWCASE_ITEM.path}`}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="absolute bottom-4 left-4 z-10 inline-flex items-center gap-2 rounded-full border border-line bg-surface/90 px-3 py-1.5 text-foreground backdrop-blur-sm transition-colors hover:bg-surface"
+      >
         <Icon className="h-3.5 w-3.5 text-muted" strokeWidth={1.5} />
         <span className="type-mono text-xs">{SHOWCASE_ITEM.name}</span>
-      </div>
-    </a>
+        <span aria-hidden className="text-muted">↗</span>
+      </a>
+    </div>
   );
 }
 
