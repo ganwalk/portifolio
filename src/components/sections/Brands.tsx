@@ -12,15 +12,15 @@ import type { Dictionary } from "@/i18n/dictionaries";
 // cabeçalhos, dentro do <h2> "Sobre" que os une.
 //
 // Marcas com logo de verdade (ver `logo` em data/brands.ts) mostram a logo,
-// já convertida pro preto e branco do site (scripts/build-brand-logos.mjs);
-// as sem cliente real por trás mostram uma marca abstrata (`mark`, ver
-// PlaceholderMarks.tsx), em currentColor, sem precisar de dark:invert.
-// dark:invert só nas logos de verdade: são PNGs/SVGs rasterizados com o
-// preto já fixo no pixel, não currentColor, então não acompanhariam
-// sozinhas a troca de tema como o resto do site acompanha; a mesma lógica
-// já usada no retrato da hero dentro da lente (.lens-invert), aqui
-// aplicada por marca. "Sua marca" por último: uma caixa pontilhada em vez
-// de nome sólido, o convite explícito de que a lista está aberta.
+// já convertida pro preto e branco do site (scripts/build-brand-logos.mjs),
+// com dark:invert: são PNGs/SVGs rasterizados com o preto já fixo no
+// pixel, não currentColor, então não acompanhariam sozinhas a troca de
+// tema como o resto do site acompanha; a mesma lógica já usada no retrato
+// da hero dentro da lente (.lens-invert), aqui aplicada por marca. "Sua
+// marca" por último: uma caixa pontilhada em vez de nome sólido, o
+// convite explícito de que a lista está aberta. O fallback em serifa (sem
+// `logo` nem `isInvite`) cobre só um cliente real ainda sem arquivo de
+// logo processado, nunca uma marca inventada.
 export function Brands({ locale, dict }: { locale: Locale; dict: Dictionary }) {
   return (
     <div>
@@ -43,10 +43,6 @@ export function Brands({ locale, dict }: { locale: Locale; dict: Dictionary }) {
                     brand.large ? "h-12 sm:h-14" : "h-8 sm:h-10"
                   }`}
                 />
-              ) : brand.mark ? (
-                <span role="img" aria-label={brand.name[locale]} className="mx-6 sm:mx-8">
-                  <brand.mark className="h-7 w-auto text-muted sm:h-8" />
-                </span>
               ) : (
                 <span className="type-serif-display mx-6 whitespace-nowrap text-2xl sm:mx-8 sm:text-3xl">
                   {brand.name[locale]}
