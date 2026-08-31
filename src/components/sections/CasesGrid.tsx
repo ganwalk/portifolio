@@ -22,6 +22,7 @@ import { IntranetGridPreview } from "@/components/ui/IntranetGridPreview";
 import { IntranetMobileCarousel } from "@/components/ui/IntranetMobileCarousel";
 import { IntranetShowcase } from "@/components/ui/IntranetShowcase";
 import { LandingPagesGridPreview } from "@/components/ui/LandingPagesGridPreview";
+import { LandingPagesShowcase } from "@/components/ui/LandingPagesShowcase";
 import { LiveEmbed } from "@/components/ui/LiveEmbed";
 import { MediaView } from "@/components/ui/MediaView";
 import { Reveal } from "@/components/ui/Reveal";
@@ -804,6 +805,18 @@ function ExpandedCase({
             dict={dict}
             className="mt-12"
           />
+        ) : caseStudy.slug === "ecossistema-auvp" ? (
+          // Mesmo raciocínio de CaseDetail.tsx: sem demoUrl único (é uma
+          // coleção de páginas publicadas separadas), cada uma mora na
+          // própria simulação de janela de navegador, com still e link
+          // direto (ver LandingPagesShowcase.tsx), em vez das duas caixas
+          // vazias que o fallback abaixo usa. Esse branch tinha ficado de
+          // fora quando o case ganhou a vitrine própria: só CaseDetail.tsx
+          // (a página dedicada) tinha sido atualizado, então quem abria o
+          // case pelo cartão da home (este overlay) ainda caía no
+          // fallback genérico, vendo dois retângulos cinza sem nada
+          // dentro.
+          <LandingPagesShowcase locale={locale} dict={dict} className="mt-12" />
         ) : (
           <Reveal delay={0.6}>
             {caseStudy.demoUrl ? (
