@@ -64,7 +64,13 @@ export function About({ locale, dict }: { locale: Locale; dict: Dictionary }) {
           ))}
         </div>
 
-        <Reveal delay={0.15} className="space-y-14">
+        {/* z-20: a corda de SkillsOrbit se move por transform, sem limite de
+            recorte, e pode arrastar sobre a lista de idiomas logo abaixo ou
+            sobre a bio à esquerda. Sem essa camada explícita, ela ficava
+            atrás desses vizinhos (ordem de pintura seguindo a ordem do DOM,
+            já que nenhum tem z-index próprio), lendo como a corda "sumindo"
+            atrás de outro elemento. */}
+        <Reveal delay={0.15} className="z-20 space-y-14">
           <div>
             <h3 className="type-mono mb-4 text-muted">
               {dict.about.skillsTitle}

@@ -301,7 +301,11 @@ export function SkillsOrbit({
   }
 
   return (
-    <div ref={containerRef} className="relative flex flex-wrap gap-2">
+    // z-10: mesma razão do z-20 em About.tsx (ver comentário lá), um nível
+    // abaixo: aqui é só pra vencer o bloco de "Idiomas" logo abaixo, dentro
+    // do mesmo Reveal (sem z-index próprio nenhum dos dois, a ordem do DOM
+    // decidiria, e "Idiomas" vem depois).
+    <div ref={containerRef} className="relative z-10 flex flex-wrap gap-2">
       <svg aria-hidden className="pointer-events-none absolute inset-0 h-full w-full overflow-visible">
         {skills.map((skill, i) => (
           <line
