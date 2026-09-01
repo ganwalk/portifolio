@@ -95,8 +95,6 @@ function EmbeddedShowcase() {
     }
   }
 
-  const Icon = SHOWCASE_ITEM.icon;
-
   return (
     // h-[60vh]/max-h: nunca mais alto que a própria tela (isso já bastava
     // pra garantir isso sozinho, na prática qualquer fração de vh
@@ -110,8 +108,11 @@ function EmbeddedShowcase() {
     // uma janela de verdade pro site publicado, com o scroll nativo dele
     // (roda, arrasta, teclado, tudo) disponível por dentro, não só um
     // still decorativo atrás de um link que cobre o quadro inteiro. Abrir
-    // em nova aba vira um botão explícito, próprio, por cima (ver abaixo),
-    // em vez do quadro inteiro reagir a qualquer clique.
+    // em nova aba já tem o próprio botão explícito acima do quadro
+    // ("Abrir em nova aba", ver IntranetShowcase abaixo): o selo com o
+    // nome da categoria por cima do iframe (ex.: "Cores", nome do primeiro
+    // item do catálogo, sem contexto pra quem não conhece o índice) virava
+    // um segundo caminho pra fazer a mesma coisa, removido.
     <div className="relative h-[60vh] max-h-[560px] min-h-[360px] overflow-hidden bg-background">
       <iframe
         ref={iframeRef}
@@ -122,16 +123,6 @@ function EmbeddedShowcase() {
         className="absolute inset-0 h-full w-full transition-opacity duration-300"
         style={{ border: 0, opacity: ready ? 1 : 0 }}
       />
-      <a
-        href={`${INTRANET_ORIGIN}${SHOWCASE_ITEM.path}`}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="absolute bottom-4 left-4 z-10 inline-flex items-center gap-2 rounded-full border border-line bg-surface/90 px-3 py-1.5 text-foreground backdrop-blur-sm transition-colors hover:bg-surface"
-      >
-        <Icon className="h-3.5 w-3.5 text-muted" strokeWidth={1.5} />
-        <span className="type-mono text-xs">{SHOWCASE_ITEM.name}</span>
-        <span aria-hidden className="text-muted">↗</span>
-      </a>
     </div>
   );
 }
