@@ -74,10 +74,10 @@ export const cases: CaseStudy[] = [
       },
     },
     hoverLabel: {
-      pt: "Tocar nas partículas",
-      en: "Touch the particles",
-      es: "Tocar las partículas",
-      zh: "触碰粒子",
+      pt: "Veja mais",
+      en: "See more",
+      es: "Ver más",
+      zh: "查看更多",
     },
     tags: {
       pt: ["Música", "WebGL", "Three.js", "Interatividade"],
@@ -139,10 +139,10 @@ export const cases: CaseStudy[] = [
       },
     },
     hoverLabel: {
-      pt: "Ouvir o álbum",
-      en: "Listen to the album",
-      es: "Escuchar el álbum",
-      zh: "聆听专辑",
+      pt: "Veja mais",
+      en: "See more",
+      es: "Ver más",
+      zh: "查看更多",
     },
     tags: {
       pt: ["Música", "WebGL", "Three.js", "Player embutido"],
@@ -198,10 +198,10 @@ export const cases: CaseStudy[] = [
       },
     },
     hoverLabel: {
-      pt: "Ver o nome reagir",
-      en: "Watch the name react",
-      es: "Ver el nombre reaccionar",
-      zh: "看名字随手而动",
+      pt: "Veja mais",
+      en: "See more",
+      es: "Ver más",
+      zh: "查看更多",
     },
     tags: {
       pt: ["Música", "Canvas 2D", "Tailwind CSS", "Interatividade"],

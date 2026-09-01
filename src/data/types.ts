@@ -62,10 +62,11 @@ export interface CaseStudy {
   title: Localized;
   statement: CaseStatement;
   /**
-   * Texto do selo que segue o cursor no hover (ver CasesGrid): reflete o
-   * conteúdo específico do case ("Tocar nas partículas"), não um rótulo
-   * genérico. Opcional: sem ele, o selo cai pro texto padrão de
-   * dict.cases.viewCase (ou comingSoon, se o case ainda não tiver página).
+   * Texto do selo que segue o cursor no hover (ver CasesGrid): pode ser
+   * específico do case ("Ouvir o álbum") ou só "Veja mais", quando não faz
+   * sentido prometer uma ação específica antes de abrir a página. Opcional:
+   * sem ele, o selo cai pro texto padrão de dict.cases.viewCase (ou
+   * comingSoon, se o case ainda não tiver página).
    */
   hoverLabel?: Localized;
   tags: Localized<readonly string[]>;
