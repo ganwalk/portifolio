@@ -116,7 +116,7 @@ function LandingPageCard({
           setHovered(true);
         }}
         onMouseLeave={() => setHovered(false)}
-        className="relative block h-48 overflow-hidden bg-background sm:h-56"
+        className="relative block h-64 overflow-hidden bg-background sm:h-72"
       >
         {/* Sem crop nem aspect-video: a imagem é o still da página
             INTEIRA, tamanho natural, e o quadro é só uma janela fixa por

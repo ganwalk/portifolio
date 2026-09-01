@@ -74,8 +74,8 @@ export const en: Dictionary = {
   about: {
     title: "About",
     bio: [
-      "A full-time curious person, I'm a little bit of everything: music lover, illustrator, tech enthusiast and nerd for random topics, and a decade ago I turned my drive to create into a profession.",
-      "Right now, I work at a bank (see if you can guess which one) and serve clients worldwide, building interactive experiences focused on real user needs, always guided by data, SEO, performance and great taste (mine!).",
+      "A full-time curious person, I'm a little bit of everything: music lover, illustrator, tech enthusiast, nerd for random topics, and a decade ago I turned my drive to create into a profession.",
+      "Right now, I'm a product designer at a bank (see if you can guess which one) and serve clients worldwide, building interactive experiences focused on real user needs, always guided by data, SEO, performance and great taste (mine!).",
       "I love what I do, I'm lucky to do what I love, and maybe we'll end up making something together.",
     ],
     skillsTitle: "Tools & skills",

@@ -75,8 +75,8 @@ export const es: Dictionary = {
   about: {
     title: "Sobre mí",
     bio: [
-      "Curioso a tiempo completo, soy un poco de todo: apasionado por la música, ilustrador, entusiasta de la tecnología y nerd de temas aleatorios, y hace ya una década convertí mis ganas de crear en profesión.",
-      "Actualmente, trabajo en un banco (a ver si adivinas cuál) y atiendo clientes en todo el mundo, creando experiencias interactivas enfocadas en las necesidades reales de los usuarios, siempre guiadas por datos, SEO, rendimiento y muy buen gusto (¡el mío!).",
+      "Curioso a tiempo completo, soy un poco de todo: apasionado por la música, ilustrador, entusiasta de la tecnología, nerd de temas aleatorios, y hace ya una década convertí mis ganas de crear en profesión.",
+      "Actualmente, soy diseñador de producto en un banco (a ver si adivinas cuál) y atiendo clientes en todo el mundo, creando experiencias interactivas enfocadas en las necesidades reales de los usuarios, siempre guiadas por datos, SEO, rendimiento y muy buen gusto (¡el mío!).",
       "Amo lo que hago, tengo la suerte de hacer lo que amo, y quizás terminemos haciendo algo juntos.",
     ],
     skillsTitle: "Herramientas y habilidades",

@@ -86,8 +86,8 @@ export const pt = {
   about: {
     title: "Sobre",
     bio: [
-      "Curioso em tempo integral, sou um pouco de tudo: apaixonado por música, ilustrador, entusiasta de tecnologia e nerd de assuntos aleatórios, e já há uma década transformei minha vontade de criar em profissão.",
-      "Atualmente, estou em um banco (você consegue descobrir qual se for curioso) e atendo clientes no mundo todo criando experiências interativas focadas nas necessidades reais dos usuários, sempre guiadas por dados, SEO, performance e um ótimo bom gosto (o meu!).",
+      "Curioso em tempo integral, sou um pouco de tudo: apaixonado por música, ilustrador, entusiasta de tecnologia, nerd de assuntos aleatórios, e já há uma década transformei minha vontade de criar em profissão.",
+      "Atualmente, sou designer de produtos em um banco (você consegue descobrir qual se for curioso) e atendo clientes no mundo todo criando experiências interativas focadas nas necessidades reais dos usuários, sempre guiadas por dados, SEO, performance e um ótimo bom gosto (o meu!).",
       "Adoro o que faço, tenho sorte de fazer o que amo, e talvez a gente ainda faça algo juntos.",
     ],
     skillsTitle: "Ferramentas e habilidades",
