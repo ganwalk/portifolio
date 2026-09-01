@@ -50,15 +50,17 @@ export function BoringView({
         <h2 className="type-mono mb-3 font-bold">
           {dict.boring.experienceTitle}
         </h2>
-        {profile.experience.map((job) => (
-          <div key={job.company} className="text-sm">
-            <p className="font-bold">
-              {job.company}{" "}
-              <span className="font-normal text-muted">({job.period})</span>
-            </p>
-            <p>{job.role[locale]}</p>
-          </div>
-        ))}
+        <div className="space-y-4">
+          {profile.experience.map((job) => (
+            <div key={job.company} className="text-sm">
+              <p className="font-bold">
+                {job.company}{" "}
+                <span className="font-normal text-muted">({job.period})</span>
+              </p>
+              <p>{job.role[locale]}</p>
+            </div>
+          ))}
+        </div>
       </section>
 
       {/* Projetos em tabela utilitária */}
