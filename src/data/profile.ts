@@ -1,5 +1,4 @@
 // Dados públicos de contato e perfil.
-// TODO(Armando): confirmar/completar o campo marcado, cidade.
 
 // Mensagem pronta do WhatsApp: preenche o campo de texto assim que o link
 // abre, quem visita só precisa apertar enviar. Sem travessão nem sublinhado,
@@ -10,7 +9,7 @@ export const profile = {
   name: "Armando Custodio",
   role: "Design Engineer",
   email: "armandocustodio0@gmail.com",
-  location: "Brasil", // TODO(Armando): cidade/UF, se quiser expor
+  location: "Goiânia, Brasil",
   links: {
     github: "https://github.com/ganwalk",
     linkedin: "https://br.linkedin.com/in/armando-custodio-00080320a",
