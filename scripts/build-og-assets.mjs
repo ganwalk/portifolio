@@ -1,28 +1,25 @@
-// Prepara o que as imagens sociais precisam ler no build: as fontes num
-// formato que o gerador entende e um quadro solto do retrato.
+// Prepara o que as imagens sociais precisam ler no build: a fonte das
+// legendas num formato que o gerador entende e um quadro solto do retrato.
+// O título (nome/case) não usa fonte nenhuma aqui: é contorno vetorial, ver
+// scripts/build-og-wordmarks.mjs.
 //
 // Uso (ferramenta de bancada, não entra no package.json, mesmo critério do
 // sharp em build-frames.mjs):
 //
-//   npm install --no-save sharp @fontsource/bricolage-grotesque @fontsource/ibm-plex-mono
+//   npm install --no-save sharp @fontsource/ibm-plex-mono
 //   node scripts/build-og-assets.mjs
 //
-// FONTES. O gerador de imagem do Next (satori, por baixo do ImageResponse)
+// FONTE. O gerador de imagem do Next (satori, por baixo do ImageResponse)
 // não decodifica woff2: falta o brotli, e o pacote nem embarca o decodificador.
 // Todo pacote de fonte do site é woff2, então o card social cairia na fonte
 // padrão do próprio gerador, que não tem nada a ver com o site. A saída é
-// levar woff, que o satori lê, e que os pacotes do Fontsource já publicam ao
+// levar woff, que o satori lê, e que o pacote do Fontsource já publica ao
 // lado do woff2.
 //
-// São as duas fontes que o site usa fora dos três destaques em Whyte Inktrap:
-// Bricolage Grotesque 800 (a --font-headline, do .type-display) no título e
-// IBM Plex Mono (a --font-mono) nas legendas. As duas são OFL, então copiar o
-// arquivo para dentro do repositório é uso previsto pela licença, ao
-// contrário da Whyte (ver build-favicon.mjs, que contorna o glifo justamente
-// para não precisar levar a fonte).
-//
-// Os dois arquivos são lidos no build e nunca chegam ao navegador: o site
-// continua servindo os woff2 dos pacotes originais.
+// IBM Plex Mono (a --font-mono) é a fonte das legendas (rótulo e rodapé), e
+// é OFL: copiar o arquivo para dentro do repositório é uso previsto pela
+// licença. O arquivo é lido no build e nunca chega ao navegador: o site
+// continua servindo o woff2 do pacote original.
 //
 // RETRATO. O card da home mostra o retrato, e o que existe pronto é a folha
 // de sprite da hero, feita para background-position, não para aparecer
@@ -41,12 +38,6 @@ const FONTS_OUT = here("../src/fonts/og");
 const OG_OUT = here("../src/lib/og");
 
 const FONTS = [
-  [
-    here(
-      "../node_modules/@fontsource/bricolage-grotesque/files/bricolage-grotesque-latin-800-normal.woff",
-    ),
-    `${FONTS_OUT}/bricolage-grotesque-800.woff`,
-  ],
   [
     here(
       "../node_modules/@fontsource/ibm-plex-mono/files/ibm-plex-mono-latin-400-normal.woff",
