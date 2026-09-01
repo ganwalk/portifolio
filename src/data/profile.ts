@@ -1,5 +1,5 @@
 // Dados públicos de contato e perfil.
-// TODO(Armando): confirmar/completar os campos marcados, cidade.
+// TODO(Armando): confirmar/completar o campo marcado, cidade.
 
 // Mensagem pronta do WhatsApp: preenche o campo de texto assim que o link
 // abre, quem visita só precisa apertar enviar. Sem travessão nem sublinhado,
@@ -92,6 +92,9 @@ export const profile = {
       },
     ],
   },
+  // Mais recente primeiro (ordem de currículo padrão): AUVP é o cargo
+  // atual, os três anteriores entram abaixo dele, do mais recente ao mais
+  // antigo.
   experience: [
     {
       company: "AUVP",
@@ -101,7 +104,37 @@ export const profile = {
         es: "Design Engineer, responsable del diseño digital del ecosistema (webpages, producto y marca)",
         zh: "Design Engineer，负责生态系统的数字设计（网页、产品与品牌）",
       },
-      period: "20XX até hoje", // TODO(Armando): ano de início
+      period: "2023 até hoje",
+    },
+    {
+      company: "Defensoria Pública do Estado de Goiás",
+      role: {
+        pt: "Estágio em design gráfico",
+        en: "Graphic design internship",
+        es: "Prácticas en diseño gráfico",
+        zh: "平面设计实习",
+      },
+      period: "2021-2022",
+    },
+    {
+      company: "Prime Mais",
+      role: {
+        pt: "Web designer pleno",
+        en: "Mid-level web designer",
+        es: "Diseñador web de nivel intermedio",
+        zh: "中级网页设计师",
+      },
+      period: "2020-2021",
+    },
+    {
+      company: "AS Web",
+      role: {
+        pt: "Designer gráfico com foco em social media",
+        en: "Graphic designer focused on social media",
+        es: "Diseñador gráfico enfocado en redes sociales",
+        zh: "专注社交媒体的平面设计师",
+      },
+      period: "2019-2020",
     },
   ],
 } as const;

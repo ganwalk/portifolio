@@ -85,25 +85,14 @@ export const cases: CaseStudy[] = [
       es: ["Música", "WebGL", "Three.js", "Interactividad"],
       zh: ["音乐", "WebGL", "Three.js", "互动设计"],
     },
-    // Sem dado de impacto no site em si (não há analytics público do
-    // Ganwalk): a métrica vem do próprio código do repositório, não de
-    // contagem de commits (pouco relevante pra quem visita o site). O painel
-    // de mixagem ao vivo (id="p1-...") expõe nove controles de efeito de
-    // verdade, ligados ao Web Audio API: delay, reverb, chorus, filter,
-    // pitch, overdrive e EQ de três bandas (low/mid/high). Contados direto
-    // em index.htm (github.com/ganwalk/2026) em 19/08/2026.
-    metrics: [
-      {
-        value: "9",
-        label: {
-          pt: "efeitos ao vivo no painel de mixagem",
-          en: "live effects in the mixing panel",
-          es: "efectos en vivo en el panel de mezcla",
-          zh: "混音面板中的实时效果",
-        },
-        illustrative: false,
-      },
-    ],
+    // Sem métricas de propósito: projeto de arte/identidade, não produto de
+    // negócio, e um número (efeitos do painel, faixas do álbum) ao lado de
+    // "conversão"/"acessos diários" dos outros cases lia como estar
+    // forçando uma régua de impacto que não é o que este trabalho vende.
+    // O link pra abrir o site de verdade e o repositório (ver repoUrl/
+    // demoUrl no fim do bloco) já contam essa história melhor que um
+    // número solto contaria.
+    metrics: [],
     // Mídia real: vídeo de preview do próprio projeto (ver ganwalk-preview/
     // e scripts/build-ganwalk-preview.mjs), a palavra "ganwalk" repetida
     // formando um retrato em silhueta, âmbar sobre preto, no mesmo clima
@@ -161,21 +150,9 @@ export const cases: CaseStudy[] = [
       es: ["Música", "WebGL", "Three.js", "Reproductor integrado"],
       zh: ["音乐", "WebGL", "Three.js", "内置播放器"],
     },
-    // Sem dado de impacto no site em si: a métrica vem do array `tracks` de
-    // index.htm (github.com/ganwalk/cavalo), o álbum de verdade que o painel
-    // retrô toca faixa a faixa, contada em 19/08/2026.
-    metrics: [
-      {
-        value: "10",
-        label: {
-          pt: "faixas do álbum tocadas no site",
-          en: "album tracks played on the site",
-          es: "pistas del álbum reproducidas en el sitio",
-          zh: "网站上播放的专辑曲目",
-        },
-        illustrative: false,
-      },
-    ],
+    // Sem métricas, mesmo raciocínio do Ganwalk acima: arte/identidade, não
+    // produto de negócio.
+    metrics: [],
     // O site real já está no ar (ver demoUrl, embutido em LiveEmbed no
     // corpo do case), mas a CAPA aqui embaixo continua o placeholder de
     // vídeo: já batia com o tema (deserto de verdade em Three.js). Pendente:
@@ -232,21 +209,9 @@ export const cases: CaseStudy[] = [
       es: ["Música", "Canvas 2D", "Tailwind CSS", "Interactividad"],
       zh: ["音乐", "Canvas 2D", "Tailwind CSS", "互动设计"],
     },
-    // Sem dado de impacto no site em si: a métrica vem da seção de
-    // discografia de index.htm (github.com/ganwalk/pinkopala), contada em
-    // 19/08/2026.
-    metrics: [
-      {
-        value: "6",
-        label: {
-          pt: "lançamentos na discografia",
-          en: "releases in the discography",
-          es: "lanzamientos en la discografía",
-          zh: "唱片作品数量",
-        },
-        illustrative: false,
-      },
-    ],
+    // Sem métricas, mesmo raciocínio do Ganwalk (ver acima): arte/
+    // identidade, não produto de negócio.
+    metrics: [],
     // Mídia real: gravação de tela do próprio hero do site (ver
     // pink-opala-preview/ e scripts/build-pink-opala-preview.mjs), o nome
     // da banda em partículas de areia reagindo ao mouse de verdade, não só
@@ -275,10 +240,10 @@ export const cases: CaseStudy[] = [
     slug: "intranet-auvp",
     area: "banking",
     title: {
-      pt: "Intranet completa",
-      en: "Complete intranet",
-      es: "Intranet completa",
-      zh: "完整内网系统",
+      pt: "Design System",
+      en: "Design System",
+      es: "Design System",
+      zh: "Design System",
     },
     statement: {
       headline: {

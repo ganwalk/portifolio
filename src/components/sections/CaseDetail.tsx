@@ -70,7 +70,12 @@ export function CaseDetail({
           caseStudy={caseStudy}
           locale={locale}
           metricsSlot={
-            <CaseMetrics caseStudy={caseStudy} locale={locale} compact className="mb-8" />
+            // Sem métricas (trio de artistas, ver cases.ts): nada aqui,
+            // não um bloco vazio com a mesma margem inferior de sempre
+            // sobrando um vão contra a descrição logo abaixo.
+            caseStudy.metrics.length > 0 ? (
+              <CaseMetrics caseStudy={caseStudy} locale={locale} compact className="mb-8" />
+            ) : undefined
           }
         />
       </Reveal>
