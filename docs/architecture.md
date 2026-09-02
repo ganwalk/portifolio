@@ -288,9 +288,10 @@ decorativa. O que dá vida é movimento e tipografia, não ornamento.
   última descrita na lente do nome, logo abaixo), e as três ensinaram a mesma
   coisa: a hero não tem espaço para um segundo assunto.
 
-  A gravura sobreviveu onde faz sentido, nas imagens sociais
-  (`src/lib/engraving.ts`, ver SEO), que são paradas por definição e não
-  disputam com movimento nenhum.
+  A gravura chegou a sobreviver nas imagens sociais (paradas por definição,
+  sem disputa com movimento nenhum), mas saiu de lá também depois: hoje o
+  cartão social usa o mesmo grão de filme da hero, não a gravura em ondas
+  (ver `src/lib/og-noise.ts` em SEO, abaixo).
 
   **O nome incha sob uma lente que segue o cursor** (`HeroTitleGL`, o único
   uso de WebGL do site). Onde o ponteiro passa, "ARMANDO CUSTODIO" engorda,
@@ -804,40 +805,47 @@ basePath), fonte de verdade de todo metadado que precisa de URL absoluta:
   inclui o hreflang de cada URL, espelhando o `alternates.languages` da
   página.
 - `opengraph-image.tsx` (home e case, via `next/og`): cartão gerado no build
-  (`src/lib/og-card.tsx`), a hero em 1200x630. Papel, a gravura em linha no
-  fundo, o título em caixa alta ocupando o quadro, legendas em mono nos
-  cantos, e o retrato só na home (num case ele roubaria o assunto, que é o
-  trabalho). O Next reaproveita a mesma imagem pro `twitter:image`, sem
-  precisar de um `twitter-image.tsx` separado.
+  (`src/lib/og-card.tsx`), a hero em 1200x630. Papel, o nome/título em Whyte
+  Inktrap ocupando o quadro, legendas em mono nos cantos, e o retrato só na
+  home (num case ele roubaria o assunto, que é o trabalho). O Next reaproveita
+  a mesma imagem pro `twitter:image`, sem precisar de um `twitter-image.tsx`
+  separado.
 
-  Fonte não é detalhe aqui. O gerador por baixo do `ImageResponse` é o satori,
-  que cai numa fonte genérica quando não recebe nenhuma, e era isso que o
-  cartão vinha mostrando: o nome em Helvetica, sem relação com o site. Só que
-  satori não decodifica woff2 (falta o brotli, e o pacote nem embarca o
-  decodificador), e todo pacote de fonte do site é woff2. A saída é levar
-  woff, que ele lê e que o Fontsource já publica ao lado: Bricolage Grotesque
-  800 (a display do `.type-display`) e IBM Plex Mono, copiadas para
-  `src/fonts/og/` por `scripts/build-og-assets.mjs`. As duas são OFL, então a
-  cópia é uso previsto pela licença. A Whyte Inktrap do nome na hero fica de
-  fora: é licenciada, e levar a fonte inteira para dentro do build por causa
-  de um cartão não se justifica.
+  O nome/título não é texto, é contorno vetorial (SVG path) em Whyte Inktrap,
+  a mesma assinatura do cabeçalho e da hero, não uma fonte parecida. O
+  gerador por baixo do `ImageResponse` é o satori, que cai numa fonte
+  genérica quando não recebe nenhuma (era isso que o cartão vinha mostrando
+  antes: o nome em Helvetica, sem relação com o site), e não decodifica
+  woff2 (falta o brotli). Levar a Whyte inteira pro build só por causa de um
+  cartão não se justifica (é licenciada, ABC Dinamo), então o contorno é
+  extraído uma vez, por `scripts/build-og-wordmarks.mjs` (mesma técnica do
+  favicon: path, não fonte embarcada), e commitado pronto em
+  `src/lib/og/wordmarks.ts`, uma palavra por linha, igual ao tratamento do
+  nome na hero de verdade. Título fora da lista fixa de wordmarks (hoje só a
+  versão em chinês do case de Landing Pages, sem cobertura nenhuma na Whyte
+  de qualquer forma) cai em texto normal, na fonte de reserva do próprio
+  gerador. IBM Plex Mono, a fonte das legendas, é OFL: essa sim entra como
+  fonte de verdade (copiada para `src/fonts/og/` por
+  `scripts/build-og-assets.mjs`), lida no build e nunca servida ao navegador.
 
-  As duas fontes são subconjunto latino, então título em chinês não é coberto
-  por nenhuma e cai no mecanismo de reserva do próprio `ImageResponse`, que
-  era quem já resolvia isso antes delas existirem. O `zh` continua saindo
-  certo, com o latim em Plex Mono e o chinês na reserva.
+  Dois bugs de opentype.js apareceram no caminho do script gerador: kerning
+  via GPOS devolvendo `NaN` em alguns pares de letra, e glifos que saem com
+  coordenada `NaN` quando o contorno é construído já deslocado por um x
+  grande (alguns glifos desta fonte, não uma regra geral). A saída: kerning
+  desligado e cada letra gerada no próprio x=0, posicionada só depois, via
+  `transform` no SVG (satori também não reamostra `viewBox` contra
+  `width`/`height` diferentes, então a escala entra no mesmo `transform`, não
+  delegada ao SVG).
 
   O retrato é o primeiro quadro da folha de sprite da hero (o de repouso),
-  recortado pelo mesmo script para `src/lib/og/retrato.png`. Os três arquivos
-  são lidos do disco no build e nunca chegam ao navegador.
+  recortado por `scripts/build-og-assets.mjs` para `src/lib/og/retrato.png`.
 
-  A gravura do fundo é a mesma trama ondulada do retrato, ampliada, e vem de
-  `src/lib/engraving.ts`. Ela chegou a ser o fundo da hero e foi revertida de
-  lá (ver Mídia e movimento, acima): aqui ficou, porque um cartão é parado por
-  definição e não disputa espaço com movimento nenhum. Entra como `<img>`, e
-  não como `background-image`: satori resolve background com um raster próprio
-  que ignora filtro de SVG, e é filtro (`feTurbulence` somado a
-  `feDisplacementMap`) que faz a onda.
+  O fundo é o mesmo grão de filme que `.texture-noise` usa no resto do site
+  (`src/lib/og-noise.ts`), não uma peça própria do cartão: chegou a existir
+  uma gravura em ondas ali (`src/lib/engraving.ts`, removido), sem
+  equivalente no site publicado, e virou esse grão real. Entra como `<img>`,
+  e não como `background-image`: satori resolve background com um raster
+  próprio que ignora filtro de SVG.
 - `PersonJsonLd` (`src/components/seo/PersonJsonLd.tsx`), renderizado no
   layout: schema.org `Person` com nome, cargo, URL, redes (`sameAs`) e
   `worksFor`. Ainda sem `image`: agora existe um retrato parado
@@ -896,15 +904,14 @@ ou na Vercel, basta não definir `NEXT_PUBLIC_BASE_PATH` e trocar
 1. Dezert Horse ainda espera a captura de tela real do próprio site (usa
    WebGL/Three.js): a capa continua no placeholder do Pexels, duna de
    areia. Último placeholder de mídia restante, os outros quatro cases já
-   usam mídia real (Ganwalk, Pink Opala, Intranet, Landing Pages).
-2. ~~Calibrar as métricas dos cases~~ — feito: nenhuma métrica de nenhum
-   case continua `illustrative: true`.
-3. ~~Escrever o corpo dos cases~~ — feito, todos os cinco (o número mudou
+   usam mídia real (Ganwalk, Pink Opala, Design System, Landing Pages).
+2. ~~Calibrar as métricas dos cases~~ (feito: nenhuma métrica de nenhum
+   case continua `illustrative: true`).
+3. ~~Escrever o corpo dos cases~~ (feito, todos os cinco: o número mudou
    de quatro pra cinco quando Landing Pages virou case próprio).
-4. Completar `src/data/profile.ts`: cidade (`location`) e ano de início na
-   AUVP (`experience[0].period`, hoje "20XX até hoje", texto de espera
-   visível de verdade no Modo Boring/currículo). LinkedIn, Instagram e
-   WhatsApp já estão prontos (`profile.links`).
+4. ~~Completar `src/data/profile.ts`~~ (feito: cidade e ano de início na
+   AUVP preenchidos, `experience` ganhou três vagas anteriores). LinkedIn,
+   Instagram e WhatsApp já estavam prontos (`profile.links`).
 5. Ligar Microsoft Clarity e Google Analytics quando os IDs existirem.
 6. Recortes de colagem em volta do nome no hero, quando chegarem.
 7. Registrar domínio próprio e verificar a propriedade no Google Search
