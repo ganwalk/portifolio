@@ -938,16 +938,21 @@ function ExpandedCase({
 // página do case direto, sem o overlay expandido em FLIP que a versão de
 // desktop usa.
 //
-// Exceção: o trio de artistas (ARTIST_PREVIEW_SLUGS) monta sem esperar
-// `isNear`, igual à versão de desktop (CaseColumn): o Dezert Horse
-// registra a própria tela de carregamento do portfólio como pendência
-// (usePageLoadingRegistration, ver DezertHorseLive.tsx), e essa espera só
-// funciona se o componente já estiver montado enquanto a tela de entrada
-// (SiteLoader) ainda está de pé. Escondido atrás do `isNear`, o registro
-// só chegava bem depois da entrada já ter revelado o site, e o visitante
-// via o cenário 3D aparecer com atraso, solto, ao rolar até o trio. Custo
-// aceito aqui: só um iframe (não seis vídeos), e só quando o trio existe
-// na página.
+// Exceção: só o Dezert Horse (não o trio inteiro) monta sem esperar
+// `isNear`, único caso em que a versão mobile foge da versão de desktop
+// (CaseColumn, que monta o trio inteiro de cara: ver o comentário lá sobre
+// por que faz sentido NESSA arquitetura, de fatias empilhadas absolute
+// inset-0 no mesmo contêiner, que aqui no mobile não existe). O Dezert
+// Horse registra a própria tela de carregamento do portfólio como
+// pendência (usePageLoadingRegistration, ver DezertHorseLive.tsx), e essa
+// espera só funciona se o componente já estiver montado enquanto a tela de
+// entrada (SiteLoader) ainda está de pé. Escondido atrás do `isNear`, o
+// registro só chegava bem depois da entrada já ter revelado o site, e o
+// visitante via o cenário 3D aparecer com atraso, solto, ao rolar até ele.
+// Custo aceito aqui: só um iframe. Ganwalk e Pink Opala não têm esse
+// acoplamento (não chamam usePageLoadingRegistration) e esperam `isNear`
+// como qualquer outro cartão: nada os obriga a pagar o mesmo custo cedo
+// demais só por dividirem ARTIST_PREVIEW_SLUGS com o Dezert Horse.
 
 // Folga extra (em svh) que cada cartão mobile ganha além da própria altura
 // de tela: mais rolagem dentro do MESMO cartão antes que o próximo alcance o
@@ -1019,13 +1024,33 @@ function MobileCaseCard({
           className="absolute inset-0 scale-125"
           style={reduceMotion ? undefined : { y: mediaY }}
         >
-          {ARTIST_PREVIEW_SLUGS.has(caseStudy.slug) && caseStudy.demoUrl ? (
+          {caseStudy.slug === "dezert-horse" && caseStudy.demoUrl ? (
+            // Único do trio que precisa montar sem esperar isNear (ver
+            // comentário acima, "Exceção: o trio de artistas"): é o único
+            // que registra pendência na tela de carregamento do portfólio
+            // (usePageLoadingRegistration, em DezertHorseLive.tsx). Ganwalk
+            // e Pink Opala (abaixo) não têm esse acoplamento, então voltam a
+            // esperar isNear como o resto do cartão: sem isso, os três
+            // montavam juntos no load da home, baixando o vídeo do Ganwalk
+            // (autoplay, ~500KB) e ligando o canvas de partículas do Pink
+            // Opala bem antes de existir qualquer chance de rolar até eles.
             <ArtistPreview
-              slug={caseStudy.slug}
+              slug="dezert-horse"
               demoUrl={caseStudy.demoUrl}
               title={caseStudy.title[locale]}
               className="absolute inset-0 h-full w-full"
             />
+          ) : ARTIST_PREVIEW_SLUGS.has(caseStudy.slug) && caseStudy.demoUrl ? (
+            isNear ? (
+              <ArtistPreview
+                slug={caseStudy.slug}
+                demoUrl={caseStudy.demoUrl}
+                title={caseStudy.title[locale]}
+                className="absolute inset-0 h-full w-full"
+              />
+            ) : (
+              <div className="absolute inset-0 bg-surface" />
+            )
           ) : caseStudy.slug === "ecossistema-auvp" ? (
             <LandingPagesGridPreview className="absolute inset-0 h-full w-full" />
           ) : caseStudy.slug === "intranet-auvp" ? (
