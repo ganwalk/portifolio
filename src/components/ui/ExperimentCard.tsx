@@ -111,8 +111,23 @@ export function ExperimentCard({
   // persegue o cursor com um atraso curto em vez de grudar nele.
   const pointerRawX = useMotionValue(0);
   const pointerRawY = useMotionValue(0);
-  const leadX = useSpring(pointerRawX, { stiffness: 400, damping: 35, mass: 0.5 });
-  const leadY = useSpring(pointerRawY, { stiffness: 400, damping: 35, mass: 0.5 });
+  // skipInitialAnimation: mesmo raciocínio do selo "ver caso" em
+  // CasesGrid.tsx. Sem isso a legenda nascia no canto (0,0) e a mola
+  // desenhava um voo visível até a primeira posição real do cursor, em vez
+  // de já nascer ali; só a primeira mudança de posição pula a mola, o
+  // atraso normal de perseguição volta a partir da segunda em diante.
+  const leadX = useSpring(pointerRawX, {
+    stiffness: 400,
+    damping: 35,
+    mass: 0.5,
+    skipInitialAnimation: true,
+  });
+  const leadY = useSpring(pointerRawY, {
+    stiffness: 400,
+    damping: 35,
+    mass: 0.5,
+    skipInitialAnimation: true,
+  });
   const labelX = useTransform(leadX, (v) => v + TOOLTIP_OFFSET_X);
   const labelY = useTransform(leadY, (v) => v + TOOLTIP_OFFSET_Y);
 

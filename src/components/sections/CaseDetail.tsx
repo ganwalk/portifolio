@@ -1,17 +1,30 @@
 "use client";
 
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import { motion } from "framer-motion";
 import { CaseMetrics } from "@/components/ui/CaseMetrics";
 import { CaseStatement } from "@/components/ui/CaseStatement";
-import { IntranetShowcase } from "@/components/ui/IntranetShowcase";
-import { LandingPagesShowcase } from "@/components/ui/LandingPagesShowcase";
 import { LiveEmbed } from "@/components/ui/LiveEmbed";
 import { Reveal } from "@/components/ui/Reveal";
 import { RepoLink } from "@/components/ui/RepoLink";
 import type { CaseStudy } from "@/data/types";
 import type { Locale } from "@/i18n/config";
 import type { Dictionary } from "@/i18n/dictionaries";
+
+// Code-split: cada vitrine só serve a página do PRÓPRIO case (Intranet ou
+// Landing Pages), então sem isso as outras três páginas de case (Ganwalk,
+// Pink Opala, Dezert Horse) baixavam os ~400 linhas das duas à toa, nunca
+// chegando a montar nenhuma. Cada rota de case passa a carregar só o que a
+// própria página usa.
+const IntranetShowcase = dynamic(
+  () => import("@/components/ui/IntranetShowcase").then((m) => m.IntranetShowcase),
+  { ssr: false },
+);
+const LandingPagesShowcase = dynamic(
+  () => import("@/components/ui/LandingPagesShowcase").then((m) => m.LandingPagesShowcase),
+  { ssr: false },
+);
 
 // Corpo da página de um case (/work/[slug]): vai direto ao título e à
 // descrição, sem capa de vídeo/imagem no topo. A capa em tela cheia com
