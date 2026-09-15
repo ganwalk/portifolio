@@ -1,8 +1,25 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { DezertHorseLive } from "./DezertHorseLive";
-import { GanwalkAsciiVideo } from "./GanwalkAsciiVideo";
-import { ParticleTextCanvas } from "./ParticleTextCanvas";
+
+// Code-split: Ganwalk e Pink Opala só montam depois que o scroll chega perto
+// (`isNear`/`isNearActive` em CasesGrid.tsx), então o chunk pode carregar
+// depois sem custar nada visível. Dezert Horse fica de fora dessa divisão
+// (import estático, acima) de propósito: é a exceção documentada em
+// CasesGrid.tsx que monta sem esperar `isNear`, porque registra uma
+// pendência na tela de carregamento do site (`usePageLoadingRegistration`
+// em DezertHorseLive.tsx) e precisa estar montado enquanto ela ainda existe;
+// um chunk assíncrono ali atrasaria esse registro e arriscaria a
+// sincronização já calibrada.
+const GanwalkAsciiVideo = dynamic(
+  () => import("./GanwalkAsciiVideo").then((m) => m.GanwalkAsciiVideo),
+  { ssr: false },
+);
+const ParticleTextCanvas = dynamic(
+  () => import("./ParticleTextCanvas").then((m) => m.ParticleTextCanvas),
+  { ssr: false },
+);
 
 // Prévia dos três projetos de artista, no card do trio (ver
 // CasesGrid.tsx). Não é um tratamento único pros três: cada projeto pediu

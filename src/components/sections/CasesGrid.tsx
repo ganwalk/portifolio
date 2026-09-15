@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import Lenis from "lenis";
+import dynamic from "next/dynamic";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   AnimatePresence,
@@ -20,9 +21,7 @@ import { CaseStatement } from "@/components/ui/CaseStatement";
 import { CursorLabel } from "@/components/ui/CursorLabel";
 import { IntranetGridPreview } from "@/components/ui/IntranetGridPreview";
 import { IntranetMobileCarousel } from "@/components/ui/IntranetMobileCarousel";
-import { IntranetShowcase } from "@/components/ui/IntranetShowcase";
 import { LandingPagesGridPreview } from "@/components/ui/LandingPagesGridPreview";
-import { LandingPagesShowcase } from "@/components/ui/LandingPagesShowcase";
 import { LiveEmbed } from "@/components/ui/LiveEmbed";
 import { MediaView } from "@/components/ui/MediaView";
 import { Reveal } from "@/components/ui/Reveal";
@@ -39,6 +38,20 @@ import { useNearViewport } from "@/lib/use-near-viewport";
 // dar superpoderes de motion (whileTap, aqui) a um componente que já
 // encaminha ref, sem perder o comportamento de navegação do próprio Link.
 const MotionLink = motion.create(Link);
+
+// Code-split: cada vitrine só serve UM case (Intranet ou Landing Pages) e só
+// monta depois do clique que abre `ExpandedCase`, nunca no load da home. Sem
+// isso os ~400 linhas das duas (carrossel da Intranet, simulação de janela
+// de Landing Pages) entravam no bundle da home pra todo visitante, mesmo
+// quem nunca chega a clicar em nenhum dos dois.
+const IntranetShowcase = dynamic(
+  () => import("@/components/ui/IntranetShowcase").then((m) => m.IntranetShowcase),
+  { ssr: false },
+);
+const LandingPagesShowcase = dynamic(
+  () => import("@/components/ui/LandingPagesShowcase").then((m) => m.LandingPagesShowcase),
+  { ssr: false },
+);
 
 // Projetos em destaque como uma sequência amarrada ao scroll da própria
 // página, não um carrossel com botões e timer, A PARTIR DO sm: (640px). No
@@ -1244,8 +1257,25 @@ function DesktopCasesGrid({
   // posição bruta conhecida.
   const pointerRawX = useMotionValue(0);
   const pointerRawY = useMotionValue(0);
-  const leadX = useSpring(pointerRawX, { stiffness: 400, damping: 35, mass: 0.5 });
-  const leadY = useSpring(pointerRawY, { stiffness: 400, damping: 35, mass: 0.5 });
+  // skipInitialAnimation: sem isso, o selo nascia no canto (0,0, o valor
+  // inicial da motion value) e a mola desenhava um voo visível até a
+  // primeira posição real do cursor, junto com o próprio fade-in de
+  // `visible`. Essa opção pula só a PRIMEIRA mudança de posição (da vida do
+  // componente): a mola aterrissa direto onde o cursor já está, e volta a
+  // perseguir com atraso normalmente a partir da segunda mudança em diante,
+  // o comportamento de sempre enquanto o mouse se move de verdade.
+  const leadX = useSpring(pointerRawX, {
+    stiffness: 400,
+    damping: 35,
+    mass: 0.5,
+    skipInitialAnimation: true,
+  });
+  const leadY = useSpring(pointerRawY, {
+    stiffness: 400,
+    damping: 35,
+    mass: 0.5,
+    skipInitialAnimation: true,
+  });
   const labelX = useTransform(leadX, (v) => v + 80);
   const labelY = useTransform(leadY, (v) => v + 22);
 

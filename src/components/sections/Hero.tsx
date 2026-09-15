@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import dynamic from "next/dynamic";
 import {
   motion,
   useMotionTemplate,
@@ -10,7 +11,6 @@ import {
   useTransform,
   type MotionValue,
 } from "framer-motion";
-import { HeroTitleGL } from "@/components/ui/HeroTitleGL";
 import { SelfPortrait } from "@/components/ui/SelfPortrait";
 import { SubtitleRoulette } from "@/components/ui/SubtitleRoulette";
 import { profile } from "@/data/profile";
@@ -26,6 +26,18 @@ import type { Dictionary } from "@/i18n/dictionaries";
 // duro, então o círculo é difuso nas beiradas. Perto do CTA o raio encolhe,
 // cedendo o palco ao clique. Em telas de toque nada disso roda: sem mousemove,
 // o raio fica em zero.
+
+// Code-split: só quem tem mouse de verdade e não pediu menos movimento chega
+// a montar isto (`titleLens`, mais abaixo), mas o import estático mandava os
+// ~500 linhas de shader/WebGL pro bundle da home de qualquer visitante,
+// touch incluído. `ssr: false` é seguro aqui porque o <h1> já é a fonte
+// visível e acessível enquanto o canvas não confirma que desenhou (ver
+// `titleOnCanvas`): a navegação até a home fica mais leve pra chegar
+// interativa, sem nenhuma mudança visual pra quem já via o efeito.
+const HeroTitleGL = dynamic(
+  () => import("@/components/ui/HeroTitleGL").then((m) => m.HeroTitleGL),
+  { ssr: false },
+);
 
 const LENS_MAX = 210;
 const LENS_MIN = 40;
