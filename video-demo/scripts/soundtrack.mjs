@@ -8,7 +8,9 @@
 
 import { writeFileSync, mkdirSync } from "node:fs";
 import { fileURLToPath } from "node:url";
-import { BEAT, DURATION, TRANSITIONS, HITS, CURTAIN_COVER } from "../composition/timeline.js";
+import { BEAT, DURATION, SCENES, TRANSITIONS, HITS, CURTAIN_COVER } from "../composition/timeline.js";
+
+const S = Object.fromEntries(SCENES.map((s) => [s.id, s]));
 
 const SR = 48000;
 const N = Math.ceil(DURATION * SR);
@@ -189,33 +191,33 @@ const chordAt = (t) => CHORDS[Math.floor(t / BAR) % CHORDS.length];
 
 // Onde cada camada toca (a peça respira: abertura quase silenciosa, a batida
 // entra com as soluções, some na despedida).
-const groove = (t) => between(t, 12.5, 41) || between(t, 47, 50);
-const heroPulse = (t) => between(t, 3.5, 10);
+const groove = (t) => between(t, S.ascii.start, S.extras.start) || between(t, S.brands.start, S.brands.end);
+const heroPulse = (t) => between(t, S.hero.start, S.hero.end);
 
 const padCutoff = (t) => {
-  if (t < 3.5) return 0.004 + 0.01 * (t / 3.5);
-  if (t < 12.5) return 0.02;
-  if (t < 50) return 0.035;
-  return 0.03 - 0.02 * Math.min(1, (t - 50) / 10);
+  if (t < S.hero.start) return 0.004 + 0.01 * (t / S.hero.start);
+  if (t < S.ascii.start) return 0.02;
+  if (t < S.contact.start) return 0.035;
+  return 0.03 - 0.02 * Math.min(1, (t - S.contact.start) / (DURATION - S.contact.start));
 };
 
 for (let bar = 0; bar * BAR < DURATION; bar++) {
   const t0 = bar * BAR;
   const ch = CHORDS[bar % CHORDS.length];
-  const vel = t0 < 3.5 ? 0.05 : t0 >= 50 ? 0.075 : 0.06;
+  const vel = t0 < S.hero.start ? 0.05 : t0 >= S.contact.start ? 0.075 : 0.06;
   pad(ch.pad, t0, Math.min(BAR + 0.6, DURATION - t0), vel, padCutoff);
 }
 
 // Arpejo em colcheias, com um eco em 3/8 de batida jogado pro outro lado.
 for (let i = 0; i * BEAT * 0.5 < DURATION; i++) {
   const t = i * BEAT * 0.5;
-  if (t < 3.5) continue;
+  if (t < S.hero.start) continue;
   const ch = chordAt(t);
   const note = ch.arp[i % ch.arp.length];
   let vel = 0.09;
   if (heroPulse(t)) vel = 0.07;
-  if (between(t, 10, 12.5)) vel = 0.05 + 0.04 * ((t - 10) / 2.5);
-  if (t >= 50) vel = 0.08 * Math.max(0, 1 - (t - 50) / 9) * (i % 2 ? 0.6 : 1);
+  if (between(t, S.chapter.start, S.chapter.end)) vel = 0.05 + 0.04 * ((t - S.chapter.start) / (S.chapter.end - S.chapter.start));
+  if (t >= S.contact.start) vel = 0.08 * Math.max(0, 1 - (t - S.contact.start) / (DURATION - S.contact.start)) * (i % 2 ? 0.6 : 1);
   if (vel <= 0) continue;
   const bright = groove(t) ? 1 : 0.6;
   const p = pluck(hz(note), 0.6, vel, bright);
@@ -253,7 +255,7 @@ for (const c of HITS.click) {
 for (const r of HITS.counters) for (let t = r.from; t < r.to; t += 0.05 + (t - r.from) * 0.03) tick(t, 4200, 0.25, 0.006);
 
 // Acorde final segurando até o fim.
-pad([45, 57, 64, 67, 71, 76], 57.5, DURATION - 57.5, 0.07, () => 0.02);
+pad([45, 57, 64, 67, 71, 76], DURATION - 2.5, 2.5, 0.07, () => 0.02);
 
 // ---------------------------------------------------------- master e wav
 

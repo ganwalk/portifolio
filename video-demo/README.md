@@ -1,6 +1,6 @@
 # Vídeo demonstração
 
-Peça de um minuto pra apresentar o trabalho e convidar a pessoa a fechar um
+Peça de pouco mais de um minuto pra apresentar o trabalho e convidar a pessoa a fechar um
 projeto. Não é gravação de tela do portfólio: é uma peça própria, feita com
 os mesmos artefatos do site (retículo de Bayer, retrato girando em folha de
 sprite, lente de inversão com lupa, arte ASCII, grade que se distorce sob o
@@ -21,15 +21,15 @@ Saídas em `out/`:
 | ----- | ---- | ------------ |
 | 0:00 | Abertura | "você tem uma ideia. eu faço ela existir na tela.", digitado em mono sobre preto |
 | 0:03 | Hero | Nome gigante, retrato girando, roleta "Designer de" trocando junto com a expressão, lente invertendo e inchando o nome sob o cursor |
-| 0:10 | Índice | As seis soluções, em lista |
-| 0:12 | Identidade interativa | Arte ASCII "ganwalk" gerada ao vivo, letras fugindo do cursor (Ganwalk) |
-| 0:17 | Mundos 3D | O deserto em Three.js gravado do site real, painel retrô ao lado (Dezert Horse) |
-| 0:23 | Tipografia viva | Nome em partículas com física de mola (Pink Opala) |
-| 0:29 | Design System | Peça de motion da intranet, 110, 70 e 10 contando |
-| 0:35 | Landing pages | As onze LPs reais rolando em colunas, 20 mil+, 90+ e 8%+ |
-| 0:41 | Ilustração, animação e som | Os três cartões do bloco Extras com dither dissolvendo no hover |
-| 0:47 | Marcas | As logos de quem já confiou no trabalho |
-| 0:50 | Contato | "Vamos conversar?", foto em grade com o convite em 36 idiomas, email, WhatsApp, Instagram, LinkedIn e GitHub |
+| 0:10 | Índice | "Coisas que eu já coloquei no ar e posso fazer por você.", com a lista terminando em "E muito +" |
+| 0:14 | Identidade interativa | Arte ASCII "ganwalk" gerada ao vivo, letras fugindo do cursor (Ganwalk) |
+| 0:19 | Mundos 3D | O deserto em Three.js gravado do site real, painel retrô ao lado (Dezert Horse) |
+| 0:25 | Tipografia viva | Nome em partículas com física de mola (Pink Opala) |
+| 0:31 | Design System | Peça de motion da intranet, 110, 70 e 10 contando |
+| 0:37 | Landing pages | As onze LPs reais rolando em colunas, 20 mil+, 90+ e 8%+ |
+| 0:43 | Ilustração, animação e som | Os três cartões do bloco Extras com dither dissolvendo no hover |
+| 0:49 | Marcas | "Falta a sua marca aqui.", grade com as logos e o espaço "SUA MARCA" que a mão aperta |
+| 0:53 | Contato | "Vamos conversar?", email, WhatsApp, Instagram, LinkedIn e GitHub, e a mão passeando pela foto em grade até o fim |
 
 A trilha é sintetizada do zero em `scripts/soundtrack.mjs` (120 BPM, lá
 menor), sem nenhuma amostra de terceiros, com cada corte de imagem caindo

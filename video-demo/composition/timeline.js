@@ -10,15 +10,15 @@ export const BEAT = 0.5;
 export const SCENES = [
   { id: "intro", start: 0, end: 3.5 },
   { id: "hero", start: 3.5, end: 10 },
-  { id: "chapter", start: 10, end: 12.5 },
-  { id: "ascii", start: 12.5, end: 17.5 },
-  { id: "desert", start: 17.5, end: 23.5 },
-  { id: "particles", start: 23.5, end: 29 },
-  { id: "system", start: 29, end: 35 },
-  { id: "landing", start: 35, end: 41 },
-  { id: "extras", start: 41, end: 47 },
-  { id: "brands", start: 47, end: 51 },
-  { id: "contact", start: 51, end: 60 },
+  { id: "chapter", start: 10, end: 14.5 },
+  { id: "ascii", start: 14.5, end: 19.5 },
+  { id: "desert", start: 19.5, end: 25.5 },
+  { id: "particles", start: 25.5, end: 31 },
+  { id: "system", start: 31, end: 37 },
+  { id: "landing", start: 37, end: 43 },
+  { id: "extras", start: 43, end: 49 },
+  { id: "brands", start: 49, end: 53 },
+  { id: "contact", start: 53, end: 62 },
 ];
 
 export const DURATION = SCENES[SCENES.length - 1].end;
@@ -30,14 +30,14 @@ export const DURATION = SCENES[SCENES.length - 1].end;
 export const TRANSITIONS = [
   { at: 3.5, kind: "dither", from: 3.05, to: 4.0 },
   { at: 10, kind: "curtain", color: "#111111" },
-  { at: 12.5, kind: "dither", from: 12.25, to: 12.7 },
-  { at: 17.5, kind: "curtain", color: "#000000" },
-  { at: 23.5, kind: "dither", from: 23.2, to: 23.75 },
-  { at: 29, kind: "curtain", color: "#000000" },
-  { at: 35, kind: "dither", from: 34.7, to: 35.25 },
-  { at: 41, kind: "curtain", color: "#fafafa" },
-  { at: 47, kind: "dither", from: 46.75, to: 47.25 },
-  { at: 51, kind: "curtain", color: "#111111" },
+  { at: 14.5, kind: "dither", from: 14.25, to: 14.7 },
+  { at: 19.5, kind: "curtain", color: "#000000" },
+  { at: 25.5, kind: "dither", from: 25.2, to: 25.75 },
+  { at: 31, kind: "curtain", color: "#000000" },
+  { at: 37, kind: "dither", from: 36.7, to: 37.25 },
+  { at: 43, kind: "curtain", color: "#fafafa" },
+  { at: 49, kind: "dither", from: 48.75, to: 49.25 },
+  { at: 53, kind: "curtain", color: "#111111" },
 ];
 
 // Cortina: 8 faixas, cada uma leva STRIPE segundos, com STAGGER de atraso
@@ -51,12 +51,12 @@ export const HITS = {
   typing: [
     { from: 0.35, to: 1.25 },
     { from: 1.55, to: 2.55 },
-    { from: 10.55, to: 11.5 },
+    { from: 10.8, to: 13.0 },
   ],
   // Hero: clique no CTA. Marcas: clique no "SUA MARCA".
-  click: [9.35, 50.05],
+  click: [9.35, 52.05],
   counters: [
-    { from: 31.2, to: 32.6 },
-    { from: 37.2, to: 38.6 },
+    { from: 33.2, to: 34.6 },
+    { from: 39.2, to: 40.6 },
   ],
 };

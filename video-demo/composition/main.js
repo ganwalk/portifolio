@@ -677,8 +677,9 @@ SCENE.chapter = (ctx, t) => {
   SOLUTIONS.forEach((s, i) => {
     const col = i % cols;
     const row = Math.floor(i / cols);
-    const t0 = 0.55 + i * 0.12;
-    const str = `·  ${typed(s.toUpperCase(), t, t0, t0 + 0.35)}`;
+    // Um item por vez, com tempo de ler: a cena segura 4,5s.
+    const t0 = 0.8 + i * 0.38;
+    const str = `·  ${typed(s.toUpperCase(), t, t0, t0 + 0.45)}`;
     const a = prog(t, t0 - 0.05, t0);
     text(ctx, str, G + col * colW, y0 + row * ls * 2.1, { family: MONO, size: ls, weight: 500, color: "rgba(255,255,255,0.8)", ls: ls * 0.1, alpha: a, baseline: "top" });
   });
