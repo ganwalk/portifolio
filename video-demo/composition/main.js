@@ -738,8 +738,22 @@ SCENE.ascii = (ctx, t) => {
 SCENE.desert = (ctx, t) => {
   ctx.fillStyle = "#1a120b";
   ctx.fillRect(0, 0, W, H);
-  const f = clip(V ? "dh916" : "dh169b", t, 330, { offset: 1.2 });
-  drawCover(ctx, f, 0, V ? -120 : -60, W, H, 0.5, 0.5, (V ? 1.15 : 1.22) + t * 0.008);
+  // Dois trechos da gravação: o fim do voo de entrada com o trote, e depois
+  // o cavalo já de volta ao normal. O meio (lente fechando no máximo) corta
+  // a cabeça do cavalo pra fora do quadro, então fica de fora, com um corte
+  // seco na batida.
+  const cut = 3;
+  const src = t < cut ? 1.0 + t : 8.0 + (t - cut);
+  const f = clip(V ? "dh916" : "dh169b", src, 330);
+  drawCover(ctx, f, 0, V ? -60 : 0, W, H, 0.5, 0.5, (V ? 1.08 : 1.1) + t * 0.006);
+  // Um lampejo de dither no corte, o mesmo retículo das transições.
+  const flash = 1 - prog(t, cut, cut + 0.18);
+  if (t >= cut && flash > 0) {
+    ctx.save();
+    ctx.globalAlpha = flash;
+    dither(ctx, f, 0, 0, W, H, { cell: 14, phase: Math.floor(t * 30), bias: 20 });
+    ctx.restore();
+  }
   if (!V) {
     const panel = get(`${MEDIA}/dh-panel.png`);
     if (panel) {
