@@ -39,3 +39,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# vídeo demonstração: mídia intermediária e quadros (regeneráveis pelos scripts)
+/video-demo/.cache/
