@@ -10,6 +10,7 @@
 // O vertical usa o layout mobile do site (540×960 CSS a 2x = 1080×1920).
 
 import { mkdir, writeFile, rm } from "node:fs/promises";
+import { existsSync } from "node:fs";
 import { join } from "node:path";
 import { openSite, step, advance, SITE, root } from "./browser.mjs";
 
@@ -47,7 +48,7 @@ async function record(page, name, seconds, drive = () => null, opts = {}) {
           return el && el.closest("a,button,[role=button],label") ? "hover" : "repouso";
         }, [target.x, target.y])
       : null;
-    const jpg = await page.screenshot({ type: "jpeg", quality: 92 });
+    const jpg = await page.screenshot({ type: "jpeg", quality: 92, timeout: 300000 });
     await writeFile(join(dir, `${String(i + 1).padStart(4, "0")}.jpg`), jpg);
     cursor.push(target ? { x: target.x * viewport.scale, y: target.y * viewport.scale, state: target.state || state } : null);
     // 60Hz por dentro, 30 fps gravados: molas e easings por quadro (a grade
@@ -210,6 +211,8 @@ const SHOTS = {
       return { top: r.top + scrollY, h: r.height, vh: innerHeight };
     });
     for (const [name, title] of list) {
+      // RESUME=1 pula prévias que já terminaram de gravar.
+      if (process.env.RESUME && existsSync(join(base, `project-${name}`, "cursor.json"))) continue;
       if (only.length > 1 && !only.includes(name) && !only.includes("projects")) continue;
       // Rola o carrossel até o card aparecer inteiro e montar a prévia.
       let found = false;
