@@ -110,7 +110,13 @@ if (args.stills) {
     ...(withAudio ? ["-ss", String(from), "-t", String(to - from), "-i", audio] : []),
     "-c:v", "libx264",
     "-preset", "slow",
-    "-crf", "19",
+    // O grão de filme em todo quadro é quase incompressível: sem teto de
+    // bitrate o arquivo passava de 230 MB. 10 Mbps segura o grão (tune
+    // grain) e fica num tamanho que dá pra postar e mandar.
+    "-crf", "22",
+    "-tune", "grain",
+    "-maxrate", "10M",
+    "-bufsize", "20M",
     "-pix_fmt", "yuv420p",
     "-profile:v", "high",
     "-movflags", "+faststart",
