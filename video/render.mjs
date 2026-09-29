@@ -55,6 +55,7 @@ page.on("pageerror", (err) => console.error("página:", err.message));
 await page.goto(`http://localhost:${port}/video/composition.html?f=${format}`);
 await page.evaluate(() => window.ready);
 const meta = await page.evaluate(() => window.meta);
+console.log("duração", meta.DURATION.toFixed(2), "s,", meta.frames, "quadros");
 const stage = await page.$("#stage");
 
 const out = join(root, "video", "out");
