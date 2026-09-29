@@ -59,7 +59,22 @@ async function serve(route, pathname) {
   try {
     if (extname(file) === ".mp4") file = await playableVideo(file);
     const body = await readFile(file);
-    await route.fulfill({ status: 200, body, headers: { "content-type": TYPES[extname(file)] ?? "application/octet-stream" } });
+    const type = TYPES[extname(file)] ?? "application/octet-stream";
+    // Vídeo precisa de resposta parcial (206): sem suporte a Range o
+    // Chromium não consegue buscar um instante, e o vídeo fica preso no 0.
+    const range = route.request().headers()["range"];
+    const match = range && /bytes=(\d*)-(\d*)/.exec(range);
+    if (match) {
+      const start = match[1] ? Number(match[1]) : 0;
+      const end = match[2] ? Math.min(Number(match[2]), body.length - 1) : body.length - 1;
+      await route.fulfill({
+        status: 206,
+        body: body.subarray(start, end + 1),
+        headers: { "content-type": type, "accept-ranges": "bytes", "content-range": `bytes ${start}-${end}/${body.length}`, "content-length": String(end - start + 1) },
+      });
+      return;
+    }
+    await route.fulfill({ status: 200, body, headers: { "content-type": type, "accept-ranges": "bytes", "content-length": String(body.length) } });
   } catch {
     await route.fulfill({ status: 404, body: "" });
   }

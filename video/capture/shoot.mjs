@@ -193,7 +193,8 @@ const SHOTS = {
       content: `
         [data-reel-solo]{position:fixed!important;inset:0!important;left:0!important;top:0!important;width:100vw!important;height:100vh!important;max-width:none!important;max-height:none!important;margin:0!important;z-index:2147483647!important;transform:none!important;opacity:1!important;visibility:visible!important;background:#000!important;border:0!important}
         [data-reel-anc]{transform:none!important;filter:none!important;perspective:none!important;contain:none!important;will-change:auto!important;clip-path:none!important;-webkit-mask:none!important;mask:none!important;opacity:1!important;isolation:auto!important;visibility:visible!important}
-        body[data-reel-on] header{visibility:hidden!important}
+        body[data-reel-on] *:not([data-reel-anc]):not([data-reel-solo]){visibility:hidden!important}
+        body[data-reel-on] [data-reel-solo] *{visibility:visible!important}
       `,
     });
     const list = [
