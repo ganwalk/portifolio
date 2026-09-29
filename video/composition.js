@@ -521,16 +521,38 @@ function live(shot, time) {
   return image(`/video/.cache/live/${FORMAT}/${shot}/${String(i + 1).padStart(4, "0")}.jpg`);
 }
 
+// Câmera opcional por tomada: aproxima a região onde o mouse trabalha
+// quando a seção fica pequena demais na tela (as habilidades no 16:9).
+function camera(shot) {
+  const info = LIVE[shot];
+  if (!info || !info.zoom) return { s: 1, x: 0, y: 0 };
+  return info.zoom;
+}
+
 function liveCursor(shot, time, alpha = 1) {
   const info = LIVE[shot];
   const c = info.cursor[liveIndex(shot, time)];
-  if (c) cursor(c.x, c.y, c.state || "repouso", alpha, info.scale);
+  const cam = camera(shot);
+  if (c) cursor((c.x - cam.x) * cam.s, (c.y - cam.y) * cam.s, c.state || "repouso", alpha, info.scale * cam.s);
 }
 
 function drawLive(c, shot, time) {
   const img = live(shot, time);
-  if (img) c.drawImage(img, 0, 0, W, H);
+  const cam = camera(shot);
+  if (img) c.drawImage(img, cam.x, cam.y, W / cam.s, H / cam.s, 0, 0, W, H);
   return img;
+}
+
+function zoomOnCursor(shot, s) {
+  const pts = LIVE[shot].cursor.filter(Boolean);
+  if (!pts.length) return;
+  const xs = pts.map((p) => p.x);
+  const ys = pts.map((p) => p.y);
+  const cx = (Math.min(...xs) + Math.max(...xs)) / 2;
+  const cy = (Math.min(...ys) + Math.max(...ys)) / 2;
+  const w = W / s;
+  const h = H / s;
+  LIVE[shot].zoom = { s, x: clamp(cx - w / 2, 0, W - w), y: clamp(cy - h / 2, 0, H - h) };
 }
 
 const liveLayer = makeCanvas(W, H);
@@ -1010,6 +1032,7 @@ window.ready = (async () => {
     if (!res.ok) continue;
     LIVE[shot] = await res.json();
   }
+  if (!V) zoomOnCursor("skills", 1.45);
   LIVE.hero.meta = await (await fetch(`/video/.cache/live/${FORMAT}/hero/meta.json`)).json();
   pending = [];
   ["frames/eu-lg.webp", "cursor/repouso.webp", "cursor/hover.webp", "cursor/clique.webp"].forEach(asset);
