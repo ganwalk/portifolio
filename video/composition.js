@@ -624,36 +624,43 @@ function sceneManifesto(t) {
 
 // ─── cena 3: projetos, cada prévia gravada ao vivo ─────────────────────────
 
+// Cada case entra pelo que ele resolve, não pelo nome: o título é a solução
+// que dá pra oferecer de novo, e o projeto vira crédito ("feito para").
 const PROJECTS = [
   {
     shot: "project-ganwalk",
-    title: ["GANWALK"],
+    title: ["IDENTIDADE VISUAL", "INTERATIVA"],
+    titleP: ["IDENTIDADE", "VISUAL", "INTERATIVA"],
+    client: "GANWALK",
     area: "MÚSICA",
-    headline: "Desenhei a identidade visual interativa do Ganwalk.",
+    headline: "Logotipo de partículas que reage ao toque e painel de mixagem ao vivo, direto no navegador.",
     tags: ["WebGL", "Three.js", "Interatividade"],
   },
   {
     shot: "project-dezert",
-    title: ["DEZERT HORSE"],
-    titleP: ["DEZERT", "HORSE"],
+    title: ["EXPERIÊNCIA 3D", "NA WEB"],
+    titleP: ["EXPERIÊNCIA", "3D NA WEB"],
+    client: "DEZERT HORSE",
     area: "MÚSICA",
-    headline: "Projetei o universo interativo do Dezert Horse.",
-    tags: ["WebGL", "Three.js", "Player embutido"],
+    headline: "Um deserto em Three.js com painel retrô que toca o álbum inteiro, faixa a faixa, no site.",
+    tags: ["Three.js", "WebGL", "Player embutido"],
   },
   {
     shot: "project-pink",
-    title: ["PINK OPALA"],
-    titleP: ["PINK", "OPALA"],
+    title: ["SITE OFICIAL", "PARA ARTISTAS"],
+    titleP: ["SITE OFICIAL", "PARA", "ARTISTAS"],
+    client: "PINK OPALA",
     area: "MÚSICA",
-    headline: "Desenvolvi o site oficial do Pink Opala, duo indie pop de Goiânia.",
+    headline: "Nome da banda em partículas com física de mola, e discografia, galeria e contato numa página só.",
     tags: ["Canvas 2D", "Tailwind CSS", "Interatividade"],
   },
   {
     shot: "project-intranet",
-    title: ["DESIGN SYSTEM"],
-    titleP: ["DESIGN", "SYSTEM"],
+    title: ["DESIGN SYSTEM", "E INTRANET"],
+    titleP: ["DESIGN", "SYSTEM E", "INTRANET"],
+    client: "AUVP CAPITAL",
     area: "BANKING",
-    headline: "Construí uma intranet robusta para todo o ecossistema.",
+    headline: "Componentes documentados e manual de tom e voz pra todo o ecossistema falar a mesma língua.",
     metrics: [
       [70, "", "componentes documentados"],
       [110, "", "componentes React no total"],
@@ -662,10 +669,11 @@ const PROJECTS = [
   },
   {
     shot: "project-landing",
-    title: ["LANDING PAGES"],
-    titleP: ["LANDING", "PAGES"],
+    title: ["LANDING PAGES", "QUE CONVERTEM"],
+    titleP: ["LANDING", "PAGES QUE", "CONVERTEM"],
+    client: "AUVP CAPITAL",
     area: "BANKING",
-    headline: "Desenho e mantenho o ecossistema de webpages da AUVP Capital.",
+    headline: "Páginas rápidas, bem ranqueadas em busca e em IA, desenhadas pra virar cliente.",
     metrics: [
       [20, " mil+", "acessos diários"],
       [90, "+/100", "performance mínima"],
@@ -735,7 +743,7 @@ function sceneProjects(t) {
     ctx.fillStyle = LIGHT;
     ctx.textAlign = "left";
     const y = V ? 240 : 150;
-    ctx.fillText(`0${k + 1} / 0${list.length}  ·  ${p.area}`, G, y);
+    ctx.fillText(`0${k + 1} / 0${list.length}  ·  FEITO PARA ${p.client}  ·  ${p.area}`, G, y);
     for (let i = 0; i < list.length; i++) {
       ctx.beginPath();
       ctx.arc(W - G - (list.length - 1 - i) * 22, y - 6, 5, 0, Math.PI * 2);
@@ -747,7 +755,7 @@ function sceneProjects(t) {
 
   const lines = V && p.titleP ? p.titleP : p.title;
   const maxW = V ? W - 2 * G : p.metrics ? W * 0.56 : W * 0.62;
-  const size = fitSize(ctx, lines, INKTRAP, 900, maxW, V ? 190 : 210);
+  const size = fitSize(ctx, lines, INKTRAP, 900, maxW, V ? 150 : 150);
   const lastBase = V ? H - 560 : H - 240;
   font(ctx, size, INKTRAP, 900, "normal", "0.01em");
   ctx.fillStyle = LIGHT;
@@ -759,7 +767,7 @@ function sceneProjects(t) {
 
   ctx.save();
   ctx.globalAlpha = fade;
-  const btnW = V ? 250 : 230;
+  const btnW = V ? 330 : 310;
   const btnH = V ? 72 : 64;
   const btnY = V ? H - 220 : H - 180;
   reveal(ctx, prog(u, 0.6, 1.5), () => {
@@ -769,14 +777,14 @@ function sceneProjects(t) {
     font(ctx, V ? 19 : 17, MONO, 400, "normal", "0.14em");
     ctx.fillStyle = LIGHT;
     ctx.textAlign = "center";
-    ctx.fillText("VER CASE  →", G + btnW / 2, btnY + btnH / 2 + 6);
+    ctx.fillText("QUERO ALGO ASSIM  →", G + btnW / 2, btnY + btnH / 2 + 6);
   });
   reveal(ctx, prog(u, 0.7, 1.6), () => {
     font(ctx, V ? 32 : 24, SANS, 400);
     ctx.fillStyle = "#d6d6d6";
     ctx.textAlign = "left";
     if (V) wrap(ctx, p.headline, W - 2 * G).forEach((l, i) => ctx.fillText(l, G, H - 490 + i * 42));
-    else wrap(ctx, p.headline, 430).forEach((l, i) => ctx.fillText(l, G + btnW + 32, btnY + 24 + i * 32));
+    else wrap(ctx, p.headline, 470).forEach((l, i) => ctx.fillText(l, G + btnW + 32, btnY + 20 + i * 30));
   });
 
   if (p.metrics) {
@@ -868,19 +876,28 @@ function sceneContact(t) {
 
 // ─── cena 7: assinatura ────────────────────────────────────────────────────
 
+const CONTACTS = [
+  ["EMAIL", "armandocustodio0@gmail.com"],
+  ["WHATSAPP", "+55 62 99217 4047"],
+  ["INSTAGRAM", "@ganwalk"],
+  ["LINKEDIN", "in/armando-custodio-00080320a"],
+];
+
 function sceneEnd(t) {
   const z = t - T.end;
   ctx.fillStyle = "#0b0b0d";
   ctx.fillRect(0, 0, W, H);
 
-  const pw = V ? 620 : 380;
-  const ph = (pw * 9) / 8;
-  const top = V ? 300 : 90;
+  // Tela longa, pra dar tempo de anotar um contato: o retrato segue girando
+  // em retícula enquanto isso, a página nunca fica parada.
+  const pw = V ? 520 : 300;
+  const top = V ? 250 : 70;
   const px = (W - pw) / 2;
-  ditherPortrait(ctx, t, px, top, pw, lerp(10, V ? 4 : 3.5, outCubic(prog(z, 0, 0.9))), t, 0);
+  ditherPortrait(ctx, t, px, top, pw, lerp(10, V ? 4 : 3, outCubic(prog(z, 0, 0.9))), t, 0);
+  const ph = (pw * 9) / 8;
 
-  const nameSize = V ? 124 : 118;
-  const nameBase = top + ph + (V ? 170 : 128);
+  const nameSize = V ? 118 : 96;
+  const nameBase = top + ph + (V ? 150 : 104);
   ctx.textAlign = "center";
   ctx.fillStyle = LIGHT;
   font(ctx, nameSize, INKTRAP, 900, "normal", "0.015em");
@@ -892,25 +909,39 @@ function sceneEnd(t) {
   }
   const after = nameBase + (V ? nameSize * 0.86 : 0);
   reveal(ctx, prog(z, 0.45, 1.35), () => {
-    font(ctx, V ? 50 : 44, SWITZER, 400, "italic");
+    font(ctx, V ? 46 : 38, SWITZER, 400, "italic");
     ctx.fillStyle = DIM;
     ctx.textAlign = "center";
-    ctx.fillText("Talvez a gente ainda faça algo juntos.", W / 2, after + (V ? 110 : 84));
+    ctx.fillText("Talvez a gente ainda faça algo juntos.", W / 2, after + (V ? 100 : 70));
   });
-  reveal(ctx, prog(z, 0.6, 1.5), () => {
-    const label = "GANWALK.GITHUB.IO/PORTIFOLIO";
-    font(ctx, V ? 26 : 22, MONO, 500, "normal", "0.16em");
-    const w = ctx.measureText(label).width + 64;
-    const bh = V ? 84 : 70;
-    const by = after + (V ? 180 : 138);
-    ctx.fillStyle = LIGHT;
-    ctx.fillRect(W / 2 - w / 2, by, w, bh);
-    ctx.fillStyle = "#0b0b0d";
-    ctx.textAlign = "center";
-    ctx.fillText(label, W / 2, by + bh / 2 + 8);
-    font(ctx, V ? 17 : 15, MONO, 400, "normal", "0.16em");
+
+  // contatos, uma linha por canal, como a tabela do Modo Boring
+  const rowW = V ? W - 2 * G : 900;
+  const rowH = V ? 84 : 58;
+  const x0 = (W - rowW) / 2;
+  const rowsTop = after + (V ? 170 : 118);
+  CONTACTS.forEach(([label, value], i) => {
+    reveal(ctx, prog(z, 0.7 + i * 0.12, 1.6 + i * 0.12), () => {
+      const y = rowsTop + i * rowH;
+      ctx.fillStyle = "rgba(244,244,244,0.18)";
+      ctx.fillRect(x0, y, rowW, 1);
+      if (i === CONTACTS.length - 1) ctx.fillRect(x0, y + rowH, rowW, 1);
+      font(ctx, V ? 18 : 15, MONO, 400, "normal", "0.16em");
+      ctx.fillStyle = DIM;
+      ctx.textAlign = "left";
+      ctx.fillText(label, x0, y + rowH / 2 + 6);
+      font(ctx, V ? 27 : 22, MONO, 500, "normal", "0.02em");
+      ctx.fillStyle = LIGHT;
+      ctx.textAlign = "right";
+      ctx.fillText(value, x0 + rowW, y + rowH / 2 + 8);
+    });
+  });
+  reveal(ctx, prog(z, 1.4, 2.3), () => {
+    font(ctx, V ? 17 : 14, MONO, 400, "normal", "0.16em");
     ctx.fillStyle = DIM;
-    ctx.fillText("DESIGN ENGINEER · BASEADO NO BRASIL · DISPONÍVEL NO MUNDO TODO", W / 2, by + bh + (V ? 70 : 56));
+    ctx.textAlign = "center";
+    const y = rowsTop + CONTACTS.length * rowH + (V ? 90 : 60);
+    ctx.fillText("DESIGN ENGINEER · BASEADO NO BRASIL · DISPONÍVEL NO MUNDO TODO", W / 2, y);
   });
   grain(t, 0.06);
 }
@@ -935,7 +966,7 @@ function buildTimeline() {
   t.contactLens = 4.0;
   t.end = t.contact + (t.contactLens + 0.95 - t.contactIn);
   T = t;
-  DURATION = t.end + 2.8;
+  DURATION = t.end + 6.5;
 }
 
 function draw(t) {
