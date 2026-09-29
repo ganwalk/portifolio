@@ -17,8 +17,8 @@ export const SCENES = [
   { id: "system", start: 29, end: 35 },
   { id: "landing", start: 35, end: 41 },
   { id: "extras", start: 41, end: 47 },
-  { id: "brands", start: 47, end: 50 },
-  { id: "contact", start: 50, end: 60 },
+  { id: "brands", start: 47, end: 51 },
+  { id: "contact", start: 51, end: 60 },
 ];
 
 export const DURATION = SCENES[SCENES.length - 1].end;
@@ -37,7 +37,7 @@ export const TRANSITIONS = [
   { at: 35, kind: "dither", from: 34.7, to: 35.25 },
   { at: 41, kind: "curtain", color: "#fafafa" },
   { at: 47, kind: "dither", from: 46.75, to: 47.25 },
-  { at: 50, kind: "curtain", color: "#111111" },
+  { at: 51, kind: "curtain", color: "#111111" },
 ];
 
 // Cortina: 8 faixas, cada uma leva STRIPE segundos, com STAGGER de atraso
@@ -53,7 +53,8 @@ export const HITS = {
     { from: 1.55, to: 2.55 },
     { from: 10.55, to: 11.5 },
   ],
-  click: [9.35, 58.05],
+  // Hero: clique no CTA. Marcas: clique no "SUA MARCA".
+  click: [9.35, 50.05],
   counters: [
     { from: 31.2, to: 32.6 },
     { from: 37.2, to: 38.6 },

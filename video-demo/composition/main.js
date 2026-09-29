@@ -29,6 +29,7 @@ const INKTRAP = '"Whyte Inktrap", "Archivo", sans-serif';
 const MONO = '"Plex Mono", "DejaVu Sans Mono", monospace';
 const SWITZER = '"Switzer", "Archivo", sans-serif';
 const SANS = '"Archivo", "Liberation Sans", sans-serif';
+const BRIC = '"Bricolage", "Archivo", sans-serif';
 
 const MEDIA = "/video-demo/.cache/media";
 const PUB = "/public";
@@ -462,8 +463,8 @@ function titleBlock(ctx, title, cap, t, { dark = true, t0 = 0.35, maxW, bottom, 
   const blockH = lines.length * size * 0.95 + 34 + capLines * capSize * 1.7;
   const top = (bottom ?? H - (V ? 150 : 110)) - blockH;
   const after = revealLines(ctx, lines, G, top, { size, color, ls: 0.01, t, t0 });
-  caption(ctx, cap, G, after + 30, maxW, { t, t0: t0 + 0.45, color: capColor });
-  return top;
+  const end = caption(ctx, cap, G, after + 30, maxW, { t, t0: t0 + 0.45, color: capColor });
+  return { top, bottom: end - capSize * 0.7 };
 }
 
 // Escurece a base (ou o lado) da mídia pra o texto ler por cima dela.
@@ -512,6 +513,25 @@ function metricRow(ctx, metrics, x, y, t, t0, { dark = true, size = V ? 92 : 88,
   });
 }
 
+// KPIs empilhados na lateral direita (16:9), ocupando a mesma faixa
+// vertical do título e das tags: o primeiro número alinha com o topo do
+// título, o último rótulo com a base das tags.
+function metricColumn(ctx, metrics, top, bottom, t, t0) {
+  const size = 72;
+  const labelS = 19;
+  const itemH = size * 0.95 + labelS * 1.6;
+  const gap = Math.max(0, (bottom - top - itemH * metrics.length) / (metrics.length - 1));
+  const x = W - G;
+  metrics.forEach((m, i) => {
+    const p = easeOutCubic(prog(t, t0 + i * 0.15, t0 + i * 0.15 + 1.3));
+    const a = clamp(prog(t, t0 + i * 0.15, t0 + i * 0.15 + 0.3));
+    const y = top + i * (itemH + gap);
+    const str = `${m.prefix ?? ""}${Math.round(m.to * p)}${m.suffix ?? ""}`;
+    text(ctx, str, x, y + (1 - a) * 14, { family: INKTRAP, size, weight: 900, color: "#fff", baseline: "top", align: "right", alpha: a, ls: size * 0.01 });
+    text(ctx, m.label, x, y + size * 0.95 + (1 - a) * 14, { family: MONO, size: labelS, weight: 500, color: "rgba(255,255,255,0.72)", baseline: "top", align: "right", ls: 2.3, alpha: a });
+  });
+}
+
 // ==================================================================== cenas
 
 const SCENE = {};
@@ -556,12 +576,7 @@ SCENE.hero = (ctx, t) => {
   ctx.fillStyle = PAPER;
   ctx.fillRect(0, 0, W, H);
 
-  // Barra do topo com a assinatura e o fio, como o cabeçalho do site.
-  const barH = V ? 120 : 84;
-  text(ctx, "ARMANDO CUSTODIO", G, barH / 2 + 2, { family: INKTRAP, size: V ? 30 : 24, weight: 900, color: INK, baseline: "middle", ls: 0.6 });
-  ctx.fillStyle = "rgba(17,17,17,0.12)";
-  ctx.fillRect(0, barH, W, 1.5);
-
+  // Sem barra de cabeçalho: o nome gigante já é a assinatura.
   const { frame, tick } = portraitFrame(Math.max(0, t - 0.2));
 
   // Retrato.
@@ -644,14 +659,14 @@ const SOLUTIONS = [
   "Tipografia viva",
   "Design Systems",
   "Landing pages que convertem",
-  "Ilustração, animação e som",
+  "E muito +",
 ];
 
 SCENE.chapter = (ctx, t) => {
   ctx.fillStyle = INK;
   ctx.fillRect(0, 0, W, H);
   const size = V ? 104 : 112;
-  const title = "Seis coisas que eu já coloquei no ar e posso fazer por você.";
+  const title = "Coisas que eu já coloquei no ar e posso fazer por você.";
   const lines = wrap(ctx, title.toUpperCase(), V ? W - G * 2 : 1300, INKTRAP, size, 900, size * 0.01);
   const top = V ? 300 : 150;
   const after = revealLines(ctx, lines, G, top, { size, color: "#fff", ls: 0.01, t, t0: 0.1, stagger: 0.07 });
@@ -663,7 +678,7 @@ SCENE.chapter = (ctx, t) => {
     const col = i % cols;
     const row = Math.floor(i / cols);
     const t0 = 0.55 + i * 0.12;
-    const str = `${String(i + 1).padStart(2, "0")}  ${typed(s.toUpperCase(), t, t0, t0 + 0.35)}`;
+    const str = `·  ${typed(s.toUpperCase(), t, t0, t0 + 0.35)}`;
     const a = prog(t, t0 - 0.05, t0);
     text(ctx, str, G + col * colW, y0 + row * ls * 2.1, { family: MONO, size: ls, weight: 500, color: "rgba(255,255,255,0.8)", ls: ls * 0.1, alpha: a, baseline: "top" });
   });
@@ -806,8 +821,8 @@ SCENE.system = (ctx, t) => {
     titleBlock(ctx, "DESIGN SYSTEM QUE SEGURA UM ECOSSISTEMA INTEIRO", "INTRANET COMPLETA · COMPONENTES DOCUMENTADOS · MANUAL DE TOM E VOZ", t, { bottom: H - 380 });
     metricRow(ctx, metrics, G, H - 300, t, 2.2, { size: 88, gap: 56 });
   } else {
-    titleBlock(ctx, "DESIGN SYSTEM QUE SEGURA UM ECOSSISTEMA INTEIRO", "INTRANET COMPLETA · COMPONENTES DOCUMENTADOS · MANUAL DE TOM E VOZ", t, { maxW: 900, size: 88 });
-    metricRow(ctx, metrics, 0, H - 250, t, 2.2, { size: 80, gap: 48, right: true });
+    const b = titleBlock(ctx, "DESIGN SYSTEM QUE SEGURA UM ECOSSISTEMA INTEIRO", "INTRANET COMPLETA · COMPONENTES DOCUMENTADOS · MANUAL DE TOM E VOZ", t, { maxW: 1000, size: 96 });
+    metricColumn(ctx, metrics, b.top, b.bottom, t, 2.2);
   }
   grain(ctx, t, 0.05);
 };
@@ -851,8 +866,8 @@ SCENE.landing = (ctx, t) => {
     titleBlock(ctx, "LANDING PAGES QUE CONVERTEM E APARECEM NA BUSCA", "SEO E RANKING EM IA · CLARITY E GOOGLE ANALYTICS · MANUTENÇÃO CONTÍNUA", t, { bottom: H - 380 });
     metricRow(ctx, metrics, G, H - 300, t, 2.2, { size: 84, gap: 50 });
   } else {
-    titleBlock(ctx, "LANDING PAGES QUE CONVERTEM E APARECEM NA BUSCA", "SEO E RANKING EM IA · CLARITY E GOOGLE ANALYTICS · MANUTENÇÃO CONTÍNUA", t, { maxW: 900, size: 88 });
-    metricRow(ctx, metrics, 0, H - 250, t, 2.2, { size: 80, gap: 48, right: true });
+    const b = titleBlock(ctx, "LANDING PAGES QUE CONVERTEM E APARECEM NA BUSCA", "SEO E RANKING EM IA · CLARITY E GOOGLE ANALYTICS · MANUTENÇÃO CONTÍNUA", t, { maxW: 1000, size: 96 });
+    metricColumn(ctx, metrics, b.top, b.bottom, t, 2.2);
   }
   grain(ctx, t, 0.05);
 };
@@ -867,10 +882,10 @@ const EXTRA_CARDS = [
 ];
 const EXTRAS_CURSOR = [
   { t: 0.4, x: 1.05, y: V ? 0.3 : 0.75 },
-  { t: 1.4, x: V ? 0.55 : 0.2, y: V ? 0.3 : 0.52 },
-  { t: 2.5, x: V ? 0.5 : 0.5, y: V ? 0.52 : 0.55 },
-  { t: 3.7, x: V ? 0.55 : 0.8, y: V ? 0.75 : 0.5 },
-  { t: 5.2, x: V ? 0.9 : 0.93, y: V ? 0.93 : 0.9 },
+  { t: 1.4, x: V ? 0.3 : 0.2, y: V ? 0.42 : 0.52 },
+  { t: 2.5, x: V ? 0.72 : 0.5, y: V ? 0.45 : 0.55 },
+  { t: 3.7, x: V ? 0.55 : 0.8, y: V ? 0.78 : 0.5 },
+  { t: 5.2, x: V ? 0.92 : 0.93, y: V ? 0.97 : 0.9 },
 ];
 
 SCENE.extras = (ctx, t) => {
@@ -885,13 +900,24 @@ SCENE.extras = (ctx, t) => {
   const c = path(EXTRAS_CURSOR, t);
   const n = 3;
   const gap = V ? 36 : 48;
-  const cardW = V ? W - G * 2 : (W - G * 2 - gap * 2) / 3;
-  const mediaH = V ? 330 : cardW;
   const labelH = V ? 96 : 100;
   const y0 = after + (V ? 70 : 60);
+  // 16:9: três quadrados lado a lado. 9:16: colagem e animação lado a lado
+  // em cima e a música embaixo, na largura toda e mais alta, pro rosto do
+  // show caber inteiro no quadro.
+  const half = (W - G * 2 - gap) / 2;
+  const rows = V
+    ? [
+        { x: G, y: y0, w: half, h: half },
+        { x: G + half + gap, y: y0, w: half, h: half },
+        { x: G, y: y0 + half + labelH + gap, w: W - G * 2, h: H - 110 - labelH - (y0 + half + labelH + gap) },
+      ]
+    : [0, 1, 2].map((i) => {
+        const w = (W - G * 2 - gap * 2) / 3;
+        return { x: G + i * (w + gap), y: y0, w, h: w };
+      });
   for (let i = 0; i < n; i++) {
-    const x = V ? G : G + i * (cardW + gap);
-    const y = V ? y0 + i * (mediaH + labelH + gap) : y0;
+    const { x, y, w: cardW, h: mediaH } = rows[i];
     const a = easeOutCubic(prog(t, 0.4 + i * 0.12, 1.0 + i * 0.12));
     ctx.save();
     ctx.globalAlpha = a;
@@ -909,11 +935,14 @@ SCENE.extras = (ctx, t) => {
       else break;
     }
     const reveal = easeOutCubic(clamp(inside / 0.5));
-    dither(ctx, src, x, y, cardW, mediaH, { cell: V ? 8 : 7, phase: Math.floor(t * 10), bias: 38, reveal });
+    // No 9:16 o cartão é largo e baixo: o recorte do show sobe pro rosto
+    // do artista caber inteiro, em vez de centralizar no violão.
+    const ay = i === 2 ? (V ? 0.1 : 0.3) : 0.5;
+    dither(ctx, src, x, y, cardW, mediaH, { cell: V ? 8 : 7, phase: Math.floor(t * 10), bias: 38, reveal, ay });
     ctx.strokeStyle = "rgba(17,17,17,0.14)";
     ctx.lineWidth = 1.5;
     ctx.strokeRect(x, y, cardW, mediaH + labelH);
-    text(ctx, EXTRA_CARDS[i].title, x + 22, y + mediaH + 26, { family: SANS, size: V ? 30 : 28, weight: 450, color: INK, baseline: "top" });
+    text(ctx, EXTRA_CARDS[i].title, x + 22, y + mediaH + 26, { family: SANS, size: V ? (i < 2 ? 25 : 30) : 28, weight: 450, color: INK, baseline: "top" });
     text(ctx, EXTRA_CARDS[i].medium, x + 22, y + mediaH + (V ? 66 : 64), { family: MONO, size: V ? 19 : 18, color: MUTED, ls: 2.2, baseline: "top" });
     ctx.restore();
   }
@@ -922,46 +951,113 @@ SCENE.extras = (ctx, t) => {
   drawCursor(ctx, c.x, c.y, "hover");
 };
 
-// 09 · marcas: as logos do site passando em faixas.
-const LOGOS = ["auvp", "minuto-indie", "hits-perdidos", "defensoria-goias", "mais-saude", "hapvida", "vivo-fibra", "boi-verde"];
-// Mesma ideia do `size` de data/brands.ts: algumas logos têm muito respiro
-// interno e precisam de mais corpo pra pesar igual às outras.
-const LOGO_SCALE = { "minuto-indie": 1.35, "hits-perdidos": 1.35, "mais-saude": 1.6 };
+// 09 · marcas: grade 3×3 com as oito logos e um espaço vazio, "SUA MARCA",
+// que a mão vem apertar.
+const BRANDS = ["auvp", "minuto-indie", "hits-perdidos", "defensoria-goias", "mais-saude", "hapvida", "vivo-fibra", "boi-verde"];
 
-SCENE.brands = (ctx, t) => {
+function drawContain(ctx, img, x, y, w, h) {
+  if (!img) return;
+  const s = Math.min(w / img.naturalWidth, h / img.naturalHeight);
+  const dw = img.naturalWidth * s;
+  const dh = img.naturalHeight * s;
+  ctx.drawImage(img, x + (w - dw) / 2, y + (h - dh) / 2, dw, dh);
+}
+
+function brandsLayout() {
+  const cols = 3;
+  const cw = V ? (W - 2 * G) / 3 : 330;
+  const ch = V ? 300 : 230;
+  const x0 = V ? G : W - G - cw * cols;
+  const y0 = V ? 680 : (H - ch * 3) / 2 + 30;
+  return Array.from({ length: 9 }, (_, k) => ({ x: x0 + (k % cols) * cw, y: y0 + Math.floor(k / cols) * ch, w: cw, h: ch }));
+}
+
+// Linha que sobe por trás de uma máscara, na linha de base `y`.
+function revealLine(ctx, str, x, y, { family, size, weight, color }, p) {
+  const e = easeOutExpo(clamp(p));
+  if (e <= 0) return;
+  ctx.save();
+  ctx.beginPath();
+  ctx.rect(0, y - size * 1.0, W, size * 1.25);
+  ctx.clip();
+  text(ctx, str, x, y + (1 - e) * size * 1.1, { family, size, weight, color });
+  ctx.restore();
+}
+
+SCENE.brands = (ctx, lt) => {
   ctx.fillStyle = PAPER;
   ctx.fillRect(0, 0, W, H);
-  const size = V ? 104 : 110;
-  const lines = V ? ["ACREDITAM", "NO MEU", "TRABALHO"] : ["ACREDITAM NO", "MEU TRABALHO"];
-  const top = V ? 260 : 150;
-  const after = revealLines(ctx, lines, G, top, { size, color: INK, ls: 0.01, t, t0: 0.1 });
-  const rows = V ? 3 : 2;
-  const rowH = V ? 190 : 170;
-  const y0 = after + (V ? 120 : 80);
-  for (let r = 0; r < rows; r++) {
-    const dir = r % 2 ? 1 : -1;
-    const logoH = 92;
-    const slot = 380;
-    const offset = ((t * 160 * dir) % (slot * LOGOS.length)) - slot * LOGOS.length;
-    for (let k = 0; k < LOGOS.length * 3; k++) {
-      const img = get(`${PUB}/logos/${LOGOS[(k + r * 3) % LOGOS.length]}.webp`);
-      if (!img) continue;
-      const name = LOGOS[(k + r * 3) % LOGOS.length];
-      const lhTarget = logoH * (LOGO_SCALE[name] ?? 1);
-      const lw = Math.min(slot - 80, (lhTarget * img.naturalWidth) / img.naturalHeight);
-      const lh = (lw * img.naturalHeight) / img.naturalWidth;
-      const x = offset + k * slot;
-      if (x > W || x + lw < 0) continue;
-      // As logos já vêm em preto e branco (build-brand-logos.mjs);
-      // multiply some com o fundo branco das que não têm transparência.
-      ctx.save();
-      ctx.globalCompositeOperation = "multiply";
-      ctx.globalAlpha = easeOutCubic(prog(t, 0.3 + r * 0.1, 0.9 + r * 0.1));
-      ctx.drawImage(img, x, y0 + r * rowH + (logoH - lh) / 2, lw, lh);
-      ctx.restore();
-    }
+  const cells = brandsLayout();
+  const lines = ["Falta a sua", "marca aqui."];
+  const fs = fit(ctx, lines, V ? W - 2 * G : cells[0].x - G - 60, BRIC, 800, 0, V ? 130 : 120);
+  const titleY = V ? 330 : H / 2 - fs * 0.2;
+  text(ctx, "ACREDITAM NO MEU TRABALHO", G, titleY - fs * 0.85 - 30, { family: MONO, size: V ? 22 : 19, weight: 500, color: MUTED, ls: 2.4, alpha: prog(lt, 0.35, 0.8) });
+  lines.forEach((l, k) => revealLine(ctx, l, G, titleY + fs * k, { family: BRIC, size: fs, weight: 800, color: INK }, prog(lt, 0.45 + k * 0.1, 1.2 + k * 0.1)));
+
+  // Grade fina entre as marcas.
+  const gp = prog(lt, 0.5, 1.3);
+  ctx.save();
+  ctx.strokeStyle = "rgba(11,11,11,0.14)";
+  ctx.lineWidth = 1;
+  const gx = cells[0].x;
+  const gy = cells[0].y;
+  const gw = cells[0].w * 3;
+  const gh = cells[0].h * 3;
+  for (let k = 0; k <= 3; k++) {
+    ctx.beginPath();
+    ctx.moveTo(gx, gy + k * cells[0].h);
+    ctx.lineTo(gx + gw * easeOutCubic(gp), gy + k * cells[0].h);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(gx + k * cells[0].w, gy);
+    ctx.lineTo(gx + k * cells[0].w, gy + gh * easeOutCubic(gp));
+    ctx.stroke();
   }
-  grain(ctx, t, 0.08);
+  ctx.restore();
+
+  const clickAt = 3.05;
+  cells.forEach((r, k) => {
+    const a = prog(lt, 0.7 + k * 0.07, 1.2 + k * 0.07);
+    if (a <= 0) return;
+    ctx.save();
+    ctx.globalAlpha = easeOutCubic(a);
+    const dy = (1 - easeOutCubic(a)) * 20;
+    if (k < 8) {
+      const im = get(`${PUB}/logos/${BRANDS[k]}.webp`);
+      ctx.filter = "grayscale(1)";
+      drawContain(ctx, im, r.x + r.w * 0.15, r.y + r.h * 0.22 + dy, r.w * 0.7, r.h * 0.56);
+    } else {
+      // "Sua marca": o espaço vazio que a mão vem apertar.
+      const hv = prog(lt, 2.6, 2.8);
+      const bw = r.w * 0.62;
+      const bh = 64;
+      const bx = r.x + (r.w - bw) / 2;
+      const by = r.y + (r.h - bh) / 2 + dy + (lt > clickAt && lt < clickAt + 0.18 ? 3 : 0);
+      ctx.fillStyle = INK;
+      ctx.globalAlpha *= hv;
+      ctx.fillRect(bx, by, bw, bh);
+      ctx.globalAlpha = easeOutCubic(a);
+      ctx.setLineDash([6, 6]);
+      ctx.strokeStyle = hv > 0.5 ? INK : MUTED;
+      ctx.lineWidth = 1.5;
+      ctx.strokeRect(bx, by, bw, bh);
+      ctx.setLineDash([]);
+      text(ctx, "SUA MARCA", bx + bw / 2, by + bh / 2 + 1, { family: MONO, size: 18, weight: 500, color: hv > 0.5 ? PAPER : MUTED, ls: 18 * 0.08, align: "center", baseline: "middle" });
+    }
+    ctx.restore();
+  });
+  grain(ctx, lt, 0.08);
+
+  const target = cells[8];
+  const keys = [
+    { t: 0.0, x: 0.72, y: 0.9 },
+    { t: 1.4, x: (cells[4].x + cells[4].w * 0.5) / W, y: (cells[4].y + cells[4].h * 0.7) / H },
+    { t: 2.65, x: (target.x + target.w * 0.6) / W, y: (target.y + target.h * 0.55) / H },
+  ];
+  if (lt >= 0 && lt < 3.4) {
+    const c = path(keys, lt);
+    drawCursor(ctx, c.x, c.y, lt > clickAt && lt < clickAt + 0.2 ? "click" : lt > 2.6 ? "hover" : "rest");
+  }
 };
 
 // 10 · contato: a foto em grade que se distorce sob o ponteiro, o convite em
@@ -1032,13 +1128,29 @@ function gridImage(ctx, img, X, Y, GW, GH, pointer, strength) {
     }
 }
 
-const CONTACT_CURSOR = [
-  { t: 0.5, x: V ? 1.05 : 1.05, y: V ? 0.3 : 0.6 },
-  { t: 1.7, x: V ? 0.3 : 0.64, y: V ? 0.12 : 0.3 },
-  { t: 3.0, x: V ? 0.72 : 0.86, y: V ? 0.3 : 0.62 },
-  { t: 4.3, x: V ? 0.45 : 0.72, y: V ? 0.22 : 0.45 },
-  { t: 6.0, x: V ? 0.5 : 0.26, y: V ? 0.64 : 0.57 },
-];
+// A mão entra pela direita e fica passeando pelos quadros até o fim do
+// vídeo, sempre dentro da grade: os quadros sob ela crescem o tempo todo.
+const CONTACT_CURSOR = V
+  ? [
+      { t: 0.4, x: 1.05, y: 0.28 },
+      { t: 1.6, x: 0.7, y: 0.12 },
+      { t: 2.9, x: 0.3, y: 0.3 },
+      { t: 4.2, x: 0.55, y: 0.2 },
+      { t: 5.5, x: 0.82, y: 0.34 },
+      { t: 6.8, x: 0.4, y: 0.1 },
+      { t: 8.2, x: 0.62, y: 0.26 },
+      { t: 9.2, x: 0.5, y: 0.2 },
+    ]
+  : [
+      { t: 0.4, x: 1.05, y: 0.6 },
+      { t: 1.6, x: 0.64, y: 0.3 },
+      { t: 2.9, x: 0.86, y: 0.62 },
+      { t: 4.2, x: 0.7, y: 0.82 },
+      { t: 5.5, x: 0.92, y: 0.25 },
+      { t: 6.8, x: 0.6, y: 0.55 },
+      { t: 8.2, x: 0.82, y: 0.4 },
+      { t: 9.2, x: 0.75, y: 0.5 },
+    ];
 
 const CONTACTS = [
   ["WHATSAPP", "+55 62 99217 4047"],
@@ -1056,18 +1168,18 @@ SCENE.contact = (ctx, t) => {
   const gy = 0;
   const gW = V ? W : W / 2;
   const gH = V ? 820 : H;
-  const overGrid = c.x > gx && c.y < gy + gH;
   const pa = easeOutCubic(prog(t, 0.0, 0.8));
   ctx.save();
   ctx.globalAlpha = pa;
-  const strength = clamp(prog(t, 1.0, 1.6)) * (1 - prog(t, 4.6, 5.4));
-  gridImage(ctx, photo, gx, gy, gW, gH, overGrid || strength > 0 ? c : { x: gx + gW / 2, y: gy + gH / 2 }, strength);
+  const strength = easeOutCubic(prog(t, 0.9, 1.6));
+  gridImage(ctx, photo, gx, gy, gW, gH, c, strength);
   ctx.restore();
 
   // Coluna de texto.
   const tx = G;
   const ty = V ? gH + 90 : 170;
-  const size = V ? 150 : 150;
+  // Corpo calculado pela coluna de texto, com folga até a grade.
+  const size = fit(ctx, ["conversar?"], V ? W - G * 2 : gx - G - 110, INKTRAP, 900, -0.005, 150);
   const after = revealLines(ctx, ["Vamos", "conversar?"], tx, ty, { size, lh: 0.92, color: INK, ls: -0.005, t, t0: 0.3 });
   const sub = easeOutCubic(prog(t, 0.9, 1.5));
   text(ctx, "Aberto a projetos, colaborações e boas ideias.", tx, after + 36, { family: SANS, size: V ? 36 : 32, weight: 400, color: MUTED, baseline: "top", alpha: sub });
@@ -1079,7 +1191,7 @@ SCENE.contact = (ctx, t) => {
   const ea = easeOutCubic(prog(t, 1.2, 1.8));
   const ew = measure(ctx, email, INKTRAP, es, 900, 0.5);
   text(ctx, email, tx, ey, { family: INKTRAP, size: es, weight: 900, color: INK, baseline: "top", ls: 0.5, alpha: ea });
-  const hovered = t > 5.7;
+  const hovered = false;
   ctx.fillStyle = INK;
   ctx.globalAlpha = ea;
   ctx.fillRect(tx, ey + es * 1.05, ew * (hovered ? 1 : easeOutCubic(prog(t, 1.4, 2.2))), hovered ? 4 : 2.5);
@@ -1097,8 +1209,7 @@ SCENE.contact = (ctx, t) => {
   text(ctx, V ? "DISPONÍVEL PARA PROJETOS NO MUNDO TODO 🌍" : "BASEADO NO BRASIL · DISPONÍVEL PARA PROJETOS NO MUNDO TODO 🌍", tx, H - (V ? 110 : 90), { family: MONO, size: V ? 23 : 19, color: MUTED, ls: 2.4, alpha: aa });
 
   grain(ctx, t, 0.08);
-  const state = t > 8.05 && t < 8.3 ? "click" : t > 5.7 ? "hover" : "rest";
-  drawCursor(ctx, c.x, c.y, state, 1 - prog(t, 9.2, 9.8));
+  drawCursor(ctx, c.x, c.y, "hover");
 };
 
 // =============================================================== montagem
@@ -1163,9 +1274,9 @@ async function renderAt(t) {
 
 // Recursos fixos e fontes antes do primeiro quadro.
 const ready = (async () => {
-  const fixed = [SPRITE, ...Object.values(CURSOR), `${PUB}/photos/armando-contato.webp`, `${MEDIA}/dh-panel.png`, ...LOGOS.map((l) => `${PUB}/logos/${l}.webp`), ...LPS.map((l) => `${PUB}/photos/landing-pages/${l}.webp`), ...ILUSTRAS.map((l) => `${PUB}/photos/ilustra-${l}.webp`)];
+  const fixed = [SPRITE, ...Object.values(CURSOR), `${PUB}/photos/armando-contato.webp`, `${MEDIA}/dh-panel.png`, ...BRANDS.map((l) => `${PUB}/logos/${l}.webp`), ...LPS.map((l) => `${PUB}/photos/landing-pages/${l}.webp`), ...ILUSTRAS.map((l) => `${PUB}/photos/ilustra-${l}.webp`)];
   await Promise.all(fixed.map((u) => load(u).p));
-  const faces = [`900 40px ${INKTRAP}`, `italic 400 40px ${SWITZER}`, `500 40px ${MONO}`, `400 40px ${MONO}`, `400 40px ${SANS}`];
+  const faces = [`800 40px ${BRIC}`, `900 40px ${INKTRAP}`, `italic 400 40px ${SWITZER}`, `500 40px ${MONO}`, `400 40px ${MONO}`, `400 40px ${SANS}`];
   await Promise.all(faces.map((f) => document.fonts.load(f, "AÇÃÍáçãí")));
   await document.fonts.ready;
 })();
