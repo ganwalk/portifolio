@@ -904,7 +904,11 @@ ou na Vercel, basta não definir `NEXT_PUBLIC_BASE_PATH` e trocar
 `github-profile/` guarda o README de perfil (github.com/ganwalk), com a mesma
 estética do site: preto e branco, Whyte Inktrap no nome, Switzer na roleta do
 "Designer de", IBM Plex Mono nos rótulos e o letreiro contínuo das
-habilidades. O GitHub só mostra esse README a partir de um repositório com o
+habilidades. O retrato em flipbook da hero entra com dither ordenado (Bayer
+4 x 4, padrão fixo no espaço, então o giro não cintila), na mesma sequência e
+batida de `src/lib/portrait-frames.ts`, e a roleta troca de palavra no
+instante em que entra cada expressão, como no site. O pé do cabeçalho é um
+degradê em dither do papel até a tinta, que emenda no letreiro logo abaixo. O GitHub só mostra esse README a partir de um repositório com o
 mesmo nome da conta (`ganwalk/ganwalk`), então esta pasta é a fonte e o
 conteúdo dela é copiado para a raiz daquele repositório.
 
@@ -913,8 +917,8 @@ carrega fonte externa, e embutir a Whyte Inktrap num arquivo público seria
 redistribuir uma fonte licenciada. Cada peça sai em versão clara e escura,
 escolhidas por `<picture>` com `prefers-color-scheme`, e as animações param
 sob `prefers-reduced-motion`. Mudou nome, roleta ou habilidades no site,
-rode `python3 github-profile/build.py` (precisa de `fonttools`, `brotli` e
-`uharfbuzz`) e copie de novo.
+rode `python3 github-profile/build.py` (precisa de `fonttools`, `brotli`,
+`uharfbuzz`, `pillow` e `numpy`) e copie de novo.
 
 ## Próximos passos
 

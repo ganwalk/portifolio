@@ -1,9 +1,13 @@
 <a href="https://ganwalk.github.io/portifolio/">
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="assets/header-dark.svg">
-    <img alt="Armando Custodio, Design Engineer. Designer de produtos, experiências, aplicativos, interfaces, sistemas, músicas, sonhos, embalagens e sites." src="assets/header-light.svg" width="100%">
+    <img alt="Armando Custodio, Design Engineer, com retrato em dither girando ao lado do nome. Designer de produtos, experiências, aplicativos, interfaces, sistemas, músicas, sonhos, embalagens e sites." src="assets/header-light.svg" width="100%">
   </picture>
 </a>
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="assets/marquee-dark.svg">
+  <img alt="UX/UI Design, Protótipos de alta fidelidade, Design Systems, HTML, React, TypeScript, Figma, Adobe CC, Microsoft Clarity, Google Analytics, Animação, Ilustração e colagem, Produção musical, Edição de vídeo" src="assets/marquee-light.svg" width="100%">
+</picture>
 
 Curioso em tempo integral, sou um pouco de tudo: apaixonado por música, ilustrador, entusiasta de tecnologia, nerd de assuntos aleatórios, e já há uma década transformei minha vontade de criar em profissão.
 
@@ -21,10 +25,6 @@ Baseado no Brasil · Disponível para projetos no mundo todo 🌍
 | **Dezert Horse** | Projetei um deserto em Three.js com um painel retrô que toca o álbum inteiro, faixa a faixa. | [case](https://ganwalk.github.io/portifolio/pt/work/dezert-horse/) · [código](https://github.com/ganwalk/cavalo) · [site](https://ganwalk.github.io/cavalo/) |
 | **Pink Opala** | Desenvolvi o site oficial do duo indie pop de Goiânia, sem build nem framework. | [case](https://ganwalk.github.io/portifolio/pt/work/pink-opala/) · [código](https://github.com/ganwalk/pinkopala) · [site](https://ganwalk.github.io/pinkopala/) |
 
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="assets/marquee-dark.svg">
-  <img alt="UX/UI Design, Protótipos de alta fidelidade, Design Systems, HTML, React, TypeScript, Figma, Adobe CC, Microsoft Clarity, Google Analytics, Animação, Ilustração e colagem, Produção musical, Edição de vídeo" src="assets/marquee-light.svg" width="100%">
-</picture>
 
 ### Vamos conversar?
 
