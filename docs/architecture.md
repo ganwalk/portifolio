@@ -919,6 +919,9 @@ escolhidas por `<picture>` com `prefers-color-scheme`, e as animações param
 sob `prefers-reduced-motion`. Mudou nome, roleta ou habilidades no site,
 rode `python3 github-profile/build.py` (precisa de `fonttools`, `brotli`,
 `uharfbuzz`, `pillow` e `numpy`) e copie de novo.
+Ao trocar um SVG, suba também o `?v=` do endereço dele no README: o
+navegador guarda a imagem em cache pelo endereço, e sem isso quem já visitou
+o perfil continua vendo a versão antiga.
 
 ## Próximos passos
 
