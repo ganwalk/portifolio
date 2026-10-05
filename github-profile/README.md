@@ -1,7 +1,7 @@
 <a href="https://ganwalk.github.io/portifolio/">
   <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="assets/header-dark.svg">
-    <img alt="Armando Custodio, Design Engineer, com retrato em dither girando ao lado do nome. Designer de produtos, experiências, aplicativos, interfaces, sistemas, músicas, sonhos, embalagens e sites." src="assets/header-light.svg" width="100%">
+    <source media="(prefers-color-scheme: dark)" srcset="assets/header-dark.svg?v=2">
+    <img alt="Armando Custodio, Design Engineer, com retrato em dither girando ao lado do nome. Designer de produtos, experiências, aplicativos, interfaces, sistemas, músicas, sonhos, embalagens e sites." src="assets/header-light.svg?v=2" width="100%">
   </picture>
 </a>
 <picture>
