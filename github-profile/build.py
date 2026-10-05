@@ -204,10 +204,10 @@ def header(theme: dict) -> str:
     # Retrato com dither à direita, nome em duas linhas à esquerda.
     # A coluna do retrato continua com 420 de largura (é ela que define o
     # tamanho do nome), mas o retrato ocupa 360 dela, centralizado, e para
-    # 40 unidades acima da linha, sem encostar.
+    # 80 unidades acima da linha, com folga.
     column_w = 420
     portrait_w = 360
-    portrait_gap = 40
+    portrait_gap = 80
     strip, alpha, dw, dh = portrait_strip(portrait_w)
     portrait_h = dh * DITHER_PX
     rule_y = 640
