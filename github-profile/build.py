@@ -202,11 +202,17 @@ def header(theme: dict) -> str:
     top_right = MONO.path(top_right_text, mono, w - pad - MONO.width(top_right_text, mono), 92)
 
     # Retrato com dither à direita, nome em duas linhas à esquerda.
-    portrait_w = 420
+    # A coluna do retrato continua com 420 de largura (é ela que define o
+    # tamanho do nome), mas o retrato ocupa 360 dela, centralizado, e para
+    # 40 unidades acima da linha, sem encostar.
+    column_w = 420
+    portrait_w = 360
+    portrait_gap = 40
     strip, alpha, dw, dh = portrait_strip(portrait_w)
     portrait_h = dh * DITHER_PX
     rule_y = 640
-    px, py = w - pad - portrait_w, rule_y - portrait_h
+    px = w - pad - column_w + (column_w - portrait_w) // 2
+    py = rule_y - portrait_gap - portrait_h
     # Claro do retrato: no tema claro é o papel, no escuro é a tinta. A foto
     # nunca fica em negativo, só o fundo troca.
     light, dark = (theme["bg"], theme["ink"]) if theme["name"] == "light" else (theme["ink"], theme["bg"])
@@ -225,7 +231,7 @@ def header(theme: dict) -> str:
     strip_uri = png_uri(bits, light, dark)
     flip, flip_total = flipbook_keyframes(portrait_w)
 
-    name_w = px - pad - 48
+    name_w = w - pad - column_w - pad - 48
     size = name_w / max(INKTRAP.width("Armando", 1), INKTRAP.width("Custodio", 1))
     line1 = INKTRAP.path("Armando", size, pad, 120 + size * 0.78)
     line2 = INKTRAP.path("Custodio", size, pad, 120 + size * 1.66)
