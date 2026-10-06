@@ -42,3 +42,6 @@ next-env.d.ts
 
 # vídeo demonstração: mídia intermediária e quadros (regeneráveis pelos scripts)
 /video-demo/.cache/
+
+# python (geradores do perfil e da assinatura)
+__pycache__/
