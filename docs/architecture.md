@@ -923,6 +923,21 @@ Ao trocar um SVG, suba também o `?v=` do endereço dele no README: o
 navegador guarda a imagem em cache pelo endereço, e sem isso quem já visitou
 o perfil continua vendo a versão antiga.
 
+## Assinatura de email
+
+`assinatura-email/` gera a assinatura do Gmail com a mesma linguagem do
+perfil do GitHub. Email não carrega fonte, CSS externo nem SVG, então só o
+que carrega a identidade vira imagem: o retrato da hero em dither como GIF
+animado (mesma sequência e batida do site; o Outlook mostra só o primeiro
+quadro, o retrato de frente), o nome em Whyte Inktrap e a fita em dither que
+fecha o bloco. Cargo, links, email e disponibilidade ficam em texto, pra
+continuar legível com as imagens desligadas. Tudo em 2x, exibido pela metade.
+
+As imagens são servidas de `ganwalk/ganwalk` (pasta `assinatura`, pelo
+raw.githubusercontent.com), porque o Gmail não aceita imagem embutida em
+assinatura. Mudou algo, rode `python3 assinatura-email/build.py`, copie as
+imagens pra lá, suba `VERSION` no script e cole a assinatura nova no Gmail.
+
 ## Próximos passos
 
 1. Dezert Horse ainda espera a captura de tela real do próprio site (usa
