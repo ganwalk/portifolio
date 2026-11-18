@@ -36,7 +36,7 @@ Plataforma que transforma membros em embaixadores, com link próprio, ranking e 
 Product Design · Frontend · Directus · Figma
 
 Sistema Integrado de Logística · AUVP · 2026
-Sistema interno do grupo para pedidos de presentes e brindes no estilo ecommerce: o consultor escolhe cliente e presente, personaliza a carta e conclui o pedido, com painel de gestão por status e login pelo SSO da AUVP. Em testes desde outubro, com expectativa de até 70% menos tempo por pedido; integração com Tiny ERP e Salesforce na fase 2.
+Sistema interno do grupo para pedidos de presentes e brindes no estilo ecommerce, com painel de gestão por status e login pelo SSO da AUVP. Em testes desde outubro, com expectativa de até 70% menos tempo por pedido; integração com Tiny ERP e Salesforce na fase 2.
 Claude Code · SSO · Painel administrativo
 
 Diagnóstico Financeiro AUVP · AUVP · 2026 · https://diagnostico.auvp.com.br
@@ -46,6 +46,10 @@ UX/UI Design · Responsivo · Geração de leads
 Ganwalk · Projeto pessoal · https://ganwalk.github.io/2026/
 Identidade visual interativa: logotipo de partículas em WebGL que reage ao toque e painel de mixagem ao vivo, com looper e gravação, direto no navegador.
 WebGL · Three.js
+
+FORMAÇÃO ACADÊMICA
+Bacharelado em Design Gráfico · Universidade Federal de Goiás (UFG) · 2018 a 2022
+Design UX/UI · Cubos Academy · certificação · 2023
 
 HABILIDADES TÉCNICAS
 Design: UX/UI Design · Product Design · Design Systems · Ant Design · Protótipos de alta fidelidade · Jornadas do usuário · Identidade visual · Diagramação editorial · Animação · Ilustração e colagem

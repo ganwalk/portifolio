@@ -113,7 +113,7 @@
       "nome": "Sistema Integrado de Logística",
       "contexto": "AUVP · 2026",
       "url": "",
-      "descricao": "Sistema interno do grupo para pedidos de presentes e brindes no estilo ecommerce: o consultor escolhe cliente e presente, personaliza a carta e conclui o pedido, com painel de gestão por status e login pelo SSO da AUVP. Em testes desde outubro, com expectativa de até 70% menos tempo por pedido; integração com Tiny ERP e Salesforce na fase 2.",
+      "descricao": "Sistema interno do grupo para pedidos de presentes e brindes no estilo ecommerce, com painel de gestão por status e login pelo SSO da AUVP. Em testes desde outubro, com expectativa de até 70% menos tempo por pedido; integração com Tiny ERP e Salesforce na fase 2.",
       "tecnologias": [
         "Claude Code",
         "SSO",
@@ -142,7 +142,20 @@
       ]
     }
   ],
-  "formacao": [],
+  "formacao": [
+    {
+      "curso": "Bacharelado em Design Gráfico",
+      "instituicao": "Universidade Federal de Goiás (UFG)",
+      "inicio": "2018",
+      "fim": "2022"
+    },
+    {
+      "curso": "Design UX/UI",
+      "instituicao": "Cubos Academy · certificação",
+      "inicio": "",
+      "fim": "2023"
+    }
+  ],
   "habilidades": [
     {
       "grupo": "Design",
@@ -222,7 +235,6 @@
     }
   ],
   "pendencias": [
-    "Formação acadêmica: curso, instituição e ano de conclusão (ATS e IA de RH filtram por isso).",
     "Mês de início e fim de cada experiência (ATS calcula tempo de experiência por MM/AAAA).",
     "Conquistas concretas em Defensoria Pública, Prime Mais e AS Web (hoje só existe o cargo).",
     "Cargo: usei Designer de Produto Pleno (Design Engineer). Conferir se bate com LinkedIn e registro, porque recrutador cruza as fontes.",
@@ -304,7 +316,7 @@
         "nome": "Pink Opala",
         "contexto": "Freelance",
         "url": "https://ganwalk.github.io/pinkopala/",
-        "descricao": "Site oficial do duo indie pop de Goiânia: partículas com física de mola formam o nome da banda, e discografia, galeria e contato moram numa página só, sem build nem framework.",
+        "descricao": "Site oficial do duo indie pop de Goiânia, com o nome da banda em partículas com física de mola, numa página só, sem build nem framework.",
         "tecnologias": [
           "Canvas 2D",
           "Tailwind CSS",

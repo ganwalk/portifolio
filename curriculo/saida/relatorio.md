@@ -10,12 +10,10 @@ Nenhum.
 Nenhum.
 
 ## Pendências de dado
-* Formação acadêmica: curso, instituição e ano de conclusão (ATS e IA de RH filtram por isso).
 * Mês de início e fim de cada experiência (ATS calcula tempo de experiência por MM/AAAA).
 * Conquistas concretas em Defensoria Pública, Prime Mais e AS Web (hoje só existe o cargo).
 * Cargo: usei Designer de Produto Pleno (Design Engineer). Conferir se bate com LinkedIn e registro, porque recrutador cruza as fontes.
 * Números ainda A preencher no relatório 2026: leads das páginas de captação, AUVP Pro, economia com a saída do WordPress.
-* Formação acadêmica: curso, instituição e ano de conclusão (ATS e IA de RH filtram por isso).
 * Mês de início e fim de cada experiência (ATS calcula tempo de experiência por MM/AAAA).
 * Conquistas concretas em Defensoria Pública, Prime Mais e AS Web (hoje só existe o cargo).
 * Cargo: usei Designer de Produto Pleno (Design Engineer). Conferir se bate com LinkedIn e registro, porque recrutador cruza as fontes.
@@ -113,10 +111,9 @@ Sistema Integrado de Logística
 
 AUVP · 2026
 
-Sistema interno do grupo para pedidos de presentes e brindes no estilo ecommerce: o consultor
-escolhe cliente e presente, personaliza a carta e conclui o pedido, com painel de gestão por status e
-login pelo SSO da AUVP. Em testes desde outubro, com expectativa de até 70% menos tempo por
-pedido; integração com Tiny ERP e Salesforce na fase 2.
+Sistema interno do grupo para pedidos de presentes e brindes no estilo ecommerce, com painel de
+gestão por status e login pelo SSO da AUVP. Em testes desde outubro, com expectativa de até 70%
+menos tempo por pedido; integração com Tiny ERP e Salesforce na fase 2.
 Claude Code · SSO · Painel administrativo
 
 Diagnóstico Financeiro AUVP
@@ -134,6 +131,19 @@ Ganwalk
 Identidade visual interativa: logotipo de partículas em WebGL que reage ao toque e painel de mixagem
 ao vivo, com looper e gravação, direto no navegador.
 WebGL · Three.js · ganwalk.github.io/2026
+
+FORMAÇÃO
+ACADÊMICA
+
+Bacharelado em Design Gráfico
+
+2018 A 2022
+
+Universidade Federal de Goiás (UFG)
+2023
+
+Design UX/UI
+Cubos Academy · certificação
 
 HABILIDADES
 TÉCNICAS
