@@ -234,14 +234,14 @@ ${FONTES}
   --fio-claro: #d6d6d6;
   /* Grade de duas colunas: rótulo da seção à esquerda, conteúdo à direita.
      A mesma lógica de "rótulo mono + bloco" dos cases do site. */
-  --rotulo: 34mm;
-  --vao: 6mm;
+  --rotulo: 32mm;
+  --vao: 8mm;
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html {
   font-family: "Archivo", system-ui, sans-serif;
-  font-size: 8.9pt;
-  line-height: 1.38;
+  font-size: 8.8pt;
+  line-height: 1.42;
   color: var(--tinta);
   background: #ffffff;
   /* Sem ligaduras: "fi" e "fl" precisam sair como duas letras na extração
@@ -251,6 +251,10 @@ html {
   -webkit-print-color-adjust: exact;
   print-color-adjust: exact;
 }
+/* Largura fixa na área útil do A4 (210mm menos 14mm de cada lado): o canvas
+   da faixa de destaques é medido antes da impressão e precisa ver
+   exatamente o layout que vai para o papel. */
+body { width: 182mm; }
 a { color: inherit; text-decoration: none; }
 .mono { font-family: "IBM Plex Mono", monospace; }
 
@@ -258,7 +262,7 @@ a { color: inherit; text-decoration: none; }
 /* Respiro em cima do nome: a Whyte Inktrap desenha acima da própria
    métrica de ascendente, e o Chromium recorta tudo que passa da margem da
    página. Sem isso o topo das letras sai cortado no PDF. */
-header { border-bottom: 2pt solid var(--fio); padding-top: 7pt; padding-bottom: 9pt; }
+header { border-bottom: 2pt solid var(--fio); padding-top: 7pt; padding-bottom: 12pt; }
 h1 {
   font-family: "Whyte Inktrap", "Archivo", sans-serif;
   font-weight: 900;
@@ -274,13 +278,13 @@ h1 {
   font-style: italic;
   font-size: 14pt;
   line-height: 1.2;
-  margin-top: 2pt;
+  margin-top: 4pt;
 }
 .contato {
   font-family: "IBM Plex Mono", monospace;
   font-size: 7.3pt;
   line-height: 1.6;
-  margin-top: 8pt;
+  margin-top: 11pt;
   display: flex;
   flex-wrap: wrap;
   column-gap: 0;
@@ -288,38 +292,36 @@ h1 {
 .contato .sep { color: var(--cinza); white-space: pre; }
 
 /* ---------- Números em destaque ---------- */
+/* Quatro colunas, número em cima e rótulo embaixo. A faixa vira imagem antes
+   do PDF (ver o canvas no fim do arquivo), então o layout é livre: a
+   extração de texto não enxerga esses números, que já estão no resumo. */
 .destaques {
-  /* 2x2 com número e rótulo na mesma linha de base: assim a extração de
-     texto lê "20 mil+ acessos diários" junto, e não quatro números
-     seguidos de quatro rótulos soltos. */
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(4, 1fr);
   border-bottom: 0.6pt solid var(--fio);
 }
 .destaque {
   display: flex;
-  align-items: baseline;
-  gap: 7pt;
-  padding: 5pt 8pt 5pt 0;
-  border-bottom: 0.6pt solid var(--fio-claro);
+  flex-direction: column;
+  gap: 4pt;
+  padding: 11pt 12pt 11pt 0;
 }
-.destaque:nth-child(even) { border-left: 0.6pt solid var(--fio-claro); padding-left: 9pt; }
-.destaque:nth-last-child(-n + 2) { border-bottom: 0; }
+.destaque + .destaque { border-left: 0.6pt solid var(--fio-claro); padding-left: 11pt; }
 .destaque strong {
   font-family: "Whyte Inktrap", "Archivo", sans-serif;
   font-weight: 900;
-  font-size: 18pt;
-  line-height: 1.1;
+  font-size: 20pt;
+  line-height: 1;
   letter-spacing: -0.01em;
   white-space: nowrap;
 }
 .destaque span {
   font-family: "IBM Plex Mono", monospace;
-  font-size: 6.8pt;
+  font-size: 6.6pt;
+  line-height: 1.45;
   text-transform: uppercase;
   letter-spacing: 0.06em;
   color: var(--cinza);
-  white-space: nowrap;
 }
 
 /* ---------- Seções ---------- */
@@ -327,7 +329,7 @@ section {
   display: grid;
   grid-template-columns: var(--rotulo) 1fr;
   column-gap: var(--vao);
-  padding: 7.5pt 0;
+  padding: 11pt 0;
   border-bottom: 0.6pt solid var(--fio-claro);
 }
 section:last-child { border-bottom: 0; }
@@ -354,11 +356,18 @@ h2::before {
   background: var(--tinta);
 }
 .corpo { min-width: 0; }
-.resumo { font-size: 9.6pt; line-height: 1.42; }
+.resumo { font-size: 9.5pt; line-height: 1.48; }
 .competencias { font-weight: 500; }
 
-.item { padding-bottom: 5.5pt; margin-bottom: 5.5pt; border-bottom: 0.4pt dashed var(--fio-claro); break-inside: avoid; }
-.item:last-child { padding-bottom: 0; margin-bottom: 0; border-bottom: 0; }
+/* Itens separados só por espaço, sem fio: o fio fica para as seções. */
+.item { margin-bottom: 10pt; }
+/* Item curto não quebra entre páginas; o longo (experiência com muitos
+   bullets) pode quebrar, mas nunca separa o título do conteúdo nem corta
+   um bullet ao meio. */
+.projeto, .item:not(:has(li:nth-child(4))) { break-inside: avoid; }
+.linha, .meta { break-after: avoid; }
+li { break-inside: avoid; }
+.item:last-child { margin-bottom: 0; }
 .linha { display: flex; justify-content: space-between; align-items: baseline; gap: 10pt; }
 h3 {
   font-family: "Whyte Inktrap", "Archivo", sans-serif;
@@ -375,28 +384,29 @@ h3 {
   text-transform: uppercase;
   letter-spacing: 0.04em;
 }
-.meta { font-weight: 600; margin-top: 0.5pt; }
-.descricao { color: var(--cinza); margin-top: 1.5pt; }
-ul { list-style: none; margin-top: 3.5pt; }
-li { position: relative; padding-left: 10pt; margin-top: 1.2pt; }
+.meta { font-weight: 600; margin-top: 1pt; }
+.descricao { color: var(--cinza); margin-top: 2pt; }
+ul { list-style: none; margin-top: 5pt; }
+li { position: relative; padding-left: 11pt; }
+li + li { margin-top: 2.6pt; }
 li::before {
   content: "";
   position: absolute;
   left: 0.5pt;
-  top: 4.3pt;
+  top: 4.7pt;
   width: 3pt;
   height: 3pt;
   background: var(--tinta);
 }
-.projeto p { margin-top: 1.5pt; }
+.projeto p { margin-top: 2pt; }
 .projeto .tec {
   font-family: "IBM Plex Mono", monospace;
   font-size: 6.9pt;
   color: var(--cinza);
-  margin-top: 2.5pt;
+  margin-top: 4pt;
 }
 .grupo { display: grid; grid-template-columns: 24mm 1fr; column-gap: 4mm; }
-.grupo + .grupo { margin-top: 2.5pt; }
+.grupo + .grupo { margin-top: 4pt; }
 .grupo strong { font-weight: 700; }
 </style>
 </head>
@@ -568,6 +578,7 @@ const browser = await chromium.launch();
 const page = await browser.newPage();
 await page.setContent(html, { waitUntil: "load" });
 await page.evaluate(() => document.fonts.ready);
+await page.emulateMedia({ media: "print" });
 // A faixa de destaques é só desenho: os mesmos números já estão, com
 // contexto, no resumo e nas conquistas. Em texto, número grande e rótulo
 // pequeno saem em blocos separados na extração ("20 mil+ 8%+" soltos), então
@@ -586,19 +597,37 @@ await page.evaluate(() => {
     ctx.scale(escala, escala);
     for (const el of celula.children) {
       const cs = getComputedStyle(el);
-      // Sonda de altura zero no fim do texto: o fundo dela é a linha de base.
-      const sonda = document.createElement("i");
-      sonda.style.cssText = "display:inline-block;width:0;height:0;vertical-align:baseline";
-      el.appendChild(sonda);
-      const base = sonda.getBoundingClientRect().bottom - caixa.top;
-      sonda.remove();
-      const r = el.getBoundingClientRect();
       ctx.font = `${cs.fontStyle} ${cs.fontWeight} ${cs.fontSize} ${cs.fontFamily}`;
       ctx.letterSpacing = cs.letterSpacing === "normal" ? "0px" : cs.letterSpacing;
       ctx.fillStyle = cs.color;
       ctx.textBaseline = "alphabetic";
-      const texto = cs.textTransform === "uppercase" ? el.textContent.toLocaleUpperCase("pt-BR") : el.textContent;
-      ctx.fillText(texto, r.left - caixa.left, base);
+      const maiusculas = cs.textTransform === "uppercase";
+      // Sonda de altura zero no começo: o fundo dela é a linha de base da
+      // primeira linha, e a distância até o topo vale para todas as linhas.
+      const sonda = document.createElement("i");
+      sonda.style.cssText = "display:inline-block;width:0;height:0;vertical-align:baseline";
+      el.prepend(sonda);
+      // Cada palavra num span para descobrir onde o navegador quebrou a linha.
+      const palavras = el.textContent.split(/\s+/).filter(Boolean);
+      el.replaceChildren(sonda, ...palavras.flatMap((w, i) => {
+        const s = document.createElement("span");
+        s.textContent = w;
+        return i ? [" ", s] : [s];
+      }));
+      const spans = [...el.querySelectorAll("span")];
+      const topo = spans[0].getBoundingClientRect().top;
+      const deslocamento = sonda.getBoundingClientRect().bottom - topo;
+      const linhas = new Map();
+      for (const s of spans) {
+        const r = s.getBoundingClientRect();
+        const chave = Math.round(r.top);
+        if (!linhas.has(chave)) linhas.set(chave, { x: r.left, top: r.top, texto: [] });
+        linhas.get(chave).texto.push(s.textContent);
+      }
+      for (const { x, top, texto } of linhas.values()) {
+        const linha = texto.join(" ");
+        ctx.fillText(maiusculas ? linha.toLocaleUpperCase("pt-BR") : linha, x - caixa.left, top + deslocamento - caixa.top);
+      }
       el.style.visibility = "hidden";
     }
     celula.style.position = "relative";
