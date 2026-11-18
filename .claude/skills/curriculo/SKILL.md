@@ -62,19 +62,33 @@ no `base.json` (o gerador recusa número sem lastro lá) e depois use.
    * remova `pendencias` e `$comentario` do base; acrescente `pendencias`
      próprias da vaga, se houver.
 
-4. **Gerar:** `npm run curriculo -- <slug>`. Erro bloqueia (copy, número sem
-   lastro, texto que não extrai). Corrija e gere de novo.
-
-5. **Conferir:** leia `relatorio.md` e as `previa-N.png` (são o PDF real:
-   olhe corte no topo, quebra de página e espaços vazios).
-   * Cobertura de palavras chave: mire 80% ou mais dos termos obrigatórios.
-     Termo faltando que ele de fato domina: encaixe num bullet. Termo que é
-     lacuna real: deixe de fora e registre na análise.
+4. **Checar (gerador local):** `npm run curriculo -- <slug>`. Serve de
+   verificação de ATS: erro bloqueia (copy, número sem lastro, texto que não
+   extrai) e o `relatorio.md` mede as palavras chave no texto extraído.
+   * Cobertura: mire 80% ou mais dos termos obrigatórios. Termo faltando que
+     ele de fato domina: encaixe num bullet. Lacuna real: fica de fora e vai
+     para a análise.
    * Termo repetido demais (mais de 4 ou 5 vezes) soa como enchimento para
      leitor com IA: reduza.
-   * 1 ou 2 páginas. Passou, corte projetos e bullets antigos.
 
-6. **Entregar:** resumo curto para o usuário com cobertura, lacunas, o que
-   mudou em relação ao base, e o caminho do PDF e do TXT. Sugira ajustes no
-   LinkedIn quando o vocabulário da vaga não aparece lá. Commit com mensagem
-   em português.
+5. **Montar no Claude Design** (é ali que o Armando ajusta e exporta o PDF):
+   canvas "Currículo Armando Custodio",
+   https://claude.ai/artifact/AsRx7mAvK113ZCJgzKSEAz. Leia o
+   `project/canvas.json` e as pranchetas da versão base (`Main.dc.html` e
+   `Pagina-2.dc.html`) e copie a estrutura: mesmas fontes enviadas, mesma
+   grade (rótulo de 121px, vão de 30px), mesmos estilos. Cada vaga ganha uma
+   página nova do canvas (`pages`, id = slug) com duas pranchetas A4 de
+   794×1123 (`vagas/<slug>-1.dc.html` e `-2.dc.html`), numa linha nova
+   abaixo das existentes, sem cobrir nenhuma.
+   * **Equilíbrio entre páginas:** as duas folhas precisam terminar perto da
+     mesma altura, nenhuma cheia com a outra vazia. Meça a altura do conteúdo
+     de cada prancheta antes de publicar e redistribua seções (projetos,
+     habilidades, experiência anterior) até ficarem parecidas e dentro da
+     margem de 45px.
+   * Programas da AUVP sempre pela definição (Sistema de Indicação AUVP,
+     curso de investimentos, portal interno de produto), nunca pelo nome
+     de marca interno.
+
+6. **Entregar:** resumo curto com cobertura, lacunas, o que mudou em relação
+   ao base e o link do canvas. Sugira ajustes no LinkedIn quando o
+   vocabulário da vaga não aparece lá. Commit com mensagem em português.
