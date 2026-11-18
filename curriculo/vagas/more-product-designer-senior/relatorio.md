@@ -15,12 +15,12 @@ Nenhum.
 | :--- | ---: |
 | Product Designer | 2 |
 | Design System | 3 |
-| componentes | 3 |
-| padrões | 1 |
+| componentes | 4 |
+| padrões | 2 |
 | Arquitetura de informação | 3 |
 | Design de interação | 4 |
 | Navegação | 1 |
-| Acessibilidade | 2 |
+| Acessibilidade | 3 |
 | Pesquisa | 3 |
 | Métricas | 3 |
 | Dados de comportamento | 3 |
@@ -30,7 +30,7 @@ Nenhum.
 | Fluxos | 2 |
 | Workflows | 2 |
 | Escala | 1 |
-| Consistência | 2 |
+| Consistência | 1 |
 | Manutenção | 1 |
 | Desenvolvimento | 1 |
 | Tecnologia | 2 |
@@ -44,18 +44,13 @@ Nenhum.
 | Tree testing | 0 |
 | Service Design | 0 |
 
-## Pendências de dado
-* Confirmar nível de espanhol (a vaga pede compreensão avançada).
-* Confirmar se houve trabalho de acessibilidade na AUVP.
-* Disponibilidade para ir a São Paulo.
-
 ## Texto extraído do PDF (o que o ATS lê)
 
 ```text
 ARMANDO CUSTODIO
 Product Designer · Design Engineer · Design Systems
-Goiânia, GO, Brasil · +55 62 99217 4047 · armandocustodio0@gmail.com · ganwalk.github.io/portifolio ·
-br.linkedin.com/in/armando-custodio-00080320a · github.com/ganwalk
+Goiânia, GO · Disponível em São Paulo quando necessário · +55 62 99217 4047 · armandocustodio0@gmail.com ·
+ganwalk.github.io/portifolio · br.linkedin.com/in/armando-custodio-00080320a · github.com/ganwalk
 
 RESUMO
 PROFISSIONAL
@@ -95,8 +90,8 @@ seções (Design System, tom e voz, roadmap, mural de novidades e outras): 1.333
 pessoas em 2026, 67% delas de quem voltou.
 Respondo pelo canal web de 11 produtos: migrei todas as páginas do WordPress para o GitHub com
 homologação antes do deploy e padronizei rodapés, políticas e compliance em todas as páginas.
-Criei o fluxo e o checklist de Design QA para plataformas desenvolvidas fora do time de design,
-garantindo consistência em todos os pontos de contato.
+Trato acessibilidade digital como pilar de todos os projetos, em interfaces, componentes e padrões, e
+criei o fluxo de Design QA para plataformas desenvolvidas fora do time de design.
 Desenhei jornadas do usuário, interface e front end do Sistema de Indicação AUVP, com conteúdo
 gerenciado no Directus (CMS) e alinhamento entre Produto, Tecnologia e Atendimento: em 7
 semanas, 124 embaixadores, 149 indicações e 31 vendas.
@@ -189,8 +184,8 @@ de interação · Jornadas do usuário · Protótipos de alta fidelidade · Figm
 
 Acessibilidade
 
-Atalho para conteúdo · Rótulos ARIA · Movimento reduzido · Modo de alto
-contraste (aplicados no meu portfólio)
+Pilar de todos os projetos · Atalho para conteúdo · Rótulos ARIA · Movimento
+reduzido · Modo de alto contraste
 
 Código
 
@@ -217,5 +212,5 @@ Fluente
 
 Espanhol
 
-Leitura e compreensão oral
+Conversacional
 ```

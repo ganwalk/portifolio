@@ -231,7 +231,7 @@
     },
     {
       "idioma": "Espanhol",
-      "nivel": "Leitura e compreensão oral"
+      "nivel": "Conversacional"
     }
   ],
   "pendencias": [
@@ -261,6 +261,7 @@
   "banco": {
     "$comentario": "Material verdadeiro que não cabe no PDF base. Use para trocar bullets e projetos conforme a vaga.",
     "conquistas": [
+      "Trato acessibilidade digital como pilar de todos os projetos, em interfaces, componentes e padrões, sem falhas graves de acessibilidade em nenhum deles.",
       "Idealizei, roteirizei e produzi o módulo bônus de Criptomoedas do curso de investimentos da AUVP, com 15 aulas.",
       "Diagramei 10 apostilas dos treinamentos para o agronegócio, de hedge a crédito rural, com modelo único que permitiu fechar sete delas em uma semana.",
       "Criei o manual de tom e voz da marca, com 10 áreas de comunicação mapeadas.",

@@ -1,6 +1,6 @@
 Armando Custodio
 Product Designer · Design Engineer · Design Systems
-Goiânia, GO, Brasil · +55 62 99217 4047 · armandocustodio0@gmail.com
+Goiânia, GO · Disponível em São Paulo quando necessário · +55 62 99217 4047 · armandocustodio0@gmail.com
 Portfólio: https://ganwalk.github.io/portifolio/ · LinkedIn: https://br.linkedin.com/in/armando-custodio-00080320a · GitHub: https://github.com/ganwalk
 
 110 componentes React no Design System · 305 pessoas usando o portal interno de produto · 15+ produtos atendidos pelo mesmo sistema · R$ 5,85 mi em vendas pelas páginas em 2026
@@ -17,7 +17,7 @@ Design de produto e engenharia de design para mais de 15 produtos de um grupo do
 · Projetei e desenvolvi o Design System AUVP, base comum das páginas, do sistema de indicação e do superapp: tokens de cor, tipografia e espaçamento, tema claro e escuro, base Ant Design e 110 componentes React compartilhados entre os times.
 · Criei e mantenho o portal interno de produto, fonte única de marca e produto organizada em sete seções (Design System, tom e voz, roadmap, mural de novidades e outras): 1.333 sessões de 305 pessoas em 2026, 67% delas de quem voltou.
 · Respondo pelo canal web de 11 produtos: migrei todas as páginas do WordPress para o GitHub com homologação antes do deploy e padronizei rodapés, políticas e compliance em todas as páginas.
-· Criei o fluxo e o checklist de Design QA para plataformas desenvolvidas fora do time de design, garantindo consistência em todos os pontos de contato.
+· Trato acessibilidade digital como pilar de todos os projetos, em interfaces, componentes e padrões, e criei o fluxo de Design QA para plataformas desenvolvidas fora do time de design.
 · Desenhei jornadas do usuário, interface e front end do Sistema de Indicação AUVP, com conteúdo gerenciado no Directus (CMS) e alinhamento entre Produto, Tecnologia e Atendimento: em 7 semanas, 124 embaixadores, 149 indicações e 31 vendas.
 · Construí com Claude Code ferramentas internas para workflows complexos de outras áreas: o sistema integrado de logística do grupo e o gerador de documentos usado por toda a área de consultoria de investimentos.
 · Oriento decisões com dados de comportamento e métricas de experiência: mapas de calor do Microsoft Clarity, processo de teste A/B das páginas (uma variável por ciclo) e CSAT, que nos ebooks do curso subiu de 92,2 para 95,8 no ano.
@@ -52,10 +52,10 @@ Design UX/UI · Cubos Academy · certificação · 2023
 
 HABILIDADES TÉCNICAS
 Design: Product Design · Design Systems · Ant Design · Arquitetura de informação · Design de interação · Jornadas do usuário · Protótipos de alta fidelidade · Figma
-Acessibilidade: Atalho para conteúdo · Rótulos ARIA · Movimento reduzido · Modo de alto contraste (aplicados no meu portfólio)
+Acessibilidade: Pilar de todos os projetos · Atalho para conteúdo · Rótulos ARIA · Movimento reduzido · Modo de alto contraste
 Código: HTML · CSS · JavaScript · TypeScript · React · Next.js · Tailwind CSS · Git
 Conteúdo e canal: Directus (CMS) · WordPress · GitHub · Vercel · Homologação e deploy · Design QA
 Pesquisa e dados: Discovery · Testes A/B · Microsoft Clarity · Google Analytics · Salesforce (relatórios) · CSAT e NPS · IA no processo (Claude Code)
 
 IDIOMAS
-Português (Nativo) · Inglês (Fluente) · Espanhol (Leitura e compreensão oral)
+Português (Nativo) · Inglês (Fluente) · Espanhol (Conversacional)

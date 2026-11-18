@@ -182,5 +182,5 @@ Fluente
 
 Espanhol
 
-Leitura e compreensão oral
+Conversacional
 ```
