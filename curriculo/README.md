@@ -18,7 +18,7 @@ curriculo/
     analise.md              palavras chave, lacunas, decisões da adaptação
     <Arquivo>.pdf           o que eu envio
     <Arquivo>.txt           para colar em formulário (Gupy, LinkedIn, Workday)
-    previa.png              conferência visual rápida
+    previa-N.png            cada página do PDF rasterizada, para conferir
     relatorio.md            checagens e o texto como o ATS lê
 ```
 
@@ -43,8 +43,9 @@ npm install --no-save playwright && npx playwright install chromium
 
 ## O que o gerador garante
 
-* **Coluna única e ordem de leitura linear.** Parser de ATS lê o PDF de cima
-  para baixo; duas colunas misturam as linhas.
+* **Ordem de leitura linear.** O rótulo de cada seção fica numa coluna estreita
+  à esquerda, mas o conteúdo é uma coluna só; o relatório confere que as
+  seções saem do PDF na ordem certa.
 * **Texto real com fontes TrueType embutidas.** A Archivo variável sai como
   Type 3 no Chromium, então o gerador usa as instâncias estáticas.
 * **Ligaduras desligadas.** "fi" e "fl" viram glifo único e quebram palavras
@@ -90,7 +91,16 @@ vale o mesmo vocabulário no título do LinkedIn, no "Sobre" e no portfólio.
 
 ## Formato do JSON
 
-Igual ao `base.json`. Campos extras opcionais numa versão de vaga:
+Igual ao `base.json`. Dois campos merecem nota:
+
+* `destaques`: até quatro números grandes no topo (valor e rótulo). A faixa é
+  só visual: o gerador a desenha como imagem, então ela não entra no texto que
+  o ATS lê. Todo número dali precisa aparecer também, com contexto, no resumo
+  ou nas conquistas.
+* `projetos[].contexto`: onde o projeto aconteceu ("AUVP · 2026", "Projeto
+  pessoal", "Freelance").
+
+Campos extras opcionais numa versão de vaga:
 
 * `vaga.palavrasChave`: lista de termos medidos no relatório. Use `|` para
   variantes equivalentes: `"Frontend|Front end"`.

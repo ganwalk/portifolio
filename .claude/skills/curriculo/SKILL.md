@@ -49,7 +49,10 @@ no `base.json` (o gerador recusa número sem lastro lá) e depois use.
    * `experiencia`: reordene e reescreva bullets para trazer os termos da vaga
      em contexto de resultado; corte o que não ajuda; mantenha cargos, empresas
      e datas fiéis;
-   * `projetos`: só os que reforçam a vaga (0 a 3);
+   * `destaques`: os 4 números do base que mais pesam para a vaga (precisam
+     estar também no resumo ou nas conquistas, a faixa não é lida pelo ATS);
+   * `projetos`: só os que reforçam a vaga (2 a 4), AUVP primeiro quando a
+     vaga for de produto, pessoais quando for criativa ou interativa;
    * `habilidades`: reordene, tire o irrelevante;
    * `ordem`: se a vaga é muito técnica e a experiência fala mais, experiência
      pode subir antes de competências;
@@ -59,7 +62,8 @@ no `base.json` (o gerador recusa número sem lastro lá) e depois use.
 4. **Gerar:** `npm run curriculo -- <slug>`. Erro bloqueia (copy, número sem
    lastro, texto que não extrai). Corrija e gere de novo.
 
-5. **Conferir:** leia `relatorio.md` e `previa.png`.
+5. **Conferir:** leia `relatorio.md` e as `previa-N.png` (são o PDF real:
+   olhe corte no topo, quebra de página e espaços vazios).
    * Cobertura de palavras chave: mire 80% ou mais dos termos obrigatórios.
      Termo faltando que ele de fato domina: encaixe num bullet. Termo que é
      lacuna real: deixe de fora e registre na análise.

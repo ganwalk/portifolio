@@ -15,16 +15,25 @@
     "telefone": "+55 62 99217 4047",
     "email": "armandocustodio0@gmail.com",
     "links": [
-      { "rotulo": "Portfólio", "url": "https://ganwalk.github.io/portifolio/" },
-      { "rotulo": "LinkedIn", "url": "https://br.linkedin.com/in/armando-custodio-00080320a" },
-      { "rotulo": "GitHub", "url": "https://github.com/ganwalk" }
+      {
+        "rotulo": "Portfólio",
+        "url": "https://ganwalk.github.io/portifolio/"
+      },
+      {
+        "rotulo": "LinkedIn",
+        "url": "https://br.linkedin.com/in/armando-custodio-00080320a"
+      },
+      {
+        "rotulo": "GitHub",
+        "url": "https://github.com/ganwalk"
+      }
     ]
   },
   "resumo": "Design Engineer com atuação em design digital desde 2019, do desenho da interface ao código em produção. Na AUVP, respondo pelo design digital do ecossistema (webpages, produto e marca): mantenho landing pages com 20 mil+ acessos diários, nota mínima de 90/100 em performance e conversão acima de 8%, e construí uma intranet com Design System de 70 componentes documentados e 110 componentes React. Trabalho guiado por dados, SEO e performance, com Figma, HTML, React e TypeScript.",
   "competencias": [
     "Design Engineering",
-    "UX/UI Design",
     "Product Design",
+    "UX/UI Design",
     "Design Systems",
     "Protótipos de alta fidelidade",
     "Desenvolvimento Frontend",
@@ -32,9 +41,11 @@
     "SEO",
     "Performance web",
     "Otimização de conversão (CRO)",
+    "Testes A/B",
+    "Design QA",
+    "Discovery",
     "Análise de comportamento (Microsoft Clarity, Google Analytics)",
     "Tom de voz e UX Writing",
-    "Identidade visual",
     "Experiências interativas (WebGL, Three.js)"
   ],
   "experiencia": [
@@ -48,9 +59,12 @@
       "conquistas": [
         "Desenho e mantenho o ecossistema de webpages da AUVP Capital, com 11 produtos e 20 mil+ acessos diários.",
         "Garanto nota mínima de 90/100 em performance em todas as landing pages, com conversão acima de 8% e bom posicionamento em mecanismos de busca e em respostas de IA.",
-        "Construí a intranet do ecossistema com Design System completo: 70 componentes documentados e 110 componentes React.",
-        "Criei o manual de tom e voz da marca, com 10 áreas de comunicação mapeadas.",
-        "Acompanho o comportamento de uso com Microsoft Clarity e Google Analytics para orientar decisões de design e conversão."
+        "Criei o Design System que padroniza as plataformas AUVP e o expandi sobre a biblioteca Ant Design; na intranet, são 70 componentes documentados e 110 componentes React.",
+        "Migrei todas as páginas do WordPress para o GitHub, com código versionado e publicação controlada pelo time.",
+        "Compilei e apresentei o estudo de testes A/B das páginas e analiso mapas de calor no Microsoft Clarity para definir o plano de ação de conversão.",
+        "Criei o fluxo de Design QA que audita plataformas desenvolvidas fora do time de design, garantindo consistência de marca em todos os pontos de contato.",
+        "Documentei os métodos de Discovery do time de produto e escrevi o playbook de bom uso de IA da equipe.",
+        "Criei o manual de tom e voz da marca, com 10 áreas de comunicação mapeadas."
       ]
     },
     {
@@ -83,59 +97,180 @@
   ],
   "projetos": [
     {
-      "nome": "Portfólio pessoal",
-      "url": "https://ganwalk.github.io/portifolio/",
-      "descricao": "Site em quatro idiomas (português, inglês, espanhol e chinês) com export estático, modo de alto contraste que desliga toda animação e respeito à preferência de movimento reduzido do sistema.",
-      "tecnologias": ["Next.js", "TypeScript", "Tailwind CSS", "Framer Motion"]
+      "nome": "Indica AUVP (Sistema de Indicação)",
+      "contexto": "AUVP · 2026",
+      "url": "",
+      "descricao": "Design de produto do programa de indicação de membros: jornadas do usuário, interface, componentização no Design System, termo de aceite, apoio ao lançamento com beta testers e acompanhamento de usabilidade depois do lançamento.",
+      "tecnologias": [
+        "Product Design",
+        "Jornadas do usuário",
+        "Figma",
+        "Design System"
+      ]
+    },
+    {
+      "nome": "Diagnóstico Financeiro AUVP",
+      "contexto": "AUVP · 2026",
+      "url": "https://diagnostico.auvp.com.br",
+      "descricao": "Design completo, para computador e celular, da nova isca digital da AUVP: 9 telas de perguntas sobre a vida financeira geram um plano personalizado e levam a pessoa direto ao atendimento no WhatsApp.",
+      "tecnologias": [
+        "UX/UI Design",
+        "Responsivo",
+        "Geração de leads"
+      ]
+    },
+    {
+      "nome": "Catálogo de Presentes",
+      "contexto": "AUVP · 2026",
+      "url": "",
+      "descricao": "Ferramenta interna para consultores enviarem presentes a clientes: catálogo visual com busca, solicitação com carta personalizada, painel administrativo com status do pedido e perfis de acesso para consultor, relacionamento e financeiro.",
+      "tecnologias": [
+        "Ferramenta interna",
+        "Painel administrativo",
+        "Perfis de acesso"
+      ]
+    },
+    {
+      "nome": "Dashboard Logístico",
+      "contexto": "AUVP · 2026",
+      "url": "",
+      "descricao": "Painel de acompanhamento semanal da operação logística, com volume de envios, produtividade, atrasos, status das demandas e previsão de finalização dos pedidos.",
+      "tecnologias": [
+        "Dashboard",
+        "Visualização de dados"
+      ]
     },
     {
       "nome": "Ganwalk",
+      "contexto": "Projeto pessoal",
       "url": "https://ganwalk.github.io/2026/",
       "descricao": "Identidade visual interativa: logotipo de partículas em WebGL que reage ao toque e painel de mixagem ao vivo, com looper e gravação, direto no navegador.",
-      "tecnologias": ["WebGL", "Three.js"]
+      "tecnologias": [
+        "WebGL",
+        "Three.js"
+      ]
     },
     {
       "nome": "Dezert Horse",
+      "contexto": "Projeto pessoal",
       "url": "https://ganwalk.github.io/cavalo/",
       "descricao": "Universo interativo de um álbum: deserto em Three.js com painel de controle retrô que toca o disco inteiro, faixa a faixa.",
-      "tecnologias": ["Three.js", "WebGL"]
+      "tecnologias": [
+        "Three.js",
+        "WebGL"
+      ]
     },
     {
       "nome": "Pink Opala",
+      "contexto": "Freelance",
       "url": "https://ganwalk.github.io/pinkopala/",
       "descricao": "Site oficial do duo indie pop de Goiânia: partículas com física de mola formam o nome da banda, e discografia, galeria e contato moram numa página só, sem build nem framework.",
-      "tecnologias": ["Canvas 2D", "Tailwind CSS", "JavaScript"]
+      "tecnologias": [
+        "Canvas 2D",
+        "Tailwind CSS",
+        "JavaScript"
+      ]
     }
   ],
   "formacao": [],
   "habilidades": [
     {
       "grupo": "Design",
-      "itens": ["UX/UI Design", "Design Systems", "Protótipos de alta fidelidade", "Identidade visual", "Animação", "Ilustração e colagem", "Edição de vídeo"]
+      "itens": [
+        "UX/UI Design",
+        "Product Design",
+        "Design Systems",
+        "Ant Design",
+        "Protótipos de alta fidelidade",
+        "Jornadas do usuário",
+        "Identidade visual",
+        "Animação",
+        "Ilustração e colagem",
+        "Edição de vídeo"
+      ]
     },
     {
       "grupo": "Código",
-      "itens": ["HTML", "CSS", "JavaScript", "TypeScript", "React", "Next.js", "Tailwind CSS", "Framer Motion", "Three.js", "WebGL", "Canvas 2D", "Git"]
+      "itens": [
+        "HTML",
+        "CSS",
+        "JavaScript",
+        "TypeScript",
+        "React",
+        "Next.js",
+        "Tailwind CSS",
+        "Framer Motion",
+        "Three.js",
+        "WebGL",
+        "Canvas 2D",
+        "Git"
+      ]
     },
     {
       "grupo": "Ferramentas",
-      "itens": ["Figma", "Adobe CC", "Canva", "Microsoft Clarity", "Google Analytics", "GitHub"]
+      "itens": [
+        "Figma",
+        "Adobe CC",
+        "Canva",
+        "Microsoft Clarity",
+        "Google Analytics",
+        "GitHub",
+        "WordPress",
+        "IA generativa (Claude)"
+      ]
     },
     {
-      "grupo": "Web e dados",
-      "itens": ["SEO", "Performance web", "Otimização de conversão", "Landing pages"]
+      "grupo": "Produto e dados",
+      "itens": [
+        "Discovery",
+        "Testes A/B",
+        "Mapas de calor",
+        "SEO",
+        "Performance web",
+        "Otimização de conversão",
+        "Landing pages",
+        "Dashboards"
+      ]
     }
   ],
   "idiomas": [
-    { "idioma": "Português", "nivel": "Nativo" },
-    { "idioma": "Inglês", "nivel": "Fluente" },
-    { "idioma": "Espanhol", "nivel": "Leitura e compreensão oral" }
+    {
+      "idioma": "Português",
+      "nivel": "Nativo"
+    },
+    {
+      "idioma": "Inglês",
+      "nivel": "Fluente"
+    },
+    {
+      "idioma": "Espanhol",
+      "nivel": "Leitura e compreensão oral"
+    }
   ],
   "pendencias": [
     "Formação acadêmica: curso, instituição e ano de conclusão (ATS e IA de RH filtram por isso).",
     "Mês de início e fim de cada experiência (ATS calcula tempo de experiência por MM/AAAA).",
     "Conquistas concretas em Defensoria Pública, Prime Mais e AS Web (hoje só existe o cargo).",
-    "Confirmar ferramenta que mede a nota 90/100 (Lighthouse, PageSpeed Insights) para usar o nome como palavra chave.",
-    "Confirmar a stack das landing pages da AUVP (framework, CMS, ferramenta de teste A/B)."
+    "Resultados dos projetos do ClickUp (Indica AUVP, Diagnóstico, testes A/B): números de adesão, leads ou conversão, se houver. O relatório anual de 2026 é a fonte ideal.",
+    "Stack do Catálogo de Presentes e do Dashboard Logístico (e se houve integração com Salesforce ou Tiny ERP).",
+    "Confirmar ferramenta que mede a nota 90/100 (Lighthouse, PageSpeed Insights)."
+  ],
+  "destaques": [
+    {
+      "valor": "20 mil+",
+      "rotulo": "acessos diários nas webpages"
+    },
+    {
+      "valor": "90/100",
+      "rotulo": "nota mínima de performance"
+    },
+    {
+      "valor": "8%+",
+      "rotulo": "de conversão nas landing pages"
+    },
+    {
+      "valor": "110",
+      "rotulo": "componentes React no Design System"
+    }
   ]
 }
