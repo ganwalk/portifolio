@@ -53,6 +53,9 @@ no `base.json` (o gerador recusa número sem lastro lá) e depois use.
      estar também no resumo ou nas conquistas, a faixa não é lida pelo ATS);
    * `projetos`: só os que reforçam a vaga (2 a 4), AUVP primeiro quando a
      vaga for de produto, pessoais quando for criativa ou interativa;
+   * `banco` (no base.json) guarda conquistas e projetos verdadeiros que não
+     saem no PDF base: puxe dali o que servir melhor à vaga e remova o bloco
+     `banco` da versão adaptada;
    * `habilidades`: reordene, tire o irrelevante;
    * `ordem`: se a vaga é muito técnica e a experiência fala mais, experiência
      pode subir antes de competências;
