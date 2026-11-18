@@ -78,8 +78,9 @@ no `base.json` (o gerador recusa número sem lastro lá) e depois use.
    `Pagina-2.dc.html`) e copie a estrutura: mesmas fontes enviadas, mesma
    grade (rótulo de 121px, vão de 30px), mesmos estilos. Cada vaga ganha uma
    página nova do canvas (`pages`, id = slug) com duas pranchetas A4 de
-   794×1123 (`vagas/<slug>-1.dc.html` e `-2.dc.html`), numa linha nova
-   abaixo das existentes, sem cobrir nenhuma.
+   794×1123 na raiz de `project/` (ex.: `More-1.dc.html` e `More-2.dc.html`,
+   sem subpasta, para o `./support.js` resolver), com `"page"` = o id da
+   página da vaga e uma nota `title1` com empresa e cargo.
    * **Equilíbrio entre páginas:** as duas folhas precisam terminar perto da
      mesma altura, nenhuma cheia com a outra vazia. Meça a altura do conteúdo
      de cada prancheta antes de publicar e redistribua seções (projetos,
