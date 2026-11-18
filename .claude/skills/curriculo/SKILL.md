@@ -1,0 +1,73 @@
+---
+name: curriculo
+description: Adapta o currículo do Armando para uma vaga específica, otimizando para ATS, triagem por IA de RH e busca de recrutador. Use quando o usuário colar uma vaga (texto ou link), pedir "currículo para esta vaga", ou pedir para ajustar, traduzir ou regenerar o currículo.
+---
+
+# Currículo por vaga
+
+Leia `curriculo/README.md` antes de começar. Toda comunicação em português do
+Brasil e a regra de copy do projeto vale no currículo: nada de travessão, meia
+risca, hífen como pausa, sublinhado ou emoji em texto visível.
+
+## Regra que não se quebra
+
+**Nunca invente.** Todo fato, ferramenta, número e cargo vem de
+`curriculo/base.json` ou do que o usuário disser na conversa. Pode reordenar,
+cortar, reescrever e trocar sinônimo pelo termo exato da vaga. Não pode
+acrescentar tecnologia que ele não usou, métrica que não existe ou
+senioridade que ele não tem. Se a vaga pede algo que não está no base, isso é
+lacuna: pergunte ao usuário. Se ele confirmar com um fato novo, grave primeiro
+no `base.json` (o gerador recusa número sem lastro lá) e depois use.
+
+## Passos
+
+1. **Vaga.** Se veio link, busque o texto. Crie `curriculo/vagas/<empresa-cargo>/`
+   (slug minúsculo com hífen) e salve o anúncio integral em `vaga.md`, com
+   empresa, cargo, link e data no topo.
+
+2. **Análise** em `analise.md`:
+   * cargo exato do anúncio e idioma da vaga;
+   * requisitos obrigatórios e desejáveis, separados;
+   * palavras chave: hard skills, ferramentas, metodologias, domínio do
+     negócio, soft skills, na grafia do anúncio;
+   * para cada requisito: evidência no `base.json` (qual bullet ou projeto),
+     ou LACUNA;
+   * ATS provável (Gupy, Workday, Greenhouse, Lever, LinkedIn) se der para
+     inferir pelo link.
+
+   Mostre ao usuário as lacunas e pergunte o que for decisivo antes de seguir.
+
+3. **Adaptação** em `curriculo.json` (copie o `base.json` e ajuste):
+   * `idioma` igual ao da vaga (pt, en, es); traduza tudo se preciso;
+   * `arquivo`: `Armando-Custodio-Curriculo-<Cargo-Da-Vaga>`;
+   * `vaga`: empresa, cargo, link e `palavrasChave` (as da análise; variantes
+     com `|`);
+   * `pessoa.titulo`: cargo do anúncio na frente, se for verdadeiro;
+   * `resumo`: 3 a 4 frases, cargo da vaga, os requisitos obrigatórios que ele
+     cumpre e 1 ou 2 números reais;
+   * `competencias`: 8 a 14 termos, os da vaga primeiro, grafia do anúncio;
+   * `experiencia`: reordene e reescreva bullets para trazer os termos da vaga
+     em contexto de resultado; corte o que não ajuda; mantenha cargos, empresas
+     e datas fiéis;
+   * `projetos`: só os que reforçam a vaga (0 a 3);
+   * `habilidades`: reordene, tire o irrelevante;
+   * `ordem`: se a vaga é muito técnica e a experiência fala mais, experiência
+     pode subir antes de competências;
+   * remova `pendencias` e `$comentario` do base; acrescente `pendencias`
+     próprias da vaga, se houver.
+
+4. **Gerar:** `npm run curriculo -- <slug>`. Erro bloqueia (copy, número sem
+   lastro, texto que não extrai). Corrija e gere de novo.
+
+5. **Conferir:** leia `relatorio.md` e `previa.png`.
+   * Cobertura de palavras chave: mire 80% ou mais dos termos obrigatórios.
+     Termo faltando que ele de fato domina: encaixe num bullet. Termo que é
+     lacuna real: deixe de fora e registre na análise.
+   * Termo repetido demais (mais de 4 ou 5 vezes) soa como enchimento para
+     leitor com IA: reduza.
+   * 1 ou 2 páginas. Passou, corte projetos e bullets antigos.
+
+6. **Entregar:** resumo curto para o usuário com cobertura, lacunas, o que
+   mudou em relação ao base, e o caminho do PDF e do TXT. Sugira ajustes no
+   LinkedIn quando o vocabulário da vaga não aparece lá. Commit com mensagem
+   em português.
